@@ -28,7 +28,7 @@ interface IBrushMode {
   render: "PU" | "DR";
 }
 
-export default class Brush {
+export class Brush {
   /**
    * 主屏的 Canvas 元素
    * Main Screen

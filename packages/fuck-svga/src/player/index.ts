@@ -5,9 +5,9 @@ import {
   Video,
   PlayerConfig,
 } from "../types";
+import { Brush } from "./brush";
 import { Animator } from "./animator";
 import benchmark from "../test/benchmark";
-import Brush from "./brush";
 
 type EventCallback = undefined | (() => void);
 
@@ -270,7 +270,7 @@ export class Player {
       if (this.tail !== spriteCount) {
         // 1.2和3均为阔值，保证渲染尽快完成
         const tmp = hasRemained
-          ? (Math.min(spriteCount * spendValue * 1.2 + 3, spriteCount)) << 0
+          ? Math.min(spriteCount * spendValue * 1.2 + 3, spriteCount) << 0
           : spriteCount;
 
         if (tmp > this.tail) {

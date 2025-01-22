@@ -1,5 +1,5 @@
 import { noop, now } from "../polyfill";
-import Brush from "./brush";
+import type { Brush } from "./brush";
 
 export class Animator {
   /**

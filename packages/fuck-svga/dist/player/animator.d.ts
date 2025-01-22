@@ -1,4 +1,4 @@
-import Brush from "./brush";
+import type { Brush } from "./brush";
 export declare class Animator {
     private readonly brush;
     /**

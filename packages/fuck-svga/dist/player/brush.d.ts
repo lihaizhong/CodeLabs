@@ -1,5 +1,5 @@
 import { Bitmap, PlatformImage, RawImages, Video } from "../types";
-export default class Brush {
+export declare class Brush {
     /**
      * 主屏的 Canvas 元素
      * Main Screen
