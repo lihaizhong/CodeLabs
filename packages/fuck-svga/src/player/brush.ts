@@ -1,4 +1,4 @@
-import benchmark from "../test/benchmark";
+import benchmark from "../benchmark";
 import {
   getCanvas,
   getOffscreenCanvas,

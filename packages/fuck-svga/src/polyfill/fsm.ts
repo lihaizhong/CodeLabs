@@ -1,6 +1,6 @@
 import { br } from "./bridge";
 import { app, SP } from "./app";
-import benchmark from "../test/benchmark";
+import benchmark from "../benchmark";
 
 const { USER_DATA_PATH } =
   app === SP.H5

@@ -3,7 +3,7 @@ import { MovieEntityReader } from "fuck-protobuf";
 import download from "../polyfill/download";
 import { VideoEntity } from "./video-entity";
 import type { Video } from "../types";
-import benchmark from "test/benchmark";
+import benchmark from "benchmark";
 
 /**
  * SVGA 下载解析器

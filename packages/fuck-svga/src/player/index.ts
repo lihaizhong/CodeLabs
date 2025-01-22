@@ -7,7 +7,7 @@ import {
 } from "../types";
 import { Brush } from "./brush";
 import { Animator } from "./animator";
-import benchmark from "../test/benchmark";
+import benchmark from "../benchmark";
 
 type EventCallback = undefined | (() => void);
 
