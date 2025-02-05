@@ -23,7 +23,7 @@
     "access": "public"
   },
   "bugs": {
-    "url": "https://github.com/lihaizhong/bitkit/issues"
+    "url": "https://github.com/lihaizhong/CodeSnippets/issues"
   },
   "devDependencies": {
     "typescript": "^5.7.2"

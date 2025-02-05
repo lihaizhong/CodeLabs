@@ -165,11 +165,11 @@ export class Brush {
 
     // #region clear secondary screen implement
     // ------- 生成副屏清理函数 --------
-    // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
     switch (mode.clear) {
       case "CR":
         this.clearBack = () => {
           const { W, H } = this;
+          // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
           const { canvas, ctx } = getOffscreenCanvas({ width: W, height: H });
           this.Y = canvas;
           this.YC = ctx;
@@ -196,8 +196,8 @@ export class Brush {
     switch (mode.render) {
       case "DR":
         this.stick = () => {
-          // FIXME:【微信小程序】 drawImage 无法绘制 OffscreenCanvas；【抖音小程序】 drawImage 无法绘制 Canvas
           const { W, H } = this;
+          // FIXME:【微信小程序】 drawImage 无法绘制 OffscreenCanvas；【抖音小程序】 drawImage 无法绘制 Canvas
           this.XC!.drawImage(this.Y as CanvasImageSource, 0, 0, W, H);
         };
         break;
