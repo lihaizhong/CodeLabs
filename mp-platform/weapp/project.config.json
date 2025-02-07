@@ -2,7 +2,7 @@
   "appid": "wxf221ee13f2abd417",
   "compileType": "miniprogram",
   "libVersion": "3.0.2",
-  "miniprogramRoot": "mp-platform/weapp/",
+  "miniprogramRoot": "",
   "packOptions": {
     "ignore": [],
     "include": []
@@ -35,5 +35,5 @@
     "tabIndent": "insertSpaces",
     "tabSize": 2
   },
-  "srcMiniprogramRoot": "miniprogram/"
+  "srcMiniprogramRoot": ""
 }
