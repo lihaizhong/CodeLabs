@@ -19,7 +19,21 @@ interface CurrentPoint {
   y2: number;
 }
 
-const validMethods = "MLHVCSQRZmlhvcsqrz";
+/**
+ * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Tutorial/Paths
+ * 绘制路径的不同指令：
+ * - M: MoveTo，移动到指定点，不绘制直线。
+ * - L: LineTo，从起始点绘制一条直线到指定点。
+ * - H: 水平线，从起始点绘制一条水平线到指定点。
+ * - V: 垂直线，从起始点绘制一条垂直线到指定点。
+ * - C: Bezier CurveTo，绘制三次贝塞尔曲线。
+ * - S: Smooth CurveTo，绘制平滑三次贝塞尔曲线。
+ * - Q: Quadratic CurveTo，绘制两次贝塞尔曲线。
+ * - T: Smooth Quadratic CurveTo，绘制平滑两次贝塞尔曲线。
+ * - Z: 闭合路径，从初识点绘制一条直线到路径起点，形成一个闭合路径。
+ * - A: ...
+ */
+const validMethods = "MLHVCSQZmlhvcsqz";
 
 function render(
   context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
@@ -391,10 +405,6 @@ function drawBezierElement(
         currentPoint.x,
         currentPoint.y
       );
-      break;
-    case "A":
-      break;
-    case "a":
       break;
     case "Z":
     case "z":
