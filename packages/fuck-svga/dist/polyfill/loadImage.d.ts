@@ -1,8 +1,10 @@
 import type { PlatformImage } from "../types";
 /**
  * 加载图片
- * @param canvas 画布对象
+ * @param brush 创建图片对象
  * @param data 图片数据
+ * @param filename 图片名称
+ * @param prefix 文件名称前缀
  * @returns
  */
 export declare function loadImage(brush: {

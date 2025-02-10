@@ -121,7 +121,7 @@ export class Player {
    * @param videoEntity SVGA 数据源
    * @returns Promise<void>
    */
-  public async mount(videoEntity: Video): Promise<void | void[]> {
+  public mount(videoEntity: Video): Promise<void | void[]> {
     if (!videoEntity) {
       throw new Error("videoEntity undefined");
     }
