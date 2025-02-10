@@ -22,16 +22,19 @@ interface CurrentPoint {
 /**
  * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Tutorial/Paths
  * 绘制路径的不同指令：
- * - M: MoveTo，移动到指定点，不绘制直线。
- * - L: LineTo，从起始点绘制一条直线到指定点。
- * - H: 水平线，从起始点绘制一条水平线到指定点。
- * - V: 垂直线，从起始点绘制一条垂直线到指定点。
- * - C: Bezier CurveTo，绘制三次贝塞尔曲线。
- * - S: Smooth CurveTo，绘制平滑三次贝塞尔曲线。
- * - Q: Quadratic CurveTo，绘制两次贝塞尔曲线。
- * - T: Smooth Quadratic CurveTo，绘制平滑两次贝塞尔曲线。
- * - Z: 闭合路径，从初识点绘制一条直线到路径起点，形成一个闭合路径。
- * - A: ...
+ * * 直线命令
+ * - M: moveTo，移动到指定点，不绘制直线。
+ * - L: lineTo，从起始点绘制一条直线到指定点。
+ * - H: horizontal lineTo，从起始点绘制一条水平线到指定点。
+ * - V: vertical lineTo，从起始点绘制一条垂直线到指定点。
+ * - Z: closePath，从起始点绘制一条直线到路径起点，形成一个闭合路径。
+ * * 曲线命令
+ * - C: bezierCurveTo，绘制三次贝塞尔曲线。
+ * - S: smooth curveTo，绘制平滑三次贝塞尔曲线。
+ * - Q: quadraticCurveTo，绘制两次贝塞尔曲线。
+ * - T: smooth quadraticCurveTo，绘制平滑两次贝塞尔曲线。
+ * * 弧线命令
+ * - A: arcTo，从起始点绘制一条弧线到指定点。
  */
 const validMethods = "MLHVCSQZmlhvcsqz";
 
