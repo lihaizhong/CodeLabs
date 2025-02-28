@@ -19,50 +19,50 @@ export interface RGBAColorProps {
   a: number | null;
 }
 
-export class RGBAColorWriter {
-  /**
-   * Encodes the specified RGBAColor message. Does not implicitly {@link com.opensource.svga.ShapeEntity.ShapeStyle.RGBAColor.verify|verify} messages.
-   * @function encode
-   * @memberof com.opensource.svga.ShapeEntity.ShapeStyle.RGBAColor
-   * @static
-   * @param {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor} message RGBAColor message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encode(message: RGBAColor, writer: Writer): Writer {
-  //   if (!writer) {
-  //     writer = Writer.create();
-  //   }
-  //   if (message.r != null && Object.hasOwn(message, "r")) {
-  //     writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.r);
-  //   }
-  //   if (message.g != null && Object.hasOwn(message, "g")) {
-  //     writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.g);
-  //   }
-  //   if (message.b != null && Object.hasOwn(message, "b")) {
-  //     writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.b);
-  //   }
-  //   if (message.a != null && Object.hasOwn(message, "a")) {
-  //     writer.uint32(/* id 4, wireType 5 =*/ 37).float(message.a);
-  //   }
+// export class RGBAColorWriter {
+//   /**
+//    * Encodes the specified RGBAColor message. Does not implicitly {@link com.opensource.svga.ShapeEntity.ShapeStyle.RGBAColor.verify|verify} messages.
+//    * @function encode
+//    * @memberof com.opensource.svga.ShapeEntity.ShapeStyle.RGBAColor
+//    * @static
+//    * @param {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor} message RGBAColor message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encode(message: RGBAColor, writer: Writer): Writer {
+//     if (!writer) {
+//       writer = Writer.create();
+//     }
+//     if (message.r != null && Object.hasOwn(message, "r")) {
+//       writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.r);
+//     }
+//     if (message.g != null && Object.hasOwn(message, "g")) {
+//       writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.g);
+//     }
+//     if (message.b != null && Object.hasOwn(message, "b")) {
+//       writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.b);
+//     }
+//     if (message.a != null && Object.hasOwn(message, "a")) {
+//       writer.uint32(/* id 4, wireType 5 =*/ 37).float(message.a);
+//     }
 
-  //   return writer;
-  // }
-  /**
-   * Encodes the specified RGBAColor message, length delimited. Does not implicitly {@link com.opensource.svga.ShapeEntity.ShapeStyle.RGBAColor.verify|verify} messages.
-   * @function encodeDelimited
-   * @memberof com.opensource.svga.ShapeEntity.ShapeStyle.RGBAColor
-   * @static
-   * @param {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor} message RGBAColor message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encodeDelimited(message: RGBAColor, writer: Writer): Writer {
-  //   return RGBAColor.encode(message, writer).ldelim();
-  // }
-}
+//     return writer;
+//   }
+//   /**
+//    * Encodes the specified RGBAColor message, length delimited. Does not implicitly {@link com.opensource.svga.ShapeEntity.ShapeStyle.RGBAColor.verify|verify} messages.
+//    * @function encodeDelimited
+//    * @memberof com.opensource.svga.ShapeEntity.ShapeStyle.RGBAColor
+//    * @static
+//    * @param {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor} message RGBAColor message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encodeDelimited(message: RGBAColor, writer: Writer): Writer {
+//     return RGBAColor.encode(message, writer).ldelim();
+//   }
+// }
 
-export class RGBAColorReader {
+export default class RGBAColor {
   /**
    * Decodes a RGBAColor message from the specified reader or buffer.
    * @function decode
@@ -75,9 +75,7 @@ export class RGBAColorReader {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader | Uint8Array, length?: number): RGBAColor {
-    if (!(reader instanceof Reader)) {
-      reader = Reader.create(reader);
-    }
+    reader = Reader.create(reader);
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = new RGBAColor();
     while (reader.pos < end) {
@@ -107,6 +105,7 @@ export class RGBAColorReader {
 
     return message;
   }
+
   /**
    * Decodes a RGBAColor message from the specified reader or buffer, length delimited.
    * @function decodeDelimited
@@ -117,27 +116,12 @@ export class RGBAColorReader {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decodeDelimited(reader: Reader | Uint8Array): RGBAColor {
-    if (!(reader instanceof Reader)) {
-      reader = new Reader(reader);
-    }
+  // static decodeDelimited(reader: Reader | Uint8Array): RGBAColor {
+  //   reader = Reader.create(reader);
 
-    return this.decode(reader, reader.uint32());
-  }
-}
+  //   return this.decode(reader, reader.uint32());
+  // }
 
-export default class RGBAColor {
-  /**
-   * Creates a new RGBAColor instance using the specified properties.
-   * @function create
-   * @memberof com.opensource.svga.ShapeEntity.ShapeStyle.RGBAColor
-   * @static
-   * @param {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor=} [properties] Properties to set
-   * @returns {com.opensource.svga.ShapeEntity.ShapeStyle.RGBAColor} RGBAColor instance
-   */
-  static create(properties: RGBAColorProps) {
-    return new RGBAColor(properties);
-  }
   /**
    * Verifies a RGBAColor message.
    * @function verify
@@ -173,6 +157,7 @@ export default class RGBAColor {
 
   //   return null;
   // }
+
   /**
    * Creates a RGBAColor message from a plain object. Also converts values to their respective internal types.
    * @function fromObject
@@ -201,6 +186,7 @@ export default class RGBAColor {
 
   //   return message;
   // }
+
   /**
    * Creates a plain object from a RGBAColor message. Also converts values to other types if specified.
    * @function toObject
@@ -243,6 +229,7 @@ export default class RGBAColor {
 
   //   return object;
   // }
+
   /**
    * Gets the default type url for RGBAColor
    * @function getTypeUrl

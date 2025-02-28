@@ -1,6 +1,6 @@
 import Reader from "../../serialization/Reader";
 // import Writer from "../serialization/Writer";
-import FrameEntity, { FrameEntityReader } from "./FrameEntity";
+import FrameEntity from "./FrameEntity";
 // import { isString, toJSONOptions } from "../utils";
 
 /**
@@ -17,53 +17,53 @@ export interface SpriteEntityProps {
   matteKey: string | null;
 }
 
-export class SpriteEntityWriter {
-  /**
-   * Encodes the specified SpriteEntity message. Does not implicitly {@link com.opensource.svga.SpriteEntity.verify|verify} messages.
-   * @function encode
-   * @memberof com.opensource.svga.SpriteEntity
-   * @static
-   * @param {com.opensource.svga.ISpriteEntity} message SpriteEntity message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encode(message: SpriteEntity, writer: Writer): Writer {
-  //   if (!writer) {
-  //     writer = Writer.create();
-  //   }
-  //   if (message.imageKey != null && Object.hasOwn(message, "imageKey")) {
-  //     writer.uint32(/* id 1, wireType 2 =*/ 10).string(message.imageKey);
-  //   }
-  //   if (message.frames != null && message.frames.length) {
-  //     for (let i = 0; i < message.frames.length; ++i) {
-  //       FrameEntity.encode(
-  //         message.frames[i],
-  //         writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
-  //       ).ldelim();
-  //     }
-  //   }
-  //   if (message.matteKey != null && Object.hasOwn(message, "matteKey")) {
-  //     writer.uint32(/* id 3, wireType 2 =*/ 26).string(message.matteKey);
-  //   }
+// export class SpriteEntityWriter {
+//   /**
+//    * Encodes the specified SpriteEntity message. Does not implicitly {@link com.opensource.svga.SpriteEntity.verify|verify} messages.
+//    * @function encode
+//    * @memberof com.opensource.svga.SpriteEntity
+//    * @static
+//    * @param {com.opensource.svga.ISpriteEntity} message SpriteEntity message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encode(message: SpriteEntity, writer: Writer): Writer {
+//     if (!writer) {
+//       writer = Writer.create();
+//     }
+//     if (message.imageKey != null && Object.hasOwn(message, "imageKey")) {
+//       writer.uint32(/* id 1, wireType 2 =*/ 10).string(message.imageKey);
+//     }
+//     if (message.frames != null && message.frames.length) {
+//       for (let i = 0; i < message.frames.length; ++i) {
+//         FrameEntity.encode(
+//           message.frames[i],
+//           writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
+//         ).ldelim();
+//       }
+//     }
+//     if (message.matteKey != null && Object.hasOwn(message, "matteKey")) {
+//       writer.uint32(/* id 3, wireType 2 =*/ 26).string(message.matteKey);
+//     }
 
-  //   return writer;
-  // }
+//     return writer;
+//   }
 
-  /**
-   * Encodes the specified SpriteEntity message, length delimited. Does not implicitly {@link com.opensource.svga.SpriteEntity.verify|verify} messages.
-   * @function encodeDelimited
-   * @memberof com.opensource.svga.SpriteEntity
-   * @static
-   * @param {com.opensource.svga.ISpriteEntity} message SpriteEntity message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encodeDelimited(message: SpriteEntity, writer: Writer): Writer {
-  //   return SpriteEntity.encode(message, writer).ldelim();
-  // }
-}
+//   /**
+//    * Encodes the specified SpriteEntity message, length delimited. Does not implicitly {@link com.opensource.svga.SpriteEntity.verify|verify} messages.
+//    * @function encodeDelimited
+//    * @memberof com.opensource.svga.SpriteEntity
+//    * @static
+//    * @param {com.opensource.svga.ISpriteEntity} message SpriteEntity message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encodeDelimited(message: SpriteEntity, writer: Writer): Writer {
+//     return SpriteEntity.encode(message, writer).ldelim();
+//   }
+// }
 
-export class SpriteEntityReader {
+export default class SpriteEntity {
   /**
    * Decodes a SpriteEntity message from the specified reader or buffer.
    * @function decode
@@ -76,9 +76,7 @@ export class SpriteEntityReader {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader | Uint8Array, length?: number): SpriteEntity {
-    if (!(reader instanceof Reader)) {
-      reader = Reader.create(reader);
-    }
+    reader = Reader.create(reader);
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = new SpriteEntity();
     while (reader.pos < end) {
@@ -92,7 +90,7 @@ export class SpriteEntityReader {
           if (!(message.frames && message.frames.length)) {
             message.frames = [];
           }
-          message.frames.push(FrameEntityReader.decode(reader, reader.uint32()));
+          message.frames.push(FrameEntity.decode(reader, reader.uint32()));
           break;
         }
         case 3: {
@@ -106,6 +104,7 @@ export class SpriteEntityReader {
     }
     return message;
   }
+
   /**
    * Decodes a SpriteEntity message from the specified reader or buffer, length delimited.
    * @function decodeDelimited
@@ -116,27 +115,12 @@ export class SpriteEntityReader {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decodeDelimited(reader: Reader | Uint8Array): SpriteEntity {
-    if (!(reader instanceof Reader)) {
-      reader = new Reader(reader);
-    }
+  // static decodeDelimited(reader: Reader | Uint8Array): SpriteEntity {
+  //   reader = Reader.create(reader);
 
-    return this.decode(reader, reader.uint32());
-  }
-}
+  //   return this.decode(reader, reader.uint32());
+  // }
 
-export default class SpriteEntity {
-  /**
-   * Creates a new SpriteEntity instance using the specified properties.
-   * @function create
-   * @memberof com.opensource.svga.SpriteEntity
-   * @static
-   * @param {com.opensource.svga.ISpriteEntity=} [properties] Properties to set
-   * @returns {com.opensource.svga.SpriteEntity} SpriteEntity instance
-   */
-  static create(properties: SpriteEntityProps): SpriteEntity {
-    return new SpriteEntity(properties);
-  }
   /**
    * Verifies a SpriteEntity message.
    * @function verify
@@ -173,6 +157,7 @@ export default class SpriteEntity {
 
   //   return null;
   // }
+
   /**
    * Creates a SpriteEntity message from a plain object. Also converts values to their respective internal types.
    * @function fromObject
@@ -212,6 +197,7 @@ export default class SpriteEntity {
 
   //   return message;
   // }
+
   /**
    * Creates a plain object from a SpriteEntity message. Also converts values to other types if specified.
    * @function toObject
@@ -252,6 +238,7 @@ export default class SpriteEntity {
 
   //   return object;
   // }
+
   /**
    * Gets the default type url for SpriteEntity
    * @function getTypeUrl

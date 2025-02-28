@@ -1,5 +1,4 @@
-import { PlayerConfigOptions, Video } from "../types";
-type EventCallback = undefined | (() => void);
+import { PlayerConfigOptions, Video, PlayerEventCallback } from "../types";
 /**
  * SVGA 播放器
  */
@@ -9,7 +8,7 @@ export declare class Player {
      */
     private currFrame;
     /**
-     * SVGA 数据源
+     * SVGA 元数据
      * Video Entity
      */
     private entity;
@@ -41,27 +40,27 @@ export declare class Player {
     /**
      * 开始播放事件回调
      */
-    onStart: EventCallback;
+    onStart?: PlayerEventCallback;
     /**
      * 重新播放事件回调
      */
-    onResume: EventCallback;
+    onResume?: PlayerEventCallback;
     /**
      * 暂停播放事件回调
      */
-    onPause: EventCallback;
+    onPause?: PlayerEventCallback;
     /**
      * 停止播放事件回调
      */
-    onStop: EventCallback;
+    onStop?: PlayerEventCallback;
     /**
      * 播放中事件回调
      */
-    onProcess: EventCallback;
+    onProcess?: PlayerEventCallback;
     /**
-     * 播放结束事件回调
+     * 结束播放事件回调
      */
-    onEnd: EventCallback;
+    onEnd?: PlayerEventCallback;
     /**
      * 开始播放
      */
@@ -86,9 +85,10 @@ export declare class Player {
      * 销毁实例
      */
     destroy(): void;
+    stepToFrame(frame: number, andPlay?: boolean): void;
+    stepToPercentage(percentage: number, andPlay?: boolean): void;
     /**
      * 开始绘制动画
      */
     private startAnimation;
 }
-export {};

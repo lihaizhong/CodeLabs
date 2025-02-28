@@ -14,9 +14,7 @@ export interface RGBAColorProps {
     b: number | null;
     a: number | null;
 }
-export declare class RGBAColorWriter {
-}
-export declare class RGBAColorReader {
+export default class RGBAColor {
     /**
      * Decodes a RGBAColor message from the specified reader or buffer.
      * @function decode
@@ -39,18 +37,6 @@ export declare class RGBAColorReader {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decodeDelimited(reader: Reader | Uint8Array): RGBAColor;
-}
-export default class RGBAColor {
-    /**
-     * Creates a new RGBAColor instance using the specified properties.
-     * @function create
-     * @memberof com.opensource.svga.ShapeEntity.ShapeStyle.RGBAColor
-     * @static
-     * @param {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor=} [properties] Properties to set
-     * @returns {com.opensource.svga.ShapeEntity.ShapeStyle.RGBAColor} RGBAColor instance
-     */
-    static create(properties: RGBAColorProps): RGBAColor;
     /**
      * Verifies a RGBAColor message.
      * @function verify

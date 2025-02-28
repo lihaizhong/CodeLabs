@@ -19,9 +19,7 @@ export interface FrameEntityProps {
     clipPath: string | null;
     shapes: ShapeEntity[] | null;
 }
-export declare class FrameEntityWriter {
-}
-export declare class FrameEntityReader {
+export default class FrameEntity {
     /**
      * Decodes a FrameEntity message from the specified reader or buffer.
      * @function decode
@@ -44,18 +42,6 @@ export declare class FrameEntityReader {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decodeDelimited(reader: Reader | Uint8Array): FrameEntity;
-}
-export default class FrameEntity {
-    /**
-     * Creates a new FrameEntity instance using the specified properties.
-     * @function create
-     * @memberof com.opensource.svga.FrameEntity
-     * @static
-     * @param {com.opensource.svga.IFrameEntity=} [properties] Properties to set
-     * @returns {com.opensource.svga.FrameEntity} FrameEntity instance
-     */
-    static create(properties?: FrameEntityProps): FrameEntity;
     /**
      * Verifies a FrameEntity message.
      * @function verify

@@ -22,55 +22,55 @@ export interface TransformProps {
   ty: number | null;
 }
 
-export class TransformWriter {
-  /**
-   * Encodes the specified Transform message. Does not implicitly {@link com.opensource.svga.Transform.verify|verify} messages.
-   * @function encode
-   * @memberof com.opensource.svga.Transform
-   * @static
-   * @param {com.opensource.svga.ITransform} message Transform message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encode(message: Transform, writer: Writer): Writer {
-  //   if (!writer) {
-  //     writer = Writer.create();
-  //   }
-  //   if (message.a != null && Object.hasOwn(message, "a")) {
-  //     writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.a);
-  //   }
-  //   if (message.b != null && Object.hasOwn(message, "b")) {
-  //     writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.b);
-  //   }
-  //   if (message.c != null && Object.hasOwn(message, "c")) {
-  //     writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.c);
-  //   }
-  //   if (message.d != null && Object.hasOwn(message, "d")) {
-  //     writer.uint32(/* id 4, wireType 5 =*/ 37).float(message.d);
-  //   }
-  //   if (message.tx != null && Object.hasOwn(message, "tx")) {
-  //     writer.uint32(/* id 5, wireType 5 =*/ 45).float(message.tx);
-  //   }
-  //   if (message.ty != null && Object.hasOwn(message, "ty")) {
-  //     writer.uint32(/* id 6, wireType 5 =*/ 53).float(message.ty);
-  //   }
-  //   return writer;
-  // }
-  /**
-   * Encodes the specified Transform message, length delimited. Does not implicitly {@link com.opensource.svga.Transform.verify|verify} messages.
-   * @function encodeDelimited
-   * @memberof com.opensource.svga.Transform
-   * @static
-   * @param {com.opensource.svga.ITransform} message Transform message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encodeDelimited(message: Transform, writer: Writer): Writer {
-  //   return Transform.encode(message, writer).ldelim();
-  // }
-}
+// export class TransformWriter {
+//   /**
+//    * Encodes the specified Transform message. Does not implicitly {@link com.opensource.svga.Transform.verify|verify} messages.
+//    * @function encode
+//    * @memberof com.opensource.svga.Transform
+//    * @static
+//    * @param {com.opensource.svga.ITransform} message Transform message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encode(message: Transform, writer: Writer): Writer {
+//     if (!writer) {
+//       writer = Writer.create();
+//     }
+//     if (message.a != null && Object.hasOwn(message, "a")) {
+//       writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.a);
+//     }
+//     if (message.b != null && Object.hasOwn(message, "b")) {
+//       writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.b);
+//     }
+//     if (message.c != null && Object.hasOwn(message, "c")) {
+//       writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.c);
+//     }
+//     if (message.d != null && Object.hasOwn(message, "d")) {
+//       writer.uint32(/* id 4, wireType 5 =*/ 37).float(message.d);
+//     }
+//     if (message.tx != null && Object.hasOwn(message, "tx")) {
+//       writer.uint32(/* id 5, wireType 5 =*/ 45).float(message.tx);
+//     }
+//     if (message.ty != null && Object.hasOwn(message, "ty")) {
+//       writer.uint32(/* id 6, wireType 5 =*/ 53).float(message.ty);
+//     }
+//     return writer;
+//   }
+//   /**
+//    * Encodes the specified Transform message, length delimited. Does not implicitly {@link com.opensource.svga.Transform.verify|verify} messages.
+//    * @function encodeDelimited
+//    * @memberof com.opensource.svga.Transform
+//    * @static
+//    * @param {com.opensource.svga.ITransform} message Transform message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encodeDelimited(message: Transform, writer: Writer): Writer {
+//     return Transform.encode(message, writer).ldelim();
+//   }
+// }
 
-export class TransformReader {
+export default class Transform {
   /**
    * Decodes a Transform message from the specified reader or buffer.
    * @function decode
@@ -83,9 +83,7 @@ export class TransformReader {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader | Uint8Array, length?: number): Transform {
-    if (!(reader instanceof Reader)) {
-      reader = Reader.create(reader);
-    }
+    reader = Reader.create(reader);
     let end = length === undefined ? reader.len : reader.pos + length;
     let message = new Transform();
     while (reader.pos < end) {
@@ -122,6 +120,7 @@ export class TransformReader {
     }
     return message;
   }
+
   /**
    * Decodes a Transform message from the specified reader or buffer, length delimited.
    * @function decodeDelimited
@@ -132,27 +131,12 @@ export class TransformReader {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decodeDelimited(reader: Reader | Uint8Array): Transform {
-    if (!(reader instanceof Reader)) {
-      reader = new Reader(reader);
-    }
+  // static decodeDelimited(reader: Reader | Uint8Array): Transform {
+  //   reader = Reader.create(reader);
 
-    return this.decode(reader, reader.uint32());
-  }
-}
+  //   return this.decode(reader, reader.uint32());
+  // }
 
-export default class Transform {
-  /**
-   * Creates a new Transform instance using the specified properties.
-   * @function create
-   * @memberof com.opensource.svga.Transform
-   * @static
-   * @param {com.opensource.svga.ITransform=} [properties] Properties to set
-   * @returns {com.opensource.svga.Transform} Transform instance
-   */
-  static create(properties: TransformProps): Transform {
-    return new Transform(properties);
-  }
   /**
    * Verifies a Transform message.
    * @function verify
@@ -198,6 +182,7 @@ export default class Transform {
 
   //   return null;
   // }
+
   /**
    * Creates a Transform message from a plain object. Also converts values to their respective internal types.
    * @function fromObject
@@ -232,6 +217,7 @@ export default class Transform {
 
   //   return message;
   // }
+
   /**
    * Creates a plain object from a Transform message. Also converts values to other types if specified.
    * @function toObject
@@ -284,6 +270,7 @@ export default class Transform {
 
   //   return object;
   // }
+
   /**
    * Gets the default type url for Transform
    * @function getTypeUrl

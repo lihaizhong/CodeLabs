@@ -108,7 +108,7 @@ export class VideoEntity implements Video {
 
       let shapes: VideoFrameShapes = this.formatShapes(mFrame.shapes || []);
 
-      if (mFrame.shapes[0]?.type === 3 && lastShapes) {
+      if (mFrame.shapes[0]?.type == 3 && lastShapes) {
         shapes = lastShapes;
       } else {
         lastShapes = shapes;
@@ -167,7 +167,7 @@ export class VideoEntity implements Video {
     for (let mShape of mShapes) {
       const mStyles = mShape.styles;
 
-      if (mStyles === null) {
+      if (mStyles == null) {
         continue;
       }
 
@@ -252,21 +252,21 @@ export class VideoEntity implements Video {
         ty: ShF?.ty ?? 0.0,
       };
 
-      if (mShape.type === 0 && shape) {
+      if (mShape.type == 0 && shape) {
         shapes.push({
           type: SHAPE_TYPE.SHAPE,
           path: shape,
           styles: SS,
           transform: ST,
         });
-      } else if (mShape.type === 1 && rect) {
+      } else if (mShape.type == 1 && rect) {
         shapes.push({
           type: SHAPE_TYPE.RECT,
           path: rect,
           styles: SS,
           transform: ST,
         });
-      } else if (mShape.type === 2 && ellipse) {
+      } else if (mShape.type == 2 && ellipse) {
         shapes.push({
           type: SHAPE_TYPE.ELLIPSE,
           path: ellipse,

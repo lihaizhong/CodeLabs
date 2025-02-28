@@ -1,11 +1,11 @@
 import Reader from "../../serialization/Reader";
 // import Writer from "../serialization/Writer";
-import Transform, { TransformReader } from "./Transform";
+import Transform from "./Transform";
 import ShapeType from "./ShapeType";
-import ShapeArgs, { ShapeArgsReader } from "./ShapeArgs";
-import RectArgs, { RectArgsReader } from "./RectArgs";
-import EllipseArgs, { EllipseArgsReader } from "./EllipseArgs";
-import ShapeStyle, { ShapeStyleReader } from "./ShapeStyle";
+import ShapeArgs from "./ShapeArgs";
+import RectArgs from "./RectArgs";
+import EllipseArgs from "./EllipseArgs";
+import ShapeStyle from "./ShapeStyle";
 // import { toJSONOptions } from "../utils";
 
 /**
@@ -28,71 +28,71 @@ export interface ShapeEntityProps {
   transform: Transform | null;
 }
 
-export class ShapeEntityWriter {
-  /**
-   * Encodes the specified ShapeEntity message. Does not implicitly {@link com.opensource.svga.ShapeEntity.verify|verify} messages.
-   * @function encode
-   * @memberof com.opensource.svga.ShapeEntity
-   * @static
-   * @param {com.opensource.svga.IShapeEntity} message ShapeEntity message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encode(message: ShapeEntity, writer: Writer): Writer {
-  //   if (!writer) {
-  //     writer = Writer.create();
-  //   }
-  //   if (message.type != null && Object.hasOwn(message, "type")) {
-  //     writer.uint32(/* id 1, wireType 0 =*/ 8).int32(message.type);
-  //   }
-  //   if (message.shape != null && Object.hasOwn(message, "shape")) {
-  //     ShapeArgs.encode(
-  //       message.shape,
-  //       writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
-  //     ).ldelim();
-  //   }
-  //   if (message.rect != null && Object.hasOwn(message, "rect")) {
-  //     RectArgs.encode(
-  //       message.rect,
-  //       writer.uint32(/* id 3, wireType 2 =*/ 26).fork()
-  //     ).ldelim();
-  //   }
-  //   if (message.ellipse != null && Object.hasOwn(message, "ellipse")) {
-  //     EllipseArgs.encode(
-  //       message.ellipse,
-  //       writer.uint32(/* id 4, wireType 2 =*/ 34).fork()
-  //     ).ldelim();
-  //   }
-  //   if (message.styles != null && Object.hasOwn(message, "styles")) {
-  //     ShapeStyle.encode(
-  //       message.styles,
-  //       writer.uint32(/* id 10, wireType 2 =*/ 82).fork()
-  //     ).ldelim();
-  //   }
-  //   if (message.transform != null && Object.hasOwn(message, "transform")) {
-  //     Transform.encode(
-  //       message.transform,
-  //       writer.uint32(/* id 11, wireType 2 =*/ 90).fork()
-  //     ).ldelim();
-  //   }
+// export class ShapeEntityWriter {
+//   /**
+//    * Encodes the specified ShapeEntity message. Does not implicitly {@link com.opensource.svga.ShapeEntity.verify|verify} messages.
+//    * @function encode
+//    * @memberof com.opensource.svga.ShapeEntity
+//    * @static
+//    * @param {com.opensource.svga.IShapeEntity} message ShapeEntity message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encode(message: ShapeEntity, writer: Writer): Writer {
+//     if (!writer) {
+//       writer = Writer.create();
+//     }
+//     if (message.type != null && Object.hasOwn(message, "type")) {
+//       writer.uint32(/* id 1, wireType 0 =*/ 8).int32(message.type);
+//     }
+//     if (message.shape != null && Object.hasOwn(message, "shape")) {
+//       ShapeArgs.encode(
+//         message.shape,
+//         writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
+//       ).ldelim();
+//     }
+//     if (message.rect != null && Object.hasOwn(message, "rect")) {
+//       RectArgs.encode(
+//         message.rect,
+//         writer.uint32(/* id 3, wireType 2 =*/ 26).fork()
+//       ).ldelim();
+//     }
+//     if (message.ellipse != null && Object.hasOwn(message, "ellipse")) {
+//       EllipseArgs.encode(
+//         message.ellipse,
+//         writer.uint32(/* id 4, wireType 2 =*/ 34).fork()
+//       ).ldelim();
+//     }
+//     if (message.styles != null && Object.hasOwn(message, "styles")) {
+//       ShapeStyle.encode(
+//         message.styles,
+//         writer.uint32(/* id 10, wireType 2 =*/ 82).fork()
+//       ).ldelim();
+//     }
+//     if (message.transform != null && Object.hasOwn(message, "transform")) {
+//       Transform.encode(
+//         message.transform,
+//         writer.uint32(/* id 11, wireType 2 =*/ 90).fork()
+//       ).ldelim();
+//     }
 
-  //   return writer;
-  // }
-  /**
-   * Encodes the specified ShapeEntity message, length delimited. Does not implicitly {@link com.opensource.svga.ShapeEntity.verify|verify} messages.
-   * @function encodeDelimited
-   * @memberof com.opensource.svga.ShapeEntity
-   * @static
-   * @param {com.opensource.svga.IShapeEntity} message ShapeEntity message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encodeDelimited(message: ShapeEntity, writer: Writer): Writer {
-  //   return ShapeEntity.encode(message, writer).ldelim();
-  // }
-}
+//     return writer;
+//   }
+//   /**
+//    * Encodes the specified ShapeEntity message, length delimited. Does not implicitly {@link com.opensource.svga.ShapeEntity.verify|verify} messages.
+//    * @function encodeDelimited
+//    * @memberof com.opensource.svga.ShapeEntity
+//    * @static
+//    * @param {com.opensource.svga.IShapeEntity} message ShapeEntity message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encodeDelimited(message: ShapeEntity, writer: Writer): Writer {
+//     return ShapeEntity.encode(message, writer).ldelim();
+//   }
+// }
 
-export class ShapeEntityReader {
+export default class ShapeEntity {
   /**
    * Decodes a ShapeEntity message from the specified reader or buffer.
    * @function decode
@@ -105,9 +105,7 @@ export class ShapeEntityReader {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader | Uint8Array, length?: number): ShapeEntity {
-    if (!(reader instanceof Reader)) {
-      reader = Reader.create(reader);
-    }
+    reader = Reader.create(reader);
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = new ShapeEntity();
     while (reader.pos < end) {
@@ -118,29 +116,29 @@ export class ShapeEntityReader {
           break;
         }
         case 2: {
-          message.shape = ShapeArgsReader.decode(reader, reader.uint32());
+          message.shape = ShapeArgs.decode(reader, reader.uint32());
           break;
         }
         case 3: {
-          message.rect = RectArgsReader.decode(reader, reader.uint32());
+          message.rect = RectArgs.decode(reader, reader.uint32());
           break;
         }
         case 4: {
-          message.ellipse = EllipseArgsReader.decode(
+          message.ellipse = EllipseArgs.decode(
             reader,
             reader.uint32()
           );
           break;
         }
         case 10: {
-          message.styles = ShapeStyleReader.decode(
+          message.styles = ShapeStyle.decode(
             reader,
             reader.uint32()
           );
           break;
         }
         case 11: {
-          message.transform = TransformReader.decode(reader, reader.uint32());
+          message.transform = Transform.decode(reader, reader.uint32());
           break;
         }
         default:
@@ -151,6 +149,7 @@ export class ShapeEntityReader {
 
     return message;
   }
+
   /**
    * Decodes a ShapeEntity message from the specified reader or buffer, length delimited.
    * @function decodeDelimited
@@ -161,27 +160,12 @@ export class ShapeEntityReader {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decodeDelimited(reader: Reader | Uint8Array): ShapeEntity {
-    if (!(reader instanceof Reader)) {
-      reader = new Reader(reader);
-    }
+  // static decodeDelimited(reader: Reader | Uint8Array): ShapeEntity {
+  //   reader = Reader.create(reader);
 
-    return this.decode(reader, reader.uint32());
-  }
-}
+  //   return this.decode(reader, reader.uint32());
+  // }
 
-export default class ShapeEntity {
-  /**
-   * Creates a new ShapeEntity instance using the specified properties.
-   * @function create
-   * @memberof com.opensource.svga.ShapeEntity
-   * @static
-   * @param {com.opensource.svga.IShapeEntity=} [properties] Properties to set
-   * @returns {com.opensource.svga.ShapeEntity} ShapeEntity instance
-   */
-  static create(properties: ShapeEntityProps): ShapeEntity {
-    return new ShapeEntity(properties);
-  }
   /**
    * Verifies a ShapeEntity message.
    * @function verify
@@ -251,6 +235,7 @@ export default class ShapeEntity {
 
   //   return null;
   // }
+
   /**
    * Creates a ShapeEntity message from a plain object. Also converts values to their respective internal types.
    * @function fromObject
@@ -331,6 +316,7 @@ export default class ShapeEntity {
 
   //   return message;
   // }
+
   /**
    * Creates a plain object from a ShapeEntity message. Also converts values to other types if specified.
    * @function toObject
@@ -391,6 +377,7 @@ export default class ShapeEntity {
 
   //   return object;
   // }
+
   /**
    * Gets the default type url for ShapeEntity
    * @function getTypeUrl

@@ -14,9 +14,7 @@ export interface MovieParamsProps {
     fps: number | null;
     frames: number | null;
 }
-export declare class MovieParamsWriter {
-}
-export declare class MovieParamsReader {
+export default class MovieParams {
     /**
      * Decodes a MovieParams message from the specified reader or buffer.
      * @function decode
@@ -39,18 +37,6 @@ export declare class MovieParamsReader {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decodeDelimited(reader: Reader | Uint8Array): MovieParams;
-}
-export default class MovieParams {
-    /**
-     * Creates a new MovieParams instance using the specified properties.
-     * @function create
-     * @memberof com.opensource.svga.MovieParams
-     * @static
-     * @param {com.opensource.svga.IMovieParams=} [properties] Properties to set
-     * @returns {com.opensource.svga.MovieParams} MovieParams instance
-     */
-    static create(properties?: MovieParamsProps): MovieParams;
     /**
      * Verifies a MovieParams message.
      * @function verify

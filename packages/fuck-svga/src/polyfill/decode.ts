@@ -2,7 +2,8 @@ import { app, SP } from "./app";
 import { br } from "./bridge";
 
 // miniprogram btoa/atob polyfill
-const b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+const b64c =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 const b64re =
   /^(?:[A-Za-z\d+\/]{4})*?(?:[A-Za-z\d+\/]{2}(?:==)?|[A-Za-z\d+\/]{3}=?)?$/;
 
@@ -34,10 +35,10 @@ export function mbtoa(string: string): string {
 
     bitmap = (a << 16) | (b << 8) | c;
     result +=
-      b64.charAt((bitmap >> 18) & 63) +
-      b64.charAt((bitmap >> 12) & 63) +
-      b64.charAt((bitmap >> 6) & 63) +
-      b64.charAt(bitmap & 63);
+      b64c.charAt((bitmap >> 18) & 63) +
+      b64c.charAt((bitmap >> 12) & 63) +
+      b64c.charAt((bitmap >> 6) & 63) +
+      b64c.charAt(bitmap & 63);
   }
 
   return rest ? result.slice(0, rest - 3) + "===".substring(rest) : result;
@@ -64,15 +65,15 @@ export function matob(base64: string): string {
     r2;
   for (let i = 0; i < string.length; ) {
     bitmap =
-      (b64.indexOf(string.charAt(i++)) << 18) |
-      (b64.indexOf(string.charAt(i++)) << 12) |
-      ((r1 = b64.indexOf(string.charAt(i++))) << 6) |
-      (r2 = b64.indexOf(string.charAt(i++)));
+      (b64c.indexOf(string.charAt(i++)) << 18) |
+      (b64c.indexOf(string.charAt(i++)) << 12) |
+      ((r1 = b64c.indexOf(string.charAt(i++))) << 6) |
+      (r2 = b64c.indexOf(string.charAt(i++)));
 
     result +=
-      r1 === 64
+      r1 == 64
         ? String.fromCharCode((bitmap >> 16) & 255)
-        : r2 === 64
+        : r2 == 64
         ? String.fromCharCode((bitmap >> 16) & 255, (bitmap >> 8) & 255)
         : String.fromCharCode(
             (bitmap >> 16) & 255,
@@ -93,7 +94,7 @@ export function toBase64(data: Uint8Array): string {
   const buf = toBuffer(data);
   let b64: string;
 
-  if (app === SP.H5) {
+  if (app == SP.H5) {
     b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
   } else {
     // FIXME: 如果arrayBufferToBase64被废除，可以使用mbtoa代替

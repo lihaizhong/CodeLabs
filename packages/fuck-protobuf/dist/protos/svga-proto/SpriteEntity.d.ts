@@ -13,9 +13,7 @@ export interface SpriteEntityProps {
     frames: FrameEntity[] | null;
     matteKey: string | null;
 }
-export declare class SpriteEntityWriter {
-}
-export declare class SpriteEntityReader {
+export default class SpriteEntity {
     /**
      * Decodes a SpriteEntity message from the specified reader or buffer.
      * @function decode
@@ -38,18 +36,6 @@ export declare class SpriteEntityReader {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decodeDelimited(reader: Reader | Uint8Array): SpriteEntity;
-}
-export default class SpriteEntity {
-    /**
-     * Creates a new SpriteEntity instance using the specified properties.
-     * @function create
-     * @memberof com.opensource.svga.SpriteEntity
-     * @static
-     * @param {com.opensource.svga.ISpriteEntity=} [properties] Properties to set
-     * @returns {com.opensource.svga.SpriteEntity} SpriteEntity instance
-     */
-    static create(properties: SpriteEntityProps): SpriteEntity;
     /**
      * Verifies a SpriteEntity message.
      * @function verify

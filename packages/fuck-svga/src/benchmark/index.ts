@@ -4,7 +4,7 @@ const stopwatch = {
   l: {} as Record<string, boolean>,
   t: {} as Record<string, number>,
   increment(label: string) {
-    if (stopwatch.t[label] === undefined) {
+    if (stopwatch.t[label] == undefined) {
       stopwatch.t[label] = 0;
     }
 

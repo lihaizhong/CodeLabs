@@ -4,12 +4,11 @@ import {
   PlayerConfigOptions,
   Video,
   PlayerConfig,
+  PlayerEventCallback,
 } from "../types";
 import { Brush } from "./brush";
 import { Animator } from "./animator";
 import benchmark from "../benchmark";
-
-type EventCallback = undefined | (() => void);
 
 /**
  * SVGA 播放器
@@ -20,7 +19,7 @@ export class Player {
    */
   private currFrame: number = 0;
   /**
-   * SVGA 数据源
+   * SVGA 元数据
    * Video Entity
    */
   private entity: Video | undefined = undefined;
@@ -62,7 +61,7 @@ export class Player {
   ): Promise<void> {
     let config: PlayerConfigOptions;
 
-    if (typeof options === "string") {
+    if (typeof options == "string") {
       config = { container: options };
     } else {
       config = options;
@@ -97,7 +96,7 @@ export class Player {
     // 监听容器是否处于浏览器视窗内
     // this.setIntersectionObserver()
     this.animator = new Animator(this.brush);
-    this.animator.onEnd = () => this.onEnd?.();
+    this.animator.onEnd = () => this.onEnd?.(this.currFrame);
   }
 
   // private setIntersectionObserver (): void {
@@ -144,27 +143,27 @@ export class Player {
   /**
    * 开始播放事件回调
    */
-  public onStart: EventCallback;
+  public onStart?: PlayerEventCallback;
   /**
    * 重新播放事件回调
    */
-  public onResume: EventCallback;
+  public onResume?: PlayerEventCallback;
   /**
    * 暂停播放事件回调
    */
-  public onPause: EventCallback;
+  public onPause?: PlayerEventCallback;
   /**
    * 停止播放事件回调
    */
-  public onStop: EventCallback;
+  public onStop?: PlayerEventCallback;
   /**
    * 播放中事件回调
    */
-  public onProcess: EventCallback;
+  public onProcess?: PlayerEventCallback;
   /**
-   * 播放结束事件回调
+   * 结束播放事件回调
    */
-  public onEnd: EventCallback;
+  public onEnd?: PlayerEventCallback;
 
   /**
    * 开始播放
@@ -172,7 +171,7 @@ export class Player {
   public start(): void {
     this.brush.clearFront();
     this.startAnimation();
-    this.onStart?.();
+    this.onStart?.(this.currFrame);
   }
 
   /**
@@ -180,7 +179,7 @@ export class Player {
    */
   public resume(): void {
     this.startAnimation();
-    this.onResume?.();
+    this.onResume?.(this.currFrame);
   }
 
   /**
@@ -188,7 +187,7 @@ export class Player {
    */
   public pause(): void {
     this.animator!.stop();
-    this.onPause?.();
+    this.onPause?.(this.currFrame);
   }
 
   /**
@@ -198,7 +197,7 @@ export class Player {
     this.animator!.stop();
     this.currFrame = 0;
     this.brush.clearFront();
-    this.onStop?.();
+    this.onStop?.(this.currFrame);
   }
 
   /**
@@ -218,6 +217,31 @@ export class Player {
     this.entity = undefined;
   }
 
+  public stepToFrame(frame: number, andPlay = false) {
+    if (!this.entity) return;
+    if (frame >= this.entity.frames || frame < 0) {
+      return;
+    }
+    this.pause();
+    this.currFrame = frame;
+    if (andPlay) {
+      this.startAnimation();
+    }
+  }
+
+  public stepToPercentage(percentage: number, andPlay: boolean = false) {
+    if (!this.entity) return;
+
+    const { frames } = this.entity;
+    let frame = percentage * frames;
+
+    if (frame >= frames && frame > 0) {
+      frame = frames - 1;
+    }
+
+    this.stepToFrame(frame, andPlay);
+  }
+
   /**
    * 开始绘制动画
    */
@@ -231,12 +255,12 @@ export class Player {
     const end = endFrame > 0 ? endFrame : lastFrame;
 
     // 如果开始动画的当前帧是最后一帧，重置为开始帧
-    if (this.currFrame === lastFrame) {
+    if (this.currFrame == lastFrame) {
       this.currFrame = start;
     }
 
     // 顺序播放/倒叙播放
-    if (playMode === PLAYER_PLAY_MODE.FORWARDS) {
+    if (playMode == PLAYER_PLAY_MODE.FORWARDS) {
       this.animator!.setRange(start, end);
     } else {
       this.animator!.setRange(end, start);
@@ -260,12 +284,12 @@ export class Player {
         ? (loopStartFrame - startFrame) * frameDuration
         : 0,
       loop <= 0 ? Infinity : loop,
-      +(fillMode === PLAYER_FILL_MODE.BACKWARDS)
+      +(fillMode == PLAYER_FILL_MODE.BACKWARDS)
     );
     // 动画绘制过程
     this.animator!.onUpdate = (value: number, spendValue: number) => {
       // 是否还有剩余时间
-      const hasRemained = this.currFrame === value;
+      const hasRemained = this.currFrame == value;
       // 当前帧的图片还未绘制完成
       if (this.tail !== spriteCount) {
         // 1.2和3均为阔值，保证渲染尽快完成
@@ -302,7 +326,7 @@ export class Player {
         }
       );
       this.brush.clearBack();
-      this.onProcess?.();
+      this.onProcess?.(this.currFrame);
       this.currFrame = value;
       this.tail = 0;
     };

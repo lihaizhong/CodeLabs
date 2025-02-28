@@ -14,9 +14,7 @@ export interface EllipseArgsProps {
     radiusX: number | null;
     radiusY: number | null;
 }
-export declare class EllipseArgsWriter {
-}
-export declare class EllipseArgsReader {
+export default class EllipseArgs {
     /**
      * Decodes an EllipseArgs message from the specified reader or buffer.
      * @function decode
@@ -39,18 +37,6 @@ export declare class EllipseArgsReader {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decodeDelimited(reader: Reader | Uint8Array): EllipseArgs;
-}
-export default class EllipseArgs {
-    /**
-     * Creates a new EllipseArgs instance using the specified properties.
-     * @function create
-     * @memberof com.opensource.svga.ShapeEntity.EllipseArgs
-     * @static
-     * @param {com.opensource.svga.ShapeEntity.IEllipseArgs=} [properties] Properties to set
-     * @returns {com.opensource.svga.ShapeEntity.EllipseArgs} EllipseArgs instance
-     */
-    static create(properties?: EllipseArgsProps): EllipseArgs;
     /**
      * Verifies an EllipseArgs message.
      * @function verify

@@ -1,9 +1,9 @@
 import { unzlibSync } from "fflate";
-import { MovieEntityReader } from "fuck-protobuf";
-import download from "../polyfill/download";
+import { MovieEntity } from "fuck-protobuf";
+import { download } from "../polyfill/download";
 import { VideoEntity } from "./video-entity";
 import type { Video } from "../types";
-import benchmark from "benchmark";
+import benchmark from "../benchmark";
 
 /**
  * SVGA 下载解析器
@@ -19,14 +19,14 @@ export class Parser {
     const header = new Uint8Array(data, 0, 4);
     const u8a = new Uint8Array(data);
 
-    if (header.toString() === "80,75,3,4") {
+    if (header.toString() == "80,75,3,4") {
       throw new Error("this parser only support version@2 of SVGA.");
     }
 
     let entity: VideoEntity;
     benchmark.time("unzlibSync", () => {
       const inflateData = unzlibSync(u8a);
-      const movieData = MovieEntityReader.decode(inflateData);
+      const movieData = MovieEntity.decode(inflateData);
 
       entity = new VideoEntity(
         movieData!,

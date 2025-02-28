@@ -1,8 +1,8 @@
 // import base64 from "@protobufjs/base64";
 import Reader from "../../serialization/Reader";
 // import Writer from "../serialization/Writer";
-import SpriteEntity, { SpriteEntityReader } from "./SpriteEntity";
-import MovieParams, { MovieParamsReader } from "./MovieParams";
+import SpriteEntity from "./SpriteEntity";
+import MovieParams from "./MovieParams";
 import { emptyObject } from "../../utils";
 
 /**
@@ -21,68 +21,68 @@ export interface MovieEntityProps {
   sprites: SpriteEntity[] | null;
 }
 
-export class MovieEntityWriter {
-  /**
-   * Encodes the specified MovieEntity message. Does not implicitly {@link com.opensource.svga.MovieEntity.verify|verify} messages.
-   * @function encode
-   * @memberof com.opensource.svga.MovieEntity
-   * @static
-   * @param {com.opensource.svga.IMovieEntity} message MovieEntity message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encode(message: MovieEntity, writer: Writer): Writer {
-  //   if (!writer) {
-  //     writer = Writer.create();
-  //   }
-  //   if (message.version != null && Object.hasOwn(message, "version")) {
-  //     writer.uint32(/* id 1, wireType 2 =*/ 10).string(message.version);
-  //   }
-  //   if (message.params != null && Object.hasOwn(message, "params")) {
-  //     MovieParams.encode(
-  //       message.params,
-  //       writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
-  //     ).ldelim();
-  //   }
-  //   if (message.images != null && Object.hasOwn(message, "images")) {
-  //     const keys = Object.keys(message.images);
-  //     for (let i = 0; i < keys.length; ++i) {
-  //       writer
-  //         .uint32(/* id 3, wireType 2 =*/ 26)
-  //         .fork()
-  //         .uint32(/* id 1, wireType 2 =*/ 10)
-  //         .string(keys[i])
-  //         .uint32(/* id 2, wireType 2 =*/ 18)
-  //         .bytes(message.images[keys[i]])
-  //         .ldelim();
-  //     }
-  //   }
-  //   if (message.sprites != null && message.sprites.length) {
-  //     for (let i = 0; i < message.sprites.length; ++i) {
-  //       SpriteEntity.encode(
-  //         message.sprites[i],
-  //         writer.uint32(/* id 4, wireType 2 =*/ 34).fork()
-  //       ).ldelim();
-  //     }
-  //   }
+// export class MovieEntityWriter {
+//   /**
+//    * Encodes the specified MovieEntity message. Does not implicitly {@link com.opensource.svga.MovieEntity.verify|verify} messages.
+//    * @function encode
+//    * @memberof com.opensource.svga.MovieEntity
+//    * @static
+//    * @param {com.opensource.svga.IMovieEntity} message MovieEntity message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encode(message: MovieEntity, writer: Writer): Writer {
+//     if (!writer) {
+//       writer = Writer.create();
+//     }
+//     if (message.version != null && Object.hasOwn(message, "version")) {
+//       writer.uint32(/* id 1, wireType 2 =*/ 10).string(message.version);
+//     }
+//     if (message.params != null && Object.hasOwn(message, "params")) {
+//       MovieParams.encode(
+//         message.params,
+//         writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
+//       ).ldelim();
+//     }
+//     if (message.images != null && Object.hasOwn(message, "images")) {
+//       const keys = Object.keys(message.images);
+//       for (let i = 0; i < keys.length; ++i) {
+//         writer
+//           .uint32(/* id 3, wireType 2 =*/ 26)
+//           .fork()
+//           .uint32(/* id 1, wireType 2 =*/ 10)
+//           .string(keys[i])
+//           .uint32(/* id 2, wireType 2 =*/ 18)
+//           .bytes(message.images[keys[i]])
+//           .ldelim();
+//       }
+//     }
+//     if (message.sprites != null && message.sprites.length) {
+//       for (let i = 0; i < message.sprites.length; ++i) {
+//         SpriteEntity.encode(
+//           message.sprites[i],
+//           writer.uint32(/* id 4, wireType 2 =*/ 34).fork()
+//         ).ldelim();
+//       }
+//     }
 
-  //   return writer;
-  // }
-  /**
-   * Encodes the specified MovieEntity message, length delimited. Does not implicitly {@link com.opensource.svga.MovieEntity.verify|verify} messages.
-   * @function encodeDelimited
-   * @memberof com.opensource.svga.MovieEntity
-   * @static
-   * @param {com.opensource.svga.IMovieEntity} message MovieEntity message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encodeDelimited(message: MovieEntity, writer: Writer): Writer {
-  //   return MovieEntity.encode(message, writer).ldelim();
-  // }
-}
+//     return writer;
+//   }
+//   /**
+//    * Encodes the specified MovieEntity message, length delimited. Does not implicitly {@link com.opensource.svga.MovieEntity.verify|verify} messages.
+//    * @function encodeDelimited
+//    * @memberof com.opensource.svga.MovieEntity
+//    * @static
+//    * @param {com.opensource.svga.IMovieEntity} message MovieEntity message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encodeDelimited(message: MovieEntity, writer: Writer): Writer {
+//     return MovieEntity.encode(message, writer).ldelim();
+//   }
+// }
 
-export class MovieEntityReader {
+export default class MovieEntity {
   /**
    * Decodes a MovieEntity message from the specified reader or buffer.
    * @function decode
@@ -95,9 +95,7 @@ export class MovieEntityReader {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader | Uint8Array, length?: number): MovieEntity {
-    if (!(reader instanceof Reader)) {
-      reader = Reader.create(reader);
-    }
+    reader = Reader.create(reader);
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = new MovieEntity();
     let key;
@@ -110,7 +108,7 @@ export class MovieEntityReader {
           break;
         }
         case 2: {
-          message.params = MovieParamsReader.decode(reader, reader.uint32());
+          message.params = MovieParams.decode(reader, reader.uint32());
           break;
         }
         case 3: {
@@ -141,7 +139,7 @@ export class MovieEntityReader {
           if (!(message.sprites && message.sprites.length)) {
             message.sprites = [];
           }
-          message.sprites.push(SpriteEntityReader.decode(reader, reader.uint32()));
+          message.sprites.push(SpriteEntity.decode(reader, reader.uint32()));
           break;
         }
         default:
@@ -151,6 +149,7 @@ export class MovieEntityReader {
     }
     return message;
   }
+
   /**
    * Decodes a MovieEntity message from the specified reader or buffer, length delimited.
    * @function decodeDelimited
@@ -161,27 +160,12 @@ export class MovieEntityReader {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decodeDelimited(reader: Reader | Uint8Array): MovieEntity {
-    if (!(reader instanceof Reader)) {
-      reader = new Reader(reader);
-    }
+  // static decodeDelimited(reader: Reader | Uint8Array): MovieEntity {
+  //   reader = Reader.create(reader);
 
-    return this.decode(reader, reader.uint32());
-  }
-}
+  //   return this.decode(reader, reader.uint32());
+  // }
 
-export default class MovieEntity {
-  /**
-   * Creates a new MovieEntity instance using the specified properties.
-   * @function create
-   * @memberof com.opensource.svga.MovieEntity
-   * @static
-   * @param {com.opensource.svga.IMovieEntity=} [properties] Properties to set
-   * @returns {com.opensource.svga.MovieEntity} MovieEntity instance
-   */
-  static create(properties?: MovieEntityProps): MovieEntity {
-    return new MovieEntity(properties);
-  }
   /**
    * Verifies a MovieEntity message.
    * @function verify
@@ -237,6 +221,7 @@ export default class MovieEntity {
 
   //   return null;
   // }
+
   /**
    * Creates a MovieEntity message from a plain object. Also converts values to their respective internal types.
    * @function fromObject
@@ -303,6 +288,7 @@ export default class MovieEntity {
 
   //   return message;
   // }
+
   /**
    * Creates a plain object from a MovieEntity message. Also converts values to other types if specified.
    * @function toObject
@@ -358,6 +344,7 @@ export default class MovieEntity {
 
   //   return object;
   // }
+
   /**
    * Gets the default type url for MovieEntity
    * @function getTypeUrl

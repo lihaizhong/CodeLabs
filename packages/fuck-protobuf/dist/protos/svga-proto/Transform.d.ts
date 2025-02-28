@@ -18,9 +18,7 @@ export interface TransformProps {
     tx: number | null;
     ty: number | null;
 }
-export declare class TransformWriter {
-}
-export declare class TransformReader {
+export default class Transform {
     /**
      * Decodes a Transform message from the specified reader or buffer.
      * @function decode
@@ -43,18 +41,6 @@ export declare class TransformReader {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decodeDelimited(reader: Reader | Uint8Array): Transform;
-}
-export default class Transform {
-    /**
-     * Creates a new Transform instance using the specified properties.
-     * @function create
-     * @memberof com.opensource.svga.Transform
-     * @static
-     * @param {com.opensource.svga.ITransform=} [properties] Properties to set
-     * @returns {com.opensource.svga.Transform} Transform instance
-     */
-    static create(properties: TransformProps): Transform;
     /**
      * Verifies a Transform message.
      * @function verify

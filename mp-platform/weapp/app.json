@@ -2,8 +2,10 @@
   "pages": [
     "pages/index/index",
     "pages/svga/index",
+    "pages/poster/index",
     "pages/webview/index",
-    "pages/svga-analyze/index"
+    "pages/svga-analyze/index",
+    "pages/apng/index"
   ],
   "window": {
     "navigationStyle": "default"

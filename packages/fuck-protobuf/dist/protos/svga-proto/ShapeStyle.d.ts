@@ -27,9 +27,7 @@ export interface ShapeStyleProps {
     lineDashII: number | null;
     lineDashIII: number | null;
 }
-export declare class ShapeStyleWriter {
-}
-export declare class ShapeStyleReader {
+export default class ShapeStyle {
     /**
      * Decodes a ShapeStyle message from the specified reader or buffer.
      * @function decode
@@ -52,18 +50,6 @@ export declare class ShapeStyleReader {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decodeDelimited(reader: Reader | Uint8Array): ShapeStyle;
-}
-export default class ShapeStyle {
-    /**
-     * Creates a new ShapeStyle instance using the specified properties.
-     * @function create
-     * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
-     * @static
-     * @param {com.opensource.svga.ShapeEntity.IShapeStyle=} [properties] Properties to set
-     * @returns {com.opensource.svga.ShapeEntity.ShapeStyle} ShapeStyle instance
-     */
-    static create(properties: ShapeStyleProps): ShapeStyle;
     /**
      * Verifies a ShapeStyle message.
      * @function verify

@@ -3,9 +3,9 @@ import { app, SP } from "./app";
 import benchmark from "../benchmark";
 
 const { USER_DATA_PATH } =
-  app === SP.H5
+  app == SP.H5
     ? {}
-    : app === SP.DOUYIN
+    : app == SP.DOUYIN
     ? // @ts-ignore
       tt.getEnvInfoSync().common
     : br.env;
@@ -65,7 +65,7 @@ export function removeTmpFile(filePath: string): Promise<void> {
         benchmark.log(`remove file: ${filePath}`);
         fs.unlink({
           filePath,
-          success: resolve,
+          success: () => resolve(),
           fail(err: any) {
             benchmark.log(`remove fail: ${filePath}`, err);
             resolve();

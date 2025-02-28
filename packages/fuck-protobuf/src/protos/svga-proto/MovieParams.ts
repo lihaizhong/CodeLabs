@@ -18,55 +18,55 @@ export interface MovieParamsProps {
   frames: number | null;
 }
 
-export class MovieParamsWriter {
-  /**
-   * Encodes the specified MovieParams message. Does not implicitly {@link com.opensource.svga.MovieParams.verify|verify} messages.
-   * @function encode
-   * @memberof com.opensource.svga.MovieParams
-   * @static
-   * @param {com.opensource.svga.IMovieParams} message MovieParams message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encode(message: MovieParams, writer: Writer): Writer {
-  //   if (!writer) {
-  //     writer = Writer.create();
-  //   }
-  //   if (
-  //     message.viewBoxWidth != null &&
-  //     Object.hasOwn(message, "viewBoxWidth")
-  //   ) {
-  //     writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.viewBoxWidth);
-  //   }
-  //   if (
-  //     message.viewBoxHeight != null &&
-  //     Object.hasOwn(message, "viewBoxHeight")
-  //   ) {
-  //     writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.viewBoxHeight);
-  //   }
-  //   if (message.fps != null && Object.hasOwn(message, "fps")) {
-  //     writer.uint32(/* id 3, wireType 0 =*/ 24).int32(message.fps);
-  //   }
-  //   if (message.frames != null && Object.hasOwn(message, "frames")) {
-  //     writer.uint32(/* id 4, wireType 0 =*/ 32).int32(message.frames);
-  //   }
-  //   return writer;
-  // }
-  /**
-   * Encodes the specified MovieParams message, length delimited. Does not implicitly {@link com.opensource.svga.MovieParams.verify|verify} messages.
-   * @function encodeDelimited
-   * @memberof com.opensource.svga.MovieParams
-   * @static
-   * @param {com.opensource.svga.IMovieParams} message MovieParams message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encodeDelimited(message: MovieParams, writer: Writer): Writer {
-  //   return MovieParams.encode(message, writer).ldelim();
-  // }
-}
+// export class MovieParamsWriter {
+//   /**
+//    * Encodes the specified MovieParams message. Does not implicitly {@link com.opensource.svga.MovieParams.verify|verify} messages.
+//    * @function encode
+//    * @memberof com.opensource.svga.MovieParams
+//    * @static
+//    * @param {com.opensource.svga.IMovieParams} message MovieParams message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encode(message: MovieParams, writer: Writer): Writer {
+//     if (!writer) {
+//       writer = Writer.create();
+//     }
+//     if (
+//       message.viewBoxWidth != null &&
+//       Object.hasOwn(message, "viewBoxWidth")
+//     ) {
+//       writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.viewBoxWidth);
+//     }
+//     if (
+//       message.viewBoxHeight != null &&
+//       Object.hasOwn(message, "viewBoxHeight")
+//     ) {
+//       writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.viewBoxHeight);
+//     }
+//     if (message.fps != null && Object.hasOwn(message, "fps")) {
+//       writer.uint32(/* id 3, wireType 0 =*/ 24).int32(message.fps);
+//     }
+//     if (message.frames != null && Object.hasOwn(message, "frames")) {
+//       writer.uint32(/* id 4, wireType 0 =*/ 32).int32(message.frames);
+//     }
+//     return writer;
+//   }
+//   /**
+//    * Encodes the specified MovieParams message, length delimited. Does not implicitly {@link com.opensource.svga.MovieParams.verify|verify} messages.
+//    * @function encodeDelimited
+//    * @memberof com.opensource.svga.MovieParams
+//    * @static
+//    * @param {com.opensource.svga.IMovieParams} message MovieParams message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encodeDelimited(message: MovieParams, writer: Writer): Writer {
+//     return MovieParams.encode(message, writer).ldelim();
+//   }
+// }
 
-export class MovieParamsReader {
+export default class MovieParams {
   /**
    * Decodes a MovieParams message from the specified reader or buffer.
    * @function decode
@@ -79,10 +79,7 @@ export class MovieParamsReader {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader | Uint8Array, length?: number): MovieParams {
-    if (!(reader instanceof Reader)) {
-      reader = Reader.create(reader);
-    }
-
+    reader = Reader.create(reader);
     let end = length === undefined ? reader.len : reader.pos + length;
     let message = new MovieParams();
     while (reader.pos < end) {
@@ -123,27 +120,12 @@ export class MovieParamsReader {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decodeDelimited(reader: Reader | Uint8Array): MovieParams {
-    if (!(reader instanceof Reader)) {
-      reader = new Reader(reader);
-    }
+  // static decodeDelimited(reader: Reader | Uint8Array): MovieParams {
+  //   reader = Reader.create(reader);
 
-    return this.decode(reader, reader.uint32());
-  }
-}
+  //   return this.decode(reader, reader.uint32());
+  // }
 
-export default class MovieParams {
-  /**
-   * Creates a new MovieParams instance using the specified properties.
-   * @function create
-   * @memberof com.opensource.svga.MovieParams
-   * @static
-   * @param {com.opensource.svga.IMovieParams=} [properties] Properties to set
-   * @returns {com.opensource.svga.MovieParams} MovieParams instance
-   */
-  static create(properties?: MovieParamsProps): MovieParams {
-    return new MovieParams(properties);
-  }
   /**
    * Verifies a MovieParams message.
    * @function verify
@@ -185,6 +167,7 @@ export default class MovieParams {
 
   //   return null;
   // }
+
   /**
    * Creates a MovieParams message from a plain object. Also converts values to their respective internal types.
    * @function fromObject
@@ -214,6 +197,7 @@ export default class MovieParams {
 
   //   return message;
   // }
+
   /**
    * Creates a plain object from a MovieParams message. Also converts values to other types if specified.
    * @function toObject
@@ -265,6 +249,7 @@ export default class MovieParams {
 
   //   return object;
   // }
+
   /**
    * Gets the default type url for MovieParams
    * @function getTypeUrl

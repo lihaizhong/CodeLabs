@@ -16,9 +16,7 @@ export interface RectArgsProps {
     height: number | null;
     cornerRadius: number | null;
 }
-export declare class RectArgsWriter {
-}
-export declare class RectArgsReader {
+export default class RectArgs {
     /**
      * Decodes a RectArgs message from the specified reader or buffer.
      * @function decode
@@ -41,18 +39,6 @@ export declare class RectArgsReader {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decodeDelimited(reader: Reader | Uint8Array): RectArgs;
-}
-export default class RectArgs {
-    /**
-     * Creates a new RectArgs instance using the specified properties.
-     * @function create
-     * @memberof com.opensource.svga.ShapeEntity.RectArgs
-     * @static
-     * @param {com.opensource.svga.ShapeEntity.IRectArgs=} [properties] Properties to set
-     * @returns {com.opensource.svga.ShapeEntity.RectArgs} RectArgs instance
-     */
-    static create(properties?: RectArgsProps): RectArgs;
     /**
      * Verifies a RectArgs message.
      * @function verify

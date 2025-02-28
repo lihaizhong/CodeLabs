@@ -14,9 +14,7 @@ export interface LayoutProps {
     width: number | null;
     height: number | null;
 }
-export declare class LayoutWriter {
-}
-export declare class LayoutReader {
+export default class Layout {
     /**
      * Decodes a Layout message from the specified reader or buffer.
      * @function decode
@@ -39,18 +37,6 @@ export declare class LayoutReader {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decodeDelimited(reader: Reader | Uint8Array): Layout;
-}
-export default class Layout {
-    /**
-     * Creates a new Layout instance using the specified properties.
-     * @function create
-     * @memberof com.opensource.svga.Layout
-     * @static
-     * @param {com.opensource.svga.ILayout=} [properties] Properties to set
-     * @returns {com.opensource.svga.Layout} Layout instance
-     */
-    static create(properties?: LayoutProps): Layout;
     /**
      * Verifies a Layout message.
      * @function verify

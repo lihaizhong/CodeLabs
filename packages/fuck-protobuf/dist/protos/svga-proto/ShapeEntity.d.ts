@@ -24,9 +24,7 @@ export interface ShapeEntityProps {
     styles: ShapeStyle | null;
     transform: Transform | null;
 }
-export declare class ShapeEntityWriter {
-}
-export declare class ShapeEntityReader {
+export default class ShapeEntity {
     /**
      * Decodes a ShapeEntity message from the specified reader or buffer.
      * @function decode
@@ -49,18 +47,6 @@ export declare class ShapeEntityReader {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decodeDelimited(reader: Reader | Uint8Array): ShapeEntity;
-}
-export default class ShapeEntity {
-    /**
-     * Creates a new ShapeEntity instance using the specified properties.
-     * @function create
-     * @memberof com.opensource.svga.ShapeEntity
-     * @static
-     * @param {com.opensource.svga.IShapeEntity=} [properties] Properties to set
-     * @returns {com.opensource.svga.ShapeEntity} ShapeEntity instance
-     */
-    static create(properties: ShapeEntityProps): ShapeEntity;
     /**
      * Verifies a ShapeEntity message.
      * @function verify

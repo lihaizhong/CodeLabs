@@ -6,11 +6,15 @@ export default class Reader {
   /**
    * Creates a new reader using the specified buffer.
    * @function
-   * @param {Uint8Array|Buffer} buffer Buffer to read from
+   * @param {Reader|Uint8Array|Buffer} buffer Buffer to read from
    * @returns {Reader|BufferReader} A {@link BufferReader} if `buffer` is a Buffer, otherwise a {@link Reader}
    * @throws {Error} If `buffer` is not a valid buffer
    */
-  static create(buffer: Uint8Array) {
+  static create(buffer: Reader | Uint8Array) {
+    if (buffer instanceof Reader) {
+      return buffer;
+    }
+
     if (buffer instanceof Uint8Array) {
       return new Reader(buffer);
     }
@@ -241,7 +245,7 @@ export default class Reader {
    * @returns {boolean} Value read
    */
   // bool() {
-  //   return this.uint32() !== 0;
+  //   return this.uint32() != 0;
   // }
 
   /**
@@ -334,7 +338,7 @@ export default class Reader {
     }
 
     this.pos += length;
-    if (start === end) {
+    if (start == end) {
       return new Uint8Array(0);
     }
 
@@ -357,7 +361,7 @@ export default class Reader {
    * @returns {Reader} `this`
    */
   skip(length?: number) {
-    if (typeof length === "number") {
+    if (typeof length == "number") {
       /* istanbul ignore if */
       if (this.pos + length > this.len) {
         throw this.indexOutOfRange(this, length);
@@ -391,7 +395,7 @@ export default class Reader {
         this.skip(this.uint32());
         break;
       case 3:
-        while ((wireType = this.uint32() & 7) !== 4) {
+        while ((wireType = this.uint32() & 7) != 4) {
           this.skipType(wireType);
         }
         break;

@@ -21,56 +21,56 @@ export interface RectArgsProps {
   cornerRadius: number | null;
 }
 
-export class RectArgsWriter {
-  /**
-   * Encodes the specified RectArgs message. Does not implicitly {@link com.opensource.svga.ShapeEntity.RectArgs.verify|verify} messages.
-   * @function encode
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
-   * @static
-   * @param {com.opensource.svga.ShapeEntity.IRectArgs} message RectArgs message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encode(message: RectArgs, writer: Writer): Writer {
-  //   if (!writer) {
-  //     writer = Writer.create();
-  //   }
-  //   if (message.x != null && Object.hasOwn(message, "x")) {
-  //     writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.x);
-  //   }
-  //   if (message.y != null && Object.hasOwn(message, "y")) {
-  //     writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.y);
-  //   }
-  //   if (message.width != null && Object.hasOwn(message, "width")) {
-  //     writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.width);
-  //   }
-  //   if (message.height != null && Object.hasOwn(message, "height")) {
-  //     writer.uint32(/* id 4, wireType 5 =*/ 37).float(message.height);
-  //   }
-  //   if (
-  //     message.cornerRadius != null &&
-  //     Object.hasOwn(message, "cornerRadius")
-  //   ) {
-  //     writer.uint32(/* id 5, wireType 5 =*/ 45).float(message.cornerRadius);
-  //   }
+// export class RectArgsWriter {
+//   /**
+//    * Encodes the specified RectArgs message. Does not implicitly {@link com.opensource.svga.ShapeEntity.RectArgs.verify|verify} messages.
+//    * @function encode
+//    * @memberof com.opensource.svga.ShapeEntity.RectArgs
+//    * @static
+//    * @param {com.opensource.svga.ShapeEntity.IRectArgs} message RectArgs message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encode(message: RectArgs, writer: Writer): Writer {
+//     if (!writer) {
+//       writer = Writer.create();
+//     }
+//     if (message.x != null && Object.hasOwn(message, "x")) {
+//       writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.x);
+//     }
+//     if (message.y != null && Object.hasOwn(message, "y")) {
+//       writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.y);
+//     }
+//     if (message.width != null && Object.hasOwn(message, "width")) {
+//       writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.width);
+//     }
+//     if (message.height != null && Object.hasOwn(message, "height")) {
+//       writer.uint32(/* id 4, wireType 5 =*/ 37).float(message.height);
+//     }
+//     if (
+//       message.cornerRadius != null &&
+//       Object.hasOwn(message, "cornerRadius")
+//     ) {
+//       writer.uint32(/* id 5, wireType 5 =*/ 45).float(message.cornerRadius);
+//     }
 
-  //   return writer;
-  // }
-  /**
-   * Encodes the specified RectArgs message, length delimited. Does not implicitly {@link com.opensource.svga.ShapeEntity.RectArgs.verify|verify} messages.
-   * @function encodeDelimited
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
-   * @static
-   * @param {com.opensource.svga.ShapeEntity.IRectArgs} message RectArgs message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encodeDelimited(message: RectArgs, writer: Writer): Writer {
-  //   return RectArgs.encode(message, writer).ldelim();
-  // }
-}
+//     return writer;
+//   }
+//   /**
+//    * Encodes the specified RectArgs message, length delimited. Does not implicitly {@link com.opensource.svga.ShapeEntity.RectArgs.verify|verify} messages.
+//    * @function encodeDelimited
+//    * @memberof com.opensource.svga.ShapeEntity.RectArgs
+//    * @static
+//    * @param {com.opensource.svga.ShapeEntity.IRectArgs} message RectArgs message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encodeDelimited(message: RectArgs, writer: Writer): Writer {
+//     return RectArgs.encode(message, writer).ldelim();
+//   }
+// }
 
-export class RectArgsReader {
+export default class RectArgs {
   /**
    * Decodes a RectArgs message from the specified reader or buffer.
    * @function decode
@@ -83,9 +83,7 @@ export class RectArgsReader {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader | Uint8Array, length?: number): RectArgs {
-    if (!(reader instanceof Reader)) {
-      reader = Reader.create(reader);
-    }
+    reader = Reader.create(reader);
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = new RectArgs();
     while (reader.pos < end) {
@@ -119,6 +117,7 @@ export class RectArgsReader {
 
     return message;
   }
+
   /**
    * Decodes a RectArgs message from the specified reader or buffer, length delimited.
    * @function decodeDelimited
@@ -129,27 +128,12 @@ export class RectArgsReader {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decodeDelimited(reader: Reader | Uint8Array): RectArgs {
-    if (!(reader instanceof Reader)) {
-      reader = new Reader(reader);
-    }
+  // static decodeDelimited(reader: Reader | Uint8Array): RectArgs {
+  //   reader = Reader.create(reader);
 
-    return this.decode(reader, reader.uint32());
-  }
-}
+  //   return this.decode(reader, reader.uint32());
+  // }
 
-export default class RectArgs {
-  /**
-   * Creates a new RectArgs instance using the specified properties.
-   * @function create
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
-   * @static
-   * @param {com.opensource.svga.ShapeEntity.IRectArgs=} [properties] Properties to set
-   * @returns {com.opensource.svga.ShapeEntity.RectArgs} RectArgs instance
-   */
-  static create(properties?: RectArgsProps): RectArgs {
-    return new RectArgs(properties);
-  }
   /**
    * Verifies a RectArgs message.
    * @function verify
@@ -193,6 +177,7 @@ export default class RectArgs {
 
   //   return null;
   // }
+
   /**
    * Creates a RectArgs message from a plain object. Also converts values to their respective internal types.
    * @function fromObject
@@ -224,6 +209,7 @@ export default class RectArgs {
 
   //   return message;
   // }
+
   /**
    * Creates a plain object from a RectArgs message. Also converts values to other types if specified.
    * @function toObject
@@ -280,6 +266,7 @@ export default class RectArgs {
 
   //   return object;
   // }
+
   /**
    * Gets the default type url for RectArgs
    * @function getTypeUrl

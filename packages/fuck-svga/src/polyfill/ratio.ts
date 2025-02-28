@@ -6,7 +6,7 @@ import { br } from "./bridge";
  */
 let dpr: number = 1;
 
-if (app === SP.H5) {
+if (app == SP.H5) {
   dpr = window.devicePixelRatio;
 } else if ("getWindowInfo" in br) {
   dpr = (br as any).getWindowInfo().pixelRatio;

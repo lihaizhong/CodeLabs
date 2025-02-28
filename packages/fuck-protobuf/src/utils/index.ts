@@ -48,7 +48,7 @@ export function writeFixed32(val: number, buf: Uint8Array, pos: number) {
  * @returns {boolean} `true` if the value is an string
  */
 export function isString(val: any) {
-  return typeof val === "string" || val instanceof String;
+  return typeof val == "string" || val instanceof String;
 }
 
 /**
@@ -58,7 +58,7 @@ export function isString(val: any) {
  * @returns {boolean} `true` if the value is an object
  */
 export function isObject(val: any) {
-  return val && typeof val === "object";
+  return val && typeof val == "object";
 }
 
 /**
@@ -69,7 +69,7 @@ export function isObject(val: any) {
  */
 export function isInteger(value: any) {
   return (
-    typeof value === "number" && isFinite(value) && Math.floor(value) === value
+    typeof value == "number" && isFinite(value) && Math.floor(value) == value
   );
 }
 
@@ -87,7 +87,7 @@ export function setProperty(
 ) {
   function setProp(dst: Record<string, any>, path: string[], value: any) {
     var part = path.shift() as string;
-    if (part === "__proto__" || part === "prototype") {
+    if (part == "__proto__" || part == "prototype") {
       return dst;
     }
     if (path.length > 0) {
@@ -100,7 +100,7 @@ export function setProperty(
     return dst;
   }
 
-  if (typeof dst !== "object") throw TypeError("dst must be an object");
+  if (typeof dst != "object") throw TypeError("dst must be an object");
   if (!path) throw TypeError("path must be specified");
 
   return setProp(dst, path.split("."), value);
@@ -118,7 +118,7 @@ export function toObject(array: any[]) {
   while (index < array.length) {
     const key = array[index++];
     const val = array[index++];
-    if (val !== undefined) {
+    if (val != undefined) {
       object[key] = val;
     }
   }
@@ -186,11 +186,9 @@ export function getOneOf(fieldNames: string[]) {
     const keys = Object.keys(this);
     for (let i = keys.length - 1; i > -1; --i) {
       if (
-        fieldMap[keys[i]] === 1 &&
+        fieldMap[keys[i]] == 1 &&
         // @ts-ignore
-        this[keys[i]] !== undefined &&
-        // @ts-ignore
-        this[keys[i]] !== null
+        this[keys[i]] != null
       ) {
         return keys[i];
       }
@@ -212,7 +210,7 @@ export function setOneOf(fieldNames: string[]) {
    */
   return function oneOfSetter(name: string) {
     for (let i = 0; i < fieldNames.length; ++i) {
-      if (fieldNames[i] !== name) {
+      if (fieldNames[i] != name) {
         // @ts-ignore
         delete this[fieldNames[i]];
       }

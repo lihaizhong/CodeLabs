@@ -8,9 +8,7 @@ import Reader from "../../serialization/Reader";
 export interface ShapeArgsProps {
     d: string | null;
 }
-export declare class ShapeArgsWriter {
-}
-export declare class ShapeArgsReader {
+export default class ShapeArgs {
     /**
      * Decodes a ShapeArgs message from the specified reader or buffer.
      * @function decode
@@ -33,18 +31,6 @@ export declare class ShapeArgsReader {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decodeDelimited(reader: Reader | Uint8Array): ShapeArgs;
-}
-export default class ShapeArgs {
-    /**
-     * Creates a new ShapeArgs instance using the specified properties.
-     * @function create
-     * @memberof com.opensource.svga.ShapeEntity.ShapeArgs
-     * @static
-     * @param {com.opensource.svga.ShapeEntity.IShapeArgs=} [properties] Properties to set
-     * @returns {com.opensource.svga.ShapeEntity.ShapeArgs} ShapeArgs instance
-     */
-    static create(properties: ShapeArgsProps): ShapeArgs;
     /**
      * Verifies a ShapeArgs message.
      * @function verify

@@ -2,7 +2,7 @@ import Reader from "../../serialization/Reader";
 // import Writer from "../serialization/Writer";
 import LineCap from "./LineCap";
 import LineJoin from "./LineJoin";
-import RGBAColor, { RGBAColorReader } from "./RGBAColor";
+import RGBAColor from "./RGBAColor";
 // import ShapeEntity from "./ShapeEntity";
 // import { toJSONOptions } from "../utils";
 
@@ -32,71 +32,71 @@ export interface ShapeStyleProps {
   lineDashIII: number | null;
 }
 
-export class ShapeStyleWriter {
-  /**
-   * Encodes the specified ShapeStyle message. Does not implicitly {@link com.opensource.svga.ShapeEntity.ShapeStyle.verify|verify} messages.
-   * @function encode
-   * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
-   * @static
-   * @param {com.opensource.svga.ShapeEntity.IShapeStyle} message ShapeStyle message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encode(message: ShapeStyle, writer: Writer): Writer {
-  //   if (!writer) {
-  //     writer = Writer.create();
-  //   }
-  //   if (message.fill != null && Object.hasOwn(message, "fill")) {
-  //     RGBAColor.encode(
-  //       message.fill,
-  //       writer.uint32(/* id 1, wireType 2 =*/ 10).fork()
-  //     ).ldelim();
-  //   }
-  //   if (message.stroke != null && Object.hasOwn(message, "stroke")) {
-  //     RGBAColor.encode(
-  //       message.stroke,
-  //       writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
-  //     ).ldelim();
-  //   }
-  //   if (message.strokeWidth != null && Object.hasOwn(message, "strokeWidth")) {
-  //     writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.strokeWidth);
-  //   }
-  //   if (message.lineCap != null && Object.hasOwn(message, "lineCap")) {
-  //     writer.uint32(/* id 4, wireType 0 =*/ 32).int32(message.lineCap);
-  //   }
-  //   if (message.lineJoin != null && Object.hasOwn(message, "lineJoin")) {
-  //     writer.uint32(/* id 5, wireType 0 =*/ 40).int32(message.lineJoin);
-  //   }
-  //   if (message.miterLimit != null && Object.hasOwn(message, "miterLimit")) {
-  //     writer.uint32(/* id 6, wireType 5 =*/ 53).float(message.miterLimit);
-  //   }
-  //   if (message.lineDashI != null && Object.hasOwn(message, "lineDashI")) {
-  //     writer.uint32(/* id 7, wireType 5 =*/ 61).float(message.lineDashI);
-  //   }
-  //   if (message.lineDashII != null && Object.hasOwn(message, "lineDashII")) {
-  //     writer.uint32(/* id 8, wireType 5 =*/ 69).float(message.lineDashII);
-  //   }
-  //   if (message.lineDashIII != null && Object.hasOwn(message, "lineDashIII")) {
-  //     writer.uint32(/* id 9, wireType 5 =*/ 77).float(message.lineDashIII);
-  //   }
+// export class ShapeStyleWriter {
+//   /**
+//    * Encodes the specified ShapeStyle message. Does not implicitly {@link com.opensource.svga.ShapeEntity.ShapeStyle.verify|verify} messages.
+//    * @function encode
+//    * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
+//    * @static
+//    * @param {com.opensource.svga.ShapeEntity.IShapeStyle} message ShapeStyle message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encode(message: ShapeStyle, writer: Writer): Writer {
+//     if (!writer) {
+//       writer = Writer.create();
+//     }
+//     if (message.fill != null && Object.hasOwn(message, "fill")) {
+//       RGBAColor.encode(
+//         message.fill,
+//         writer.uint32(/* id 1, wireType 2 =*/ 10).fork()
+//       ).ldelim();
+//     }
+//     if (message.stroke != null && Object.hasOwn(message, "stroke")) {
+//       RGBAColor.encode(
+//         message.stroke,
+//         writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
+//       ).ldelim();
+//     }
+//     if (message.strokeWidth != null && Object.hasOwn(message, "strokeWidth")) {
+//       writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.strokeWidth);
+//     }
+//     if (message.lineCap != null && Object.hasOwn(message, "lineCap")) {
+//       writer.uint32(/* id 4, wireType 0 =*/ 32).int32(message.lineCap);
+//     }
+//     if (message.lineJoin != null && Object.hasOwn(message, "lineJoin")) {
+//       writer.uint32(/* id 5, wireType 0 =*/ 40).int32(message.lineJoin);
+//     }
+//     if (message.miterLimit != null && Object.hasOwn(message, "miterLimit")) {
+//       writer.uint32(/* id 6, wireType 5 =*/ 53).float(message.miterLimit);
+//     }
+//     if (message.lineDashI != null && Object.hasOwn(message, "lineDashI")) {
+//       writer.uint32(/* id 7, wireType 5 =*/ 61).float(message.lineDashI);
+//     }
+//     if (message.lineDashII != null && Object.hasOwn(message, "lineDashII")) {
+//       writer.uint32(/* id 8, wireType 5 =*/ 69).float(message.lineDashII);
+//     }
+//     if (message.lineDashIII != null && Object.hasOwn(message, "lineDashIII")) {
+//       writer.uint32(/* id 9, wireType 5 =*/ 77).float(message.lineDashIII);
+//     }
 
-  //   return writer;
-  // }
-  /**
-   * Encodes the specified ShapeStyle message, length delimited. Does not implicitly {@link com.opensource.svga.ShapeEntity.ShapeStyle.verify|verify} messages.
-   * @function encodeDelimited
-   * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
-   * @static
-   * @param {com.opensource.svga.ShapeEntity.IShapeStyle} message ShapeStyle message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encodeDelimited(message: ShapeStyle, writer: Writer): Writer {
-  //   return ShapeStyle.encode(message, writer).ldelim();
-  // }
-}
+//     return writer;
+//   }
+//   /**
+//    * Encodes the specified ShapeStyle message, length delimited. Does not implicitly {@link com.opensource.svga.ShapeEntity.ShapeStyle.verify|verify} messages.
+//    * @function encodeDelimited
+//    * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
+//    * @static
+//    * @param {com.opensource.svga.ShapeEntity.IShapeStyle} message ShapeStyle message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encodeDelimited(message: ShapeStyle, writer: Writer): Writer {
+//     return ShapeStyle.encode(message, writer).ldelim();
+//   }
+// }
 
-export class ShapeStyleReader {
+export default class ShapeStyle {
   /**
    * Decodes a ShapeStyle message from the specified reader or buffer.
    * @function decode
@@ -109,23 +109,21 @@ export class ShapeStyleReader {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader | Uint8Array, length?: number): ShapeStyle {
-    if (!(reader instanceof Reader)) {
-      reader = Reader.create(reader);
-    }
+    reader = Reader.create(reader);
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = new ShapeStyle();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
-          message.fill = RGBAColorReader.decode(
+          message.fill = RGBAColor.decode(
             reader,
             reader.uint32()
           );
           break;
         }
         case 2: {
-          message.stroke = RGBAColorReader.decode(
+          message.stroke = RGBAColor.decode(
             reader,
             reader.uint32()
           );
@@ -167,6 +165,7 @@ export class ShapeStyleReader {
 
     return message;
   }
+
   /**
    * Decodes a ShapeStyle message from the specified reader or buffer, length delimited.
    * @function decodeDelimited
@@ -177,27 +176,12 @@ export class ShapeStyleReader {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decodeDelimited(reader: Reader | Uint8Array): ShapeStyle {
-    if (!(reader instanceof Reader)) {
-      reader = new Reader(reader);
-    }
+  // static decodeDelimited(reader: Reader | Uint8Array): ShapeStyle {
+  //   reader = Reader.create(reader);
 
-    return this.decode(reader, reader.uint32());
-  }
-}
+  //   return this.decode(reader, reader.uint32());
+  // }
 
-export default class ShapeStyle {
-  /**
-   * Creates a new ShapeStyle instance using the specified properties.
-   * @function create
-   * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
-   * @static
-   * @param {com.opensource.svga.ShapeEntity.IShapeStyle=} [properties] Properties to set
-   * @returns {com.opensource.svga.ShapeEntity.ShapeStyle} ShapeStyle instance
-   */
-  static create(properties: ShapeStyleProps) {
-    return new ShapeStyle(properties);
-  }
   /**
    * Verifies a ShapeStyle message.
    * @function verify
@@ -268,6 +252,7 @@ export default class ShapeStyle {
 
   //   return null;
   // }
+
   /**
    * Creates a ShapeStyle message from a plain object. Also converts values to their respective internal types.
    * @function fromObject
@@ -357,6 +342,7 @@ export default class ShapeStyle {
 
   //   return message;
   // }
+
   /**
    * Creates a plain object from a ShapeStyle message. Also converts values to other types if specified.
    * @function toObject
@@ -446,6 +432,7 @@ export default class ShapeStyle {
 
   //   return object;
   // }
+
   /**
    * Gets the default type url for ShapeStyle
    * @function getTypeUrl

@@ -14,20 +14,20 @@ async function genImageSource(
   filename: string,
   prefix?: string
 ): Promise<string> {
-  if (typeof data === "string") {
+  if (typeof data == "string") {
     return data;
   }
 
   // FIXME: 支付宝小程序IDE保存临时文件会失败
-  if (app === SP.H5 || (app === SP.ALIPAY && br.isIDE)) {
+  if (app == SP.H5 || (app == SP.ALIPAY && br.isIDE)) {
     return toBase64(data);
   }
 
   try {
     // FIXME: IOS设备Uint8Array转base64时间较长，使用图片缓存形式速度会更快
     return await writeTmpFile(toBuffer(data), genFilePath(filename, prefix));
-  } catch (ex) {
-    console.error(ex);
+  } catch (ex: any) {
+    console.warn(`图片缓存失败：${ex.message}`)
     return toBase64(data);
   }
 }
@@ -46,7 +46,7 @@ export function loadImage(
   filename: string,
   prefix?: string
 ): Promise<PlatformImage | ImageBitmap> {
-  if (app === SP.H5) {
+  if (app == SP.H5) {
     // 由于ImageBitmap在图片渲染上有优势，故优先使用
     if (data instanceof Uint8Array && "createImageBitmap" in window) {
       return toBitmap(data);
@@ -62,7 +62,7 @@ export function loadImage(
 
     img.onload = () => {
       // 如果 data 是 URL/base64 或者 img.src 是 base64
-      if (img.src.startsWith("data:") || typeof data === "string") {
+      if (img.src.startsWith("data:") || typeof data == "string") {
         resolve(img);
       } else {
         removeTmpFile(img.src).then(() => resolve(img));

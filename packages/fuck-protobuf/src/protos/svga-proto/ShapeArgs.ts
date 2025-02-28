@@ -13,41 +13,41 @@ export interface ShapeArgsProps {
   d: string | null;
 }
 
-export class ShapeArgsWriter {
-  /**
-   * Encodes the specified ShapeArgs message. Does not implicitly {@link com.opensource.svga.ShapeEntity.ShapeArgs.verify|verify} messages.
-   * @function encode
-   * @memberof com.opensource.svga.ShapeEntity.ShapeArgs
-   * @static
-   * @param {com.opensource.svga.ShapeEntity.IShapeArgs} message ShapeArgs message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encode(message: ShapeArgs, writer: Writer): Writer {
-  //   if (!writer) {
-  //     writer = Writer.create();
-  //   }
-  //   if (message.d != null && Object.hasOwn(message, "d")) {
-  //     writer.uint32(/* id 1, wireType 2 =*/ 10).string(message.d);
-  //   }
+// export class ShapeArgsWriter {
+//   /**
+//    * Encodes the specified ShapeArgs message. Does not implicitly {@link com.opensource.svga.ShapeEntity.ShapeArgs.verify|verify} messages.
+//    * @function encode
+//    * @memberof com.opensource.svga.ShapeEntity.ShapeArgs
+//    * @static
+//    * @param {com.opensource.svga.ShapeEntity.IShapeArgs} message ShapeArgs message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encode(message: ShapeArgs, writer: Writer): Writer {
+//     if (!writer) {
+//       writer = Writer.create();
+//     }
+//     if (message.d != null && Object.hasOwn(message, "d")) {
+//       writer.uint32(/* id 1, wireType 2 =*/ 10).string(message.d);
+//     }
 
-  //   return writer;
-  // }
-  /**
-   * Encodes the specified ShapeArgs message, length delimited. Does not implicitly {@link com.opensource.svga.ShapeEntity.ShapeArgs.verify|verify} messages.
-   * @function encodeDelimited
-   * @memberof com.opensource.svga.ShapeEntity.ShapeArgs
-   * @static
-   * @param {com.opensource.svga.ShapeEntity.IShapeArgs} message ShapeArgs message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encodeDelimited(message: ShapeArgs, writer: Writer): Writer {
-  //   return ShapeArgs.encode(message, writer).ldelim();
-  // }
-}
+//     return writer;
+//   }
+//   /**
+//    * Encodes the specified ShapeArgs message, length delimited. Does not implicitly {@link com.opensource.svga.ShapeEntity.ShapeArgs.verify|verify} messages.
+//    * @function encodeDelimited
+//    * @memberof com.opensource.svga.ShapeEntity.ShapeArgs
+//    * @static
+//    * @param {com.opensource.svga.ShapeEntity.IShapeArgs} message ShapeArgs message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encodeDelimited(message: ShapeArgs, writer: Writer): Writer {
+//     return ShapeArgs.encode(message, writer).ldelim();
+//   }
+// }
 
-export class ShapeArgsReader {
+export default class ShapeArgs {
   /**
    * Decodes a ShapeArgs message from the specified reader or buffer.
    * @function decode
@@ -60,9 +60,7 @@ export class ShapeArgsReader {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader | Uint8Array, length?: number): ShapeArgs {
-    if (!(reader instanceof Reader)) {
-      reader = Reader.create(reader);
-    }
+    reader = Reader.create(reader);
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = new ShapeArgs();
     while (reader.pos < end) {
@@ -80,6 +78,7 @@ export class ShapeArgsReader {
 
     return message;
   }
+
   /**
    * Decodes a ShapeArgs message from the specified reader or buffer, length delimited.
    * @function decodeDelimited
@@ -90,27 +89,12 @@ export class ShapeArgsReader {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decodeDelimited(reader: Reader | Uint8Array): ShapeArgs {
-    if (!(reader instanceof Reader)) {
-      reader = new Reader(reader);
-    }
+  // static decodeDelimited(reader: Reader | Uint8Array): ShapeArgs {
+  //   reader = Reader.create(reader);
 
-    return this.decode(reader, reader.uint32());
-  }
-}
+  //   return this.decode(reader, reader.uint32());
+  // }
 
-export default class ShapeArgs {
-  /**
-   * Creates a new ShapeArgs instance using the specified properties.
-   * @function create
-   * @memberof com.opensource.svga.ShapeEntity.ShapeArgs
-   * @static
-   * @param {com.opensource.svga.ShapeEntity.IShapeArgs=} [properties] Properties to set
-   * @returns {com.opensource.svga.ShapeEntity.ShapeArgs} ShapeArgs instance
-   */
-  static create(properties: ShapeArgsProps): ShapeArgs {
-    return new ShapeArgs(properties);
-  }
   /**
    * Verifies a ShapeArgs message.
    * @function verify
@@ -131,6 +115,7 @@ export default class ShapeArgs {
 
   //   return null;
   // }
+
   /**
    * Creates a ShapeArgs message from a plain object. Also converts values to their respective internal types.
    * @function fromObject
@@ -150,6 +135,7 @@ export default class ShapeArgs {
 
   //   return message;
   // }
+
   /**
    * Creates a plain object from a ShapeArgs message. Also converts values to other types if specified.
    * @function toObject
@@ -176,6 +162,7 @@ export default class ShapeArgs {
 
   //   return object;
   // }
+
   /**
    * Gets the default type url for ShapeArgs
    * @function getTypeUrl

@@ -1,5 +1,7 @@
 import { Bitmap, PlatformImage, RawImages, Video } from "../types";
+type TBrushMode = 'simple' | 'normal';
 export declare class Brush {
+    private readonly mode;
     /**
      * 主屏的 Canvas 元素
      * Main Screen
@@ -31,12 +33,13 @@ export declare class Brush {
     /**
      * 粉刷模式
      */
-    private mode;
+    private model;
     /**
      * 素材
      */
     materials: Map<string, Bitmap>;
-    private setMode;
+    constructor(mode?: TBrushMode);
+    private setModel;
     /**
      * 注册画笔，根据环境判断生成最优的绘制方式
      * @param selector
@@ -63,6 +66,13 @@ export declare class Brush {
      */
     createImage(): PlatformImage;
     /**
+     * 生成图片
+     * @param type
+     * @param encoderOptions
+     * @returns
+     */
+    getImage(type?: string, encoderOptions?: number): string;
+    /**
      * 注册刷新屏幕的回调函数
      * @param cb
      */
@@ -83,3 +93,4 @@ export declare class Brush {
      */
     destroy(): void;
 }
+export {};

@@ -2,11 +2,11 @@ export default class Reader {
     /**
      * Creates a new reader using the specified buffer.
      * @function
-     * @param {Uint8Array|Buffer} buffer Buffer to read from
+     * @param {Reader|Uint8Array|Buffer} buffer Buffer to read from
      * @returns {Reader|BufferReader} A {@link BufferReader} if `buffer` is a Buffer, otherwise a {@link Reader}
      * @throws {Error} If `buffer` is not a valid buffer
      */
-    static create(buffer: Uint8Array): Reader;
+    static create(buffer: Reader | Uint8Array): Reader;
     /**
      * Read buffer.
      * @type {Uint8Array}

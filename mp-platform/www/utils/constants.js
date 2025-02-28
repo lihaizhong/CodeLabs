@@ -54,7 +54,7 @@ export const svgaSources = [
   "https://assets.2dfire.com/frontend/e5ed31cec6b576cd67df0271b69320aa.svga",
   "https://assets.2dfire.com/frontend/ad6d6a788bb88520f908bb0fe04a75ca.svga",
   "https://assets.2dfire.com/frontend/45eadf03bee2013daa407fd4b91e29f5.svga",
-];
+].map((url) => url.replace('https://assets.2dfire.com/frontend', `${location.origin}/public/svga`));
 
 export function getOneAtRandom() {
   const ranIndex = Math.floor(Math.random() * svgaSources.length)

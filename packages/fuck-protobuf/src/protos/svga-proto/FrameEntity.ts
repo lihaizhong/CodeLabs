@@ -1,8 +1,8 @@
 import Reader from "../../serialization/Reader";
 // import Writer from "../serialization/Writer";
-import Layout, { LayoutReader } from "./Layout";
-import Transform, { TransformReader } from "./Transform";
-import ShapeEntity, { ShapeEntityReader } from "./ShapeEntity";
+import Layout from "./Layout";
+import Transform from "./Transform";
+import ShapeEntity from "./ShapeEntity";
 // import { isString, toJSONOptions } from "../utils";
 
 /**
@@ -23,63 +23,63 @@ export interface FrameEntityProps {
   shapes: ShapeEntity[] | null;
 }
 
-export class FrameEntityWriter {
-  /**
-   * Encodes the specified FrameEntity message. Does not implicitly {@link com.opensource.svga.FrameEntity.verify|verify} messages.
-   * @function encode
-   * @memberof com.opensource.svga.FrameEntity
-   * @static
-   * @param {com.opensource.svga.IFrameEntity} message FrameEntity message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encode(message: FrameEntity, writer: Writer): Writer {
-  //   if (!writer) {
-  //     writer = Writer.create();
-  //   }
-  //   if (message.alpha != null && Object.hasOwn(message, "alpha")) {
-  //     writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.alpha);
-  //   }
-  //   if (message.layout != null && Object.hasOwn(message, "layout")) {
-  //     Layout.encode(
-  //       message.layout,
-  //       writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
-  //     ).ldelim();
-  //   }
-  //   if (message.transform != null && Object.hasOwn(message, "transform")) {
-  //     Transform.encode(
-  //       message.transform,
-  //       writer.uint32(/* id 3, wireType 2 =*/ 26).fork()
-  //     ).ldelim();
-  //   }
-  //   if (message.clipPath != null && Object.hasOwn(message, "clipPath")) {
-  //     writer.uint32(/* id 4, wireType 2 =*/ 34).string(message.clipPath);
-  //   }
-  //   if (message.shapes != null && message.shapes.length) {
-  //     for (let i = 0; i < message.shapes.length; ++i) {
-  //       ShapeEntity.encode(
-  //         message.shapes[i],
-  //         writer.uint32(/* id 5, wireType 2 =*/ 42).fork()
-  //       ).ldelim();
-  //     }
-  //   }
-  //   return writer;
-  // }
-  /**
-   * Encodes the specified FrameEntity message, length delimited. Does not implicitly {@link com.opensource.svga.FrameEntity.verify|verify} messages.
-   * @function encodeDelimited
-   * @memberof com.opensource.svga.FrameEntity
-   * @static
-   * @param {com.opensource.svga.IFrameEntity} message FrameEntity message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encodeDelimited(message: FrameEntity, writer: Writer): Writer {
-  //   return FrameEntity.encode(message, writer).ldelim();
-  // }
-}
+// export class FrameEntityWriter {
+//   /**
+//    * Encodes the specified FrameEntity message. Does not implicitly {@link com.opensource.svga.FrameEntity.verify|verify} messages.
+//    * @function encode
+//    * @memberof com.opensource.svga.FrameEntity
+//    * @static
+//    * @param {com.opensource.svga.IFrameEntity} message FrameEntity message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encode(message: FrameEntity, writer: Writer): Writer {
+//     if (!writer) {
+//       writer = Writer.create();
+//     }
+//     if (message.alpha != null && Object.hasOwn(message, "alpha")) {
+//       writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.alpha);
+//     }
+//     if (message.layout != null && Object.hasOwn(message, "layout")) {
+//       Layout.encode(
+//         message.layout,
+//         writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
+//       ).ldelim();
+//     }
+//     if (message.transform != null && Object.hasOwn(message, "transform")) {
+//       Transform.encode(
+//         message.transform,
+//         writer.uint32(/* id 3, wireType 2 =*/ 26).fork()
+//       ).ldelim();
+//     }
+//     if (message.clipPath != null && Object.hasOwn(message, "clipPath")) {
+//       writer.uint32(/* id 4, wireType 2 =*/ 34).string(message.clipPath);
+//     }
+//     if (message.shapes != null && message.shapes.length) {
+//       for (let i = 0; i < message.shapes.length; ++i) {
+//         ShapeEntity.encode(
+//           message.shapes[i],
+//           writer.uint32(/* id 5, wireType 2 =*/ 42).fork()
+//         ).ldelim();
+//       }
+//     }
+//     return writer;
+//   }
+//   /**
+//    * Encodes the specified FrameEntity message, length delimited. Does not implicitly {@link com.opensource.svga.FrameEntity.verify|verify} messages.
+//    * @function encodeDelimited
+//    * @memberof com.opensource.svga.FrameEntity
+//    * @static
+//    * @param {com.opensource.svga.IFrameEntity} message FrameEntity message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encodeDelimited(message: FrameEntity, writer: Writer): Writer {
+//     return FrameEntity.encode(message, writer).ldelim();
+//   }
+// }
 
-export class FrameEntityReader {
+export default class FrameEntity {
   /**
    * Decodes a FrameEntity message from the specified reader or buffer.
    * @function decode
@@ -92,9 +92,7 @@ export class FrameEntityReader {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader | Uint8Array, length?: number): FrameEntity {
-    if (!(reader instanceof Reader)) {
-      reader = Reader.create(reader);
-    }
+    reader = Reader.create(reader);
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = new FrameEntity();
     while (reader.pos < end) {
@@ -105,11 +103,11 @@ export class FrameEntityReader {
           break;
         }
         case 2: {
-          message.layout = LayoutReader.decode(reader, reader.uint32());
+          message.layout = Layout.decode(reader, reader.uint32());
           break;
         }
         case 3: {
-          message.transform = TransformReader.decode(reader, reader.uint32());
+          message.transform = Transform.decode(reader, reader.uint32());
           break;
         }
         case 4: {
@@ -120,7 +118,7 @@ export class FrameEntityReader {
           if (!(message.shapes && message.shapes.length)) {
             message.shapes = [];
           }
-          message.shapes.push(ShapeEntityReader.decode(reader, reader.uint32()));
+          message.shapes.push(ShapeEntity.decode(reader, reader.uint32()));
           break;
         }
         default:
@@ -131,6 +129,7 @@ export class FrameEntityReader {
 
     return message;
   }
+
   /**
    * Decodes a FrameEntity message from the specified reader or buffer, length delimited.
    * @function decodeDelimited
@@ -141,27 +140,12 @@ export class FrameEntityReader {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decodeDelimited(reader: Reader | Uint8Array): FrameEntity {
-    if (!(reader instanceof Reader)) {
-      reader = new Reader(reader);
-    }
+  // static decodeDelimited(reader: Reader | Uint8Array): FrameEntity {
+  //   reader = Reader.create(reader);
 
-    return this.decode(reader, reader.uint32());
-  }
-}
+  //   return this.decode(reader, reader.uint32());
+  // }
 
-export default class FrameEntity {
-  /**
-   * Creates a new FrameEntity instance using the specified properties.
-   * @function create
-   * @memberof com.opensource.svga.FrameEntity
-   * @static
-   * @param {com.opensource.svga.IFrameEntity=} [properties] Properties to set
-   * @returns {com.opensource.svga.FrameEntity} FrameEntity instance
-   */
-  static create(properties?: FrameEntityProps): FrameEntity {
-    return new FrameEntity(properties);
-  }
   /**
    * Verifies a FrameEntity message.
    * @function verify
@@ -210,6 +194,7 @@ export default class FrameEntity {
 
   //   return null;
   // }
+
   /**
    * Creates a FrameEntity message from a plain object. Also converts values to their respective internal types.
    * @function fromObject
@@ -264,6 +249,7 @@ export default class FrameEntity {
 
   //   return message;
   // }
+
   /**
    * Creates a plain object from a FrameEntity message. Also converts values to other types if specified.
    * @function toObject
@@ -314,6 +300,7 @@ export default class FrameEntity {
 
   //   return object;
   // }
+
   /**
    * Gets the default type url for FrameEntity
    * @function getTypeUrl

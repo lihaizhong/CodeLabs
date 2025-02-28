@@ -19,7 +19,7 @@ import {
 } from "../types";
 import render from "./render";
 
-interface IBrushMode {
+interface IBrushModel {
   // canvas or offscreen
   type: "C" | "O";
   // clear or resize or create
@@ -27,6 +27,8 @@ interface IBrushMode {
   // put or draw
   render: "PU" | "DR";
 }
+
+type TBrushMode = 'simple' | 'normal'
 
 export class Brush {
   /**
@@ -63,47 +65,49 @@ export class Brush {
   /**
    * 粉刷模式
    */
-  private mode: IBrushMode = {} as IBrushMode;
+  private model: IBrushModel = {} as IBrushModel;
   /**
    * 素材
    */
   public materials: Map<string, Bitmap> = new Map();
 
-  private setMode(type: "C" | "O"): void {
-    const { mode } = this;
+  constructor(private readonly mode: TBrushMode = 'normal') {}
+
+  private setModel(type: "C" | "O"): void {
+    const { model } = this;
 
     // set type
-    mode.type = type;
+    model.type = type;
 
     // set clear
     if (
-      type === "O" &&
+      type == "O" &&
       // OffscreenCanvas 在 Firefox 浏览器无法被清理历史内容
-      app === SP.H5 &&
+      app == SP.H5 &&
       navigator.userAgent.includes("Firefox")
     ) {
-      mode.clear = "CR";
-    } else if ((type === "O" && app === SP.DOUYIN) || app === SP.ALIPAY) {
-      mode.clear = "CL";
+      model.clear = "CR";
+    } else if ((type == "O" && app == SP.DOUYIN) || app == SP.ALIPAY) {
+      model.clear = "CL";
     } else {
-      mode.clear = "RE";
+      model.clear = "RE";
     }
 
     // set render
     if (
-      (type === "C" &&
-        (app === SP.DOUYIN || (platform === "IOS" && app === SP.ALIPAY))) ||
-      (type === "O" && app === SP.WECHAT)
+      (type == "C" &&
+        (app == SP.DOUYIN || (platform == "IOS" && app == SP.ALIPAY))) ||
+      (type == "O" && app == SP.WECHAT)
     ) {
-      mode.render = "PU";
+      model.render = "PU";
     } else {
-      mode.render = "DR";
+      model.render = "DR";
     }
 
     benchmark.line(4);
-    benchmark.log("brush type", mode.type);
-    benchmark.log("brush clear", mode.clear);
-    benchmark.log("brush render", mode.render);
+    benchmark.log("brush type", model.type);
+    benchmark.log("brush clear", model.clear);
+    benchmark.log("brush render", model.render);
     benchmark.line(4);
   }
 
@@ -118,6 +122,7 @@ export class Brush {
     ofsSelector?: string,
     component?: WechatMiniprogram.Component.TrivialInstance | null
   ) {
+    const { model, mode } = this;
     // #region set main screen implement
     // -------- 创建主屏 ---------
     const { canvas, ctx } = await getCanvas(selector, component);
@@ -131,25 +136,32 @@ export class Brush {
 
     // #region set secondary screen implement
     // ------- 创建副屏 ---------
-    let ofsResult;
-    if (typeof ofsSelector === "string" && ofsSelector !== "") {
-      ofsResult = await getCanvas(ofsSelector, component);
-      ofsResult.canvas.width = width;
-      ofsResult.canvas.height = height;
-      this.setMode("C");
+    if (mode == 'simple') {
+      this.Y = this.X;
+      this.YC = this.XC;
+      this.setModel('C');
     } else {
-      ofsResult = getOffscreenCanvas({ width, height });
-      this.setMode("O");
+      let ofsResult;
+
+      if (typeof ofsSelector == "string" && ofsSelector != "") {
+        ofsResult = await getCanvas(ofsSelector, component);
+        ofsResult.canvas.width = width;
+        ofsResult.canvas.height = height;
+        this.setModel("C");
+      } else {
+        ofsResult = getOffscreenCanvas({ width, height });
+        this.setModel("O");
+      }
+
+      this.Y = ofsResult.canvas;
+      this.YC = ofsResult.ctx;
     }
-    this.Y = ofsResult.canvas;
-    this.YC = ofsResult.ctx;
     // #endregion set secondary screen implement
 
-    const { mode } = this;
     // #region clear main screen implement
     // ------- 生成主屏清理函数 -------
     // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
-    if (mode.clear === "CL") {
+    if (model.clear == "CL") {
       this.clearFront = () => {
         const { W, H } = this;
         this.XC!.clearRect(0, 0, W, H);
@@ -163,55 +175,60 @@ export class Brush {
     }
     // #endregion clear main screen implement
 
-    // #region clear secondary screen implement
-    // ------- 生成副屏清理函数 --------
-    switch (mode.clear) {
-      case "CR":
-        this.clearBack = () => {
-          const { W, H } = this;
-          // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
-          const { canvas, ctx } = getOffscreenCanvas({ width: W, height: H });
-          this.Y = canvas;
-          this.YC = ctx;
-        };
-        break;
-      case "CL":
-        this.clearBack = () => {
-          const { W, H } = this;
-          // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
-          this.YC!.clearRect(0, 0, W, H);
-        };
-        break;
-      default:
-        this.clearBack = () => {
-          const { W, H, Y } = this;
-          Y!.width = W;
-          Y!.height = H;
-        };
-    }
-    // #endregion clear secondary screen implement
 
-    // #region stick implement
-    // -------- 生成渲染函数 ---------
-    switch (mode.render) {
-      case "DR":
-        this.stick = () => {
-          const { W, H } = this;
-          // FIXME:【微信小程序】 drawImage 无法绘制 OffscreenCanvas；【抖音小程序】 drawImage 无法绘制 Canvas
-          this.XC!.drawImage(this.Y as CanvasImageSource, 0, 0, W, H);
-        };
-        break;
-      case "PU":
-        this.stick = () => {
-          const { W, H } = this;
-          // FIXME:【所有小程序】 imageData 获取到的数据都是 0，可以当场使用，但不要妄图缓存它
-          const imageData = this.YC!.getImageData(0, 0, W, H);
-          this.XC!.putImageData(imageData, 0, 0, 0, 0, W, H);
-        };
-        break;
-      default:
+    if (mode == 'simple') {
+      this.clearBack = this.stick = noop
+    } else {
+      // #region clear secondary screen implement
+      // ------- 生成副屏清理函数 --------
+      switch (model.clear) {
+        case "CR":
+          this.clearBack = () => {
+            const { W, H } = this;
+            // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
+            const { canvas, ctx } = getOffscreenCanvas({ width: W, height: H });
+            this.Y = canvas;
+            this.YC = ctx;
+          };
+          break;
+        case "CL":
+          this.clearBack = () => {
+            const { W, H } = this;
+            // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
+            this.YC!.clearRect(0, 0, W, H);
+          };
+          break;
+        default:
+          this.clearBack = () => {
+            const { W, H, Y } = this;
+            Y!.width = W;
+            Y!.height = H;
+          };
+      }
+      // #endregion clear secondary screen implement
+
+      // #region stick implement
+      // -------- 生成渲染函数 ---------
+      switch (model.render) {
+        case "DR":
+          this.stick = () => {
+            const { W, H } = this;
+            // FIXME:【微信小程序】 drawImage 无法绘制 OffscreenCanvas；【抖音小程序】 drawImage 无法绘制 Canvas
+            this.XC!.drawImage(this.Y as CanvasImageSource, 0, 0, W, H);
+          };
+          break;
+        case "PU":
+          this.stick = () => {
+            const { W, H } = this;
+            // FIXME:【所有小程序】 imageData 获取到的数据都是 0，可以当场使用，但不要妄图缓存它
+            const imageData = this.YC!.getImageData(0, 0, W, H);
+            this.XC!.putImageData(imageData, 0, 0, 0, 0, W, H);
+          };
+          break;
+        default:
+      }
+      // #endregion stick implement
     }
-    // #endregion stick implement
   }
 
   /**
@@ -255,7 +272,7 @@ export class Brush {
    * @returns 
    */
   public createImage(): PlatformImage {
-    if (app === SP.H5) {
+    if (app == SP.H5) {
       return new Image();
     }
 
@@ -263,11 +280,21 @@ export class Brush {
   }
 
   /**
+   * 生成图片
+   * @param type 
+   * @param encoderOptions 
+   * @returns 
+   */
+  public getImage(type: string = 'image/png', encoderOptions: number = 0.92) {
+    return this.X!.toDataURL(type, encoderOptions);
+  }
+
+  /**
    * 注册刷新屏幕的回调函数
    * @param cb 
    */
   public flush(cb: () => void): void {
-    (app === SP.H5 ? br : this.X).requestAnimationFrame(cb);
+    (app == SP.H5 ? br : this.X).requestAnimationFrame(cb);
   }
 
   public clearFront: () => void = noop;
@@ -300,5 +327,6 @@ export class Brush {
     this.clearBack();
     this.materials.clear();
     this.X = this.XC = this.Y = this.YC = null;
+    this.clearFront = this.clearBack = this.stick = noop;
   }
 }

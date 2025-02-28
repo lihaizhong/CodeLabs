@@ -6,6 +6,10 @@ Page({
         path: "/pages/svga/index",
       },
       {
+        text: "跳转海报",
+        path: "/pages/poster/index",
+      },
+      {
         text: "跳转Webview",
         path: "/pages/webview/index",
       },
@@ -13,6 +17,10 @@ Page({
         text: "跳转SVGA分析",
         path: "/pages/svga-analyze/index",
       },
+      {
+        text: "跳转APNG动画",
+        path: "/pages/apng/index"
+      }
     ],
   },
   handleNavigateTo(e) {

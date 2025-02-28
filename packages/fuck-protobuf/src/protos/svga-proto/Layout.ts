@@ -18,50 +18,51 @@ export interface LayoutProps {
   height: number | null;
 }
 
-export class LayoutWriter {
-  /**
-   * Encodes the specified Layout message. Does not implicitly {@link com.opensource.svga.Layout.verify|verify} messages.
-   * @function encode
-   * @memberof com.opensource.svga.Layout
-   * @static
-   * @param {com.opensource.svga.ILayout} message Layout message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encode(message: Layout, writer: Writer): Writer {
-  //   if (!writer) {
-  //     writer = Writer.create();
-  //   }
-  //   if (message.x != null && Object.hasOwn(message, "x")) {
-  //     writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.x);
-  //   }
-  //   if (message.y != null && Object.hasOwn(message, "y")) {
-  //     writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.y);
-  //   }
-  //   if (message.width != null && Object.hasOwn(message, "width")) {
-  //     writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.width);
-  //   }
-  //   if (message.height != null && Object.hasOwn(message, "height")) {
-  //     writer.uint32(/* id 4, wireType 5 =*/ 37).float(message.height);
-  //   }
+// export class LayoutWriter {
+//   /**
+//    * Encodes the specified Layout message. Does not implicitly {@link com.opensource.svga.Layout.verify|verify} messages.
+//    * @function encode
+//    * @memberof com.opensource.svga.Layout
+//    * @static
+//    * @param {com.opensource.svga.ILayout} message Layout message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encode(message: Layout, writer: Writer): Writer {
+//     if (!writer) {
+//       writer = Writer.create();
+//     }
+//     if (message.x != null && Object.hasOwn(message, "x")) {
+//       writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.x);
+//     }
+//     if (message.y != null && Object.hasOwn(message, "y")) {
+//       writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.y);
+//     }
+//     if (message.width != null && Object.hasOwn(message, "width")) {
+//       writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.width);
+//     }
+//     if (message.height != null && Object.hasOwn(message, "height")) {
+//       writer.uint32(/* id 4, wireType 5 =*/ 37).float(message.height);
+//     }
 
-  //   return writer;
-  // }
-  /**
-   * Encodes the specified Layout message, length delimited. Does not implicitly {@link com.opensource.svga.Layout.verify|verify} messages.
-   * @function encodeDelimited
-   * @memberof com.opensource.svga.Layout
-   * @static
-   * @param {com.opensource.svga.ILayout} message Layout message or plain object to encode
-   * @param {$protobuf.Writer} [writer] Writer to encode to
-   * @returns {$protobuf.Writer} Writer
-   */
-  // static encodeDelimited(message: Layout, writer: Writer): Writer {
-  //   return Layout.encode(message, writer).ldelim();
-  // }
-}
+//     return writer;
+//   }
 
-export class LayoutReader {
+//   /**
+//    * Encodes the specified Layout message, length delimited. Does not implicitly {@link com.opensource.svga.Layout.verify|verify} messages.
+//    * @function encodeDelimited
+//    * @memberof com.opensource.svga.Layout
+//    * @static
+//    * @param {com.opensource.svga.ILayout} message Layout message or plain object to encode
+//    * @param {$protobuf.Writer} [writer] Writer to encode to
+//    * @returns {$protobuf.Writer} Writer
+//    */
+//   static encodeDelimited(message: Layout, writer: Writer): Writer {
+//     return Layout.encode(message, writer).ldelim();
+//   }
+// }
+
+export default class Layout {
   /**
    * Decodes a Layout message from the specified reader or buffer.
    * @function decode
@@ -74,9 +75,7 @@ export class LayoutReader {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader | Uint8Array, length?: number): Layout {
-    if (!(reader instanceof Reader)) {
-      reader = Reader.create(reader);
-    }
+    reader = Reader.create(reader);
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = new Layout();
     while (reader.pos < end) {
@@ -106,6 +105,7 @@ export class LayoutReader {
 
     return message;
   }
+
   /**
    * Decodes a Layout message from the specified reader or buffer, length delimited.
    * @function decodeDelimited
@@ -116,27 +116,12 @@ export class LayoutReader {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decodeDelimited(reader: Reader | Uint8Array): Layout {
-    if (!(reader instanceof Reader)) {
-      reader = new Reader(reader);
-    }
+  // static decodeDelimited(reader: Reader | Uint8Array): Layout {
+  //   reader = Reader.create(reader);
 
-    return this.decode(reader, reader.uint32());
-  }
-}
+  //   return this.decode(reader, reader.uint32());
+  // }
 
-export default class Layout {
-  /**
-   * Creates a new Layout instance using the specified properties.
-   * @function create
-   * @memberof com.opensource.svga.Layout
-   * @static
-   * @param {com.opensource.svga.ILayout=} [properties] Properties to set
-   * @returns {com.opensource.svga.Layout} Layout instance
-   */
-  static create(properties?: LayoutProps): Layout {
-    return new Layout(properties);
-  }
   /**
    * Verifies a Layout message.
    * @function verify
@@ -172,6 +157,7 @@ export default class Layout {
 
   //   return null;
   // }
+
   /**
    * Creates a Layout message from a plain object. Also converts values to their respective internal types.
    * @function fromObject
@@ -200,6 +186,7 @@ export default class Layout {
 
   //   return message;
   // }
+
   /**
    * Creates a plain object from a Layout message. Also converts values to other types if specified.
    * @function toObject
@@ -246,6 +233,7 @@ export default class Layout {
 
   //   return object;
   // }
+
   /**
    * Gets the default type url for Layout
    * @function getTypeUrl

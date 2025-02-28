@@ -199,6 +199,8 @@ export declare const enum PLAYER_PLAY_MODE {
      */
     FALLBACKS = "fallbacks"
 }
+export type PlayerEventCallback = (currentFrame: number) => void;
+export type PosterEventCallback = () => void;
 export interface PlayerConfig {
     /**
      * 循环次数，默认值 0（无限循环）

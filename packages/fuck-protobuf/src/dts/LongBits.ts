@@ -7,7 +7,7 @@ export default class LongBits {
    * @returns {util.LongBits} Instance
    */
   static fromNumber(value: number) {
-    if (value === 0) {
+    if (value == 0) {
       return new ZeroBits();
     }
 
@@ -39,7 +39,7 @@ export default class LongBits {
    * @returns {util.LongBits} Instance
    */
   static from(value: any) {
-    if (typeof value === "number") {
+    if (typeof value == "number") {
       return LongBits.fromNumber(value);
     }
 
@@ -58,7 +58,7 @@ export default class LongBits {
    * @returns {util.LongBits} Bits
    */
   static fromHash(hash: string) {
-    if (hash === ZeroBits.zeroHash) {
+    if (hash == ZeroBits.zeroHash) {
       return new ZeroBits();
     }
 
@@ -189,8 +189,8 @@ export default class LongBits {
     const part1 = ((this.lo >>> 28) | (this.hi << 4)) >>> 0;
     const part2 = this.hi >>> 24;
 
-    return part2 === 0
-      ? part1 === 0
+    return part2 == 0
+      ? part1 == 0
         ? part0 < 16384
           ? part0 < 128
             ? 1

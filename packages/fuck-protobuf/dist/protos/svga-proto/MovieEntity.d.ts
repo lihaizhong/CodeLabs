@@ -16,9 +16,7 @@ export interface MovieEntityProps {
     images: Record<string, Uint8Array> | null;
     sprites: SpriteEntity[] | null;
 }
-export declare class MovieEntityWriter {
-}
-export declare class MovieEntityReader {
+export default class MovieEntity {
     /**
      * Decodes a MovieEntity message from the specified reader or buffer.
      * @function decode
@@ -41,18 +39,6 @@ export declare class MovieEntityReader {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decodeDelimited(reader: Reader | Uint8Array): MovieEntity;
-}
-export default class MovieEntity {
-    /**
-     * Creates a new MovieEntity instance using the specified properties.
-     * @function create
-     * @memberof com.opensource.svga.MovieEntity
-     * @static
-     * @param {com.opensource.svga.IMovieEntity=} [properties] Properties to set
-     * @returns {com.opensource.svga.MovieEntity} MovieEntity instance
-     */
-    static create(properties?: MovieEntityProps): MovieEntity;
     /**
      * Verifies a MovieEntity message.
      * @function verify

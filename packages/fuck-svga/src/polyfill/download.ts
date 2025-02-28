@@ -9,7 +9,7 @@ import { app, SP } from "./app";
  */
 function readRemoteFile(url: string): Promise<ArrayBuffer> {
   // H5环境
-  if (app === SP.H5) {
+  if (app == SP.H5) {
     return fetch(url).then((response) => {
       if (response.ok) {
         return response.arrayBuffer();
@@ -40,9 +40,9 @@ function readRemoteFile(url: string): Promise<ArrayBuffer> {
  * @param url 文件资源地址
  * @returns
  */
-export default function download(url: string): Promise<ArrayBuffer | null> {
+export function download(url: string): Promise<ArrayBuffer | null> {
   // 读取远程文件
-  if (/^http(s):\/\//.test(url)) {
+  if (/^http(s)?:\/\//.test(url)) {
     return readRemoteFile(url);
   }
 
