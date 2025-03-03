@@ -84,7 +84,7 @@ export default class RectArgs {
    */
   static decode(reader: Reader | Uint8Array, length?: number): RectArgs {
     reader = Reader.create(reader);
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = length == undefined ? reader.len : reader.pos + length;
     const message = new RectArgs();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -143,26 +143,26 @@ export default class RectArgs {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message !== "object" || message === null) {
+  //   if (typeof message != "object" || message == null) {
   //     return "object expected";
   //   }
   //   if (message.x != null && message.hasOwnProperty("x")) {
-  //     if (typeof message.x !== "number") {
+  //     if (typeof message.x != "number") {
   //       return "x: number expected";
   //     }
   //   }
   //   if (message.y != null && message.hasOwnProperty("y")) {
-  //     if (typeof message.y !== "number") {
+  //     if (typeof message.y != "number") {
   //       return "y: number expected";
   //     }
   //   }
   //   if (message.width != null && message.hasOwnProperty("width")) {
-  //     if (typeof message.width !== "number") {
+  //     if (typeof message.width != "number") {
   //       return "width: number expected";
   //     }
   //   }
   //   if (message.height != null && message.hasOwnProperty("height")) {
-  //     if (typeof message.height !== "number") {
+  //     if (typeof message.height != "number") {
   //       return "height: number expected";
   //     }
   //   }
@@ -170,7 +170,7 @@ export default class RectArgs {
   //     message.cornerRadius != null &&
   //     message.hasOwnProperty("cornerRadius")
   //   ) {
-  //     if (typeof message.cornerRadius !== "number") {
+  //     if (typeof message.cornerRadius != "number") {
   //       return "cornerRadius: number expected";
   //     }
   //   }
@@ -276,7 +276,7 @@ export default class RectArgs {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix === undefined) {
+  //   if (typeUrlPrefix == undefined) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 

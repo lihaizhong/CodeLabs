@@ -68,7 +68,7 @@ export class Player {
     }
 
     const { startFrame, endFrame } = config;
-    if (startFrame !== undefined && endFrame !== undefined) {
+    if (startFrame != undefined && endFrame != undefined) {
       // if (startFrame < 0) {
       //   throw new Error("StartFrame should greater then zero");
       // }
@@ -109,7 +109,7 @@ export class Player {
   //     })
   //     this.intersectionObserver.observe(this.config.container)
   //   } else {
-  //     if (this.intersectionObserver !== null) this.intersectionObserver.disconnect()
+  //     if (this.intersectionObserver != null) this.intersectionObserver.disconnect()
   //     this.config.isUseIntersectionObserver = false
   //     this.isBeIntersection = true
   //   }
@@ -291,7 +291,7 @@ export class Player {
       // 是否还有剩余时间
       const hasRemained = this.currFrame == value;
       // 当前帧的图片还未绘制完成
-      if (this.tail !== spriteCount) {
+      if (this.tail != spriteCount) {
         // 1.2和3均为阔值，保证渲染尽快完成
         const tmp = hasRemained
           ? Math.min(spriteCount * spendValue * 1.2 + 3, spriteCount) << 0

@@ -110,7 +110,7 @@ export default class ShapeStyle {
    */
   static decode(reader: Reader | Uint8Array, length?: number): ShapeStyle {
     reader = Reader.create(reader);
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = length == undefined ? reader.len : reader.pos + length;
     const message = new ShapeStyle();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -191,7 +191,7 @@ export default class ShapeStyle {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message !== "object" || message === null) {
+  //   if (typeof message != "object" || message == null) {
   //     return "object expected";
   //   }
   //   if (message.fill != null && message.hasOwnProperty("fill")) {
@@ -207,7 +207,7 @@ export default class ShapeStyle {
   //     }
   //   }
   //   if (message.strokeWidth != null && message.hasOwnProperty("strokeWidth")) {
-  //     if (typeof message.strokeWidth !== "number") {
+  //     if (typeof message.strokeWidth != "number") {
   //       return "strokeWidth: number expected";
   //     }
   //   }
@@ -230,22 +230,22 @@ export default class ShapeStyle {
   //         break;
   //     }
   //   if (message.miterLimit != null && message.hasOwnProperty("miterLimit")) {
-  //     if (typeof message.miterLimit !== "number") {
+  //     if (typeof message.miterLimit != "number") {
   //       return "miterLimit: number expected";
   //     }
   //   }
   //   if (message.lineDashI != null && message.hasOwnProperty("lineDashI")) {
-  //     if (typeof message.lineDashI !== "number") {
+  //     if (typeof message.lineDashI != "number") {
   //       return "lineDashI: number expected";
   //     }
   //   }
   //   if (message.lineDashII != null && message.hasOwnProperty("lineDashII")) {
-  //     if (typeof message.lineDashII !== "number") {
+  //     if (typeof message.lineDashII != "number") {
   //       return "lineDashII: number expected";
   //     }
   //   }
   //   if (message.lineDashIII != null && message.hasOwnProperty("lineDashIII")) {
-  //     if (typeof message.lineDashIII !== "number") {
+  //     if (typeof message.lineDashIII != "number") {
   //       return "lineDashIII: number expected";
   //     }
   //   }
@@ -267,7 +267,7 @@ export default class ShapeStyle {
   //   }
   //   const message = new ShapeEntity.ShapeStyle();
   //   if (object.fill != null) {
-  //     if (typeof object.fill !== "object") {
+  //     if (typeof object.fill != "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.ShapeEntity.ShapeStyle.fill: object expected"
   //       );
@@ -275,7 +275,7 @@ export default class ShapeStyle {
   //     message.fill = RGBAColor.fromObject(object.fill);
   //   }
   //   if (object.stroke != null) {
-  //     if (typeof object.stroke !== "object") {
+  //     if (typeof object.stroke != "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.ShapeEntity.ShapeStyle.stroke: object expected"
   //       );
@@ -289,7 +289,7 @@ export default class ShapeStyle {
   //   }
   //   switch (object.lineCap) {
   //     default:
-  //       if (typeof object.lineCap === "number") {
+  //       if (typeof object.lineCap == "number") {
   //         message.lineCap = object.lineCap;
   //         break;
   //       }
@@ -309,7 +309,7 @@ export default class ShapeStyle {
   //   }
   //   switch (object.lineJoin) {
   //     default:
-  //       if (typeof object.lineJoin === "number") {
+  //       if (typeof object.lineJoin == "number") {
   //         message.lineJoin = object.lineJoin;
   //         break;
   //       }
@@ -364,8 +364,8 @@ export default class ShapeStyle {
   //     object.fill = null;
   //     object.stroke = null;
   //     object.strokeWidth = 0;
-  //     object.lineCap = options.enums === String ? "LineCap_BUTT" : 0;
-  //     object.lineJoin = options.enums === String ? "LineJoin_MITER" : 0;
+  //     object.lineCap = options.enums == String ? "LineCap_BUTT" : 0;
+  //     object.lineJoin = options.enums == String ? "LineJoin_MITER" : 0;
   //     object.miterLimit = 0;
   //     object.lineDashI = 0;
   //     object.lineDashII = 0;
@@ -391,16 +391,16 @@ export default class ShapeStyle {
   //   }
   //   if (message.lineCap != null && message.hasOwnProperty("lineCap")) {
   //     object.lineCap =
-  //       options.enums === String
-  //         ? LineCap[message.lineCap] === undefined
+  //       options.enums == String
+  //         ? LineCap[message.lineCap] == undefined
   //           ? message.lineCap
   //           : LineCap[message.lineCap]
   //         : message.lineCap;
   //   }
   //   if (message.lineJoin != null && message.hasOwnProperty("lineJoin")) {
   //     object.lineJoin =
-  //       options.enums === String
-  //         ? LineJoin[message.lineJoin] === undefined
+  //       options.enums == String
+  //         ? LineJoin[message.lineJoin] == undefined
   //           ? message.lineJoin
   //           : LineJoin[message.lineJoin]
   //         : message.lineJoin;
@@ -442,7 +442,7 @@ export default class ShapeStyle {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix === undefined) {
+  //   if (typeUrlPrefix == undefined) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 

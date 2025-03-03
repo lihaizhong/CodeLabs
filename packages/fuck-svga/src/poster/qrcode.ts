@@ -1672,7 +1672,7 @@ const gifImage = function (width: number, height: number) {
     }
 
     _this.contains = function (key: string) {
-      return typeof _map[key] !== 'undefined'
+      return typeof _map[key] != 'undefined'
     }
 
     return _this

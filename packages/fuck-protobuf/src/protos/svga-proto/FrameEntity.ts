@@ -93,7 +93,7 @@ export default class FrameEntity {
    */
   static decode(reader: Reader | Uint8Array, length?: number): FrameEntity {
     reader = Reader.create(reader);
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = length == undefined ? reader.len : reader.pos + length;
     const message = new FrameEntity();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -155,11 +155,11 @@ export default class FrameEntity {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message !== "object" || message === null) {
+  //   if (typeof message != "object" || message == null) {
   //     return "object expected";
   //   }
   //   if (message.alpha != null && message.hasOwnProperty("alpha")) {
-  //     if (typeof message.alpha !== "number") {
+  //     if (typeof message.alpha != "number") {
   //       return "alpha: number expected";
   //     }
   //   }
@@ -212,7 +212,7 @@ export default class FrameEntity {
   //     message.alpha = +object.alpha;
   //   }
   //   if (object.layout != null) {
-  //     if (typeof object.layout !== "object") {
+  //     if (typeof object.layout != "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.FrameEntity.layout: object expected"
   //       );
@@ -220,7 +220,7 @@ export default class FrameEntity {
   //     message.layout = Layout.fromObject(object.layout);
   //   }
   //   if (object.transform != null) {
-  //     if (typeof object.transform !== "object") {
+  //     if (typeof object.transform != "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.FrameEntity.transform: object expected"
   //       );
@@ -238,7 +238,7 @@ export default class FrameEntity {
   //     }
   //     message.shapes = [];
   //     for (let i = 0; i < object.shapes.length; ++i) {
-  //       if (typeof object.shapes[i] !== "object") {
+  //       if (typeof object.shapes[i] != "object") {
   //         throw TypeError(
   //           ".com.opensource.svga.FrameEntity.shapes: object expected"
   //         );
@@ -310,7 +310,7 @@ export default class FrameEntity {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix === undefined) {
+  //   if (typeUrlPrefix == undefined) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 

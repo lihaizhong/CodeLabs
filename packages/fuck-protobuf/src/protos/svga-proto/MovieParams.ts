@@ -80,7 +80,7 @@ export default class MovieParams {
    */
   static decode(reader: Reader | Uint8Array, length?: number): MovieParams {
     reader = Reader.create(reader);
-    let end = length === undefined ? reader.len : reader.pos + length;
+    let end = length == undefined ? reader.len : reader.pos + length;
     let message = new MovieParams();
     while (reader.pos < end) {
       let tag = reader.uint32();
@@ -135,14 +135,14 @@ export default class MovieParams {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message !== "object" || message === null) {
+  //   if (typeof message != "object" || message == null) {
   //     return "object expected";
   //   }
   //   if (
   //     message.viewBoxWidth != null &&
   //     message.hasOwnProperty("viewBoxWidth")
   //   ) {
-  //     if (typeof message.viewBoxWidth !== "number") {
+  //     if (typeof message.viewBoxWidth != "number") {
   //       return "viewBoxWidth: number expected";
   //     }
   //   }
@@ -150,7 +150,7 @@ export default class MovieParams {
   //     message.viewBoxHeight != null &&
   //     message.hasOwnProperty("viewBoxHeight")
   //   ) {
-  //     if (typeof message.viewBoxHeight !== "number") {
+  //     if (typeof message.viewBoxHeight != "number") {
   //       return "viewBoxHeight: number expected";
   //     }
   //   }
@@ -259,7 +259,7 @@ export default class MovieParams {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix === undefined) {
+  //   if (typeUrlPrefix == undefined) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 

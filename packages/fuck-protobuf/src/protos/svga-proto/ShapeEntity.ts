@@ -106,7 +106,7 @@ export default class ShapeEntity {
    */
   static decode(reader: Reader | Uint8Array, length?: number): ShapeEntity {
     reader = Reader.create(reader);
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = length == undefined ? reader.len : reader.pos + length;
     const message = new ShapeEntity();
     while (reader.pos < end) {
       let tag = reader.uint32();
@@ -175,7 +175,7 @@ export default class ShapeEntity {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message !== "object" || message === null) {
+  //   if (typeof message != "object" || message == null) {
   //     return "object expected";
   //   }
   //   const properties: Record<string, any> = {};
@@ -199,7 +199,7 @@ export default class ShapeEntity {
   //     }
   //   }
   //   if (message.rect != null && message.hasOwnProperty("rect")) {
-  //     if (properties.args === 1) {
+  //     if (properties.args == 1) {
   //       return "args: multiple values";
   //     }
   //     properties.args = 1;
@@ -211,7 +211,7 @@ export default class ShapeEntity {
   //     }
   //   }
   //   if (message.ellipse != null && message.hasOwnProperty("ellipse")) {
-  //     if (properties.args === 1) {
+  //     if (properties.args == 1) {
   //       return "args: multiple values";
   //     }
   //     properties.args = 1;
@@ -251,7 +251,7 @@ export default class ShapeEntity {
   //   const message = new ShapeEntity();
   //   switch (object.type) {
   //     default:
-  //       if (typeof object.type === "number") {
+  //       if (typeof object.type == "number") {
   //         message.type = object.type;
   //         break;
   //       }
@@ -274,7 +274,7 @@ export default class ShapeEntity {
   //       break;
   //   }
   //   if (object.shape != null) {
-  //     if (typeof object.shape !== "object") {
+  //     if (typeof object.shape != "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.ShapeEntity.shape: object expected"
   //       );
@@ -282,7 +282,7 @@ export default class ShapeEntity {
   //     message.shape = ShapeArgs.fromObject(object.shape);
   //   }
   //   if (object.rect != null) {
-  //     if (typeof object.rect !== "object") {
+  //     if (typeof object.rect != "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.ShapeEntity.rect: object expected"
   //       );
@@ -290,7 +290,7 @@ export default class ShapeEntity {
   //     message.rect = RectArgs.fromObject(object.rect);
   //   }
   //   if (object.ellipse != null) {
-  //     if (typeof object.ellipse !== "object") {
+  //     if (typeof object.ellipse != "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.ShapeEntity.ellipse: object expected"
   //       );
@@ -298,7 +298,7 @@ export default class ShapeEntity {
   //     message.ellipse = EllipseArgs.fromObject(object.ellipse);
   //   }
   //   if (object.styles != null) {
-  //     if (typeof object.styles !== "object") {
+  //     if (typeof object.styles != "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.ShapeEntity.styles: object expected"
   //       );
@@ -306,7 +306,7 @@ export default class ShapeEntity {
   //     message.styles = ShapeStyle.fromObject(object.styles);
   //   }
   //   if (object.transform != null) {
-  //     if (typeof object.transform !== "object") {
+  //     if (typeof object.transform != "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.ShapeEntity.transform: object expected"
   //       );
@@ -335,14 +335,14 @@ export default class ShapeEntity {
   //   }
   //   const object: Record<string, any> = {};
   //   if (options.defaults) {
-  //     object.type = options.enums === String ? "SHAPE" : 0;
+  //     object.type = options.enums == String ? "SHAPE" : 0;
   //     object.styles = null;
   //     object.transform = null;
   //   }
   //   if (message.type != null && message.hasOwnProperty("type")) {
   //     object.type =
-  //       options.enums === String
-  //         ? ShapeType[message.type] === undefined
+  //       options.enums == String
+  //         ? ShapeType[message.type] == undefined
   //           ? message.type
   //           : ShapeType[message.type]
   //         : message.type;
@@ -387,7 +387,7 @@ export default class ShapeEntity {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix === undefined) {
+  //   if (typeUrlPrefix == undefined) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 
@@ -450,7 +450,7 @@ export default class ShapeEntity {
     for (let i = keys.length - 1; i > -1; --i) {
       const key = keys[i];
       const value = this[key];
-      if (this.$fieldMap[key] === 1 && value != null) {
+      if (this.$fieldMap[key] == 1 && value != null) {
         return key;
       }
     }
@@ -461,7 +461,7 @@ export default class ShapeEntity {
   set args(name: "shape" | "rect" | "ellipse") {
     for (var i = 0; i < this.$oneOfFields.length; ++i) {
       const key = this.$oneOfFields[i];
-      if (key !== name) {
+      if (key != name) {
         delete this[key];
       }
     }

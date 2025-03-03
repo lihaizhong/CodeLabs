@@ -96,7 +96,7 @@ export default class MovieEntity {
    */
   static decode(reader: Reader | Uint8Array, length?: number): MovieEntity {
     reader = Reader.create(reader);
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = length == undefined ? reader.len : reader.pos + length;
     const message = new MovieEntity();
     let key;
     let value;
@@ -112,7 +112,7 @@ export default class MovieEntity {
           break;
         }
         case 3: {
-          if (message.images === emptyObject) {
+          if (message.images == emptyObject) {
             message.images = {};
           }
           const end2 = reader.uint32() + reader.pos;
@@ -175,7 +175,7 @@ export default class MovieEntity {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message !== "object" || message === null) {
+  //   if (typeof message != "object" || message == null) {
   //     return "object expected";
   //   }
   //   if (message.version != null && message.hasOwnProperty("version")) {
@@ -199,7 +199,7 @@ export default class MovieEntity {
   //       if (
   //         !(
   //           (message.images[key] &&
-  //             typeof message.images[key].length === "number") ||
+  //             typeof message.images[key].length == "number") ||
   //           isString(message.images[key])
   //         )
   //       ) {
@@ -239,7 +239,7 @@ export default class MovieEntity {
   //     message.version = "" + object.version;
   //   }
   //   if (object.params != null) {
-  //     if (typeof object.params !== "object") {
+  //     if (typeof object.params != "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.MovieEntity.params: object expected"
   //       );
@@ -247,7 +247,7 @@ export default class MovieEntity {
   //     message.params = MovieParams.fromObject(object.params);
   //   }
   //   if (object.images) {
-  //     if (typeof object.images !== "object") {
+  //     if (typeof object.images != "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.MovieEntity.images: object expected"
   //       );
@@ -256,7 +256,7 @@ export default class MovieEntity {
   //     const keys = Object.keys(object.images);
   //     for (let i = 0; i < keys.length; ++i) {
   //       const key = keys[i];
-  //       if (typeof object.images[key] === "string") {
+  //       if (typeof object.images[key] == "string") {
   //         base64.decode(
   //           object.images[key],
   //           (message.images[key] = new Uint8Array(
@@ -277,7 +277,7 @@ export default class MovieEntity {
   //     }
   //     message.sprites = [];
   //     for (let i = 0; i < object.sprites.length; ++i) {
-  //       if (typeof object.sprites[i] !== "object") {
+  //       if (typeof object.sprites[i] != "object") {
   //         throw TypeError(
   //           ".com.opensource.svga.MovieEntity.sprites: object expected"
   //         );
@@ -328,9 +328,9 @@ export default class MovieEntity {
   //     for (let j = 0; j < keys2.length; ++j) {
   //       const key = keys2[j];
   //       object.images[key] =
-  //         options.bytes === String
+  //         options.bytes == String
   //           ? base64.encode(message.images[key], 0, message.images[key].length)
-  //           : options.bytes === Array
+  //           : options.bytes == Array
   //           ? [...message.images[key]]
   //           : message.images[key];
   //     }
@@ -354,7 +354,7 @@ export default class MovieEntity {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string) {
-  //   if (typeUrlPrefix === undefined) {
+  //   if (typeUrlPrefix == undefined) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 

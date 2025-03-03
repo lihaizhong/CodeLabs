@@ -76,7 +76,7 @@ export default class RGBAColor {
    */
   static decode(reader: Reader | Uint8Array, length?: number): RGBAColor {
     reader = Reader.create(reader);
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = length == undefined ? reader.len : reader.pos + length;
     const message = new RGBAColor();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -131,26 +131,26 @@ export default class RGBAColor {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message !== "object" || message === null) {
+  //   if (typeof message != "object" || message == null) {
   //     return "object expected";
   //   }
   //   if (message.r != null && message.hasOwnProperty("r")) {
-  //     if (typeof message.r !== "number") {
+  //     if (typeof message.r != "number") {
   //       return "r: number expected";
   //     }
   //   }
   //   if (message.g != null && message.hasOwnProperty("g")) {
-  //     if (typeof message.g !== "number") {
+  //     if (typeof message.g != "number") {
   //       return "g: number expected";
   //     }
   //   }
   //   if (message.b != null && message.hasOwnProperty("b")) {
-  //     if (typeof message.b !== "number") {
+  //     if (typeof message.b != "number") {
   //       return "b: number expected";
   //     }
   //   }
   //   if (message.a != null && message.hasOwnProperty("a")) {
-  //     if (typeof message.a !== "number") {
+  //     if (typeof message.a != "number") {
   //       return "a: number expected";
   //     }
   //   }
@@ -239,7 +239,7 @@ export default class RGBAColor {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix === undefined) {
+  //   if (typeUrlPrefix == undefined) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 

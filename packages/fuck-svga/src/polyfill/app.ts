@@ -12,13 +12,13 @@ export const SP = {
 let app: number
 
 // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
-if (typeof window !== "undefined") {
+if (typeof window != "undefined") {
   app = SP.H5;
-} else if (typeof tt !== "undefined") {
+} else if (typeof tt != "undefined") {
   app = SP.DOUYIN;
-} else if (typeof my !== "undefined") {
+} else if (typeof my != "undefined") {
   app = SP.ALIPAY;
-} else if (typeof wx !== "undefined") {
+} else if (typeof wx != "undefined") {
   app = SP.WECHAT;
 } else {
   throw new Error("Unsupported app");

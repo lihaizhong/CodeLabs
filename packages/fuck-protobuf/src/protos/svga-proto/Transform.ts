@@ -84,7 +84,7 @@ export default class Transform {
    */
   static decode(reader: Reader | Uint8Array, length?: number): Transform {
     reader = Reader.create(reader);
-    let end = length === undefined ? reader.len : reader.pos + length;
+    let end = length == undefined ? reader.len : reader.pos + length;
     let message = new Transform();
     while (reader.pos < end) {
       let tag = reader.uint32();
@@ -146,36 +146,36 @@ export default class Transform {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>) {
-  //   if (typeof message !== "object" || message === null) {
+  //   if (typeof message != "object" || message == null) {
   //     return "object expected";
   //   }
   //   if (message.a != null && message.hasOwnProperty("a")) {
-  //     if (typeof message.a !== "number") {
+  //     if (typeof message.a != "number") {
   //       return "a: number expected";
   //     }
   //   }
   //   if (message.b != null && message.hasOwnProperty("b")) {
-  //     if (typeof message.b !== "number") {
+  //     if (typeof message.b != "number") {
   //       return "b: number expected";
   //     }
   //   }
   //   if (message.c != null && message.hasOwnProperty("c")) {
-  //     if (typeof message.c !== "number") {
+  //     if (typeof message.c != "number") {
   //       return "c: number expected";
   //     }
   //   }
   //   if (message.d != null && message.hasOwnProperty("d")) {
-  //     if (typeof message.d !== "number") {
+  //     if (typeof message.d != "number") {
   //       return "d: number expected";
   //     }
   //   }
   //   if (message.tx != null && message.hasOwnProperty("tx")) {
-  //     if (typeof message.tx !== "number") {
+  //     if (typeof message.tx != "number") {
   //       return "tx: number expected";
   //     }
   //   }
   //   if (message.ty != null && message.hasOwnProperty("ty")) {
-  //     if (typeof message.ty !== "number") {
+  //     if (typeof message.ty != "number") {
   //       return "ty: number expected";
   //     }
   //   }
@@ -280,7 +280,7 @@ export default class Transform {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix === undefined) {
+  //   if (typeUrlPrefix == undefined) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 

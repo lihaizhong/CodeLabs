@@ -1,4 +1,4 @@
-// const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+// const now = () => (typeof performance != 'undefined' ? performance.now() : Date.now());
 const stopwatch = {
   // a: {} as Record<string, number>,
   l: {} as Record<string, boolean>,
@@ -47,7 +47,7 @@ export default {
     stopwatch.increment(label);
 
     const count = stopwatch.getCount(label);
-    if (stopwatch.isLock(label) || (this.count !== 0 && count > this.count)) {
+    if (stopwatch.isLock(label) || (this.count != 0 && count > this.count)) {
       callback(count);
     } else {
       beforeCallback?.(count);

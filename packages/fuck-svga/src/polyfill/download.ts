@@ -47,7 +47,7 @@ export function download(url: string): Promise<ArrayBuffer | null> {
   }
 
   // 读取本地文件
-  if (app !== SP.H5) {
+  if (app != SP.H5) {
     return readFile(url);
   }
 

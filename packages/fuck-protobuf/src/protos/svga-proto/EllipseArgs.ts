@@ -76,7 +76,7 @@ export default class EllipseArgs {
    */
   static decode(reader: Reader | Uint8Array, length?: number): EllipseArgs {
     reader = Reader.create(reader);
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = length == undefined ? reader.len : reader.pos + length;
     const message = new EllipseArgs();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -131,26 +131,26 @@ export default class EllipseArgs {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message !== "object" || message === null) {
+  //   if (typeof message != "object" || message == null) {
   //     return "object expected";
   //   }
   //   if (message.x != null && message.hasOwnProperty("x")) {
-  //     if (typeof message.x !== "number") {
+  //     if (typeof message.x != "number") {
   //       return "x: number expected";
   //     }
   //   }
   //   if (message.y != null && message.hasOwnProperty("y")) {
-  //     if (typeof message.y !== "number") {
+  //     if (typeof message.y != "number") {
   //       return "y: number expected";
   //     }
   //   }
   //   if (message.radiusX != null && message.hasOwnProperty("radiusX")) {
-  //     if (typeof message.radiusX !== "number") {
+  //     if (typeof message.radiusX != "number") {
   //       return "radiusX: number expected";
   //     }
   //   }
   //   if (message.radiusY != null && message.hasOwnProperty("radiusY")) {
-  //     if (typeof message.radiusY !== "number") {
+  //     if (typeof message.radiusY != "number") {
   //       return "radiusY: number expected";
   //     }
   //   }
@@ -243,7 +243,7 @@ export default class EllipseArgs {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix === undefined) {
+  //   if (typeUrlPrefix == undefined) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 

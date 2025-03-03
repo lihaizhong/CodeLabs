@@ -77,7 +77,7 @@ export default class SpriteEntity {
    */
   static decode(reader: Reader | Uint8Array, length?: number): SpriteEntity {
     reader = Reader.create(reader);
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = length == undefined ? reader.len : reader.pos + length;
     const message = new SpriteEntity();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -130,7 +130,7 @@ export default class SpriteEntity {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message !== "object" || message === null) {
+  //   if (typeof message != "object" || message == null) {
   //     return "object expected";
   //   }
   //   if (message.imageKey != null && message.hasOwnProperty("imageKey")) {
@@ -183,7 +183,7 @@ export default class SpriteEntity {
   //     }
   //     message.frames = [];
   //     for (let i = 0; i < object.frames.length; ++i) {
-  //       if (typeof object.frames[i] !== "object") {
+  //       if (typeof object.frames[i] != "object") {
   //         throw TypeError(
   //           ".com.opensource.svga.SpriteEntity.frames: object expected"
   //         );
@@ -248,7 +248,7 @@ export default class SpriteEntity {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix === undefined) {
+  //   if (typeUrlPrefix == undefined) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 
