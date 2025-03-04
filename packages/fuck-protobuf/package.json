@@ -20,6 +20,7 @@
     "@protobufjs/path": "^1.1.2",
     "@protobufjs/pool": "^1.1.0",
     "@protobufjs/utf8": "^1.1.0",
+    "fflate": "^0.8.2",
     "long": "^5.3.1"
   },
   "devDependencies": {

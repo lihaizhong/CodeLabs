@@ -173,7 +173,7 @@ const RS_BLOCK_TABLE = [
 ];
 
 export class RSBlock {
-  private getRSBlockTable(typeNumber: number, errorCorrectLevel: number): number[] | void {
+  private getRSBlockTable(typeNumber: number, errorCorrectLevel: number): number[] {
     const { L, M, Q, H } = QRErrorCorrectLevel;
     const pos = (typeNumber - 1) * 4;
 
@@ -187,16 +187,12 @@ export class RSBlock {
       case H:
         return RS_BLOCK_TABLE[pos + 3];
       default:
+        throw new Error(`bad rs block @ typeNumber:${typeNumber}/errorCorrectLevel: ${errorCorrectLevel}`);
     }
   }
 
   public getRSBlocks(typeNumber: number, errorCorrectLevel: number): RSBlockCount[] {
     const rsBlock = this.getRSBlockTable(typeNumber, errorCorrectLevel);
-
-    if (typeof rsBlock == 'undefined') {
-      throw new Error(`bad rs block @ typeNumber:${typeNumber}/errorCorrectLevel: ${errorCorrectLevel}`);
-    }
-
     const length = rsBlock.length / 3;
     const list: RSBlockCount[] = [];
 

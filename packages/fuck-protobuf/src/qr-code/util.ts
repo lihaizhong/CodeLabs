@@ -57,40 +57,9 @@ const G18 =
   (1 << 2) |
   (1 << 0);
 const G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
-const BCHDigit = {
-  // MAX_SIZE: 5000,
-  // caches: new Map<number, number>(),
-  gen(data: number): number {
-    // if (BCHDigit.caches.has(data)) {
-    //   return BCHDigit.caches.get(data) as number;
-    // }
-
-    // if (BCHDigit.caches.size >= BCHDigit.MAX_SIZE) {
-    //   const mapIter = BCHDigit.caches.keys();
-
-    //   for (let i = 0; i < 100; i++) {
-    //     const { value, done } = mapIter.next();
-
-    //     if (done) break;
-
-    //     BCHDigit.caches.delete(value);
-    //   }
-    // }
-
-    let digit = 0;
-    let d = data;
-
-    while (d != 0) {
-      digit++;
-      d >>>= 1;
-    }
-
-    // BCHDigit.caches.set(data, digit);
-    return digit;
-  },
-};
-const BCH_G15 = BCHDigit.gen(G15);
-const BCH_G18 = BCHDigit.gen(G18);
+const genBCHDigit = (data: number) => data == 0 ? 0 : Math.log2(data);
+const BCH_G15 = genBCHDigit(G15);
+const BCH_G18 = genBCHDigit(G18);
 
 // ---------------------------------------------------------------------
 // QRUtil
@@ -100,8 +69,8 @@ export const Util = {
   getBCHTypeInfo(data: number): number {
     let d = data << 10;
 
-    while (BCHDigit.gen(d) - BCH_G15 >= 0) {
-      d ^= G15 << (BCHDigit.gen(d) - BCH_G15);
+    while (genBCHDigit(d) - BCH_G15 >= 0) {
+      d ^= G15 << (genBCHDigit(d) - BCH_G15);
     }
 
     return ((data << 10) | d) ^ G15_MASK;
@@ -110,8 +79,8 @@ export const Util = {
   getBCHTypeNumber(data: number): number {
     let d = data << 12;
 
-    while (BCHDigit.gen(d) - BCH_G18 >= 0) {
-      d ^= G18 << (BCHDigit.gen(d) - BCH_G18);
+    while (genBCHDigit(d) - BCH_G18 >= 0) {
+      d ^= G18 << (genBCHDigit(d) - BCH_G18);
     }
 
     return (data << 12) | d;

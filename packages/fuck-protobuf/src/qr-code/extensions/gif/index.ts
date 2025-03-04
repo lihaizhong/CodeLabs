@@ -2,10 +2,10 @@
 // gifImage (B/W)
 // ---------------------------------------------------------------------
 
-import { BitOutputStream } from "../BitOutputStream";
-import { ByteArrayOutputStream } from "../ByteArrayOutputStream";
+import { BitOutputStream } from "../basic/BitOutputStream";
+import { ByteArrayOutputStream } from "../basic/ByteArrayOutputStream";
 import { LZWTable } from "./LZWTable";
-import { Base64EncodeOutputStream } from "../Base64EncodeOutputStream";
+import { Base64EncodeOutputStream } from "../basic/Base64EncodeOutputStream";
 
 export class GifImage {
   private data: number[] = [];

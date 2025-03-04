@@ -7,10 +7,10 @@ export class BitBuffer {
 
   public lengthInBits = 0;
 
-  public getAt(index: number): boolean {
-    const bufIndex = ~~(index / 8);
+  public getAt(i: number): boolean {
+    const bufIndex = ~~(i / 8);
 
-    return ((this.buffer[bufIndex] >>> (7 - (index % 8))) & 1) == 1;
+    return ((this.buffer[bufIndex] >>> (7 - (i % 8))) & 1) == 1;
   }
 
   public put(num: number, length: number): void {

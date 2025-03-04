@@ -24,10 +24,14 @@ function parseOptions(options: ICreateQrCodeImgOptions = {}) {
   return { typeNumber, errorCorrectLevel, size, black, white };
 }
 
-const calcCellSizeAndMargin = (moduleCount: number, size: number) => ({
-  margin: ~~(size - moduleCount * ~~(size / moduleCount)) / 2,
-  cellSize: ~~(size / moduleCount) || 2,
-});
+const calcCellSizeAndMargin = (moduleCount: number, size: number) => {
+  const cellSize = ~~(size / moduleCount);
+
+  return {
+    margin: ~~((size - moduleCount * cellSize) / 2),
+    cellSize: cellSize || 2,
+  }
+};
 
 export function createQRCodeToGIF(
   text: string,

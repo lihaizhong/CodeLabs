@@ -3,7 +3,7 @@ export declare class ByteArrayOutputStream {
     writeByte(byte: number): void;
     writeBytes(bytes: number[], offset?: number, length?: number): void;
     writeShort(i: number): void;
-    writeString(str: string): void;
+    writeString(s: string): void;
     toByteArray(): number[];
     toString(): string;
 }

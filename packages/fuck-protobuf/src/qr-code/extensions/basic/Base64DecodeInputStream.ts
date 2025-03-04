@@ -36,20 +36,17 @@ export class Base64DecodeInputStream {
   }
 
   public read(): number {
-    const { buffer, buflen, pos, data } = this;
-
-    while (buflen < 8) {
-      if (pos >= data.length) {
-        if (buflen == 0) {
+    while (this.buflen < 8) {
+      if (this.pos >= this.data.length) {
+        if (this.buflen == 0) {
           return -1;
         }
 
-        throw new Error(`unexpected end of file./${buflen}`);
+        throw new Error(`unexpected end of file./${this.buflen}`);
       }
 
-      const c = data.charAt(pos);
+      const c = this.data.charAt(this.pos);
       this.pos++;
-
       if (c == '=') {
         this.buflen = 0;
 
@@ -59,12 +56,12 @@ export class Base64DecodeInputStream {
         continue;
       }
 
-      this.buffer = (buffer << 6) | this.decode(c.charCodeAt(0));
+      this.buffer = (this.buffer << 6) | this.decode(c.charCodeAt(0));
       this.buflen += 6;
     }
 
-    const n = (buffer >>> (buflen - 8)) & 0xff;
     this.buflen -= 8;
+    const n = (this.buffer >>> this.buflen) & 0xff;
 
     return n;
   }

@@ -45,22 +45,23 @@ export class Base64EncodeOutputStream {
     this.length += 1;
 
     while (this.buflen >= 6) {
-      this.writeEncoded(this.buffer >>> (this.buflen - 6));
       this.buflen -= 6;
+      this.writeEncoded(this.buffer >>> this.buflen);
     }
   }
 
   public flush(): void {
-    if (this.buflen > 0) {
-      this.writeEncoded(this.buflen << (6 - this.buflen));
+    const { buffer, buflen, length } = this;
+
+    if (buflen > 0) {
+      this.writeEncoded(buffer << (6 - buflen));
       this.buffer = 0;
       this.buflen = 0;
     }
 
-    if (this.length % 3 != 0) {
+    if (length % 3 != 0) {
       // padding
-      const padlen = 3 - (this.length % 3)
-
+      const padlen = 3 - (length % 3);
       for (let i = 0; i < padlen; i++) {
         this.base64 += '='
       }

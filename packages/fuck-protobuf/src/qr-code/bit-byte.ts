@@ -36,7 +36,7 @@ export class BitByte {
       parsedData.push(byteArray);
     }
 
-    this.bytes = ([] as number[]).concat(...parsedData);
+    this.bytes = parsedData.flat(1);
 
     const { bytes } = this;
     if (bytes.length != data.length) {

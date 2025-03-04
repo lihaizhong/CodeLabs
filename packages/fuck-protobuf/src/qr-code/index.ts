@@ -18,7 +18,7 @@ import { BitBuffer } from "./bit-buffer";
 import { BitByte } from "./bit-byte";
 import { RSBlock, RSBlockCount } from "./block";
 import { QRErrorCorrectLevel } from "./constants";
-import { Base64DecodeInputStream } from "./extensions/Base64DecodeInputStream";
+import { Base64DecodeInputStream } from "./extensions/basic/Base64DecodeInputStream";
 import { Polynomial } from "./polynomial";
 import { Util } from "./util";
 

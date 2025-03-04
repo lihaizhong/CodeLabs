@@ -28,12 +28,10 @@ export const QRMath = {
   },
 
   gexp(n: number): number {
-    while (n < 0) {
-      n += 255;
-    }
-
-    while (n >= 256) {
-      n -= 255;
+    if (n < 0) {
+      n = 255 + (n % 255);
+    } else if (n > 255) {
+      n %= 255;
     }
 
     return EXP_TABLE[n];

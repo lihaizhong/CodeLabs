@@ -1,5 +1,5 @@
-import { Base64EncodeOutputStream } from "../Base64EncodeOutputStream";
-import { ByteArrayOutputStream } from "../ByteArrayOutputStream";
+import { Base64EncodeOutputStream } from "../basic/Base64EncodeOutputStream";
+import { ByteArrayOutputStream } from "../basic/ByteArrayOutputStream";
 
 export class PngImage {
   private data: number[] = [];

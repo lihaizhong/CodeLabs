@@ -1,4 +1,4 @@
-import { ByteArrayOutputStream } from "../ByteArrayOutputStream";
+import { ByteArrayOutputStream } from "../basic/ByteArrayOutputStream";
 export declare class GifImage {
     private readonly width;
     private readonly height;

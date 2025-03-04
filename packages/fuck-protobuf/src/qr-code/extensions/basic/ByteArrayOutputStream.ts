@@ -23,9 +23,9 @@ export class ByteArrayOutputStream {
     this.writeByte(i >>> 8);
   }
 
-  public writeString(str: string): void {
-    for (let i = 0; i < str.length; i++) {
-      this.writeByte(str.charCodeAt(i));
+  public writeString(s: string): void {
+    for (let i = 0; i < s.length; i++) {
+      this.writeByte(s.charCodeAt(i));
     }
   }
 
