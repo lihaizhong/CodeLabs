@@ -5,6 +5,7 @@
  * @param errorCorrectLevel 'L','M','Q','H'
  */
 export declare class QRCode {
+    private readonly typeNumber;
     static stringToBytes(s: string): number[];
     /**
      * @param unicodeData base64 string of byte array.
@@ -12,7 +13,6 @@ export declare class QRCode {
      * @param numChars
      */
     static createStringToBytes(unicodeData: string, numChars: number): (s: string) => number[];
-    private readonly typeNumber;
     private readonly errorCorrectLevel;
     private modules;
     private moduleCount;
@@ -34,12 +34,3 @@ export declare class QRCode {
     getModuleCount(): number;
     make(): void;
 }
-export interface ICreateQrCodeImgOptions {
-    size?: number;
-    typeNumber?: number;
-    errorCorrectLevel?: "L" | "M" | "Q" | "H";
-    black?: string;
-    white?: string;
-}
-export declare function createQRCodeToGIF(text: string, options?: ICreateQrCodeImgOptions): string;
-export declare function createQRCodeToHTML(text: string, options?: ICreateQrCodeImgOptions): string;

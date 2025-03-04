@@ -5,7 +5,7 @@
 import { QRMath } from "./math";
 
 export class Polynomial {
-  private num: number[]
+  private readonly num: number[];
 
   constructor(num: number[], shift: number) {
     const { length } = num;
@@ -35,7 +35,7 @@ export class Polynomial {
   }
 
   public multiply(e: Polynomial): Polynomial {
-    const num = new Array(this.length + e.length - 1);
+    const num: number[] = [];
 
     for (let i = 0; i < this.length; i++) {
       for (let j = 0; j < e.length; j++) {
@@ -52,15 +52,21 @@ export class Polynomial {
     }
 
     const ratio = QRMath.glog(this.getAt(0)) - QRMath.glog(e.getAt(0));
-    const num = new Array(this.length);
+    const num: number[] = [];
 
     for (var i = 0; i < this.length; i++) {
-      num[i] = this.getAt(i);
+      const n = this.getAt(i);
+
+      num[i] = i < e.length ? n ^ QRMath.gexp(QRMath.glog(e.getAt(i)) + ratio) : n;
     }
 
-    for (var i = 0; i < e.length; i++) {
-      num[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i)) + ratio);
-    }
+    // for (var i = 0; i < this.length; i++) {
+    //   num[i] = this.getAt(i);
+    // }
+
+    // for (var i = 0; i < e.length; i++) {
+    //   num[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i)) + ratio);
+    // }
 
     // recursive call
     return new Polynomial(num, 0).mod(e);

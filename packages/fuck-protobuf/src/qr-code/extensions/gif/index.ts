@@ -8,19 +8,15 @@ import { LZWTable } from "./LZWTable";
 import { Base64EncodeOutputStream } from "../Base64EncodeOutputStream";
 
 export class GifImage {
-  private signature = "GIF87a";
+  private data: number[] = [];
 
-  private data: number[];
-
-  constructor(private readonly width: number, private readonly height: number) {
-    this.data = new Array(width * height);
-  }
+  constructor(private readonly width: number, private readonly height: number) {}
 
   private getLZWRaster(lzwMinCodeSize: number): number[] {
+    const { data } = this;
     const clearCode = 1 << lzwMinCodeSize;
-    const endCode = (1 << lzwMinCodeSize) + 1;
+    const endCode = clearCode + 1;
     let bitLength = lzwMinCodeSize + 1;
-
     // Setup LZWTable
     const table = new LZWTable();
     const fromCharCode = (i: number) => String.fromCharCode(i);
@@ -39,10 +35,10 @@ export class GifImage {
     bitOut.write(clearCode, bitLength);
 
     let dataIndex = 0;
-    let s = fromCharCode(this.data[dataIndex++]);
+    let s = fromCharCode(data[dataIndex++]);
 
-    while (dataIndex < this.data.length) {
-      const c = fromCharCode(this.data[dataIndex++]);
+    while (dataIndex < data.length) {
+      const c = fromCharCode(data[dataIndex++]);
 
       if (table.contains(s + c)) {
         s += c;
@@ -62,10 +58,8 @@ export class GifImage {
     }
 
     bitOut.write(table.indexOf(s), bitLength);
-
     // end code
     bitOut.write(endCode, bitLength);
-
     bitOut.flush();
 
     return byteOut.toByteArray();
@@ -80,11 +74,11 @@ export class GifImage {
     blackColor = "#000000",
     whiteColor = "#ffffff"
   ): void {
-    const { width, height, signature } = this;
+    const { width, height } = this;
     // ---------------------------------
     // GIF Signature
 
-    out.writeString(signature);
+    out.writeString("GIF87a");
 
     // ---------------------------------
     // Screen Descriptor
@@ -143,9 +137,10 @@ export class GifImage {
     }
 
     const byte = raster.length - offset;
+
     out.writeByte(byte);
     out.writeBytes(raster, offset, byte);
-    out.writeByte(0x00);
+    out.writeByte(0);
 
     // ---------------------------------
     // GIF Terminator

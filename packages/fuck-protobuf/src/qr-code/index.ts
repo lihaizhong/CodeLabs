@@ -18,7 +18,6 @@ import { BitBuffer } from "./bit-buffer";
 import { BitByte } from "./bit-byte";
 import { RSBlock, RSBlockCount } from "./block";
 import { QRErrorCorrectLevel } from "./constants";
-import { createGifTag } from "./extensions";
 import { Base64DecodeInputStream } from "./extensions/Base64DecodeInputStream";
 import { Polynomial } from "./polynomial";
 import { Util } from "./util";
@@ -61,7 +60,6 @@ export class QRCode {
     numChars: number
   ): (s: string) => number[] {
     // create conversion map.
-
     const unicodeMap = (() => {
       const bin = new Base64DecodeInputStream(unicodeData);
       const read = () => {
@@ -128,8 +126,6 @@ export class QRCode {
     };
   }
 
-  private readonly typeNumber: number;
-
   private readonly errorCorrectLevel: number;
 
   private modules: boolean[][] = [];
@@ -140,27 +136,29 @@ export class QRCode {
 
   private dataList: BitByte[] = [];
 
-  constructor(typeNumber: number, errorCorrectLevel: "L" | "M" | "Q" | "H") {
-    this.typeNumber = typeNumber;
+  constructor(
+    private readonly typeNumber: number,
+    errorCorrectLevel: "L" | "M" | "Q" | "H"
+  ) {
     this.errorCorrectLevel = QRErrorCorrectLevel[errorCorrectLevel];
   }
 
   private makeImpl(test: boolean, maskPattern: number): void {
     this.moduleCount = this.typeNumber * 4 + 17;
     this.modules = ((moduleCount: number) => {
-      const modules = new Array(moduleCount);
+      const modules: boolean[][] = [];
 
       // 预设一个 moduleCount * moduleCount 的空白矩阵
       for (let row = 0; row < moduleCount; row++) {
-        modules[row] = new Array(moduleCount);
+        modules[row] = [];
 
         for (let col = 0; col < moduleCount; col++) {
-          modules[row][col] = null;
+          modules[row][col] = null as unknown as boolean;
         }
       }
 
       return modules;
-    })(this.moduleCount);
+    })(this.moduleCount);;
 
     const count = this.moduleCount - 7;
 
@@ -412,8 +410,8 @@ export class QRCode {
     bitBuffer: BitBuffer,
     rsBlocks: RSBlockCount[]
   ): number[] {
-    const dcdata = new Array(rsBlocks.length);
-    const ecdata = new Array(rsBlocks.length);
+    const dcdata: number[][] = [];
+    const ecdata: number[][] = [];
     let offset = 0;
     let maxDcCount = 0;
     let maxEcCount = 0;
@@ -425,9 +423,9 @@ export class QRCode {
       maxDcCount = Math.max(maxDcCount, dcCount);
       maxEcCount = Math.max(maxEcCount, ecCount);
 
-      dcdata[r] = new Array(dcCount);
+      dcdata[r] = [];
 
-      for (let i = 0; i < dcdata[r].length; i++) {
+      for (let i = 0; i < dcCount; i++) {
         dcdata[r][i] = 0xff & bitBuffer.buffer[i + offset];
       }
 
@@ -456,8 +454,7 @@ export class QRCode {
     for (let i = 0; i < maxDcCount; i++) {
       for (let r = 0; r < rsBlocks.length; r++) {
         if (i < dcdata[r].length) {
-          data[index] = dcdata[r][i];
-          index++;
+          data[index++] = dcdata[r][i];
         }
       }
     }
@@ -465,8 +462,7 @@ export class QRCode {
     for (let i = 0; i < maxEcCount; i++) {
       for (let r = 0; r < rsBlocks.length; r++) {
         if (i < ecdata[r].length) {
-          data[index] = ecdata[r][i];
-          index++;
+          data[index++] = ecdata[r][i];
         }
       }
     }
@@ -496,126 +492,4 @@ export class QRCode {
   public make(): void {
     this.makeImpl(false, this.getBestMaskPattern());
   }
-}
-
-// ---------------------------------------------------------------------
-// returns qrcode function.
-
-export interface ICreateQrCodeImgOptions {
-  size?: number;
-  typeNumber?: number;
-  errorCorrectLevel?: "L" | "M" | "Q" | "H";
-  black?: string;
-  white?: string;
-}
-
-function parseOptions(options: ICreateQrCodeImgOptions = {}) {
-  const opts = { ...options };
-  const typeNumber = opts.typeNumber ?? 4;
-  const errorCorrectLevel = opts.errorCorrectLevel ?? "M";
-  const size = opts.size ?? 500;
-  const black = opts.black ?? "#000000";
-  const white = opts.white ?? "#FFFFFF";
-
-  return { typeNumber, errorCorrectLevel, size, black, white };
-}
-
-const calcCellSizeAndMargin = (moduleCount: number, size: number) => ({
-  margin: ~~(size - moduleCount * ~~(size / moduleCount)) / 2,
-  cellSize: ~~(size / moduleCount) || 2,
-});
-
-export function createQRCodeToGIF(
-  text: string,
-  options?: ICreateQrCodeImgOptions
-): string {
-  const { typeNumber, errorCorrectLevel, size, black, white } =
-    parseOptions(options);
-  let qr: QRCode;
-
-  try {
-    qr = new QRCode(typeNumber, errorCorrectLevel);
-    qr.addData(text);
-    qr.make();
-  } catch (e) {
-    if (typeNumber >= 40) {
-      throw new Error("Text too long to encode");
-    }
-
-    return arguments.callee(text, {
-      size,
-      errorCorrectLevel,
-      typeNumber: typeNumber + 1,
-      black,
-      white,
-    });
-  }
-
-  // calc cellsize and margin
-  const moduleCount = qr.getModuleCount();
-  const { margin: min, cellSize } = calcCellSizeAndMargin(moduleCount, size);
-  const max = moduleCount * cellSize + min;
-
-  return createGifTag(
-    size,
-    size,
-    (x: number, y: number) => {
-      if (min <= x && x < max && min <= y && y < max) {
-        const c = ~~((x - min) / cellSize);
-        const r = ~~((y - min) / cellSize);
-
-        return qr.isDark(r, c) ? 0 : 1;
-      }
-
-      return 1;
-    },
-    black,
-    white
-  );
-}
-
-export function createQRCodeToHTML(
-  text: string,
-  options?: ICreateQrCodeImgOptions
-): string {
-  const { typeNumber, errorCorrectLevel, size, black, white } =
-    parseOptions(options);
-  let qr: QRCode;
-
-  try {
-    qr = new QRCode(typeNumber, errorCorrectLevel);
-    qr.addData(text);
-    qr.make();
-  } catch (e) {
-    if (typeNumber >= 40) {
-      throw new Error("Text too long to encode");
-    }
-
-    return arguments.callee(text, {
-      size,
-      errorCorrectLevel,
-      typeNumber: typeNumber + 1,
-      black,
-      white,
-    });
-  }
-  // calc cellsize and margin
-  const moduleCount = qr.getModuleCount();
-  const { margin, cellSize } = calcCellSizeAndMargin(moduleCount, size);
-  const commonStyle = "border-width: 0px; border-style: none; border-collapse: collapse; padding: 0px;";
-  let qrHtml = `<table style="${commonStyle} margin: ${margin}px;"><tbody>`;
-
-  for (let r = 0; r < moduleCount; r++) {
-    qrHtml += "<tr>";
-
-    for (let c = 0; c < moduleCount; c++) {
-      qrHtml += `<td style="${commonStyle} margin: 0px; width: ${cellSize}px; height: ${cellSize}px; background-color: ${
-        qr.isDark(r, c) ? "#000000" : "#ffffff"
-      };"/>`;
-    }
-
-    qrHtml += "</tr>";
-  }
-
-  return qrHtml + "</tbody></table>";
 }

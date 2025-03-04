@@ -2,7 +2,6 @@ import { ByteArrayOutputStream } from "../ByteArrayOutputStream";
 export declare class GifImage {
     private readonly width;
     private readonly height;
-    private signature;
     private data;
     constructor(width: number, height: number);
     private getLZWRaster;

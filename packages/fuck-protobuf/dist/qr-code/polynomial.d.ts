@@ -1,5 +1,5 @@
 export declare class Polynomial {
-    private num;
+    private readonly num;
     constructor(num: number[], shift: number);
     get length(): number;
     getAt(index: number): number;

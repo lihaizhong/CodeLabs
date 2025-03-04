@@ -3,25 +3,28 @@
 // ---------------------------------------------------------------------
 
 export class LZWTable {
-  private map: Map<string, number> = new Map();
+  private map: Record<string, number> = {};
+
+  private mapSize: number = 0;
 
   public get size(): number {
-    return this.map.size;
+    return this.mapSize;
   }
 
   public add(key: string): void {
-    if (this.map.has(key)) {
+    if (this.contains(key)) {
       throw new Error(`dup key: ${key}`);
     }
 
-    this.map.set(key, this.map.size);
+    this.map[key] = this.mapSize;
+    this.mapSize++;
   }
 
   public indexOf(key: string): number {
-    return this.map.get(key) ?? -1;
+    return this.map[key] ?? -1;
   }
 
   public contains(key: string): boolean {
-    return this.map.has(key);
+    return this.map[key] != undefined;
   }
 }
