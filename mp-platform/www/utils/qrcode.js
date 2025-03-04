@@ -1255,15 +1255,13 @@ var qr8BitByte = function (data) {
     _parsedData.push(byteArray)
   }
 
-  _parsedData = Array.prototype.concat.apply([], _parsedData)
+  const _bytes = Array.prototype.concat.apply([], _parsedData)
 
-  if (_parsedData.length != _data.length) {
-    _parsedData.unshift(191)
-    _parsedData.unshift(187)
-    _parsedData.unshift(239)
+  if (_bytes.length != _data.length) {
+    _bytes.unshift(191)
+    _bytes.unshift(187)
+    _bytes.unshift(239)
   }
-
-  const _bytes = _parsedData
 
   _this.getMode = function () {
     return _mode

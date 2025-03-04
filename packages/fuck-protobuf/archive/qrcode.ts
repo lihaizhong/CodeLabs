@@ -37,14 +37,14 @@ const qrcode = function (typeNumber: number, errorCorrectLevel: 'L' | 'M' | 'Q' 
 
   const _typeNumber = typeNumber
   const _errorCorrectLevel = QRErrorCorrectLevel[errorCorrectLevel]
-  let _modules: any = null
+  let _modules: boolean[][] = []
   let _moduleCount = 0
-  let _dataCache: any = null
+  let _dataCache: number[] | null = null
   const _dataList: any[] = []
 
   const _this: any = {}
 
-  const makeImpl = function (test: any, maskPattern: number): any {
+  const makeImpl = function (test: boolean, maskPattern: number) {
     _moduleCount = _typeNumber * 4 + 17
     _modules = (function (moduleCount) {
       const modules = new Array(moduleCount)
@@ -154,7 +154,7 @@ const qrcode = function (typeNumber: number, errorCorrectLevel: 'L' | 'M' | 'Q' 
     }
   }
 
-  var setupTypeNumber = function (test: any) {
+  var setupTypeNumber = function (test: boolean) {
     const bits = QRUtil.getBCHTypeNumber(_typeNumber)
 
     for (var i = 0; i < 18; i += 1) {
@@ -168,7 +168,7 @@ const qrcode = function (typeNumber: number, errorCorrectLevel: 'L' | 'M' | 'Q' 
     }
   }
 
-  var setupTypeInfo = function (test: any, maskPattern: number) {
+  var setupTypeInfo = function (test: boolean, maskPattern: number) {
     const data = (_errorCorrectLevel << 3) | maskPattern
     const bits = QRUtil.getBCHTypeInfo(data)
 
@@ -202,7 +202,7 @@ const qrcode = function (typeNumber: number, errorCorrectLevel: 'L' | 'M' | 'Q' 
     _modules[_moduleCount - 8][8] = !test
   }
 
-  var mapData = function (data: any, maskPattern: number) {
+  var mapData = function (data: number[], maskPattern: number) {
     let inc = -1
     let row = _moduleCount - 1
     let bitIndex = 7
@@ -311,7 +311,7 @@ const qrcode = function (typeNumber: number, errorCorrectLevel: 'L' | 'M' | 'Q' 
     return data
   }
 
-  var createData = function (typeNumber: number, errorCorrectLevel: number, dataList: any) {
+  var createData = function (typeNumber: number, errorCorrectLevel: number, dataList: any[]) {
     const rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel)
 
     const buffer = qrBitBuffer()
@@ -359,7 +359,7 @@ const qrcode = function (typeNumber: number, errorCorrectLevel: 'L' | 'M' | 'Q' 
     return createBytes(buffer, rsBlocks)
   }
 
-  _this.addData = function (data: any) {
+  _this.addData = function (data: string) {
     const newData = qr8BitByte(data)
     _dataList.push(newData)
     _dataCache = null
@@ -369,7 +369,7 @@ const qrcode = function (typeNumber: number, errorCorrectLevel: 'L' | 'M' | 'Q' 
     if (row < 0 || _moduleCount <= row || col < 0 || _moduleCount <= col) {
       throw new Error(row + ',' + col)
     }
-    return _modules[row][col]
+    return _modules![row][col]
   }
 
   _this.getModuleCount = function () {
@@ -418,7 +418,7 @@ const qrcode = function (typeNumber: number, errorCorrectLevel: 'L' | 'M' | 'Q' 
     return qrHtml
   }
 
-  _this.createImgTag = function (cellSize: number, margin: number | undefined, size: number, black: any, white: any) {
+  _this.createImgTag = function (cellSize: number, margin: number | undefined, size: number, black: string, white: string) {
     
     cellSize = cellSize || 2
     margin = typeof margin === 'undefined' ? cellSize * 4 : margin
@@ -451,7 +451,7 @@ const qrcode = function (typeNumber: number, errorCorrectLevel: 'L' | 'M' | 'Q' 
 // ---------------------------------------------------------------------
 
 qrcode.stringToBytes = function (s: string) {
-  const bytes: any[] = []
+  const bytes: number[] = []
   for (let i = 0; i < s.length; i += 1) {
     const c = s.charCodeAt(i)
     bytes.push(c & 0xff)
@@ -468,7 +468,7 @@ qrcode.stringToBytes = function (s: string) {
  * [16bit Unicode],[16bit Bytes], ...
  * @param numChars
  */
-qrcode.createStringToBytes = function (unicodeData: any, numChars: number) {
+qrcode.createStringToBytes = function (unicodeData: string, numChars: number) {
   // create conversion map.
 
   const unicodeMap = (function () {
@@ -502,7 +502,7 @@ qrcode.createStringToBytes = function (unicodeData: any, numChars: number) {
   const unknownChar = '?'.charCodeAt(0)
 
   return function (s: string) {
-    const bytes: any[] = []
+    const bytes: number[] = []
     for (let i = 0; i < s.length; i += 1) {
       const c = s.charCodeAt(i)
       if (c < 128) {
@@ -745,7 +745,7 @@ var QRUtil = (function () {
     }
   }
 
-  _this.getLostPoint = function (qrcode: any) {
+  _this.getLostPoint = function (qrcode: QRCode) {
     const moduleCount = qrcode.getModuleCount()
 
     let lostPoint = 0
@@ -857,7 +857,7 @@ var QRUtil = (function () {
 // QRMath
 // ---------------------------------------------------------------------
 
-var QRMath: any = (function () {
+var QRMath = (function () {
   const EXP_TABLE = new Array(256)
   const LOG_TABLE = new Array(256)
 
@@ -872,7 +872,10 @@ var QRMath: any = (function () {
     LOG_TABLE[EXP_TABLE[i]] = i
   }
 
-  const _this: any = {}
+  const _this = {} as {
+    glog: (n: number) => number,
+    gexp: (n: number) => number,
+  }
 
   _this.glog = function (n: number) {
     if (n < 1) {
@@ -901,7 +904,7 @@ var QRMath: any = (function () {
 // qrPolynomial
 // ---------------------------------------------------------------------
 
-function qrPolynomial(num: any, shift: number) {
+function qrPolynomial(num: number[], shift: number) {
   if (typeof num.length === 'undefined') {
     throw new Error(num.length + '/' + shift)
   }
@@ -1188,7 +1191,7 @@ var QRRSBlock = (function () {
 // ---------------------------------------------------------------------
 
 var qrBitBuffer = function () {
-  const _buffer: any[] = []
+  const _buffer: number[] = []
   let _length = 0
 
   const _this: any = {}
@@ -1212,7 +1215,7 @@ var qrBitBuffer = function () {
     return _length
   }
 
-  _this.putBit = function (bit: any) {
+  _this.putBit = function (bit: boolean) {
     const bufIndex = Math.floor(_length / 8)
     if (_buffer.length <= bufIndex) {
       _buffer.push(0)
@@ -1235,13 +1238,13 @@ var qrBitBuffer = function () {
 var qr8BitByte = function (data: string) {
   const _mode = QRMode.MODE_8BIT_BYTE
   const _data = data
-  let _parsedData: any = []
+  let _parsedData: number[][] = []
 
   const _this: any = {}
 
   // Added to support UTF-8 Characters
   for (let i = 0, l = _data.length; i < l; i++) {
-    const byteArray: any[] = []
+    const byteArray: number[] = []
     const code = _data.charCodeAt(i)
 
     if (code > 0x10000) {
@@ -1264,15 +1267,13 @@ var qr8BitByte = function (data: string) {
     _parsedData.push(byteArray)
   }
 
-  _parsedData = Array.prototype.concat.apply([], _parsedData)
+  const _bytes: number[] = Array.prototype.concat.apply([], _parsedData)
 
-  if (_parsedData.length != _data.length) {
-    _parsedData.unshift(191)
-    _parsedData.unshift(187)
-    _parsedData.unshift(239)
+  if (_bytes.length != _data.length) {
+    _bytes.unshift(191)
+    _bytes.unshift(187)
+    _bytes.unshift(239)
   }
-
-  const _bytes = _parsedData
 
   _this.getMode = function () {
     return _mode
@@ -1300,7 +1301,7 @@ var qr8BitByte = function (data: string) {
 // ---------------------------------------------------------------------
 
 const byteArrayOutputStream = function () {
-  const _bytes: any[] = []
+  const _bytes: number[] = []
 
   const _this: any = {}
 
@@ -1681,7 +1682,7 @@ const gifImage = function (width: number, height: number) {
   return _this
 }
 
-var createImgTag = function (width: number, height: number, getPixel: any, black: any, white: any) {
+var createImgTag = function (width: number, height: number, getPixel: (x: number, y: number) => 0 | 1, black: string, white: string) {
   const gif = gifImage(width, height)
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {

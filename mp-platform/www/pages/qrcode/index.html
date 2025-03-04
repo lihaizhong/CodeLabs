@@ -61,7 +61,8 @@
 
     const QRCodeUtils = {
       getSize() {
-        return document.body.clientWidth * 0.6;
+        // return document.body.clientWidth * 0.6;
+        return 258;
       },
 
       // --- insertQrCodeImg
@@ -78,7 +79,7 @@
 
       insertQrCodeToGIF(size) {
         console.time('createQRCodeToGIF');
-        const img = createQRCodeToGIF("this is a test");
+        const img = createQRCodeToGIF("i generate a gif");
         console.timeEnd('createQRCodeToGIF');
 
         insertContainer('gif', img, size);
