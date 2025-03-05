@@ -4,6 +4,7 @@ import ReadyGo from "../../utils/ReadyGo";
 let player;
 let parser;
 const readyGo = new ReadyGo();
+const cache = new Map();
 
 Component({
   properties: {
@@ -49,9 +50,18 @@ Component({
   methods: {
     async initialize() {
       try {
-        this.setData({ message: "准备下载资源" });
-        const videoItem = await parser.load(this.properties.url);
-        this.setData({ message: "下载资源成功" });
+        let videoItem
+
+        if (cache.has(this.properties.url)) {
+          this.setData({ message: "匹配到缓存" })
+          videoItem = cache.get(this.properties.url);
+        } else {
+          this.setData({ message: "准备下载资源" });
+          videoItem = await parser.load(this.properties.url);
+          cache.set(this.properties.url, videoItem);
+          this.setData({ message: "下载资源成功" });
+        }
+
         await player.mount(videoItem);
         this.setData({ message: "资源装载成功" });
         player.start();

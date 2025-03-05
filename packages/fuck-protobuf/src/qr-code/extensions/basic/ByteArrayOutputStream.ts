@@ -9,7 +9,7 @@ export class ByteArrayOutputStream {
     this.bytes.push(byte & 0xff);
   }
 
-  public writeBytes(bytes: number[], offset?: number, length?: number): void {
+  public writeBytes(bytes: Uint8Array | number[], offset?: number, length?: number): void {
     const off = offset || 0;
     const len = length || bytes.length;
 

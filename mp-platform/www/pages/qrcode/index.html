@@ -26,7 +26,7 @@
   </style>
   <script type="module">
     import { createQrCodeImg } from "../../utils/qrcode";
-    import { createQRCodeToGIF, createQRCodeToHTML } from "../../utils/fuck-protobuf";
+    import { createQRCodeToGIF, createQRCodeToPNG, createQRCodeToHTML } from "../../utils/fuck-protobuf";
 
     function insertContainer(title, source, size, type = 'img') {
       const $root = document.body;
@@ -75,6 +75,16 @@
         insertContainer('origin gif', img, size);
       },
 
+      // --- insertQrCodeToPNG
+
+      insertQrCodeToPNG(size) {
+        console.time('createQRCodeToPNG');
+        const img = createQRCodeToPNG("i generate a png");
+        console.timeEnd('createQRCodeToPNG');
+
+        insertContainer('png', img, size);
+      },
+
       // --- insertQrCodeToGIF
 
       insertQrCodeToGIF(size) {
@@ -101,6 +111,9 @@
 
       setTimeout(() => {
         QRCodeUtils.insertQrCodeImg(size);
+      }, 0);
+      setTimeout(() => {
+        QRCodeUtils.insertQrCodeToPNG(size);
       }, 0);
       setTimeout(() => {
         QRCodeUtils.insertQrCodeToGIF(size);

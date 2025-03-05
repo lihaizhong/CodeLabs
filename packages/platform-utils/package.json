@@ -2,6 +2,7 @@
   "name": "platform-utils",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "",
   "scripts": {
     "update": "",
@@ -15,6 +16,7 @@
   },
   "dependencies": {
     "crc-32": "^1.2.2",
-    "fflate": "^0.8.2"
+    "fflate": "^0.8.2",
+    "terminal-image": "^3.1.1"
   }
 }

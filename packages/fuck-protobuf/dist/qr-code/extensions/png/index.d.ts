@@ -4,8 +4,11 @@ export declare class PngImage {
     private readonly height;
     private data;
     constructor(width: number, height: number);
-    private getLZ77Raster;
+    toInt8(num: number): ArrayBuffer;
+    toInt32(num: number): ArrayBuffer;
+    private createChunk;
+    get length(): number;
     setPixel(x: number, y: number, pixel: number): void;
-    write(out: ByteArrayOutputStream, blackColor?: string, whiteColor?: string): void;
+    write(out: ByteArrayOutputStream): void;
 }
-export declare function createPngTag(width: number, height: number, getPixel: (x: number, y: number) => 0 | 1, black: string, white: string): string;
+export declare function createPngTag(width: number, height: number, getPixel: (x: number, y: number) => number): string;

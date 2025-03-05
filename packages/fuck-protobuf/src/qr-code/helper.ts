@@ -3,7 +3,7 @@
 // returns qrcode function.
 
 import { QRCode } from ".";
-import { createGifTag } from "./extensions";
+import { createGifTag, createPngTag } from "./extensions";
 
 export interface ICreateQrCodeImgOptions {
   size?: number;
@@ -18,8 +18,8 @@ function parseOptions(options: ICreateQrCodeImgOptions = {}) {
   const typeNumber = opts.typeNumber ?? 4;
   const errorCorrectLevel = opts.errorCorrectLevel ?? "M";
   const size = opts.size ?? 500;
-  const black = opts.black ?? "#000000";
-  const white = opts.white ?? "#FFFFFF";
+  const black = opts.black ?? "#000000FF";
+  const white = opts.white ?? "#FFFFFFFF";
 
   return { typeNumber, errorCorrectLevel, size, black, white };
 }
@@ -79,6 +79,55 @@ export function createQRCodeToGIF(
     },
     black,
     white
+  );
+}
+
+export function createQRCodeToPNG(
+  text: string,
+  options?: ICreateQrCodeImgOptions
+): string {
+  const { typeNumber, errorCorrectLevel, size, black, white } =
+    parseOptions(options);
+  let qr: QRCode;
+
+  try {
+    qr = new QRCode(typeNumber, errorCorrectLevel);
+    qr.addData(text);
+    qr.make();
+  } catch (e) {
+    if (typeNumber >= 40) {
+      throw new Error("Text too long to encode");
+    }
+
+    return arguments.callee(text, {
+      size,
+      errorCorrectLevel,
+      typeNumber: typeNumber + 1,
+      black,
+      white,
+    });
+  }
+
+  // calc cellsize and margin
+  const moduleCount = qr.getModuleCount();
+  const { margin: min, cellSize } = calcCellSizeAndMargin(moduleCount, size);
+  const max = moduleCount * cellSize + min;
+  const BLACK = +black.replace("#", "0x");
+  const WHITE = +white.replace("#", "0x");
+
+  return createPngTag(
+    size,
+    size,
+    (x: number, y: number) => {
+      if (min <= x && x < max && min <= y && y < max) {
+        const c = ~~((x - min) / cellSize);
+        const r = ~~((y - min) / cellSize);
+
+        return qr.isDark(r, c) ? BLACK : WHITE;
+      }
+
+      return WHITE;
+    }
   );
 }
 

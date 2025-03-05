@@ -7,7 +7,7 @@
 ## 推荐文章
 
 - [PNG文件结构](https://www.cnblogs.com/Yuuki-/p/7868858.html)
-- [一步一步解码 PNG 图片](https://vivaxyblog.github.io/2019/12/07/decode-a-png-image-with-javascript-cn.html)
+- [PNG编解码算法详解](https://zhuanlan.zhihu.com/p/196797277)
 - [PNG的算法原理](https://zhuanlan.zhihu.com/p/106945903)
 - [PNG文件解读(1):PNG/APNG格式的前世今生](https://www.zhoulujun.cn/html/theory/multimedia/CG-CV-IP/8409.html)
 - [PNG文件解读(2):PNG格式文件结构与数据结构解读—解码PNG数据](https://www.cnblogs.com/zhoulujun/p/15113029.html)

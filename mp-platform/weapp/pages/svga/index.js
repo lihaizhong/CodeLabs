@@ -1,5 +1,11 @@
 import { svgaSources, getOneAtRandom } from "../../utils/constants";
 
+const sources = [
+  'http://10.1.133.197:5151/svga/序列1.svga',
+  'http://10.1.133.197:5151/svga/序列2.svga',
+  'http://10.1.133.197:5151/svga/序列3.svga'
+]
+
 Page({
   data: {
     url: "",
@@ -20,11 +26,11 @@ Page({
     let prev = current - 1;
 
     if (prev < 0) {
-      prev = svgaSources.length - 1;
+      prev = sources.length - 1;
     }
 
     this.setData({
-      url: svgaSources[prev],
+      url: sources[prev],
       current: prev,
     });
   },
@@ -33,21 +39,21 @@ Page({
     const { current } = this.data;
     let next = current + 1;
 
-    if (next > svgaSources.length - 1) {
+    if (next > sources.length - 1) {
       next = 0;
     }
 
     this.setData({
-      url: svgaSources[next],
+      url: sources[next],
       current: next,
     });
   },
 
   onLoad() {
-    this.handleSwitchAtRandom();
-    // this.setData({
-    //   current: 40,
-    //   url: svgaSources[40]
-    // })
+    // this.handleSwitchAtRandom();
+    this.setData({
+      current: 40,
+      url: 'http://10.1.133.197:5151/svga/序列1.svga'
+    })
   },
 });

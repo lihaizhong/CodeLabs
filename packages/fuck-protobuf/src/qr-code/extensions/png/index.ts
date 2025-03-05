@@ -1,75 +1,134 @@
+import { deflateSync } from "fflate";
 import { Base64EncodeOutputStream } from "../basic/Base64EncodeOutputStream";
 import { ByteArrayOutputStream } from "../basic/ByteArrayOutputStream";
+import { CRC32 } from "./CRC32";
 
 export class PngImage {
-  private data: number[] = [];
+  private data: Uint32Array;
 
-  constructor(private readonly width: number, private readonly height: number) {}
+  constructor(
+    private readonly width: number,
+    private readonly height: number
+  ) {
+    this.data = new Uint32Array(width * height);
+  }
 
-  private getLZ77Raster(): number[] {
-    return []
+  toInt8(num: number): ArrayBuffer {
+    const arr = new ArrayBuffer(1);
+    const view = new DataView(arr);
+
+    view.setUint8(0, num);
+
+    return arr;
+  }
+
+  toInt32(num: number): ArrayBuffer {
+    const arr = new ArrayBuffer(4);
+    const view = new DataView(arr);
+
+    view.setUint32(0, num, false);
+
+    return arr;
+  }
+
+  private createChunk(
+    dataLength: number,
+    chunkTypeBuffer: number[],
+    dataBuffer: Uint8Array | number[] = []
+  ) {
+    const chunkType = new Uint8Array(chunkTypeBuffer);
+
+    return new Uint8Array([
+      // Length
+      ...new Uint8Array(this.toInt32(dataLength)),
+      // ChunkType
+      ...chunkType,
+      // ChunkData
+      ...dataBuffer,
+      // CRC
+      ...new Uint8Array(
+        this.toInt32(new CRC32([...chunkType, ...dataBuffer]).read())
+      ),
+    ]);
+  }
+
+  public get length(): number {
+    return this.data.length;
   }
 
   public setPixel(x: number, y: number, pixel: number): void {
     this.data[y * this.width + x] = pixel;
   }
 
-  write(
-    out: ByteArrayOutputStream,
-    blackColor = "#000000",
-    whiteColor = "#ffffff"
-  ): void {
+  public write(out: ByteArrayOutputStream): void {
     const { width, height } = this;
     // ---------------------------------
     // PNG Signature
-    // 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a
 
-    out.writeBytes([137, 80, 78, 71, 13, 10, 26, 10]);
+    out.writeBytes([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
     // ---------------------------------
     // IHDR
 
-    out.writeShort(width);
-    out.writeShort(height);
+    const IHDR = this.createChunk(
+      // length
+      13,
+      // chunkType
+      [0x49, 0x48, 0x44, 0x52],
+      new Uint8Array([
+        // width
+        ...new Uint8Array(this.toInt32(width)),
+        // height
+        ...new Uint8Array(this.toInt32(height)),
+        // bitDepth
+        ...new Uint8Array(this.toInt8(1)),
+        // colorType
+        ...new Uint8Array(this.toInt8(0)),
+        // compression
+        ...new Uint8Array(this.toInt8(0)),
+        // filter
+        ...new Uint8Array(this.toInt8(0)),
+        // interlace
+        ...new Uint8Array(this.toInt8(0)),
+      ])
+    );
 
-    // colorType
-    // out.writeByte(0);
-
-    // compression
-    // out.writeByte(0);
-
-    // filter
-    // out.writeByte(0);
-
-    // interlace
-    // out.writeByte(0);
+    out.writeBytes(IHDR);
 
     // ---------------------------------
     // IDAT
 
+    const data = deflateSync(new Uint8Array(this.data.buffer));
+    const IDAT = this.createChunk(data.length, [0x49, 0x44, 0x41, 0x54], data);
+
+    out.writeBytes(IDAT);
+
     // ---------------------------------
     // IEND
+
+    const IEND = this.createChunk(0, [0x49, 0x45, 0x4e, 0x44]);
+
+    out.writeBytes(IEND);
   }
 }
 
 export function createPngTag(
   width: number,
   height: number,
-  getPixel: (x: number, y: number) => 0 | 1,
-  black: string,
-  white: string
+  getPixel: (x: number, y: number) => number
 ): string {
   const png = new PngImage(width, height);
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      png.setPixel(x, y, getPixel(x, y));
-    }
+  for (let i = 0; i < png.length; i++) {
+    const x = i % width;
+    const y = Math.floor(i / width);
+
+    png.setPixel(x, y, getPixel(x, y));
   }
 
   const b = new ByteArrayOutputStream();
 
-  png.write(b, black, white);
+  png.write(b);
 
   const base64 = new Base64EncodeOutputStream();
   const bytes = b.toByteArray();

@@ -6,4 +6,5 @@ export interface ICreateQrCodeImgOptions {
     white?: string;
 }
 export declare function createQRCodeToGIF(text: string, options?: ICreateQrCodeImgOptions): string;
+export declare function createQRCodeToPNG(text: string, options?: ICreateQrCodeImgOptions): string;
 export declare function createQRCodeToHTML(text: string, options?: ICreateQrCodeImgOptions): string;
