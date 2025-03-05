@@ -1,7 +1,8 @@
-import { deflateSync } from "fflate";
+import { zlibSync } from "fflate";
+import { buf } from "crc-32";
 import { Base64EncodeOutputStream } from "../basic/Base64EncodeOutputStream";
 import { ByteArrayOutputStream } from "../basic/ByteArrayOutputStream";
-import { CRC32 } from "./CRC32";
+// import { CRC32 } from "./CRC32";
 
 export class PngImage {
   private data: Uint32Array;
@@ -31,7 +32,7 @@ export class PngImage {
     return arr;
   }
 
-  private createChunk(
+  private addChunk(
     dataLength: number,
     chunkTypeBuffer: number[],
     dataBuffer: Uint8Array | number[] = []
@@ -47,13 +48,9 @@ export class PngImage {
       ...dataBuffer,
       // CRC
       ...new Uint8Array(
-        this.toInt32(new CRC32([...chunkType, ...dataBuffer]).read())
+        this.toInt32(buf([...chunkType, ...dataBuffer]))
       ),
     ]);
-  }
-
-  public get length(): number {
-    return this.data.length;
   }
 
   public setPixel(x: number, y: number, pixel: number): void {
@@ -65,12 +62,12 @@ export class PngImage {
     // ---------------------------------
     // PNG Signature
 
-    out.writeBytes([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    const SIGNATURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
     // ---------------------------------
     // IHDR
 
-    const IHDR = this.createChunk(
+    const IHDR = this.addChunk(
       // length
       13,
       // chunkType
@@ -93,22 +90,23 @@ export class PngImage {
       ])
     );
 
-    out.writeBytes(IHDR);
+    // out.writeBytes(IHDR);
 
     // ---------------------------------
     // IDAT
 
-    const data = deflateSync(new Uint8Array(this.data.buffer));
-    const IDAT = this.createChunk(data.length, [0x49, 0x44, 0x41, 0x54], data);
+    const data = zlibSync(new Uint8Array(this.data.buffer));
+    const IDAT = this.addChunk(data.length, [0x49, 0x44, 0x41, 0x54], data);
 
-    out.writeBytes(IDAT);
+    // out.writeBytes(IDAT);
 
     // ---------------------------------
     // IEND
 
-    const IEND = this.createChunk(0, [0x49, 0x45, 0x4e, 0x44]);
+    const IEND = this.addChunk(0, [0x49, 0x45, 0x4e, 0x44]);
 
-    out.writeBytes(IEND);
+    // out.writeBytes(IEND);
+    out.writeBytes(new Uint8Array([...SIGNATURE, ...IHDR, ...IDAT, ...IEND]));
   }
 }
 
@@ -119,11 +117,10 @@ export function createPngTag(
 ): string {
   const png = new PngImage(width, height);
 
-  for (let i = 0; i < png.length; i++) {
-    const x = i % width;
-    const y = Math.floor(i / width);
-
-    png.setPixel(x, y, getPixel(x, y));
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      png.setPixel(x, y, getPixel(x, y));
+    }
   }
 
   const b = new ByteArrayOutputStream();

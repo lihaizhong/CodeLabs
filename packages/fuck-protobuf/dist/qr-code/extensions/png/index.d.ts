@@ -6,8 +6,7 @@ export declare class PngImage {
     constructor(width: number, height: number);
     toInt8(num: number): ArrayBuffer;
     toInt32(num: number): ArrayBuffer;
-    private createChunk;
-    get length(): number;
+    private addChunk;
     setPixel(x: number, y: number, pixel: number): void;
     write(out: ByteArrayOutputStream): void;
 }

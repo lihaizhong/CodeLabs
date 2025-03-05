@@ -2,8 +2,8 @@
 // ---------------------------------------------------------------------
 // returns qrcode function.
 
-import { QRCode } from ".";
-import { createGifTag, createPngTag } from "./extensions";
+import { QRCode } from "..";
+import { createGifTag, createPngTag } from ".";
 
 export interface ICreateQrCodeImgOptions {
   size?: number;

@@ -1,6 +1,9 @@
-import { deflateSync } from "fflate";
+import { zlibSync } from "fflate";
+// import zlib from "zlib";
+import fs from "fs";
 import CRC from "crc-32";
-import terminal from "terminal-image";
+// import terminal from "terminal-image";
+// import { encode } from "uint8-to-base64";
 
 // File Signature
 const PNG_SIGNATURE = new Uint8Array([
@@ -29,24 +32,44 @@ const IEND = createChunk(0, IEND_CHUNK_TYPE);
 function generateSquareImage(width, height) {
   // Create Pixel Data Buffer
   const pixelData = new Uint32Array(width * height);
-  const xBound = width / 4;
-  const yBound = height / 4;
+  const xMin = width / 4;
+  const xMax = width - xMin;
+  const yMin = height / 4;
+  const yMax = height - yMin;
 
   // Populate Pixel Data Buffer
-  for (let i = 0; i < pixelData.length; i++) {
-    const x = i % width;
-    const y = Math.floor(i / width);
-
-    if (x < width - xBound && x > xBound && y < height - yBound && y > yBound) {
-      pixelData[i] = 0xff0000ff;
-    } else {
-      pixelData[i] = 0xffffffff;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (x < xMax && x > xMin && y < yMax && y > yMin) {
+        pixelData[y * width + x] = 0xff0000ff;
+      } else {
+        pixelData[y * width + x] = 0xffffffff;
+      }
     }
   }
 
   // Compress Pixel Data
-  const data = deflateSync(new Uint8Array(pixelData.buffer));
+  // zlib.deflate(pixelData, (err, data) => {
+  //   if (err) {
+  //     throw err
+  //   }
 
+  //   // Generate IHDR Chunk
+  //   const IHDR = createChunk(
+  //     IHDR_LENGTH,
+  //     IHDR_CHUNK_TYPE,
+  //     createIHDRData(width, height, 8, 6, 0, 0, 0)
+  //   );
+
+  //   // Generate IDAT Chunk
+  //   const IDAT = createChunk(data.length, IDAT_CHUNK_TYPE, data);
+
+  //   const png = new Uint8Array([...PNG_SIGNATURE, ...IHDR, ...IDAT, ...IEND]);
+
+  //   fs.writeFileSync('auto.png', png, 'binary');
+  // });
+
+  const data = zlibSync(new Uint8Array(pixelData.buffer));
   // Generate IHDR Chunk
   const IHDR = createChunk(
     IHDR_LENGTH,
@@ -57,7 +80,9 @@ function generateSquareImage(width, height) {
   // Generate IDAT Chunk
   const IDAT = createChunk(data.length, IDAT_CHUNK_TYPE, data);
 
-  return new Uint8Array([...PNG_SIGNATURE, ...IHDR, ...IDAT, ...IEND]);
+  const png = new Uint8Array([...PNG_SIGNATURE, ...IHDR, ...IDAT, ...IEND]);
+
+  fs.writeFileSync('auto.png', png, 'binary');
 }
 
 /**
@@ -142,6 +167,4 @@ function toBytesInt8(num) {
   return arr;
 }
 
-const png = generateSquareImage(128, 128);
-
-console.log(await terminal.buffer(png, { width: 256, height: 256 }));
+generateSquareImage(128, 128);
