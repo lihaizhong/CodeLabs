@@ -252,6 +252,8 @@ export const enum PLAYER_PLAY_MODE {
 
 export type PlayerEventCallback = (currentFrame: number) => void;
 
+export type PlayerProcessEventCallback = (percentage: number) => void;
+
 export type PosterEventCallback = () => void;
 
 export interface PlayerConfig {

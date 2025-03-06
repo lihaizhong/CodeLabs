@@ -5,6 +5,7 @@ import {
   Video,
   PlayerConfig,
   PlayerEventCallback,
+  PlayerProcessEventCallback,
 } from "../types";
 import { Brush } from "./brush";
 import { Animator } from "./animator";
@@ -159,7 +160,7 @@ export class Player {
   /**
    * 播放中事件回调
    */
-  public onProcess?: PlayerEventCallback;
+  public onProcess?: PlayerProcessEventCallback;
   /**
    * 结束播放事件回调
    */
@@ -218,12 +219,11 @@ export class Player {
   }
 
   public stepToFrame(frame: number, andPlay = false) {
-    if (!this.entity) return;
-    if (frame >= this.entity.frames || frame < 0) {
+    if (!this.entity || frame < 0 || frame >= this.entity.frames) {
       return;
     }
     this.pause();
-    this.currFrame = frame;
+    this.currFrame = ~~frame;
     if (andPlay) {
       this.startAnimation();
     }
@@ -326,7 +326,7 @@ export class Player {
         }
       );
       this.brush.clearBack();
-      this.onProcess?.(this.currFrame);
+      this.onProcess?.(~~((this.currFrame / this.entity!.frames) * 100) / 100);
       this.currFrame = value;
       this.tail = 0;
     };
