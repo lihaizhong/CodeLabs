@@ -200,6 +200,7 @@ export declare const enum PLAYER_PLAY_MODE {
     FALLBACKS = "fallbacks"
 }
 export type PlayerEventCallback = (currentFrame: number) => void;
+export type PlayerProcessEventCallback = (percentage: number) => void;
 export type PosterEventCallback = () => void;
 export interface PlayerConfig {
     /**

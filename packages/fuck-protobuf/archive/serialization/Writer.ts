@@ -10,7 +10,7 @@ import {
   // writeFixed32,
   writeVarint32,
   writeVarint64,
-} from "../utils";
+} from "../../src/utils";
 import State from "./State";
 import Op from "./Op";
 // import { LongBits } from "../dts";

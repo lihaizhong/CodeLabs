@@ -1,4 +1,4 @@
-import { PlayerConfigOptions, Video, PlayerEventCallback } from "../types";
+import { PlayerConfigOptions, Video, PlayerEventCallback, PlayerProcessEventCallback } from "../types";
 /**
  * SVGA 播放器
  */
@@ -56,7 +56,7 @@ export declare class Player {
     /**
      * 播放中事件回调
      */
-    onProcess?: PlayerEventCallback;
+    onProcess?: PlayerProcessEventCallback;
     /**
      * 结束播放事件回调
      */

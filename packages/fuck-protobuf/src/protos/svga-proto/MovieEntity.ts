@@ -21,67 +21,6 @@ export interface MovieEntityProps {
   sprites: SpriteEntity[] | null;
 }
 
-// export class MovieEntityWriter {
-//   /**
-//    * Encodes the specified MovieEntity message. Does not implicitly {@link com.opensource.svga.MovieEntity.verify|verify} messages.
-//    * @function encode
-//    * @memberof com.opensource.svga.MovieEntity
-//    * @static
-//    * @param {com.opensource.svga.IMovieEntity} message MovieEntity message or plain object to encode
-//    * @param {$protobuf.Writer} [writer] Writer to encode to
-//    * @returns {$protobuf.Writer} Writer
-//    */
-//   static encode(message: MovieEntity, writer: Writer): Writer {
-//     if (!writer) {
-//       writer = Writer.create();
-//     }
-//     if (message.version != null && Object.hasOwn(message, "version")) {
-//       writer.uint32(/* id 1, wireType 2 =*/ 10).string(message.version);
-//     }
-//     if (message.params != null && Object.hasOwn(message, "params")) {
-//       MovieParams.encode(
-//         message.params,
-//         writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
-//       ).ldelim();
-//     }
-//     if (message.images != null && Object.hasOwn(message, "images")) {
-//       const keys = Object.keys(message.images);
-//       for (let i = 0; i < keys.length; ++i) {
-//         writer
-//           .uint32(/* id 3, wireType 2 =*/ 26)
-//           .fork()
-//           .uint32(/* id 1, wireType 2 =*/ 10)
-//           .string(keys[i])
-//           .uint32(/* id 2, wireType 2 =*/ 18)
-//           .bytes(message.images[keys[i]])
-//           .ldelim();
-//       }
-//     }
-//     if (message.sprites != null && message.sprites.length) {
-//       for (let i = 0; i < message.sprites.length; ++i) {
-//         SpriteEntity.encode(
-//           message.sprites[i],
-//           writer.uint32(/* id 4, wireType 2 =*/ 34).fork()
-//         ).ldelim();
-//       }
-//     }
-
-//     return writer;
-//   }
-//   /**
-//    * Encodes the specified MovieEntity message, length delimited. Does not implicitly {@link com.opensource.svga.MovieEntity.verify|verify} messages.
-//    * @function encodeDelimited
-//    * @memberof com.opensource.svga.MovieEntity
-//    * @static
-//    * @param {com.opensource.svga.IMovieEntity} message MovieEntity message or plain object to encode
-//    * @param {$protobuf.Writer} [writer] Writer to encode to
-//    * @returns {$protobuf.Writer} Writer
-//    */
-//   static encodeDelimited(message: MovieEntity, writer: Writer): Writer {
-//     return MovieEntity.encode(message, writer).ldelim();
-//   }
-// }
-
 export default class MovieEntity {
   /**
    * Decodes a MovieEntity message from the specified reader or buffer.

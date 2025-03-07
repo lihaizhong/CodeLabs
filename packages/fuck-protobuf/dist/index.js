@@ -1,471 +1,64 @@
-function getDefaultExportFromCjs (x) {
-	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-}
+const readUint = (buf, pos) => (buf[pos] |
+    (buf[pos + 1] << 8) |
+    (buf[pos + 2] << 16) |
+    (buf[pos + 3] << 24)) >>>
+    0;
+var float = {
+    readFloatLE(buf, pos) {
+        const uint = readUint(buf, pos);
+        const sign = (uint >> 31) * 2 + 1;
+        const exponent = (uint >>> 23) & 255;
+        const mantissa = uint & 8388607;
+        return exponent === 255
+            ? mantissa
+                ? NaN
+                : sign * Infinity
+            : exponent === 0 // denormal
+                ? sign * 1.401298464324817e-45 * mantissa
+                : sign * 2 ** (exponent - 150) * (mantissa + 8388608);
+    },
+};
 
-var float$1;
-var hasRequiredFloat;
-
-function requireFloat () {
-	if (hasRequiredFloat) return float$1;
-	hasRequiredFloat = 1;
-
-	float$1 = factory(factory);
-
-	/**
-	 * Reads / writes floats / doubles from / to buffers.
-	 * @name util.float
-	 * @namespace
-	 */
-
-	/**
-	 * Writes a 32 bit float to a buffer using little endian byte order.
-	 * @name util.float.writeFloatLE
-	 * @function
-	 * @param {number} val Value to write
-	 * @param {Uint8Array} buf Target buffer
-	 * @param {number} pos Target buffer offset
-	 * @returns {undefined}
-	 */
-
-	/**
-	 * Writes a 32 bit float to a buffer using big endian byte order.
-	 * @name util.float.writeFloatBE
-	 * @function
-	 * @param {number} val Value to write
-	 * @param {Uint8Array} buf Target buffer
-	 * @param {number} pos Target buffer offset
-	 * @returns {undefined}
-	 */
-
-	/**
-	 * Reads a 32 bit float from a buffer using little endian byte order.
-	 * @name util.float.readFloatLE
-	 * @function
-	 * @param {Uint8Array} buf Source buffer
-	 * @param {number} pos Source buffer offset
-	 * @returns {number} Value read
-	 */
-
-	/**
-	 * Reads a 32 bit float from a buffer using big endian byte order.
-	 * @name util.float.readFloatBE
-	 * @function
-	 * @param {Uint8Array} buf Source buffer
-	 * @param {number} pos Source buffer offset
-	 * @returns {number} Value read
-	 */
-
-	/**
-	 * Writes a 64 bit double to a buffer using little endian byte order.
-	 * @name util.float.writeDoubleLE
-	 * @function
-	 * @param {number} val Value to write
-	 * @param {Uint8Array} buf Target buffer
-	 * @param {number} pos Target buffer offset
-	 * @returns {undefined}
-	 */
-
-	/**
-	 * Writes a 64 bit double to a buffer using big endian byte order.
-	 * @name util.float.writeDoubleBE
-	 * @function
-	 * @param {number} val Value to write
-	 * @param {Uint8Array} buf Target buffer
-	 * @param {number} pos Target buffer offset
-	 * @returns {undefined}
-	 */
-
-	/**
-	 * Reads a 64 bit double from a buffer using little endian byte order.
-	 * @name util.float.readDoubleLE
-	 * @function
-	 * @param {Uint8Array} buf Source buffer
-	 * @param {number} pos Source buffer offset
-	 * @returns {number} Value read
-	 */
-
-	/**
-	 * Reads a 64 bit double from a buffer using big endian byte order.
-	 * @name util.float.readDoubleBE
-	 * @function
-	 * @param {Uint8Array} buf Source buffer
-	 * @param {number} pos Source buffer offset
-	 * @returns {number} Value read
-	 */
-
-	// Factory function for the purpose of node-based testing in modified global environments
-	function factory(exports) {
-
-	    // float: typed array
-	    if (typeof Float32Array !== "undefined") (function() {
-
-	        var f32 = new Float32Array([ -0 ]),
-	            f8b = new Uint8Array(f32.buffer),
-	            le  = f8b[3] === 128;
-
-	        function writeFloat_f32_cpy(val, buf, pos) {
-	            f32[0] = val;
-	            buf[pos    ] = f8b[0];
-	            buf[pos + 1] = f8b[1];
-	            buf[pos + 2] = f8b[2];
-	            buf[pos + 3] = f8b[3];
-	        }
-
-	        function writeFloat_f32_rev(val, buf, pos) {
-	            f32[0] = val;
-	            buf[pos    ] = f8b[3];
-	            buf[pos + 1] = f8b[2];
-	            buf[pos + 2] = f8b[1];
-	            buf[pos + 3] = f8b[0];
-	        }
-
-	        /* istanbul ignore next */
-	        exports.writeFloatLE = le ? writeFloat_f32_cpy : writeFloat_f32_rev;
-	        /* istanbul ignore next */
-	        exports.writeFloatBE = le ? writeFloat_f32_rev : writeFloat_f32_cpy;
-
-	        function readFloat_f32_cpy(buf, pos) {
-	            f8b[0] = buf[pos    ];
-	            f8b[1] = buf[pos + 1];
-	            f8b[2] = buf[pos + 2];
-	            f8b[3] = buf[pos + 3];
-	            return f32[0];
-	        }
-
-	        function readFloat_f32_rev(buf, pos) {
-	            f8b[3] = buf[pos    ];
-	            f8b[2] = buf[pos + 1];
-	            f8b[1] = buf[pos + 2];
-	            f8b[0] = buf[pos + 3];
-	            return f32[0];
-	        }
-
-	        /* istanbul ignore next */
-	        exports.readFloatLE = le ? readFloat_f32_cpy : readFloat_f32_rev;
-	        /* istanbul ignore next */
-	        exports.readFloatBE = le ? readFloat_f32_rev : readFloat_f32_cpy;
-
-	    // float: ieee754
-	    })(); else (function() {
-
-	        function writeFloat_ieee754(writeUint, val, buf, pos) {
-	            var sign = val < 0 ? 1 : 0;
-	            if (sign)
-	                val = -val;
-	            if (val === 0)
-	                writeUint(1 / val > 0 ? /* positive */ 0 : /* negative 0 */ 2147483648, buf, pos);
-	            else if (isNaN(val))
-	                writeUint(2143289344, buf, pos);
-	            else if (val > 3.4028234663852886e+38) // +-Infinity
-	                writeUint((sign << 31 | 2139095040) >>> 0, buf, pos);
-	            else if (val < 1.1754943508222875e-38) // denormal
-	                writeUint((sign << 31 | Math.round(val / 1.401298464324817e-45)) >>> 0, buf, pos);
-	            else {
-	                var exponent = Math.floor(Math.log(val) / Math.LN2),
-	                    mantissa = Math.round(val * Math.pow(2, -exponent) * 8388608) & 8388607;
-	                writeUint((sign << 31 | exponent + 127 << 23 | mantissa) >>> 0, buf, pos);
-	            }
-	        }
-
-	        exports.writeFloatLE = writeFloat_ieee754.bind(null, writeUintLE);
-	        exports.writeFloatBE = writeFloat_ieee754.bind(null, writeUintBE);
-
-	        function readFloat_ieee754(readUint, buf, pos) {
-	            var uint = readUint(buf, pos),
-	                sign = (uint >> 31) * 2 + 1,
-	                exponent = uint >>> 23 & 255,
-	                mantissa = uint & 8388607;
-	            return exponent === 255
-	                ? mantissa
-	                ? NaN
-	                : sign * Infinity
-	                : exponent === 0 // denormal
-	                ? sign * 1.401298464324817e-45 * mantissa
-	                : sign * Math.pow(2, exponent - 150) * (mantissa + 8388608);
-	        }
-
-	        exports.readFloatLE = readFloat_ieee754.bind(null, readUintLE);
-	        exports.readFloatBE = readFloat_ieee754.bind(null, readUintBE);
-
-	    })();
-
-	    // double: typed array
-	    if (typeof Float64Array !== "undefined") (function() {
-
-	        var f64 = new Float64Array([-0]),
-	            f8b = new Uint8Array(f64.buffer),
-	            le  = f8b[7] === 128;
-
-	        function writeDouble_f64_cpy(val, buf, pos) {
-	            f64[0] = val;
-	            buf[pos    ] = f8b[0];
-	            buf[pos + 1] = f8b[1];
-	            buf[pos + 2] = f8b[2];
-	            buf[pos + 3] = f8b[3];
-	            buf[pos + 4] = f8b[4];
-	            buf[pos + 5] = f8b[5];
-	            buf[pos + 6] = f8b[6];
-	            buf[pos + 7] = f8b[7];
-	        }
-
-	        function writeDouble_f64_rev(val, buf, pos) {
-	            f64[0] = val;
-	            buf[pos    ] = f8b[7];
-	            buf[pos + 1] = f8b[6];
-	            buf[pos + 2] = f8b[5];
-	            buf[pos + 3] = f8b[4];
-	            buf[pos + 4] = f8b[3];
-	            buf[pos + 5] = f8b[2];
-	            buf[pos + 6] = f8b[1];
-	            buf[pos + 7] = f8b[0];
-	        }
-
-	        /* istanbul ignore next */
-	        exports.writeDoubleLE = le ? writeDouble_f64_cpy : writeDouble_f64_rev;
-	        /* istanbul ignore next */
-	        exports.writeDoubleBE = le ? writeDouble_f64_rev : writeDouble_f64_cpy;
-
-	        function readDouble_f64_cpy(buf, pos) {
-	            f8b[0] = buf[pos    ];
-	            f8b[1] = buf[pos + 1];
-	            f8b[2] = buf[pos + 2];
-	            f8b[3] = buf[pos + 3];
-	            f8b[4] = buf[pos + 4];
-	            f8b[5] = buf[pos + 5];
-	            f8b[6] = buf[pos + 6];
-	            f8b[7] = buf[pos + 7];
-	            return f64[0];
-	        }
-
-	        function readDouble_f64_rev(buf, pos) {
-	            f8b[7] = buf[pos    ];
-	            f8b[6] = buf[pos + 1];
-	            f8b[5] = buf[pos + 2];
-	            f8b[4] = buf[pos + 3];
-	            f8b[3] = buf[pos + 4];
-	            f8b[2] = buf[pos + 5];
-	            f8b[1] = buf[pos + 6];
-	            f8b[0] = buf[pos + 7];
-	            return f64[0];
-	        }
-
-	        /* istanbul ignore next */
-	        exports.readDoubleLE = le ? readDouble_f64_cpy : readDouble_f64_rev;
-	        /* istanbul ignore next */
-	        exports.readDoubleBE = le ? readDouble_f64_rev : readDouble_f64_cpy;
-
-	    // double: ieee754
-	    })(); else (function() {
-
-	        function writeDouble_ieee754(writeUint, off0, off1, val, buf, pos) {
-	            var sign = val < 0 ? 1 : 0;
-	            if (sign)
-	                val = -val;
-	            if (val === 0) {
-	                writeUint(0, buf, pos + off0);
-	                writeUint(1 / val > 0 ? /* positive */ 0 : /* negative 0 */ 2147483648, buf, pos + off1);
-	            } else if (isNaN(val)) {
-	                writeUint(0, buf, pos + off0);
-	                writeUint(2146959360, buf, pos + off1);
-	            } else if (val > 1.7976931348623157e+308) { // +-Infinity
-	                writeUint(0, buf, pos + off0);
-	                writeUint((sign << 31 | 2146435072) >>> 0, buf, pos + off1);
-	            } else {
-	                var mantissa;
-	                if (val < 2.2250738585072014e-308) { // denormal
-	                    mantissa = val / 5e-324;
-	                    writeUint(mantissa >>> 0, buf, pos + off0);
-	                    writeUint((sign << 31 | mantissa / 4294967296) >>> 0, buf, pos + off1);
-	                } else {
-	                    var exponent = Math.floor(Math.log(val) / Math.LN2);
-	                    if (exponent === 1024)
-	                        exponent = 1023;
-	                    mantissa = val * Math.pow(2, -exponent);
-	                    writeUint(mantissa * 4503599627370496 >>> 0, buf, pos + off0);
-	                    writeUint((sign << 31 | exponent + 1023 << 20 | mantissa * 1048576 & 1048575) >>> 0, buf, pos + off1);
-	                }
-	            }
-	        }
-
-	        exports.writeDoubleLE = writeDouble_ieee754.bind(null, writeUintLE, 0, 4);
-	        exports.writeDoubleBE = writeDouble_ieee754.bind(null, writeUintBE, 4, 0);
-
-	        function readDouble_ieee754(readUint, off0, off1, buf, pos) {
-	            var lo = readUint(buf, pos + off0),
-	                hi = readUint(buf, pos + off1);
-	            var sign = (hi >> 31) * 2 + 1,
-	                exponent = hi >>> 20 & 2047,
-	                mantissa = 4294967296 * (hi & 1048575) + lo;
-	            return exponent === 2047
-	                ? mantissa
-	                ? NaN
-	                : sign * Infinity
-	                : exponent === 0 // denormal
-	                ? sign * 5e-324 * mantissa
-	                : sign * Math.pow(2, exponent - 1075) * (mantissa + 4503599627370496);
-	        }
-
-	        exports.readDoubleLE = readDouble_ieee754.bind(null, readUintLE, 0, 4);
-	        exports.readDoubleBE = readDouble_ieee754.bind(null, readUintBE, 4, 0);
-
-	    })();
-
-	    return exports;
-	}
-
-	// uint helpers
-
-	function writeUintLE(val, buf, pos) {
-	    buf[pos    ] =  val        & 255;
-	    buf[pos + 1] =  val >>> 8  & 255;
-	    buf[pos + 2] =  val >>> 16 & 255;
-	    buf[pos + 3] =  val >>> 24;
-	}
-
-	function writeUintBE(val, buf, pos) {
-	    buf[pos    ] =  val >>> 24;
-	    buf[pos + 1] =  val >>> 16 & 255;
-	    buf[pos + 2] =  val >>> 8  & 255;
-	    buf[pos + 3] =  val        & 255;
-	}
-
-	function readUintLE(buf, pos) {
-	    return (buf[pos    ]
-	          | buf[pos + 1] << 8
-	          | buf[pos + 2] << 16
-	          | buf[pos + 3] << 24) >>> 0;
-	}
-
-	function readUintBE(buf, pos) {
-	    return (buf[pos    ] << 24
-	          | buf[pos + 1] << 16
-	          | buf[pos + 2] << 8
-	          | buf[pos + 3]) >>> 0;
-	}
-	return float$1;
-}
-
-var floatExports = requireFloat();
-var float = /*@__PURE__*/getDefaultExportFromCjs(floatExports);
-
-var utf8$1 = {};
-
-var hasRequiredUtf8;
-
-function requireUtf8 () {
-	if (hasRequiredUtf8) return utf8$1;
-	hasRequiredUtf8 = 1;
-	(function (exports) {
-
-		/**
-		 * A minimal UTF8 implementation for number arrays.
-		 * @memberof util
-		 * @namespace
-		 */
-		var utf8 = exports;
-
-		/**
-		 * Calculates the UTF8 byte length of a string.
-		 * @param {string} string String
-		 * @returns {number} Byte length
-		 */
-		utf8.length = function utf8_length(string) {
-		    var len = 0,
-		        c = 0;
-		    for (var i = 0; i < string.length; ++i) {
-		        c = string.charCodeAt(i);
-		        if (c < 128)
-		            len += 1;
-		        else if (c < 2048)
-		            len += 2;
-		        else if ((c & 0xFC00) === 0xD800 && (string.charCodeAt(i + 1) & 0xFC00) === 0xDC00) {
-		            ++i;
-		            len += 4;
-		        } else
-		            len += 3;
-		    }
-		    return len;
-		};
-
-		/**
-		 * Reads UTF8 bytes as a string.
-		 * @param {Uint8Array} buffer Source buffer
-		 * @param {number} start Source start
-		 * @param {number} end Source end
-		 * @returns {string} String read
-		 */
-		utf8.read = function utf8_read(buffer, start, end) {
-		    var len = end - start;
-		    if (len < 1)
-		        return "";
-		    var parts = null,
-		        chunk = [],
-		        i = 0, // char offset
-		        t;     // temporary
-		    while (start < end) {
-		        t = buffer[start++];
-		        if (t < 128)
-		            chunk[i++] = t;
-		        else if (t > 191 && t < 224)
-		            chunk[i++] = (t & 31) << 6 | buffer[start++] & 63;
-		        else if (t > 239 && t < 365) {
-		            t = ((t & 7) << 18 | (buffer[start++] & 63) << 12 | (buffer[start++] & 63) << 6 | buffer[start++] & 63) - 0x10000;
-		            chunk[i++] = 0xD800 + (t >> 10);
-		            chunk[i++] = 0xDC00 + (t & 1023);
-		        } else
-		            chunk[i++] = (t & 15) << 12 | (buffer[start++] & 63) << 6 | buffer[start++] & 63;
-		        if (i > 8191) {
-		            (parts || (parts = [])).push(String.fromCharCode.apply(String, chunk));
-		            i = 0;
-		        }
-		    }
-		    if (parts) {
-		        if (i)
-		            parts.push(String.fromCharCode.apply(String, chunk.slice(0, i)));
-		        return parts.join("");
-		    }
-		    return String.fromCharCode.apply(String, chunk.slice(0, i));
-		};
-
-		/**
-		 * Writes a string as UTF8 bytes.
-		 * @param {string} string Source string
-		 * @param {Uint8Array} buffer Destination buffer
-		 * @param {number} offset Destination offset
-		 * @returns {number} Bytes written
-		 */
-		utf8.write = function utf8_write(string, buffer, offset) {
-		    var start = offset,
-		        c1, // character 1
-		        c2; // character 2
-		    for (var i = 0; i < string.length; ++i) {
-		        c1 = string.charCodeAt(i);
-		        if (c1 < 128) {
-		            buffer[offset++] = c1;
-		        } else if (c1 < 2048) {
-		            buffer[offset++] = c1 >> 6       | 192;
-		            buffer[offset++] = c1       & 63 | 128;
-		        } else if ((c1 & 0xFC00) === 0xD800 && ((c2 = string.charCodeAt(i + 1)) & 0xFC00) === 0xDC00) {
-		            c1 = 0x10000 + ((c1 & 0x03FF) << 10) + (c2 & 0x03FF);
-		            ++i;
-		            buffer[offset++] = c1 >> 18      | 240;
-		            buffer[offset++] = c1 >> 12 & 63 | 128;
-		            buffer[offset++] = c1 >> 6  & 63 | 128;
-		            buffer[offset++] = c1       & 63 | 128;
-		        } else {
-		            buffer[offset++] = c1 >> 12      | 224;
-		            buffer[offset++] = c1 >> 6  & 63 | 128;
-		            buffer[offset++] = c1       & 63 | 128;
-		        }
-		    }
-		    return offset - start;
-		}; 
-	} (utf8$1));
-	return utf8$1;
-}
-
-var utf8Exports = requireUtf8();
-var utf8 = /*@__PURE__*/getDefaultExportFromCjs(utf8Exports);
+/* eslint-disable no-mixed-operators */
+/**
+ * A minimal UTF8 implementation for number arrays.
+ * @memberof util
+ * @namespace
+ */
+var utf8 = {
+    /**
+     * Reads UTF8 bytes as a string.
+     * @param {Uint8Array} buffer Source buffer
+     * @param {number} start Source start
+     * @param {number} end Source end
+     * @returns {string} String read
+     */
+    read(buffer, start, end) {
+        if (end - start < 1) {
+            return '';
+        }
+        const fromCharCode = (i) => String.fromCharCode(i);
+        let str = '';
+        for (let i = start; i < end;) {
+            const t = buffer[i++];
+            if (t <= 0x7F) {
+                str += fromCharCode(t);
+            }
+            else if (t >= 0xC0 && t < 0xE0) {
+                str += fromCharCode((t & 0x1F) << 6 | buffer[i++] & 0x3F);
+            }
+            else if (t >= 0xE0 && t < 0xF0) {
+                str += fromCharCode((t & 0xF) << 12 | (buffer[i++] & 0x3F) << 6 | buffer[i++] & 0x3F);
+            }
+            else if (t >= 0xF0) {
+                const t2 = ((t & 7) << 18 | (buffer[i++] & 0x3F) << 12 | (buffer[i++] & 0x3F) << 6 | buffer[i++] & 0x3F) - 0x10000;
+                str += fromCharCode(0xD800 + (t2 >> 10));
+                str += fromCharCode(0xDC00 + (t2 & 0x3FF));
+            }
+        }
+        return str;
+    },
+};
 
 // import { LongBits } from "../dts";
 class Reader {
@@ -4302,65 +3895,6 @@ class MovieParams {
 const emptyObject = Object.freeze({});
 
 // import base64 from "@protobufjs/base64";
-// export class MovieEntityWriter {
-//   /**
-//    * Encodes the specified MovieEntity message. Does not implicitly {@link com.opensource.svga.MovieEntity.verify|verify} messages.
-//    * @function encode
-//    * @memberof com.opensource.svga.MovieEntity
-//    * @static
-//    * @param {com.opensource.svga.IMovieEntity} message MovieEntity message or plain object to encode
-//    * @param {$protobuf.Writer} [writer] Writer to encode to
-//    * @returns {$protobuf.Writer} Writer
-//    */
-//   static encode(message: MovieEntity, writer: Writer): Writer {
-//     if (!writer) {
-//       writer = Writer.create();
-//     }
-//     if (message.version != null && Object.hasOwn(message, "version")) {
-//       writer.uint32(/* id 1, wireType 2 =*/ 10).string(message.version);
-//     }
-//     if (message.params != null && Object.hasOwn(message, "params")) {
-//       MovieParams.encode(
-//         message.params,
-//         writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
-//       ).ldelim();
-//     }
-//     if (message.images != null && Object.hasOwn(message, "images")) {
-//       const keys = Object.keys(message.images);
-//       for (let i = 0; i < keys.length; ++i) {
-//         writer
-//           .uint32(/* id 3, wireType 2 =*/ 26)
-//           .fork()
-//           .uint32(/* id 1, wireType 2 =*/ 10)
-//           .string(keys[i])
-//           .uint32(/* id 2, wireType 2 =*/ 18)
-//           .bytes(message.images[keys[i]])
-//           .ldelim();
-//       }
-//     }
-//     if (message.sprites != null && message.sprites.length) {
-//       for (let i = 0; i < message.sprites.length; ++i) {
-//         SpriteEntity.encode(
-//           message.sprites[i],
-//           writer.uint32(/* id 4, wireType 2 =*/ 34).fork()
-//         ).ldelim();
-//       }
-//     }
-//     return writer;
-//   }
-//   /**
-//    * Encodes the specified MovieEntity message, length delimited. Does not implicitly {@link com.opensource.svga.MovieEntity.verify|verify} messages.
-//    * @function encodeDelimited
-//    * @memberof com.opensource.svga.MovieEntity
-//    * @static
-//    * @param {com.opensource.svga.IMovieEntity} message MovieEntity message or plain object to encode
-//    * @param {$protobuf.Writer} [writer] Writer to encode to
-//    * @returns {$protobuf.Writer} Writer
-//    */
-//   static encodeDelimited(message: MovieEntity, writer: Writer): Writer {
-//     return MovieEntity.encode(message, writer).ldelim();
-//   }
-// }
 class MovieEntity {
     /**
      * Decodes a MovieEntity message from the specified reader or buffer.
