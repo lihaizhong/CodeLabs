@@ -6192,7 +6192,7 @@ class Animator {
     }
     doFrame() {
         if (this.isRunning) {
-            this.doDeltaTime(now() - this.startTime);
+            this.doDeltaTime(now() - this.startTime + this.loopStart);
             if (this.isRunning) {
                 this.brush.flush(() => this.doFrame());
             }
@@ -6410,7 +6410,8 @@ class Player {
             return;
         }
         this.pause();
-        this.currFrame = ~~frame;
+        this.currFrame = frame;
+        this.config.loopStartFrame = frame;
         if (andPlay) {
             this.startAnimation();
         }
@@ -6419,8 +6420,12 @@ class Player {
         if (!this.entity)
             return;
         const { frames } = this.entity;
-        let frame = percentage * frames;
-        if (frame >= frames && frame > 0) {
+        let frame = Math.round(+(percentage ?? 0) * frames) % frames;
+        console.log('stepToPercentage', frame)
+        if (frame < 0) {
+            frame = 0;
+        }
+        else if (frame >= frames) {
             frame = frames - 1;
         }
         this.stepToFrame(frame, andPlay);
@@ -6457,6 +6462,7 @@ class Player {
         }
         // 每帧持续的时间
         const frameDuration = ~~((1000 / fps) * 10 ** 6) / 10 ** 6;
+        console.log('startAnimation', loopStartFrame, start)
         // 更新动画基础信息
         this.animator.setConfig(
         // duration = frames * (1 / fps) * 1000

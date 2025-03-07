@@ -6410,7 +6410,7 @@ class Player {
             return;
         }
         this.pause();
-        this.currFrame = ~~frame;
+        this.currFrame = frame;
         if (andPlay) {
             this.startAnimation();
         }
@@ -6419,7 +6419,7 @@ class Player {
         if (!this.entity)
             return;
         const { frames } = this.entity;
-        let frame = percentage * frames;
+        let frame = ~~(+(percentage ?? 0) * frames) % frames;
         if (frame >= frames && frame > 0) {
             frame = frames - 1;
         }

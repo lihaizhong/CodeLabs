@@ -225,6 +225,7 @@ export class Player {
     }
     this.pause();
     this.currFrame = frame;
+    this.config.loopStartFrame = frame;
     if (andPlay) {
       this.startAnimation();
     }
@@ -234,9 +235,11 @@ export class Player {
     if (!this.entity) return;
 
     const { frames } = this.entity;
-    let frame = ~~(+(percentage ?? 0) * frames) % frames;
+    let frame = Math.round(+(percentage ?? 0) * frames) % frames;
 
-    if (frame >= frames && frame > 0) {
+    if (frame < 0) {
+      frame = 0
+    } else if (frame >= frames) {
       frame = frames - 1;
     }
 

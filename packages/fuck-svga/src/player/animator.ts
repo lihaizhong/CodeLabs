@@ -88,7 +88,7 @@ export class Animator {
 
   private doFrame(): void {
     if (this.isRunning) {
-      this.doDeltaTime(now() - this.startTime);
+      this.doDeltaTime(now() - this.startTime + this.loopStart);
       if (this.isRunning) {
         this.brush.flush(() => this.doFrame());
       }
