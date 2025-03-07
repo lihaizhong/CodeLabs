@@ -6498,7 +6498,7 @@ class Player {
                 }
             });
             this.brush.clearBack();
-            this.onProcess?.(~~((value / this.entity.frames) * 100) / 100, value, frames);
+            this.onProcess?.(~~((value / frames) * 100) / 100, value, frames);
             this.currFrame = value;
             this.tail = 0;
         };
