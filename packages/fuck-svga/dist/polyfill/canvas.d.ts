@@ -1,4 +1,3 @@
-import type { PlatformCanvas, PlatformOffscreenCanvas } from "../types";
 export interface IGetCanvasResult {
     canvas: PlatformCanvas;
     ctx: CanvasRenderingContext2D;

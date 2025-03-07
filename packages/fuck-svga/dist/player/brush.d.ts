@@ -1,4 +1,3 @@
-import { Bitmap, PlatformImage, RawImages, Video } from "../types";
 type TBrushMode = 'simple' | 'normal';
 export declare class Brush {
     private readonly mode;

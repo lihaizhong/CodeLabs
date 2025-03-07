@@ -1,12 +1,3 @@
-import {
-  PLAYER_FILL_MODE,
-  PLAYER_PLAY_MODE,
-  PlayerConfigOptions,
-  Video,
-  PlayerConfig,
-  PlayerEventCallback,
-  PlayerProcessEventCallback,
-} from "../types";
 import { Brush } from "./brush";
 import { Animator } from "./animator";
 import benchmark from "../benchmark";

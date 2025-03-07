@@ -1,4 +1,3 @@
-import { PlayerConfigOptions, Video, PlayerEventCallback, PlayerProcessEventCallback } from "../types";
 /**
  * SVGA 播放器
  */

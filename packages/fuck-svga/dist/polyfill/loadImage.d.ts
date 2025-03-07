@@ -1,4 +1,3 @@
-import type { PlatformImage } from "../types";
 /**
  * 加载图片
  * @param brush 创建图片对象

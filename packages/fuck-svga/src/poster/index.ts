@@ -1,4 +1,3 @@
-import { DynamicElement, PosterEventCallback, ReplaceElement, Video } from "types";
 import { Brush } from "../player/brush";
 import benchmark from "../benchmark";
 import { loadImage } from "../polyfill";

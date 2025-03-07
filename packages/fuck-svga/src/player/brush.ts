@@ -3,20 +3,11 @@ import {
   getCanvas,
   getOffscreenCanvas,
   noop,
-  app,
-  SP,
   platform,
   br,
   loadImage,
 } from "../polyfill";
-import {
-  Bitmap,
-  PlatformCanvas,
-  PlatformImage,
-  PlatformOffscreenCanvas,
-  RawImages,
-  Video,
-} from "../types";
+import { Env, SE } from "../env";
 import render from "./render";
 
 interface IBrushModel {
@@ -83,11 +74,11 @@ export class Brush {
     if (
       type == "O" &&
       // OffscreenCanvas 在 Firefox 浏览器无法被清理历史内容
-      app == SP.H5 &&
+      Env.is(SE.H5) &&
       navigator.userAgent.includes("Firefox")
     ) {
       model.clear = "CR";
-    } else if ((type == "O" && app == SP.DOUYIN) || app == SP.ALIPAY) {
+    } else if ((type == "O" && Env.is(SE.DOUYIN)) || Env.is(SE.ALIPAY)) {
       model.clear = "CL";
     } else {
       model.clear = "RE";
@@ -96,8 +87,8 @@ export class Brush {
     // set render
     if (
       (type == "C" &&
-        (app == SP.DOUYIN || (platform == "IOS" && app == SP.ALIPAY))) ||
-      (type == "O" && app == SP.WECHAT)
+        (Env.is(SE.DOUYIN) || (platform == "IOS" && Env.is(SE.ALIPAY)))) ||
+      (type == "O" && Env.is(SE.WECHAT))
     ) {
       model.render = "PU";
     } else {
@@ -272,7 +263,7 @@ export class Brush {
    * @returns 
    */
   public createImage(): PlatformImage {
-    if (app == SP.H5) {
+    if (Env.is(SE.H5)) {
       return new Image();
     }
 
@@ -294,7 +285,7 @@ export class Brush {
    * @param cb 
    */
   public flush(cb: () => void): void {
-    (app == SP.H5 ? br : this.X).requestAnimationFrame(cb);
+    ((Env.is(SE.H5) ? br : this.X) as WechatMiniprogram.Canvas).requestAnimationFrame(cb);
   }
 
   public clearFront: () => void = noop;

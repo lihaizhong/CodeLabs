@@ -4,16 +4,6 @@ import type {
   ShapeEntity,
   SpriteEntity,
 } from "fuck-protobuf";
-import {
-  Video,
-  RawImages,
-  ReplaceElements,
-  DynamicElements,
-  VideoSprite,
-  SHAPE_TYPE,
-  VideoFrameShapes,
-  RGBA,
-} from "../types";
 
 export class VideoEntity implements Video {
   /**

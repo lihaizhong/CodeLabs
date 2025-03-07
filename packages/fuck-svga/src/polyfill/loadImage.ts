@@ -1,7 +1,6 @@
-import type { PlatformImage } from "../types";
 import { br } from "./bridge";
 import { genFilePath, removeTmpFile, writeTmpFile } from "./fsm";
-import { app, SP } from "./app";
+import { Env, SE } from "../env";
 import { toBase64, toBitmap, toBuffer } from "./decode";
 
 /**
@@ -19,7 +18,7 @@ async function genImageSource(
   }
 
   // FIXME: 支付宝小程序IDE保存临时文件会失败
-  if (app == SP.H5 || (app == SP.ALIPAY && br.isIDE)) {
+  if (Env.is(SE.H5) || (Env.is(SE.ALIPAY) && (br as any).isIDE)) {
     return toBase64(data);
   }
 
@@ -46,7 +45,7 @@ export function loadImage(
   filename: string,
   prefix?: string
 ): Promise<PlatformImage | ImageBitmap> {
-  if (app == SP.H5) {
+  if (Env.is(SE.H5)) {
     // 由于ImageBitmap在图片渲染上有优势，故优先使用
     if (data instanceof Uint8Array && "createImageBitmap" in window) {
       return toBitmap(data);

@@ -1,14 +1,14 @@
 import { br } from "./bridge";
-import { app, SP } from "./app";
+import { Env, SE } from "../env";
 import benchmark from "../benchmark";
 
-const { USER_DATA_PATH } =
-  app == SP.H5
+const { USER_DATA_PATH = '' } =
+  Env.is(SE.H5)
     ? {}
-    : app == SP.DOUYIN
+    : Env.is(SE.DOUYIN)
     ? // @ts-ignore
       tt.getEnvInfoSync().common
-    : br.env;
+    : (br as WechatMiniprogram.Wx).env;
 
 export function genFilePath(filename: string, prefix?: string) {
   return `${USER_DATA_PATH}/${prefix ? `${prefix}.` : ""}${filename}`;
@@ -24,7 +24,7 @@ export function writeTmpFile(
   data: ArrayBuffer,
   filePath: string
 ): Promise<string> {
-  const fs = br.getFileSystemManager();
+  const fs = (br as WechatMiniprogram.Wx).getFileSystemManager();
 
   benchmark.log(`write file: ${filePath}`);
   return new Promise<string>((resolve, reject) => {
@@ -56,7 +56,7 @@ export function writeTmpFile(
  * @returns
  */
 export function removeTmpFile(filePath: string): Promise<void> {
-  const fs = br.getFileSystemManager();
+  const fs = (br as WechatMiniprogram.Wx).getFileSystemManager();
 
   return new Promise((resolve) => {
     fs.access({
@@ -86,7 +86,7 @@ export function removeTmpFile(filePath: string): Promise<void> {
  * @returns
  */
 export function readFile(filePath: string): Promise<ArrayBuffer> {
-  const fs = br.getFileSystemManager();
+  const fs = (br as WechatMiniprogram.Wx).getFileSystemManager();
 
   return new Promise((resolve, reject) => {
     fs.access({

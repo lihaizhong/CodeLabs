@@ -1,5 +1,4 @@
 import type { MovieEntity } from "fuck-protobuf";
-import { Video, RawImages, ReplaceElements, DynamicElements, VideoSprite } from "../types";
 export declare class VideoEntity implements Video {
     /**
      * svga 版本号

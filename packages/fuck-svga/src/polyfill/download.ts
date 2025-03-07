@@ -1,6 +1,6 @@
 import { br } from "./bridge";
 import { readFile } from "./fsm";
-import { app, SP } from "./app";
+import { Env, SE } from "../env";
 
 /**
  * 读取远程文件
@@ -9,7 +9,7 @@ import { app, SP } from "./app";
  */
 function readRemoteFile(url: string): Promise<ArrayBuffer> {
   // H5环境
-  if (app == SP.H5) {
+  if (Env.is(SE.H5)) {
     return fetch(url).then((response) => {
       if (response.ok) {
         return response.arrayBuffer();
@@ -23,7 +23,7 @@ function readRemoteFile(url: string): Promise<ArrayBuffer> {
 
   // 小程序环境
   return new Promise((resolve, reject) => {
-    br.request({
+    (br as WechatMiniprogram.Wx).request({
       url,
       // @ts-ignore 支付宝小程序必须有该字段
       dataType: "arraybuffer",
@@ -47,7 +47,7 @@ export function download(url: string): Promise<ArrayBuffer | null> {
   }
 
   // 读取本地文件
-  if (app != SP.H5) {
+  if (Env.not(SE.H5)) {
     return readFile(url);
   }
 

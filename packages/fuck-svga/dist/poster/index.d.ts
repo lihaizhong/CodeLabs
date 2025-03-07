@@ -1,4 +1,3 @@
-import { DynamicElement, PosterEventCallback, ReplaceElement, Video } from "types";
 export declare class Poster {
     /**
      * SVGA 元数据

@@ -1,4 +1,3 @@
-import type { Video } from "../types";
 /**
  * SVGA 下载解析器
  */

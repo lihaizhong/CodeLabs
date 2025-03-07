@@ -1,34 +1,36 @@
+import { Env, SE } from "../env";
 import { br } from "./bridge";
-import { app, SP } from "./app";
 
-let p: string;
-
-switch (app) {
-  case SP.H5: {
+function getPlatform() {
+  if (Env.is(SE.H5)) {
     const UA = navigator.userAgent;
-
+  
     if (/(Android)/i.test(UA)) {
-      p = "Android";
-    } else if (/(iPhone|iPad|iPod|iOS)/i.test(UA)) {
-      p = "iOS";
-    } else if (/(OpenHarmony|ArkWeb)/i.test(UA)) {
-      p = "OpenHarmony";
-    } else {
-      p = "UNKNOWN";
+      return "Android";
     }
-    break;
+    
+    if (/(iPhone|iPad|iPod|iOS)/i.test(UA)) {
+      return "iOS";
+    }
+    
+    if (/(OpenHarmony|ArkWeb)/i.test(UA)) {
+      return "OpenHarmony";
+    }
+  } else {
+    if (Env.is(SE.ALIPAY)) {
+      return (br as any).getDeviceBaseInfo().platform as string;
+    }
+  
+    if (Env.is(SE.DOUYIN)) {
+      return (br as any).getDeviceInfoSync().platform as string;
+    }
+  
+    if (Env.is(SE.WECHAT)) {
+      return (br as any).getDeviceInfo().platform as string;
+    }
   }
-  case SP.ALIPAY:
-    p = br.getDeviceBaseInfo().platform as string;
-    break;
-  case SP.DOUYIN:
-    p = br.getDeviceInfoSync().platform as string;
-    break;
-  case SP.WECHAT:
-    p = br.getDeviceInfo().platform as string;
-    break;
-  default:
-    p = "UNKNOWN";
+
+  return "UNKNOWN";
 }
 
-export const platform = p.toLocaleUpperCase();
+export const platform = getPlatform().toLocaleUpperCase();

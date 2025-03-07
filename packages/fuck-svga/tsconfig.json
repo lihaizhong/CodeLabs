@@ -68,6 +68,6 @@
   },
   "include": [
     "src",
-    "typings.d.ts"
+    "typings"
   ]
 }

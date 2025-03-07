@@ -1,15 +1,3 @@
-import {
-  DynamicElement,
-  Video,
-  Transform,
-  SHAPE_TYPE,
-  VideoStyles,
-  VideoFrameShape,
-  VideoSprite,
-  Bitmap,
-  ReplaceElement,
-} from "../types";
-
 interface CurrentPoint {
   x: number;
   y: number;

@@ -1,2 +1,1 @@
-declare let br: any;
-export { br };
+export declare const br: (Window & typeof globalThis) | WechatMiniprogram.Wx;

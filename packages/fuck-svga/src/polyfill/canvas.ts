@@ -1,6 +1,5 @@
-import type { PlatformCanvas, PlatformOffscreenCanvas } from "../types";
 import { br } from "./bridge";
-import { app, SP } from "./app";
+import { Env, SE } from "../env";
 import { dpr } from "./ratio";
 
 export interface IGetCanvasResult {
@@ -36,7 +35,7 @@ export function getCanvas(
       resolve({ canvas, ctx });
     };
 
-    if (app == SP.H5) {
+    if (Env.is(SE.H5)) {
       const canvas = document.querySelector(selector) as HTMLCanvasElement;
       const { width, height } = canvas.style;
 
@@ -68,21 +67,21 @@ export function getCanvas(
 function createOffscreenCanvas(
   options: WechatMiniprogram.CreateOffscreenCanvasOption
 ): PlatformOffscreenCanvas {
-  if (app == SP.H5) {
+  if (Env.is(SE.H5)) {
     return new OffscreenCanvas(
       options.width as number,
       options.height as number
     );
   }
 
-  if (app == SP.ALIPAY) {
+  if (Env.is(SE.ALIPAY)) {
     return my.createOffscreenCanvas({
       width: options.width,
       height: options.height,
     });
   }
 
-  if (app == SP.DOUYIN) {
+  if (Env.is(SE.DOUYIN)) {
     const canvas = (tt as any).createOffscreenCanvas();
     canvas.width = options.width;
     canvas.height = options.height;

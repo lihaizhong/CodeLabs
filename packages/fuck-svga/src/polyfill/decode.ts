@@ -1,4 +1,4 @@
-import { app, SP } from "./app";
+import { Env, SE } from "../env";
 import { br } from "./bridge";
 
 // miniprogram btoa/atob polyfill
@@ -94,11 +94,11 @@ export function toBase64(data: Uint8Array): string {
   const buf = toBuffer(data);
   let b64: string;
 
-  if (app == SP.H5) {
+  if (Env.is(SE.H5)) {
     b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
   } else {
     // FIXME: 如果arrayBufferToBase64被废除，可以使用mbtoa代替
-    b64 = br.arrayBufferToBase64(buf);
+    b64 = (br as WechatMiniprogram.Wx).arrayBufferToBase64(buf);
   }
 
   return `data:image/png;base64,${b64}`;
