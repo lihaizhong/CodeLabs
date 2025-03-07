@@ -15,9 +15,9 @@ export class Animator {
    */
   private startValue: number = 0;
   /**
-   * 动画结束帧
+   * 动画总帧数
    */
-  private endValue: number = 0;
+  private totalValue: number = 0;
   /**
    * 动画持续时间
    */
@@ -51,7 +51,7 @@ export class Animator {
    */
   public setRange(startValue: number, endValue: number) {
     this.startValue = startValue;
-    this.endValue = endValue;
+    this.totalValue = endValue - startValue;
   }
 
   /**
@@ -72,6 +72,7 @@ export class Animator {
     this.loopStart = loopStart;
     this.fillRule = fillRule;
     this.loopDuration = loopStart + (duration - loopStart) * loop;
+    console.log('Animator', 'duration', duration, 'loopStart', loopStart, 'fillRule', fillRule, 'loopDuration', this.loopDuration)
   }
 
   public start(): void {
@@ -100,7 +101,7 @@ export class Animator {
       loopStart: LS,
       loopDuration: LD,
       startValue: SV,
-      endValue: EV,
+      totalValue: TV,
       fillRule: FR,
     } = this;
     // 本轮动画已消耗的时间比例 currentFrication
@@ -109,13 +110,13 @@ export class Animator {
     if (DT >= LD) {
       // 循环已结束
       CF = FR ? 0.0 : 1.0;
-      this.isRunning = false;
+      this.stop();
     } else {
       // 本轮动画已消耗的时间比例 = (本轮动画已消耗的时间 + 循环播放开始帧与动画开始帧之间的时间偏差) / 动画持续时间
       CF = DT <= D ? DT / D : (((DT - LS) % (D - LS)) + LS) / D;
     }
 
-    this.onUpdate(((EV - SV) * CF + SV) << 0, CF);
+    this.onUpdate((TV * CF + SV) << 0, CF);
     if (!this.isRunning) {
       this.onEnd();
     }

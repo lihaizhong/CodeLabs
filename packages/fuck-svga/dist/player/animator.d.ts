@@ -14,9 +14,9 @@ export declare class Animator {
      */
     private startValue;
     /**
-     * 动画结束帧
+     * 动画总帧数
      */
-    private endValue;
+    private totalValue;
     /**
      * 动画持续时间
      */

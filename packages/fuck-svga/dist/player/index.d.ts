@@ -29,6 +29,14 @@ export declare class Player {
     /**
      * 设置配置项
      * @param options 可配置项
+     * @property {string} container 主屏，播放动画的 Canvas 元素
+     * @property {string} secondary 副屏，播放动画的 Canvas 元素
+     * @property {number} loop 循环次数，默认值 0（无限循环）
+     * @property {string} fillMode 最后停留的目标模式，类似于 animation-fill-mode，接受值 forwards 和 fallbacks，默认值 forwards。
+     * @property {string} playMode 播放模式，接受值 forwards 和 fallbacks，默认值 forwards。
+     * @property {number} startFrame 开始播放的帧数，默认值 0
+     * @property {number} endFrame 结束播放的帧数，默认值 0
+     * @property {number} loopStartFrame 循环播放的开始帧，默认值 0
      */
     setConfig(options: string | PlayerConfigOptions, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
     /**
@@ -39,26 +47,34 @@ export declare class Player {
     mount(videoEntity: Video): Promise<void | void[]>;
     /**
      * 开始播放事件回调
+     * @param frame
      */
     onStart?: PlayerEventCallback;
     /**
      * 重新播放事件回调
+     * @param frame
      */
     onResume?: PlayerEventCallback;
     /**
      * 暂停播放事件回调
+     * @param frame
      */
     onPause?: PlayerEventCallback;
     /**
      * 停止播放事件回调
+     * @param frame
      */
     onStop?: PlayerEventCallback;
     /**
      * 播放中事件回调
+     * @param percent
+     * @param frame
+     * @param frames
      */
     onProcess?: PlayerProcessEventCallback;
     /**
      * 结束播放事件回调
+     * @param frame
      */
     onEnd?: PlayerEventCallback;
     /**

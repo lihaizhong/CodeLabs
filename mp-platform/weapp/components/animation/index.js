@@ -30,9 +30,17 @@ Component({
         {
           container: "#palette",
           secondary: "#secondary",
+          loop: 1,
         },
         this
       );
+      player.onProcess = (percent, frame, frames) => {
+        console.log('当前进度', percent, frame, frames)
+        console.log('---- UPDATE ----')
+      }
+      player.onEnd = () => {
+        console.log('---- END ----')
+      }
       readyGo.go();
     },
     detached() {
@@ -62,6 +70,7 @@ Component({
           this.setData({ message: "下载资源成功" });
         }
 
+        console.log(this.properties.url, videoItem);
         await player.mount(videoItem);
         this.setData({ message: "资源装载成功" });
         player.start();

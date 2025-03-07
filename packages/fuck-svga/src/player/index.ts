@@ -55,6 +55,14 @@ export class Player {
   /**
    * 设置配置项
    * @param options 可配置项
+   * @property {string} container 主屏，播放动画的 Canvas 元素
+   * @property {string} secondary 副屏，播放动画的 Canvas 元素
+   * @property {number} loop 循环次数，默认值 0（无限循环）
+   * @property {string} fillMode 最后停留的目标模式，类似于 animation-fill-mode，接受值 forwards 和 fallbacks，默认值 forwards。
+   * @property {string} playMode 播放模式，接受值 forwards 和 fallbacks，默认值 forwards。
+   * @property {number} startFrame 开始播放的帧数，默认值 0
+   * @property {number} endFrame 结束播放的帧数，默认值 0
+   * @property {number} loopStartFrame 循环播放的开始帧，默认值 0
    */
   public async setConfig(
     options: string | PlayerConfigOptions,
@@ -68,27 +76,12 @@ export class Player {
       config = options;
     }
 
-    const { startFrame, endFrame } = config;
-    if (startFrame != undefined && endFrame != undefined) {
-      // if (startFrame < 0) {
-      //   throw new Error("StartFrame should greater then zero");
-      // }
-
-      // if (endFrame < 0) {
-      //   throw new Error("EndFrame should greater then zero");
-      // }
-
-      if (startFrame > endFrame) {
-        throw new Error("StartFrame should greater than EndFrame");
-      }
-    }
-
     Object.assign(this.config, {
       loop: config.loop ?? 0,
       fillMode: config.fillMode ?? PLAYER_FILL_MODE.FORWARDS,
       playMode: config.playMode ?? PLAYER_PLAY_MODE.FORWARDS,
-      startFrame: startFrame ?? 0,
-      endFrame: endFrame ?? 0,
+      startFrame: config.startFrame ?? 0,
+      endFrame: config.endFrame ?? 0,
       loopStartFrame: config.loopStartFrame ?? 0,
     });
     await this.brush.register(config.container, config.secondary, component);
@@ -143,26 +136,34 @@ export class Player {
 
   /**
    * 开始播放事件回调
+   * @param frame
    */
   public onStart?: PlayerEventCallback;
   /**
    * 重新播放事件回调
+   * @param frame
    */
   public onResume?: PlayerEventCallback;
   /**
    * 暂停播放事件回调
+   * @param frame
    */
   public onPause?: PlayerEventCallback;
   /**
    * 停止播放事件回调
+   * @param frame
    */
   public onStop?: PlayerEventCallback;
   /**
    * 播放中事件回调
+   * @param percent
+   * @param frame
+   * @param frames
    */
   public onProcess?: PlayerProcessEventCallback;
   /**
    * 结束播放事件回调
+   * @param frame
    */
   public onEnd?: PlayerEventCallback;
 
@@ -250,12 +251,15 @@ export class Player {
       this.config;
     let { frames, fps, sprites } = this.entity!;
     const spriteCount = sprites.length;
-    const lastFrame = frames - 1;
     const start = startFrame > 0 ? startFrame : 0;
-    const end = endFrame > 0 ? endFrame : lastFrame;
+    const end = endFrame > 0 && endFrame < frames ? endFrame : frames;
+
+    if (start > end) {
+      throw new Error("StartFrame should greater than EndFrame");
+    }
 
     // 如果开始动画的当前帧是最后一帧，重置为开始帧
-    if (this.currFrame == lastFrame) {
+    if (this.currFrame == frames) {
       this.currFrame = start;
     }
 
@@ -267,24 +271,24 @@ export class Player {
     }
 
     // 更新活动帧总数
-    if (endFrame > 0 && endFrame > startFrame) {
-      frames = endFrame - startFrame;
-    } else if (endFrame <= 0 && startFrame > 0) {
-      frames -= startFrame;
+    if (end !== frames) {
+      frames = end - start;
+    } else if (end <= 0 && start > 0) {
+      frames -= start;
     }
 
     // 每帧持续的时间
-    const frameDuration = 1000 / fps;
+    const frameDuration = ~~((1000 / fps) * 10**6) / 10**6;
     // 更新动画基础信息
     this.animator!.setConfig(
       // duration = frames * (1 / fps) * 1000
       frames * frameDuration,
-      // loopStart = (loopStartFrame - startFrame) * (1 / fps) * 1000
-      loopStartFrame > startFrame
-        ? (loopStartFrame - startFrame) * frameDuration
+      // loopStart = (loopStartFrame - start) * (1 / fps) * 1000
+      loopStartFrame > start
+        ? (loopStartFrame - start) * frameDuration
         : 0,
       loop <= 0 ? Infinity : loop,
-      +(fillMode == PLAYER_FILL_MODE.BACKWARDS)
+      fillMode == PLAYER_FILL_MODE.BACKWARDS ? 1 : 0
     );
     // 动画绘制过程
     this.animator!.onUpdate = (value: number, spendValue: number) => {
@@ -326,7 +330,7 @@ export class Player {
         }
       );
       this.brush.clearBack();
-      this.onProcess?.(~~((this.currFrame / this.entity!.frames) * 100) / 100);
+      this.onProcess?.(~~((value / this.entity!.frames) * 100) / 100, value, frames);
       this.currFrame = value;
       this.tail = 0;
     };

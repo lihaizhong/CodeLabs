@@ -6129,9 +6129,9 @@ class Animator {
      */
     startValue = 0;
     /**
-     * 动画结束帧
+     * 动画总帧数
      */
-    endValue = 0;
+    totalValue = 0;
     /**
      * 动画持续时间
      */
@@ -6164,7 +6164,7 @@ class Animator {
      */
     setRange(startValue, endValue) {
         this.startValue = startValue;
-        this.endValue = endValue;
+        this.totalValue = endValue - startValue;
     }
     /**
      * 设置动画的必要参数
@@ -6179,6 +6179,7 @@ class Animator {
         this.loopStart = loopStart;
         this.fillRule = fillRule;
         this.loopDuration = loopStart + (duration - loopStart) * loop;
+        console.log('Animator', 'duration', duration, 'loopStart', loopStart, 'fillRule', fillRule, 'loopDuration', this.loopDuration);
     }
     start() {
         this.isRunning = true;
@@ -6198,20 +6199,20 @@ class Animator {
         }
     }
     doDeltaTime(DT) {
-        const { duration: D, loopStart: LS, loopDuration: LD, startValue: SV, endValue: EV, fillRule: FR, } = this;
+        const { duration: D, loopStart: LS, loopDuration: LD, startValue: SV, totalValue: TV, fillRule: FR, } = this;
         // 本轮动画已消耗的时间比例 currentFrication
         let CF;
         // 运行时间 大于等于 循环持续时间
         if (DT >= LD) {
             // 循环已结束
             CF = FR ? 0.0 : 1.0;
-            this.isRunning = false;
+            this.stop();
         }
         else {
             // 本轮动画已消耗的时间比例 = (本轮动画已消耗的时间 + 循环播放开始帧与动画开始帧之间的时间偏差) / 动画持续时间
             CF = DT <= D ? DT / D : (((DT - LS) % (D - LS)) + LS) / D;
         }
-        this.onUpdate(((EV - SV) * CF + SV) << 0, CF);
+        this.onUpdate((TV * CF + SV) << 0, CF);
         if (!this.isRunning) {
             this.onEnd();
         }
@@ -6258,6 +6259,14 @@ class Player {
     /**
      * 设置配置项
      * @param options 可配置项
+     * @property {string} container 主屏，播放动画的 Canvas 元素
+     * @property {string} secondary 副屏，播放动画的 Canvas 元素
+     * @property {number} loop 循环次数，默认值 0（无限循环）
+     * @property {string} fillMode 最后停留的目标模式，类似于 animation-fill-mode，接受值 forwards 和 fallbacks，默认值 forwards。
+     * @property {string} playMode 播放模式，接受值 forwards 和 fallbacks，默认值 forwards。
+     * @property {number} startFrame 开始播放的帧数，默认值 0
+     * @property {number} endFrame 结束播放的帧数，默认值 0
+     * @property {number} loopStartFrame 循环播放的开始帧，默认值 0
      */
     async setConfig(options, component) {
         let config;
@@ -6267,24 +6276,12 @@ class Player {
         else {
             config = options;
         }
-        const { startFrame, endFrame } = config;
-        if (startFrame != undefined && endFrame != undefined) {
-            // if (startFrame < 0) {
-            //   throw new Error("StartFrame should greater then zero");
-            // }
-            // if (endFrame < 0) {
-            //   throw new Error("EndFrame should greater then zero");
-            // }
-            if (startFrame > endFrame) {
-                throw new Error("StartFrame should greater than EndFrame");
-            }
-        }
         Object.assign(this.config, {
             loop: config.loop ?? 0,
             fillMode: config.fillMode ?? "forwards" /* PLAYER_FILL_MODE.FORWARDS */,
             playMode: config.playMode ?? "forwards" /* PLAYER_PLAY_MODE.FORWARDS */,
-            startFrame: startFrame ?? 0,
-            endFrame: endFrame ?? 0,
+            startFrame: config.startFrame ?? 0,
+            endFrame: config.endFrame ?? 0,
             loopStartFrame: config.loopStartFrame ?? 0,
         });
         await this.brush.register(config.container, config.secondary, component);
@@ -6332,26 +6329,34 @@ class Player {
     }
     /**
      * 开始播放事件回调
+     * @param frame
      */
     onStart;
     /**
      * 重新播放事件回调
+     * @param frame
      */
     onResume;
     /**
      * 暂停播放事件回调
+     * @param frame
      */
     onPause;
     /**
      * 停止播放事件回调
+     * @param frame
      */
     onStop;
     /**
      * 播放中事件回调
+     * @param percent
+     * @param frame
+     * @param frames
      */
     onProcess;
     /**
      * 结束播放事件回调
+     * @param frame
      */
     onEnd;
     /**
@@ -6427,11 +6432,13 @@ class Player {
         const { playMode, loopStartFrame, startFrame, endFrame, fillMode, loop } = this.config;
         let { frames, fps, sprites } = this.entity;
         const spriteCount = sprites.length;
-        const lastFrame = frames - 1;
         const start = startFrame > 0 ? startFrame : 0;
-        const end = endFrame > 0 ? endFrame : lastFrame;
+        const end = endFrame > 0 && endFrame < frames ? endFrame : frames;
+        if (start > end) {
+            throw new Error("StartFrame should greater than EndFrame");
+        }
         // 如果开始动画的当前帧是最后一帧，重置为开始帧
-        if (this.currFrame == lastFrame) {
+        if (this.currFrame == frames) {
             this.currFrame = start;
         }
         // 顺序播放/倒叙播放
@@ -6442,22 +6449,22 @@ class Player {
             this.animator.setRange(end, start);
         }
         // 更新活动帧总数
-        if (endFrame > 0 && endFrame > startFrame) {
-            frames = endFrame - startFrame;
+        if (end !== frames) {
+            frames = end - start;
         }
-        else if (endFrame <= 0 && startFrame > 0) {
-            frames -= startFrame;
+        else if (end <= 0 && start > 0) {
+            frames -= start;
         }
         // 每帧持续的时间
-        const frameDuration = 1000 / fps;
+        const frameDuration = ~~((1000 / fps) * 10 ** 6) / 10 ** 6;
         // 更新动画基础信息
         this.animator.setConfig(
         // duration = frames * (1 / fps) * 1000
         frames * frameDuration, 
-        // loopStart = (loopStartFrame - startFrame) * (1 / fps) * 1000
-        loopStartFrame > startFrame
-            ? (loopStartFrame - startFrame) * frameDuration
-            : 0, loop <= 0 ? Infinity : loop, +(fillMode == "backwards" /* PLAYER_FILL_MODE.BACKWARDS */));
+        // loopStart = (loopStartFrame - start) * (1 / fps) * 1000
+        loopStartFrame > start
+            ? (loopStartFrame - start) * frameDuration
+            : 0, loop <= 0 ? Infinity : loop, fillMode == "backwards" /* PLAYER_FILL_MODE.BACKWARDS */ ? 1 : 0);
         // 动画绘制过程
         this.animator.onUpdate = (value, spendValue) => {
             // 是否还有剩余时间
@@ -6491,7 +6498,7 @@ class Player {
                 }
             });
             this.brush.clearBack();
-            this.onProcess?.(~~((this.currFrame / this.entity.frames) * 100) / 100);
+            this.onProcess?.(~~((value / this.entity.frames) * 100) / 100, value, frames);
             this.currFrame = value;
             this.tail = 0;
         };
