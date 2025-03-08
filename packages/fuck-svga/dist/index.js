@@ -5974,13 +5974,13 @@ class Brush {
         // ------- 生成主屏清理函数 -------
         // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
         if (model.clear == "CL") {
-            this.clearFront = () => {
+            this.clearContainer = () => {
                 const { W, H } = this;
                 this.XC.clearRect(0, 0, W, H);
             };
         }
         else {
-            this.clearFront = () => {
+            this.clearContainer = () => {
                 const { W, H } = this;
                 this.X.width = W;
                 this.X.height = H;
@@ -5988,14 +5988,14 @@ class Brush {
         }
         // #endregion clear main screen implement
         if (mode == 'simple') {
-            this.clearBack = this.stick = noop;
+            this.clearSecondary = this.stick = noop;
         }
         else {
             // #region clear secondary screen implement
             // ------- 生成副屏清理函数 --------
             switch (model.clear) {
                 case "CR":
-                    this.clearBack = () => {
+                    this.clearSecondary = () => {
                         const { W, H } = this;
                         // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
                         const { canvas, ctx } = getOffscreenCanvas({ width: W, height: H });
@@ -6004,14 +6004,14 @@ class Brush {
                     };
                     break;
                 case "CL":
-                    this.clearBack = () => {
+                    this.clearSecondary = () => {
                         const { W, H } = this;
                         // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
                         this.YC.clearRect(0, 0, W, H);
                     };
                     break;
                 default:
-                    this.clearBack = () => {
+                    this.clearSecondary = () => {
                         const { W, H, Y } = this;
                         Y.width = W;
                         Y.height = H;
@@ -6096,8 +6096,8 @@ class Brush {
     flush(cb) {
         (Env.is(SE.H5) ? br : this.X).requestAnimationFrame(cb);
     }
-    clearFront = noop;
-    clearBack = noop;
+    clearContainer = noop;
+    clearSecondary = noop;
     /**
      * 绘制图片片段
      * @param videoEntity
@@ -6113,11 +6113,11 @@ class Brush {
      * 销毁画笔
      */
     destroy() {
-        this.clearFront();
-        this.clearBack();
+        this.clearContainer();
+        this.clearSecondary();
         this.materials.clear();
         this.X = this.XC = this.Y = this.YC = null;
-        this.clearFront = this.clearBack = this.stick = noop;
+        this.clearContainer = this.clearSecondary = this.stick = noop;
     }
 }
 
@@ -6134,11 +6134,11 @@ class Animator {
     /**
      * 动画开始帧
      */
-    startValue = 0;
+    startFrame = 0;
     /**
      * 动画总帧数
      */
-    totalValue = 0;
+    totalFrame = 0;
     /**
      * 动画持续时间
      */
@@ -6166,12 +6166,12 @@ class Animator {
     }
     /**
      * 设置动画开始帧和结束帧
-     * @param startValue
+     * @param startFrame
      * @param endValue
      */
-    setRange(startValue, endValue) {
-        this.startValue = startValue;
-        this.totalValue = endValue - startValue;
+    setRange(startFrame, endValue) {
+        this.startFrame = startFrame;
+        this.totalFrame = endValue - startFrame;
     }
     /**
      * 设置动画的必要参数
@@ -6185,7 +6185,7 @@ class Animator {
         this.duration = duration;
         this.loopStart = loopStart;
         this.fillRule = fillRule;
-        this.loopDuration = loopStart + (duration - loopStart) * loop;
+        this.loopDuration = duration * loop - loopStart;
         console.log('Animator', 'duration', duration, 'loopStart', loopStart, 'fillRule', fillRule, 'loopDuration', this.loopDuration);
     }
     start() {
@@ -6206,20 +6206,20 @@ class Animator {
         }
     }
     doDeltaTime(DT) {
-        const { duration: D, loopStart: LS, loopDuration: LD, startValue: SV, totalValue: TV, fillRule: FR, } = this;
-        // 本轮动画已消耗的时间比例 currentFrication
-        let CF;
+        const { duration: D, loopDuration: LD, totalFrame: TV, fillRule: FR, } = this;
+        // 本轮动画已消耗的时间比例（Percentage of speed time）
+        let TT;
         // 运行时间 大于等于 循环持续时间
         if (DT >= LD) {
-            // 循环已结束
-            CF = FR ? 0.0 : 1.0;
+            // 动画已结束
+            TT = FR ? 0.0 : 1.0;
             this.stop();
         }
         else {
-            // 本轮动画已消耗的时间比例 = (本轮动画已消耗的时间 + 循环播放开始帧与动画开始帧之间的时间偏差) / 动画持续时间
-            CF = DT <= D ? DT / D : (((DT - LS) % (D - LS)) + LS) / D;
+            // 本轮动画已消耗的时间比例 = 本轮动画已消耗的时间 / 动画持续时间
+            TT = DT <= D ? DT / D : (DT % D) / D;
         }
-        this.onUpdate((TV * CF + SV) << 0, CF);
+        this.onUpdate(TV * TT << 0, TT);
         if (!this.isRunning) {
             this.onEnd();
         }
@@ -6251,7 +6251,13 @@ class Player {
         loopStartFrame: 0,
         // isUseIntersectionObserver: false,
     });
+    /**
+     * 刷头实例
+     */
     brush = new Brush();
+    /**
+     * 动画实例
+     */
     animator = null;
     // private isBeIntersection = true;
     // private intersectionObserver: IntersectionObserver | null = null
@@ -6331,7 +6337,7 @@ class Player {
         benchmark.unlockTime("draw");
         const { images, filename, size } = videoEntity;
         this.brush.setRect(size.width, size.height);
-        this.brush.clearBack();
+        this.brush.clearSecondary();
         return this.brush.loadImage(images, filename);
     }
     /**
@@ -6370,7 +6376,7 @@ class Player {
      * 开始播放
      */
     start() {
-        this.brush.clearFront();
+        this.brush.clearContainer();
         this.startAnimation();
         this.onStart?.(this.currFrame);
     }
@@ -6394,14 +6400,14 @@ class Player {
     stop() {
         this.animator.stop();
         this.currFrame = 0;
-        this.brush.clearFront();
+        this.brush.clearContainer();
         this.onStop?.(this.currFrame);
     }
     /**
      * 清理容器画布
      */
     clear() {
-        this.brush.clearFront();
+        this.brush.clearContainer();
     }
     /**
      * 销毁实例
@@ -6417,24 +6423,16 @@ class Player {
             return;
         }
         this.pause();
-        this.currFrame = frame;
-        this.config.loopStartFrame = frame;
+        this.currFrame = this.config.loopStartFrame = frame;
         if (andPlay) {
             this.startAnimation();
         }
     }
-    stepToPercentage(percentage, andPlay = false) {
+    stepToPercentage(percent, andPlay = false) {
         if (!this.entity)
             return;
         const { frames } = this.entity;
-        let frame = Math.round(+(percentage ?? 0) * frames) % frames;
-        if (frame < 0) {
-            frame = 0;
-        }
-        else if (frame >= frames) {
-            frame = frames - 1;
-        }
-        this.stepToFrame(frame, andPlay);
+        this.stepToFrame((Math.round((percent < 0 ? 0 : percent) * frames) % frames), andPlay);
     }
     /**
      * 开始绘制动画
@@ -6448,22 +6446,26 @@ class Player {
         if (start > end) {
             throw new Error("StartFrame should greater than EndFrame");
         }
-        // 如果开始动画的当前帧是最后一帧，重置为开始帧
-        if (this.currFrame == frames) {
-            this.currFrame = start;
-        }
         // 顺序播放/倒叙播放
         if (playMode == "forwards" /* PLAYER_PLAY_MODE.FORWARDS */) {
             this.animator.setRange(start, end);
+            // 如果开始动画的当前帧是最后一帧，重置为开始帧
+            if (this.currFrame == frames - 1) {
+                this.currFrame = start;
+            }
         }
         else {
             this.animator.setRange(end, start);
+            // 如果开始动画的当前帧是最后一帧，重置为开始帧
+            if (this.currFrame == 0) {
+                this.currFrame = end;
+            }
         }
         // 更新活动帧总数
-        if (end !== frames) {
+        if (end != frames) {
             frames = end - start;
         }
-        else if (end <= 0 && start > 0) {
+        else if (start > 0) {
             frames -= start;
         }
         // 每帧持续的时间
@@ -6473,18 +6475,16 @@ class Player {
         // duration = frames * (1 / fps) * 1000
         frames * frameDuration, 
         // loopStart = (loopStartFrame - start) * (1 / fps) * 1000
-        loopStartFrame > start
-            ? (loopStartFrame - start) * frameDuration
-            : 0, loop <= 0 ? Infinity : loop, fillMode == "backwards" /* PLAYER_FILL_MODE.BACKWARDS */ ? 1 : 0);
+        loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0, loop <= 0 ? Infinity : loop, fillMode == "backwards" /* PLAYER_FILL_MODE.BACKWARDS */ ? 1 : 0);
         // 动画绘制过程
-        this.animator.onUpdate = (value, spendValue) => {
+        this.animator.onUpdate = (value, timePercent) => {
             // 是否还有剩余时间
             const hasRemained = this.currFrame == value;
             // 当前帧的图片还未绘制完成
             if (this.tail != spriteCount) {
                 // 1.2和3均为阔值，保证渲染尽快完成
                 const tmp = hasRemained
-                    ? Math.min(spriteCount * spendValue * 1.2 + 3, spriteCount) << 0
+                    ? Math.min(spriteCount * timePercent * 1.2 + 3, spriteCount) << 0
                     : spriteCount;
                 if (tmp > this.tail) {
                     this.head = this.tail;
@@ -6497,7 +6497,7 @@ class Player {
             if (hasRemained) {
                 return;
             }
-            this.brush.clearFront();
+            this.brush.clearContainer();
             benchmark.time("render", () => this.brush.stick(), null, (count) => {
                 benchmark.log("render count", count);
                 benchmark.line(20);
@@ -6508,7 +6508,7 @@ class Player {
                     benchmark.lockTime("draw");
                 }
             });
-            this.brush.clearBack();
+            this.brush.clearSecondary();
             this.onProcess?.(~~((value / frames) * 100) / 100, value, frames);
             this.currFrame = value;
             this.tail = 0;
@@ -6546,7 +6546,7 @@ class Poster {
         this.entity = videoEntity;
         this.currFrame = currFrame || 0;
         this.brush.setRect(size.width, size.height);
-        this.brush.clearBack();
+        this.brush.clearSecondary();
         benchmark.clearTime("render");
         return this.brush.loadImage(images, filename);
     }
@@ -6607,7 +6607,7 @@ class Poster {
      */
     draw() {
         benchmark.time("render", () => {
-            this.brush.clearBack();
+            this.brush.clearSecondary();
             this.brush.draw(this.entity, this.currFrame, 0, this.entity.sprites.length);
             this.brush.stick();
         });
@@ -6616,7 +6616,7 @@ class Poster {
      * 清理海报
      */
     clear() {
-        this.brush.clearFront();
+        this.brush.clearContainer();
     }
     /**
      * 销毁海报

@@ -15,7 +15,13 @@ export declare class Player {
      * 当前配置项
      */
     private readonly config;
+    /**
+     * 刷头实例
+     */
     private brush;
+    /**
+     * 动画实例
+     */
     private animator;
     /**
      * 片段绘制开始位置
@@ -101,7 +107,7 @@ export declare class Player {
      */
     destroy(): void;
     stepToFrame(frame: number, andPlay?: boolean): void;
-    stepToPercentage(percentage: number, andPlay?: boolean): void;
+    stepToPercentage(percent: number, andPlay?: boolean): void;
     /**
      * 开始绘制动画
      */

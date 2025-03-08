@@ -29,7 +29,14 @@ export class Player {
     // isUseIntersectionObserver: false,
   });
 
+  /**
+   * 刷头实例
+   */
   private brush = new Brush();
+
+  /**
+   * 动画实例
+   */
   private animator: Animator | null = null;
 
   // private isBeIntersection = true;
@@ -120,7 +127,7 @@ export class Player {
     const { images, filename, size } = videoEntity;
 
     this.brush.setRect(size.width, size.height);
-    this.brush.clearBack();
+    this.brush.clearSecondary();
 
     return this.brush.loadImage(images, filename);
   }
@@ -162,7 +169,7 @@ export class Player {
    * 开始播放
    */
   public start(): void {
-    this.brush.clearFront();
+    this.brush.clearContainer();
     this.startAnimation();
     this.onStart?.(this.currFrame);
   }
@@ -189,7 +196,7 @@ export class Player {
   public stop(): void {
     this.animator!.stop();
     this.currFrame = 0;
-    this.brush.clearFront();
+    this.brush.clearContainer();
     this.onStop?.(this.currFrame);
   }
 
@@ -197,7 +204,7 @@ export class Player {
    * 清理容器画布
    */
   public clear(): void {
-    this.brush.clearFront();
+    this.brush.clearContainer();
   }
 
   /**
@@ -214,27 +221,23 @@ export class Player {
     if (!this.entity || frame < 0 || frame >= this.entity.frames) {
       return;
     }
+
     this.pause();
-    this.currFrame = frame;
-    this.config.loopStartFrame = frame;
+    this.currFrame = this.config.loopStartFrame = frame;
     if (andPlay) {
       this.startAnimation();
     }
   }
 
-  public stepToPercentage(percentage: number, andPlay: boolean = false) {
+  public stepToPercentage(percent: number, andPlay: boolean = false) {
     if (!this.entity) return;
 
     const { frames } = this.entity;
-    let frame = Math.round(+(percentage ?? 0) * frames) % frames;
 
-    if (frame < 0) {
-      frame = 0
-    } else if (frame >= frames) {
-      frame = frames - 1;
-    }
-
-    this.stepToFrame(frame, andPlay);
+    this.stepToFrame(
+      (Math.round((percent < 0 ? 0 : percent) * frames) % frames),
+      andPlay
+    );
   }
 
   /**
@@ -252,47 +255,50 @@ export class Player {
       throw new Error("StartFrame should greater than EndFrame");
     }
 
-    // 如果开始动画的当前帧是最后一帧，重置为开始帧
-    if (this.currFrame == frames) {
-      this.currFrame = start;
-    }
-
     // 顺序播放/倒叙播放
     if (playMode == PLAYER_PLAY_MODE.FORWARDS) {
       this.animator!.setRange(start, end);
+
+      // 如果开始动画的当前帧是最后一帧，重置为开始帧
+      if (this.currFrame == frames - 1) {
+        this.currFrame = start;
+      }
     } else {
       this.animator!.setRange(end, start);
+
+      // 如果开始动画的当前帧是最后一帧，重置为开始帧
+      if (this.currFrame == 0) {
+        this.currFrame = end;
+      }
     }
 
     // 更新活动帧总数
-    if (end !== frames) {
+    if (end != frames) {
       frames = end - start;
-    } else if (end <= 0 && start > 0) {
+    } else if (start > 0) {
       frames -= start;
     }
 
     // 每帧持续的时间
-    const frameDuration = ~~((1000 / fps) * 10**6) / 10**6;
+    const frameDuration = 1000 / fps;
     // 更新动画基础信息
     this.animator!.setConfig(
       // duration = frames * (1 / fps) * 1000
-      frames * frameDuration,
+      (~~(frames * frameDuration * 10 ** 6)) / 10 ** 6,
       // loopStart = (loopStartFrame - start) * (1 / fps) * 1000
-      loopStartFrame > start
-        ? (loopStartFrame - start) * frameDuration
-        : 0,
+      loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0,
       loop <= 0 ? Infinity : loop,
       fillMode == PLAYER_FILL_MODE.BACKWARDS ? 1 : 0
     );
     // 动画绘制过程
-    this.animator!.onUpdate = (value: number, spendValue: number) => {
+    this.animator!.onUpdate = (value: number, timePercent: number) => {
       // 是否还有剩余时间
       const hasRemained = this.currFrame == value;
       // 当前帧的图片还未绘制完成
       if (this.tail != spriteCount) {
         // 1.2和3均为阔值，保证渲染尽快完成
         const tmp = hasRemained
-          ? Math.min(spriteCount * spendValue * 1.2 + 3, spriteCount) << 0
+          ? Math.min(spriteCount * timePercent * 1.2 + 3, spriteCount) << 0
           : spriteCount;
 
         if (tmp > this.tail) {
@@ -308,7 +314,7 @@ export class Player {
         return;
       }
 
-      this.brush.clearFront();
+      this.brush.clearContainer();
       benchmark.time(
         "render",
         () => this.brush.stick(),
@@ -323,7 +329,7 @@ export class Player {
           }
         }
       );
-      this.brush.clearBack();
+      this.brush.clearSecondary();
       this.onProcess?.(~~((value / frames) * 100) / 100, value, frames);
       this.currFrame = value;
       this.tail = 0;

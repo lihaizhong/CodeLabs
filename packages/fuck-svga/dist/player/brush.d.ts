@@ -76,8 +76,8 @@ export declare class Brush {
      * @param cb
      */
     flush(cb: () => void): void;
-    clearFront: () => void;
-    clearBack: () => void;
+    clearContainer: () => void;
+    clearSecondary: () => void;
     /**
      * 绘制图片片段
      * @param videoEntity

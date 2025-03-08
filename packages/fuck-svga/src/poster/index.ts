@@ -40,7 +40,7 @@ export class Poster {
     this.entity = videoEntity;
     this.currFrame = currFrame || 0;
     this.brush.setRect(size.width, size.height);
-    this.brush.clearBack();
+    this.brush.clearSecondary();
     benchmark.clearTime("render");
 
     return this.brush.loadImage(images, filename);
@@ -111,7 +111,7 @@ export class Poster {
     benchmark.time(
       "render",
       () => {
-        this.brush.clearBack();
+        this.brush.clearSecondary();
         this.brush.draw(this.entity!, this.currFrame, 0, this.entity!.sprites.length);
         this.brush.stick();
       }
@@ -122,7 +122,7 @@ export class Poster {
    * 清理海报
    */
   public clear(): void {
-    this.brush.clearFront();
+    this.brush.clearContainer();
   }
 
   /**

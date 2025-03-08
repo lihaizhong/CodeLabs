@@ -13,11 +13,11 @@ export class Animator {
   /**
    * 动画开始帧
    */
-  private startValue: number = 0;
+  private startFrame: number = 0;
   /**
    * 动画总帧数
    */
-  private totalValue: number = 0;
+  private totalFrame: number = 0;
   /**
    * 动画持续时间
    */
@@ -46,12 +46,12 @@ export class Animator {
 
   /**
    * 设置动画开始帧和结束帧
-   * @param startValue
+   * @param startFrame
    * @param endValue
    */
-  public setRange(startValue: number, endValue: number) {
-    this.startValue = startValue;
-    this.totalValue = endValue - startValue;
+  public setRange(startFrame: number, endValue: number) {
+    this.startFrame = startFrame;
+    this.totalFrame = endValue - startFrame;
   }
 
   /**
@@ -71,7 +71,7 @@ export class Animator {
     this.duration = duration;
     this.loopStart = loopStart;
     this.fillRule = fillRule;
-    this.loopDuration = loopStart + (duration - loopStart) * loop;
+    this.loopDuration = duration * loop - loopStart;
     console.log('Animator', 'duration', duration, 'loopStart', loopStart, 'fillRule', fillRule, 'loopDuration', this.loopDuration)
   }
 
@@ -98,25 +98,24 @@ export class Animator {
   private doDeltaTime(DT: number): void {
     const {
       duration: D,
-      loopStart: LS,
       loopDuration: LD,
-      startValue: SV,
-      totalValue: TV,
+      totalFrame: TV,
       fillRule: FR,
     } = this;
-    // 本轮动画已消耗的时间比例 currentFrication
-    let CF: number;
+    // 本轮动画已消耗的时间比例（Percentage of speed time）
+    let TT: number;
+
     // 运行时间 大于等于 循环持续时间
     if (DT >= LD) {
-      // 循环已结束
-      CF = FR ? 0.0 : 1.0;
+      // 动画已结束
+      TT = FR ? 0.0 : 1.0;
       this.stop();
     } else {
-      // 本轮动画已消耗的时间比例 = (本轮动画已消耗的时间 + 循环播放开始帧与动画开始帧之间的时间偏差) / 动画持续时间
-      CF = DT <= D ? DT / D : (((DT - LS) % (D - LS)) + LS) / D;
+      // 本轮动画已消耗的时间比例 = 本轮动画已消耗的时间 / 动画持续时间
+      TT = DT <= D ? DT / D : (DT % D) / D;
     }
 
-    this.onUpdate((TV * CF + SV) << 0, CF);
+    this.onUpdate(TV * TT << 0, TT);
     if (!this.isRunning) {
       this.onEnd();
     }

@@ -153,12 +153,12 @@ export class Brush {
     // ------- 生成主屏清理函数 -------
     // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
     if (model.clear == "CL") {
-      this.clearFront = () => {
+      this.clearContainer = () => {
         const { W, H } = this;
         this.XC!.clearRect(0, 0, W, H);
       };
     } else {
-      this.clearFront = () => {
+      this.clearContainer = () => {
         const { W, H } = this;
         this.X!.width = W;
         this.X!.height = H;
@@ -168,13 +168,13 @@ export class Brush {
 
 
     if (mode == 'simple') {
-      this.clearBack = this.stick = noop
+      this.clearSecondary = this.stick = noop
     } else {
       // #region clear secondary screen implement
       // ------- 生成副屏清理函数 --------
       switch (model.clear) {
         case "CR":
-          this.clearBack = () => {
+          this.clearSecondary = () => {
             const { W, H } = this;
             // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
             const { canvas, ctx } = getOffscreenCanvas({ width: W, height: H });
@@ -183,14 +183,14 @@ export class Brush {
           };
           break;
         case "CL":
-          this.clearBack = () => {
+          this.clearSecondary = () => {
             const { W, H } = this;
             // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
             this.YC!.clearRect(0, 0, W, H);
           };
           break;
         default:
-          this.clearBack = () => {
+          this.clearSecondary = () => {
             const { W, H, Y } = this;
             Y!.width = W;
             Y!.height = H;
@@ -288,9 +288,9 @@ export class Brush {
     ((Env.is(SE.H5) ? br : this.X) as WechatMiniprogram.Canvas).requestAnimationFrame(cb);
   }
 
-  public clearFront: () => void = noop;
+  public clearContainer: () => void = noop;
 
-  public clearBack: () => void = noop;
+  public clearSecondary: () => void = noop;
 
   /**
    * 绘制图片片段
@@ -314,10 +314,10 @@ export class Brush {
    * 销毁画笔
    */
   public destroy() {
-    this.clearFront();
-    this.clearBack();
+    this.clearContainer();
+    this.clearSecondary();
     this.materials.clear();
     this.X = this.XC = this.Y = this.YC = null;
-    this.clearFront = this.clearBack = this.stick = noop;
+    this.clearContainer = this.clearSecondary = this.stick = noop;
   }
 }

@@ -12,11 +12,11 @@ export declare class Animator {
     /**
      * 动画开始帧
      */
-    private startValue;
+    private startFrame;
     /**
      * 动画总帧数
      */
-    private totalValue;
+    private totalFrame;
     /**
      * 动画持续时间
      */
@@ -41,10 +41,10 @@ export declare class Animator {
     constructor(brush: Brush);
     /**
      * 设置动画开始帧和结束帧
-     * @param startValue
+     * @param startFrame
      * @param endValue
      */
-    setRange(startValue: number, endValue: number): void;
+    setRange(startFrame: number, endValue: number): void;
     /**
      * 设置动画的必要参数
      * @param duration

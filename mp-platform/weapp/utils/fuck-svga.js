@@ -4808,43 +4808,51 @@ requireCrc32();
  * Supported Application
  * 目前已支持微信小程序、支付宝小程序、抖音小程序、H5
  */
-const SP = {
+const SE = {
     WECHAT: 1,
     ALIPAY: 2,
     DOUYIN: 3,
     H5: 4
 };
-let app;
-// FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
-if (typeof window != "undefined") {
-    app = SP.H5;
-}
-else if (typeof tt != "undefined") {
-    app = SP.DOUYIN;
-}
-else if (typeof my != "undefined") {
-    app = SP.ALIPAY;
-}
-else if (typeof wx != "undefined") {
-    app = SP.WECHAT;
-}
-else {
+function getEnvironment() {
+    // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
+    if (typeof window != "undefined") {
+        return SE.H5;
+    }
+    if (typeof tt != "undefined") {
+        return SE.DOUYIN;
+    }
+    if (typeof my != "undefined") {
+        return SE.ALIPAY;
+    }
+    if (typeof wx != "undefined") {
+        return SE.WECHAT;
+    }
     throw new Error("Unsupported app");
 }
+let env = getEnvironment();
+const Env = {
+    is: (environment) => env === environment,
+    not: (environment) => env !== environment,
+    get: () => env,
+    set: (environment) => {
+        env = environment;
+    }
+};
 
-let br = null;
-if (app == SP.H5) {
-    br = window;
+function getBridge() {
+    if (Env.is(SE.H5)) {
+        return window;
+    }
+    if (Env.is(SE.ALIPAY)) {
+        return my;
+    }
+    if (Env.is(SE.DOUYIN)) {
+        return tt;
+    }
+    return wx;
 }
-else if (app == SP.ALIPAY) {
-    br = my;
-}
-else if (app == SP.DOUYIN) {
-    br = tt;
-}
-else if (app == SP.WECHAT) {
-    br = wx;
-}
+const br = getBridge();
 
 // const now = () => (typeof performance != 'undefined' ? performance.now() : Date.now());
 const stopwatch = {
@@ -4915,9 +4923,9 @@ var benchmark = {
     },
 };
 
-const { USER_DATA_PATH } = app == SP.H5
+const { USER_DATA_PATH = '' } = Env.is(SE.H5)
     ? {}
-    : app == SP.DOUYIN
+    : Env.is(SE.DOUYIN)
         ? // @ts-ignore
             tt.getEnvInfoSync().common
         : br.env;
@@ -5012,7 +5020,7 @@ function readFile(filePath) {
  */
 function readRemoteFile(url) {
     // H5环境
-    if (app == SP.H5) {
+    if (Env.is(SE.H5)) {
         return fetch(url).then((response) => {
             if (response.ok) {
                 return response.arrayBuffer();
@@ -5046,7 +5054,7 @@ function download(url) {
         return readRemoteFile(url);
     }
     // 读取本地文件
-    if (app != SP.H5) {
+    if (Env.not(SE.H5)) {
         return readFile(url);
     }
     return Promise.resolve(null);
@@ -5332,16 +5340,19 @@ class Parser {
 /**
  * 获取当前显示设备的物理像素分辨率与CSS 像素分辨率之比
  */
-let dpr = 1;
-if (app == SP.H5) {
-    dpr = window.devicePixelRatio;
+function getDevicePixelRatio() {
+    if (Env.is(SE.H5)) {
+        return window.devicePixelRatio;
+    }
+    if ("getWindowInfo" in br) {
+        return br.getWindowInfo().pixelRatio;
+    }
+    if ("getSystemInfoSync" in br) {
+        return br.getSystemInfoSync().pixelRatio;
+    }
+    return 1;
 }
-else if ("getWindowInfo" in br) {
-    dpr = br.getWindowInfo().pixelRatio;
-}
-else if ("getSystemInfoSync" in br) {
-    dpr = br.getSystemInfoSync().pixelRatio;
-}
+const dpr = getDevicePixelRatio();
 
 /**
  * 获取Canvas及其Context
@@ -5363,7 +5374,7 @@ function getCanvas(selector, component) {
             ctx.scale(dpr, dpr);
             resolve({ canvas, ctx });
         };
-        if (app == SP.H5) {
+        if (Env.is(SE.H5)) {
             const canvas = document.querySelector(selector);
             const { width, height } = canvas.style;
             initCanvas(canvas, parseFloat(width), parseFloat(height));
@@ -5389,16 +5400,16 @@ function getCanvas(selector, component) {
  * @returns
  */
 function createOffscreenCanvas(options) {
-    if (app == SP.H5) {
+    if (Env.is(SE.H5)) {
         return new OffscreenCanvas(options.width, options.height);
     }
-    if (app == SP.ALIPAY) {
+    if (Env.is(SE.ALIPAY)) {
         return my.createOffscreenCanvas({
             width: options.width,
             height: options.height,
         });
     }
-    if (app == SP.DOUYIN) {
+    if (Env.is(SE.DOUYIN)) {
         const canvas = tt.createOffscreenCanvas();
         canvas.width = options.width;
         canvas.height = options.height;
@@ -5428,7 +5439,7 @@ function getOffscreenCanvas(options) {
 function toBase64(data) {
     const buf = toBuffer(data);
     let b64;
-    if (app == SP.H5) {
+    if (Env.is(SE.H5)) {
         b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
     }
     else {
@@ -5465,7 +5476,7 @@ async function genImageSource(data, filename, prefix) {
         return data;
     }
     // FIXME: 支付宝小程序IDE保存临时文件会失败
-    if (app == SP.H5 || (app == SP.ALIPAY && br.isIDE)) {
+    if (Env.is(SE.H5) || (Env.is(SE.ALIPAY) && br.isIDE)) {
         return toBase64(data);
     }
     try {
@@ -5486,7 +5497,7 @@ async function genImageSource(data, filename, prefix) {
  * @returns
  */
 function loadImage(brush, data, filename, prefix) {
-    if (app == SP.H5) {
+    if (Env.is(SE.H5)) {
         // 由于ImageBitmap在图片渲染上有优势，故优先使用
         if (data instanceof Uint8Array && "createImageBitmap" in window) {
             return toBitmap(data);
@@ -5513,37 +5524,33 @@ function loadImage(brush, data, filename, prefix) {
 
 const noop = () => { };
 
-let p;
-switch (app) {
-    case SP.H5: {
+function getPlatform() {
+    if (Env.is(SE.H5)) {
         const UA = navigator.userAgent;
         if (/(Android)/i.test(UA)) {
-            p = "Android";
+            return "Android";
         }
-        else if (/(iPhone|iPad|iPod|iOS)/i.test(UA)) {
-            p = "iOS";
+        if (/(iPhone|iPad|iPod|iOS)/i.test(UA)) {
+            return "iOS";
         }
-        else if (/(OpenHarmony|ArkWeb)/i.test(UA)) {
-            p = "OpenHarmony";
+        if (/(OpenHarmony|ArkWeb)/i.test(UA)) {
+            return "OpenHarmony";
         }
-        else {
-            p = "UNKNOWN";
-        }
-        break;
     }
-    case SP.ALIPAY:
-        p = br.getDeviceBaseInfo().platform;
-        break;
-    case SP.DOUYIN:
-        p = br.getDeviceInfoSync().platform;
-        break;
-    case SP.WECHAT:
-        p = br.getDeviceInfo().platform;
-        break;
-    default:
-        p = "UNKNOWN";
+    else {
+        if (Env.is(SE.ALIPAY)) {
+            return br.getDeviceBaseInfo().platform;
+        }
+        if (Env.is(SE.DOUYIN)) {
+            return br.getDeviceInfoSync().platform;
+        }
+        if (Env.is(SE.WECHAT)) {
+            return br.getDeviceInfo().platform;
+        }
+    }
+    return "UNKNOWN";
 }
-const platform = p.toLocaleUpperCase();
+const platform = getPlatform().toLocaleUpperCase();
 
 const now = () => {
     // performance可以提供更高精度的时间测量，且不受系统时间的调整（如更改系统时间或同步时间）的影响
@@ -5897,11 +5904,11 @@ class Brush {
         // set clear
         if (type == "O" &&
             // OffscreenCanvas 在 Firefox 浏览器无法被清理历史内容
-            app == SP.H5 &&
+            Env.is(SE.H5) &&
             navigator.userAgent.includes("Firefox")) {
             model.clear = "CR";
         }
-        else if ((type == "O" && app == SP.DOUYIN) || app == SP.ALIPAY) {
+        else if ((type == "O" && Env.is(SE.DOUYIN)) || Env.is(SE.ALIPAY)) {
             model.clear = "CL";
         }
         else {
@@ -5909,8 +5916,8 @@ class Brush {
         }
         // set render
         if ((type == "C" &&
-            (app == SP.DOUYIN || (platform == "IOS" && app == SP.ALIPAY))) ||
-            (type == "O" && app == SP.WECHAT)) {
+            (Env.is(SE.DOUYIN) || (platform == "IOS" && Env.is(SE.ALIPAY)))) ||
+            (type == "O" && Env.is(SE.WECHAT))) {
             model.render = "PU";
         }
         else {
@@ -5967,13 +5974,13 @@ class Brush {
         // ------- 生成主屏清理函数 -------
         // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
         if (model.clear == "CL") {
-            this.clearFront = () => {
+            this.clearContainer = () => {
                 const { W, H } = this;
                 this.XC.clearRect(0, 0, W, H);
             };
         }
         else {
-            this.clearFront = () => {
+            this.clearContainer = () => {
                 const { W, H } = this;
                 this.X.width = W;
                 this.X.height = H;
@@ -5981,14 +5988,14 @@ class Brush {
         }
         // #endregion clear main screen implement
         if (mode == 'simple') {
-            this.clearBack = this.stick = noop;
+            this.clearSecondary = this.stick = noop;
         }
         else {
             // #region clear secondary screen implement
             // ------- 生成副屏清理函数 --------
             switch (model.clear) {
                 case "CR":
-                    this.clearBack = () => {
+                    this.clearSecondary = () => {
                         const { W, H } = this;
                         // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
                         const { canvas, ctx } = getOffscreenCanvas({ width: W, height: H });
@@ -5997,14 +6004,14 @@ class Brush {
                     };
                     break;
                 case "CL":
-                    this.clearBack = () => {
+                    this.clearSecondary = () => {
                         const { W, H } = this;
                         // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
                         this.YC.clearRect(0, 0, W, H);
                     };
                     break;
                 default:
-                    this.clearBack = () => {
+                    this.clearSecondary = () => {
                         const { W, H, Y } = this;
                         Y.width = W;
                         Y.height = H;
@@ -6068,7 +6075,7 @@ class Brush {
      * @returns
      */
     createImage() {
-        if (app == SP.H5) {
+        if (Env.is(SE.H5)) {
             return new Image();
         }
         return this.X.createImage();
@@ -6087,10 +6094,10 @@ class Brush {
      * @param cb
      */
     flush(cb) {
-        (app == SP.H5 ? br : this.X).requestAnimationFrame(cb);
+        (Env.is(SE.H5) ? br : this.X).requestAnimationFrame(cb);
     }
-    clearFront = noop;
-    clearBack = noop;
+    clearContainer = noop;
+    clearSecondary = noop;
     /**
      * 绘制图片片段
      * @param videoEntity
@@ -6106,11 +6113,11 @@ class Brush {
      * 销毁画笔
      */
     destroy() {
-        this.clearFront();
-        this.clearBack();
+        this.clearContainer();
+        this.clearSecondary();
         this.materials.clear();
         this.X = this.XC = this.Y = this.YC = null;
-        this.clearFront = this.clearBack = this.stick = noop;
+        this.clearContainer = this.clearSecondary = this.stick = noop;
     }
 }
 
@@ -6127,11 +6134,11 @@ class Animator {
     /**
      * 动画开始帧
      */
-    startValue = 0;
+    startFrame = 0;
     /**
      * 动画总帧数
      */
-    totalValue = 0;
+    totalFrame = 0;
     /**
      * 动画持续时间
      */
@@ -6159,12 +6166,12 @@ class Animator {
     }
     /**
      * 设置动画开始帧和结束帧
-     * @param startValue
+     * @param startFrame
      * @param endValue
      */
-    setRange(startValue, endValue) {
-        this.startValue = startValue;
-        this.totalValue = endValue - startValue;
+    setRange(startFrame, endValue) {
+        this.startFrame = startFrame;
+        this.totalFrame = endValue - startFrame;
     }
     /**
      * 设置动画的必要参数
@@ -6178,7 +6185,7 @@ class Animator {
         this.duration = duration;
         this.loopStart = loopStart;
         this.fillRule = fillRule;
-        this.loopDuration = loopStart + (duration - loopStart) * loop;
+        this.loopDuration = duration * loop - loopStart;
         console.log('Animator', 'duration', duration, 'loopStart', loopStart, 'fillRule', fillRule, 'loopDuration', this.loopDuration);
     }
     start() {
@@ -6199,20 +6206,20 @@ class Animator {
         }
     }
     doDeltaTime(DT) {
-        const { duration: D, loopStart: LS, loopDuration: LD, startValue: SV, totalValue: TV, fillRule: FR, } = this;
-        // 本轮动画已消耗的时间比例 currentFrication
-        let CF;
+        const { duration: D, loopDuration: LD, totalFrame: TV, fillRule: FR, } = this;
+        // 本轮动画已消耗的时间比例（Percentage of speed time）
+        let TT;
         // 运行时间 大于等于 循环持续时间
         if (DT >= LD) {
-            // 循环已结束
-            CF = FR ? 0.0 : 1.0;
+            // 动画已结束
+            TT = FR ? 0.0 : 1.0;
             this.stop();
         }
         else {
-            // 本轮动画已消耗的时间比例 = (本轮动画已消耗的时间 + 循环播放开始帧与动画开始帧之间的时间偏差) / 动画持续时间
-            CF = DT <= D ? DT / D : (((DT - LS) % (D - LS)) + LS) / D;
+            // 本轮动画已消耗的时间比例 = 本轮动画已消耗的时间 / 动画持续时间
+            TT = DT <= D ? DT / D : (DT % D) / D;
         }
-        this.onUpdate((TV * CF + SV) << 0, CF);
+        this.onUpdate(TV * TT << 0, TT);
         if (!this.isRunning) {
             this.onEnd();
         }
@@ -6244,7 +6251,13 @@ class Player {
         loopStartFrame: 0,
         // isUseIntersectionObserver: false,
     });
+    /**
+     * 刷头实例
+     */
     brush = new Brush();
+    /**
+     * 动画实例
+     */
     animator = null;
     // private isBeIntersection = true;
     // private intersectionObserver: IntersectionObserver | null = null
@@ -6324,7 +6337,7 @@ class Player {
         benchmark.unlockTime("draw");
         const { images, filename, size } = videoEntity;
         this.brush.setRect(size.width, size.height);
-        this.brush.clearBack();
+        this.brush.clearSecondary();
         return this.brush.loadImage(images, filename);
     }
     /**
@@ -6363,7 +6376,7 @@ class Player {
      * 开始播放
      */
     start() {
-        this.brush.clearFront();
+        this.brush.clearContainer();
         this.startAnimation();
         this.onStart?.(this.currFrame);
     }
@@ -6387,14 +6400,14 @@ class Player {
     stop() {
         this.animator.stop();
         this.currFrame = 0;
-        this.brush.clearFront();
+        this.brush.clearContainer();
         this.onStop?.(this.currFrame);
     }
     /**
      * 清理容器画布
      */
     clear() {
-        this.brush.clearFront();
+        this.brush.clearContainer();
     }
     /**
      * 销毁实例
@@ -6410,25 +6423,16 @@ class Player {
             return;
         }
         this.pause();
-        this.currFrame = frame;
-        this.config.loopStartFrame = frame;
+        this.currFrame = this.config.loopStartFrame = frame;
         if (andPlay) {
             this.startAnimation();
         }
     }
-    stepToPercentage(percentage, andPlay = false) {
+    stepToPercentage(percent, andPlay = false) {
         if (!this.entity)
             return;
         const { frames } = this.entity;
-        let frame = Math.round(+(percentage ?? 0) * frames) % frames;
-        console.log('stepToPercentage', frame)
-        if (frame < 0) {
-            frame = 0;
-        }
-        else if (frame >= frames) {
-            frame = frames - 1;
-        }
-        this.stepToFrame(frame, andPlay);
+        this.stepToFrame((Math.round((percent < 0 ? 0 : percent) * frames) % frames), andPlay);
     }
     /**
      * 开始绘制动画
@@ -6442,44 +6446,45 @@ class Player {
         if (start > end) {
             throw new Error("StartFrame should greater than EndFrame");
         }
-        // 如果开始动画的当前帧是最后一帧，重置为开始帧
-        if (this.currFrame == frames) {
-            this.currFrame = start;
-        }
         // 顺序播放/倒叙播放
         if (playMode == "forwards" /* PLAYER_PLAY_MODE.FORWARDS */) {
             this.animator.setRange(start, end);
+            // 如果开始动画的当前帧是最后一帧，重置为开始帧
+            if (this.currFrame == frames - 1) {
+                this.currFrame = start;
+            }
         }
         else {
             this.animator.setRange(end, start);
+            // 如果开始动画的当前帧是最后一帧，重置为开始帧
+            if (this.currFrame == 0) {
+                this.currFrame = end;
+            }
         }
         // 更新活动帧总数
-        if (end !== frames) {
+        if (end != frames) {
             frames = end - start;
         }
-        else if (end <= 0 && start > 0) {
+        else if (start > 0) {
             frames -= start;
         }
         // 每帧持续的时间
         const frameDuration = ~~((1000 / fps) * 10 ** 6) / 10 ** 6;
-        console.log('startAnimation', loopStartFrame, start)
         // 更新动画基础信息
         this.animator.setConfig(
         // duration = frames * (1 / fps) * 1000
         frames * frameDuration, 
         // loopStart = (loopStartFrame - start) * (1 / fps) * 1000
-        loopStartFrame > start
-            ? (loopStartFrame - start) * frameDuration
-            : 0, loop <= 0 ? Infinity : loop, fillMode == "backwards" /* PLAYER_FILL_MODE.BACKWARDS */ ? 1 : 0);
+        loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0, loop <= 0 ? Infinity : loop, fillMode == "backwards" /* PLAYER_FILL_MODE.BACKWARDS */ ? 1 : 0);
         // 动画绘制过程
-        this.animator.onUpdate = (value, spendValue) => {
+        this.animator.onUpdate = (value, timePercent) => {
             // 是否还有剩余时间
             const hasRemained = this.currFrame == value;
             // 当前帧的图片还未绘制完成
             if (this.tail != spriteCount) {
                 // 1.2和3均为阔值，保证渲染尽快完成
                 const tmp = hasRemained
-                    ? Math.min(spriteCount * spendValue * 1.2 + 3, spriteCount) << 0
+                    ? Math.min(spriteCount * timePercent * 1.2 + 3, spriteCount) << 0
                     : spriteCount;
                 if (tmp > this.tail) {
                     this.head = this.tail;
@@ -6492,7 +6497,7 @@ class Player {
             if (hasRemained) {
                 return;
             }
-            this.brush.clearFront();
+            this.brush.clearContainer();
             benchmark.time("render", () => this.brush.stick(), null, (count) => {
                 benchmark.log("render count", count);
                 benchmark.line(20);
@@ -6503,7 +6508,7 @@ class Player {
                     benchmark.lockTime("draw");
                 }
             });
-            this.brush.clearBack();
+            this.brush.clearSecondary();
             this.onProcess?.(~~((value / frames) * 100) / 100, value, frames);
             this.currFrame = value;
             this.tail = 0;
@@ -6541,7 +6546,7 @@ class Poster {
         this.entity = videoEntity;
         this.currFrame = currFrame || 0;
         this.brush.setRect(size.width, size.height);
-        this.brush.clearBack();
+        this.brush.clearSecondary();
         benchmark.clearTime("render");
         return this.brush.loadImage(images, filename);
     }
@@ -6602,7 +6607,7 @@ class Poster {
      */
     draw() {
         benchmark.time("render", () => {
-            this.brush.clearBack();
+            this.brush.clearSecondary();
             this.brush.draw(this.entity, this.currFrame, 0, this.entity.sprites.length);
             this.brush.stick();
         });
@@ -6611,7 +6616,7 @@ class Poster {
      * 清理海报
      */
     clear() {
-        this.brush.clearFront();
+        this.brush.clearContainer();
     }
     /**
      * 销毁海报
@@ -6631,5 +6636,5 @@ class Poster {
     }
 }
 
-export { Brush, Parser, Player, Poster, download, getCanvas, getOffscreenCanvas, loadImage };
+export { Brush, Env, Parser, Player, Poster, SE as SUPPORTED_ENV, download, getCanvas, getOffscreenCanvas, loadImage };
 //# sourceMappingURL=index.js.map

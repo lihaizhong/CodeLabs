@@ -4808,43 +4808,51 @@ requireCrc32();
  * Supported Application
  * 目前已支持微信小程序、支付宝小程序、抖音小程序、H5
  */
-const SP = {
+const SE = {
     WECHAT: 1,
     ALIPAY: 2,
     DOUYIN: 3,
     H5: 4
 };
-let app;
-// FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
-if (typeof window != "undefined") {
-    app = SP.H5;
-}
-else if (typeof tt != "undefined") {
-    app = SP.DOUYIN;
-}
-else if (typeof my != "undefined") {
-    app = SP.ALIPAY;
-}
-else if (typeof wx != "undefined") {
-    app = SP.WECHAT;
-}
-else {
+function getEnvironment() {
+    // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
+    if (typeof window != "undefined") {
+        return SE.H5;
+    }
+    if (typeof tt != "undefined") {
+        return SE.DOUYIN;
+    }
+    if (typeof my != "undefined") {
+        return SE.ALIPAY;
+    }
+    if (typeof wx != "undefined") {
+        return SE.WECHAT;
+    }
     throw new Error("Unsupported app");
 }
+let env = getEnvironment();
+const Env = {
+    is: (environment) => env === environment,
+    not: (environment) => env !== environment,
+    get: () => env,
+    set: (environment) => {
+        env = environment;
+    }
+};
 
-let br = null;
-if (app == SP.H5) {
-    br = window;
+function getBridge() {
+    if (Env.is(SE.H5)) {
+        return window;
+    }
+    if (Env.is(SE.ALIPAY)) {
+        return my;
+    }
+    if (Env.is(SE.DOUYIN)) {
+        return tt;
+    }
+    return wx;
 }
-else if (app == SP.ALIPAY) {
-    br = my;
-}
-else if (app == SP.DOUYIN) {
-    br = tt;
-}
-else if (app == SP.WECHAT) {
-    br = wx;
-}
+const br = getBridge();
 
 // const now = () => (typeof performance != 'undefined' ? performance.now() : Date.now());
 const stopwatch = {
@@ -4915,9 +4923,9 @@ var benchmark = {
     },
 };
 
-const { USER_DATA_PATH } = app == SP.H5
+const { USER_DATA_PATH = '' } = Env.is(SE.H5)
     ? {}
-    : app == SP.DOUYIN
+    : Env.is(SE.DOUYIN)
         ? // @ts-ignore
             tt.getEnvInfoSync().common
         : br.env;
@@ -5012,7 +5020,7 @@ function readFile(filePath) {
  */
 function readRemoteFile(url) {
     // H5环境
-    if (app == SP.H5) {
+    if (Env.is(SE.H5)) {
         return fetch(url).then((response) => {
             if (response.ok) {
                 return response.arrayBuffer();
@@ -5046,7 +5054,7 @@ function download(url) {
         return readRemoteFile(url);
     }
     // 读取本地文件
-    if (app != SP.H5) {
+    if (Env.not(SE.H5)) {
         return readFile(url);
     }
     return Promise.resolve(null);
@@ -5332,16 +5340,19 @@ class Parser {
 /**
  * 获取当前显示设备的物理像素分辨率与CSS 像素分辨率之比
  */
-let dpr = 1;
-if (app == SP.H5) {
-    dpr = window.devicePixelRatio;
+function getDevicePixelRatio() {
+    if (Env.is(SE.H5)) {
+        return window.devicePixelRatio;
+    }
+    if ("getWindowInfo" in br) {
+        return br.getWindowInfo().pixelRatio;
+    }
+    if ("getSystemInfoSync" in br) {
+        return br.getSystemInfoSync().pixelRatio;
+    }
+    return 1;
 }
-else if ("getWindowInfo" in br) {
-    dpr = br.getWindowInfo().pixelRatio;
-}
-else if ("getSystemInfoSync" in br) {
-    dpr = br.getSystemInfoSync().pixelRatio;
-}
+const dpr = getDevicePixelRatio();
 
 /**
  * 获取Canvas及其Context
@@ -5363,7 +5374,7 @@ function getCanvas(selector, component) {
             ctx.scale(dpr, dpr);
             resolve({ canvas, ctx });
         };
-        if (app == SP.H5) {
+        if (Env.is(SE.H5)) {
             const canvas = document.querySelector(selector);
             const { width, height } = canvas.style;
             initCanvas(canvas, parseFloat(width), parseFloat(height));
@@ -5389,16 +5400,16 @@ function getCanvas(selector, component) {
  * @returns
  */
 function createOffscreenCanvas(options) {
-    if (app == SP.H5) {
+    if (Env.is(SE.H5)) {
         return new OffscreenCanvas(options.width, options.height);
     }
-    if (app == SP.ALIPAY) {
+    if (Env.is(SE.ALIPAY)) {
         return my.createOffscreenCanvas({
             width: options.width,
             height: options.height,
         });
     }
-    if (app == SP.DOUYIN) {
+    if (Env.is(SE.DOUYIN)) {
         const canvas = tt.createOffscreenCanvas();
         canvas.width = options.width;
         canvas.height = options.height;
@@ -5428,7 +5439,7 @@ function getOffscreenCanvas(options) {
 function toBase64(data) {
     const buf = toBuffer(data);
     let b64;
-    if (app == SP.H5) {
+    if (Env.is(SE.H5)) {
         b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
     }
     else {
@@ -5465,7 +5476,7 @@ async function genImageSource(data, filename, prefix) {
         return data;
     }
     // FIXME: 支付宝小程序IDE保存临时文件会失败
-    if (app == SP.H5 || (app == SP.ALIPAY && br.isIDE)) {
+    if (Env.is(SE.H5) || (Env.is(SE.ALIPAY) && br.isIDE)) {
         return toBase64(data);
     }
     try {
@@ -5486,7 +5497,7 @@ async function genImageSource(data, filename, prefix) {
  * @returns
  */
 function loadImage(brush, data, filename, prefix) {
-    if (app == SP.H5) {
+    if (Env.is(SE.H5)) {
         // 由于ImageBitmap在图片渲染上有优势，故优先使用
         if (data instanceof Uint8Array && "createImageBitmap" in window) {
             return toBitmap(data);
@@ -5513,37 +5524,33 @@ function loadImage(brush, data, filename, prefix) {
 
 const noop = () => { };
 
-let p;
-switch (app) {
-    case SP.H5: {
+function getPlatform() {
+    if (Env.is(SE.H5)) {
         const UA = navigator.userAgent;
         if (/(Android)/i.test(UA)) {
-            p = "Android";
+            return "Android";
         }
-        else if (/(iPhone|iPad|iPod|iOS)/i.test(UA)) {
-            p = "iOS";
+        if (/(iPhone|iPad|iPod|iOS)/i.test(UA)) {
+            return "iOS";
         }
-        else if (/(OpenHarmony|ArkWeb)/i.test(UA)) {
-            p = "OpenHarmony";
+        if (/(OpenHarmony|ArkWeb)/i.test(UA)) {
+            return "OpenHarmony";
         }
-        else {
-            p = "UNKNOWN";
-        }
-        break;
     }
-    case SP.ALIPAY:
-        p = br.getDeviceBaseInfo().platform;
-        break;
-    case SP.DOUYIN:
-        p = br.getDeviceInfoSync().platform;
-        break;
-    case SP.WECHAT:
-        p = br.getDeviceInfo().platform;
-        break;
-    default:
-        p = "UNKNOWN";
+    else {
+        if (Env.is(SE.ALIPAY)) {
+            return br.getDeviceBaseInfo().platform;
+        }
+        if (Env.is(SE.DOUYIN)) {
+            return br.getDeviceInfoSync().platform;
+        }
+        if (Env.is(SE.WECHAT)) {
+            return br.getDeviceInfo().platform;
+        }
+    }
+    return "UNKNOWN";
 }
-const platform = p.toLocaleUpperCase();
+const platform = getPlatform().toLocaleUpperCase();
 
 const now = () => {
     // performance可以提供更高精度的时间测量，且不受系统时间的调整（如更改系统时间或同步时间）的影响
@@ -5897,11 +5904,11 @@ class Brush {
         // set clear
         if (type == "O" &&
             // OffscreenCanvas 在 Firefox 浏览器无法被清理历史内容
-            app == SP.H5 &&
+            Env.is(SE.H5) &&
             navigator.userAgent.includes("Firefox")) {
             model.clear = "CR";
         }
-        else if ((type == "O" && app == SP.DOUYIN) || app == SP.ALIPAY) {
+        else if ((type == "O" && Env.is(SE.DOUYIN)) || Env.is(SE.ALIPAY)) {
             model.clear = "CL";
         }
         else {
@@ -5909,8 +5916,8 @@ class Brush {
         }
         // set render
         if ((type == "C" &&
-            (app == SP.DOUYIN || (platform == "IOS" && app == SP.ALIPAY))) ||
-            (type == "O" && app == SP.WECHAT)) {
+            (Env.is(SE.DOUYIN) || (platform == "IOS" && Env.is(SE.ALIPAY)))) ||
+            (type == "O" && Env.is(SE.WECHAT))) {
             model.render = "PU";
         }
         else {
@@ -6068,7 +6075,7 @@ class Brush {
      * @returns
      */
     createImage() {
-        if (app == SP.H5) {
+        if (Env.is(SE.H5)) {
             return new Image();
         }
         return this.X.createImage();
@@ -6087,7 +6094,7 @@ class Brush {
      * @param cb
      */
     flush(cb) {
-        (app == SP.H5 ? br : this.X).requestAnimationFrame(cb);
+        (Env.is(SE.H5) ? br : this.X).requestAnimationFrame(cb);
     }
     clearFront = noop;
     clearBack = noop;
@@ -6192,7 +6199,7 @@ class Animator {
     }
     doFrame() {
         if (this.isRunning) {
-            this.doDeltaTime(now() - this.startTime);
+            this.doDeltaTime(now() - this.startTime + this.loopStart);
             if (this.isRunning) {
                 this.brush.flush(() => this.doFrame());
             }
@@ -6411,6 +6418,7 @@ class Player {
         }
         this.pause();
         this.currFrame = frame;
+        this.config.loopStartFrame = frame;
         if (andPlay) {
             this.startAnimation();
         }
@@ -6419,8 +6427,11 @@ class Player {
         if (!this.entity)
             return;
         const { frames } = this.entity;
-        let frame = ~~(+(percentage ?? 0) * frames) % frames;
-        if (frame >= frames && frame > 0) {
+        let frame = Math.round(+(percentage ?? 0) * frames) % frames;
+        if (frame < 0) {
+            frame = 0;
+        }
+        else if (frame >= frames) {
             frame = frames - 1;
         }
         this.stepToFrame(frame, andPlay);
@@ -6625,5 +6636,5 @@ class Poster {
     }
 }
 
-export { Brush, Parser, Player, Poster, download, getCanvas, getOffscreenCanvas, loadImage };
+export { Brush, Env, Parser, Player, Poster, SE as SUPPORTED_ENV, download, getCanvas, getOffscreenCanvas, loadImage };
 //# sourceMappingURL=index.js.map
