@@ -38,10 +38,10 @@ export declare class Player {
      * @property {string} secondary 副屏，播放动画的 Canvas 元素
      * @property {number} loop 循环次数，默认值 0（无限循环）
      * @property {string} fillMode 最后停留的目标模式，类似于 animation-fill-mode，接受值 forwards 和 fallbacks，默认值 forwards。
-     * @property {string} playMode 播放模式，接受值 forwards 和 fallbacks，默认值 forwards。
-     * @property {number} startFrame 开始播放的帧数，默认值 0
-     * @property {number} endFrame 结束播放的帧数，默认值 0
-     * @property {number} loopStartFrame 循环播放的开始帧，默认值 0
+     * @property {string} playMode 播放模式，接受值 forwards 和 fallbacks ，默认值 forwards。
+     * @property {number} startFrame 单个循环周期内开始播放的帧数，默认值 0
+     * @property {number} endFrame 单个循环周期内结束播放的帧数，默认值 0
+     * @property {number} loopStartFrame 循环播放的开始帧，仅影响第一个周期的开始帧，默认值 0
      */
     setConfig(options: string | PlayerConfigOptions, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
     /**

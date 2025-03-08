@@ -11,14 +11,6 @@ export class Animator {
    */
   private startTime = 0;
   /**
-   * 动画开始帧
-   */
-  private startFrame: number = 0;
-  /**
-   * 动画总帧数
-   */
-  private totalFrame: number = 0;
-  /**
    * 动画持续时间
    */
   private duration: number = 0;
@@ -39,25 +31,14 @@ export class Animator {
 
   /* ---- 事件钩子 ---- */
   public onStart: () => void = noop;
-  public onUpdate: (currentValue: number, spendValue: number) => void = noop;
+  public onUpdate: (timePercent: number) => void = noop;
   public onEnd: () => void = noop;
 
   constructor(private readonly brush: Brush) {}
 
   /**
-   * 设置动画开始帧和结束帧
-   * @param startFrame
-   * @param endValue
-   */
-  public setRange(startFrame: number, endValue: number) {
-    this.startFrame = startFrame;
-    this.totalFrame = endValue - startFrame;
-  }
-
-  /**
    * 设置动画的必要参数
    * @param duration
-   * @param frameDuration
    * @param loopStart
    * @param loop
    * @param fillRule
@@ -72,7 +53,6 @@ export class Animator {
     this.loopStart = loopStart;
     this.fillRule = fillRule;
     this.loopDuration = duration * loop - loopStart;
-    console.log('Animator', 'duration', duration, 'loopStart', loopStart, 'fillRule', fillRule, 'loopDuration', this.loopDuration)
   }
 
   public start(): void {
@@ -88,7 +68,7 @@ export class Animator {
 
   private doFrame(): void {
     if (this.isRunning) {
-      this.doDeltaTime(now() - this.startTime + this.loopStart);
+      this.doDeltaTime(now() - this.startTime);
       if (this.isRunning) {
         this.brush.flush(() => this.doFrame());
       }
@@ -98,25 +78,27 @@ export class Animator {
   private doDeltaTime(DT: number): void {
     const {
       duration: D,
+      loopStart: LS,
       loopDuration: LD,
-      totalFrame: TV,
       fillRule: FR,
     } = this;
     // 本轮动画已消耗的时间比例（Percentage of speed time）
-    let TT: number;
+    let TP: number;
+    let ended = false;
 
     // 运行时间 大于等于 循环持续时间
     if (DT >= LD) {
       // 动画已结束
-      TT = FR ? 0.0 : 1.0;
+      TP = FR ? 0.0 : 1.0;
+      ended = true;
       this.stop();
     } else {
       // 本轮动画已消耗的时间比例 = 本轮动画已消耗的时间 / 动画持续时间
-      TT = DT <= D ? DT / D : (DT % D) / D;
+      TP = ((DT + LS) % D) / D;
     }
 
-    this.onUpdate(TV * TT << 0, TT);
-    if (!this.isRunning) {
+    this.onUpdate(TP);
+    if (!this.isRunning && ended) {
       this.onEnd();
     }
   }

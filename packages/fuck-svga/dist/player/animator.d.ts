@@ -10,14 +10,6 @@ export declare class Animator {
      */
     private startTime;
     /**
-     * 动画开始帧
-     */
-    private startFrame;
-    /**
-     * 动画总帧数
-     */
-    private totalFrame;
-    /**
      * 动画持续时间
      */
     private duration;
@@ -36,19 +28,12 @@ export declare class Animator {
      */
     private fillRule;
     onStart: () => void;
-    onUpdate: (currentValue: number, spendValue: number) => void;
+    onUpdate: (timePercent: number) => void;
     onEnd: () => void;
     constructor(brush: Brush);
     /**
-     * 设置动画开始帧和结束帧
-     * @param startFrame
-     * @param endValue
-     */
-    setRange(startFrame: number, endValue: number): void;
-    /**
      * 设置动画的必要参数
      * @param duration
-     * @param frameDuration
      * @param loopStart
      * @param loop
      * @param fillRule

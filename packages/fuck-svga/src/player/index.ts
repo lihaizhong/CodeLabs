@@ -57,10 +57,10 @@ export class Player {
    * @property {string} secondary 副屏，播放动画的 Canvas 元素
    * @property {number} loop 循环次数，默认值 0（无限循环）
    * @property {string} fillMode 最后停留的目标模式，类似于 animation-fill-mode，接受值 forwards 和 fallbacks，默认值 forwards。
-   * @property {string} playMode 播放模式，接受值 forwards 和 fallbacks，默认值 forwards。
-   * @property {number} startFrame 开始播放的帧数，默认值 0
-   * @property {number} endFrame 结束播放的帧数，默认值 0
-   * @property {number} loopStartFrame 循环播放的开始帧，默认值 0
+   * @property {string} playMode 播放模式，接受值 forwards 和 fallbacks ，默认值 forwards。
+   * @property {number} startFrame 单个循环周期内开始播放的帧数，默认值 0
+   * @property {number} endFrame 单个循环周期内结束播放的帧数，默认值 0
+   * @property {number} loopStartFrame 循环播放的开始帧，仅影响第一个周期的开始帧，默认值 0
    */
   public async setConfig(
     options: string | PlayerConfigOptions,
@@ -223,7 +223,7 @@ export class Player {
     }
 
     this.pause();
-    this.currFrame = this.config.loopStartFrame = frame;
+    this.config.loopStartFrame = frame;
     if (andPlay) {
       this.startAnimation();
     }
@@ -250,60 +250,61 @@ export class Player {
     const spriteCount = sprites.length;
     const start = startFrame > 0 ? startFrame : 0;
     const end = endFrame > 0 && endFrame < frames ? endFrame : frames;
+    const reverse = playMode == PLAYER_PLAY_MODE.FALLBACKS
 
     if (start > end) {
       throw new Error("StartFrame should greater than EndFrame");
     }
 
-    // 顺序播放/倒叙播放
-    if (playMode == PLAYER_PLAY_MODE.FORWARDS) {
-      this.animator!.setRange(start, end);
+    // 更新活动帧总数
+    if (end < frames) {
+      frames = end - start;
+    } else if (start > 0) {
+      frames -= start;
+    }
 
+    this.currFrame = loopStartFrame;
+    // 顺序播放/倒叙播放
+    if (reverse) {
+      // 如果开始动画的当前帧是最后一帧，重置为开始帧
+      if (this.currFrame == 0) {
+        this.currFrame = end - 1;
+      }
+    } else {
       // 如果开始动画的当前帧是最后一帧，重置为开始帧
       if (this.currFrame == frames - 1) {
         this.currFrame = start;
       }
-    } else {
-      this.animator!.setRange(end, start);
-
-      // 如果开始动画的当前帧是最后一帧，重置为开始帧
-      if (this.currFrame == 0) {
-        this.currFrame = end;
-      }
-    }
-
-    // 更新活动帧总数
-    if (end != frames) {
-      frames = end - start;
-    } else if (start > 0) {
-      frames -= start;
     }
 
     // 每帧持续的时间
     const frameDuration = 1000 / fps;
     // 更新动画基础信息
     this.animator!.setConfig(
-      // duration = frames * (1 / fps) * 1000
-      (~~(frames * frameDuration * 10 ** 6)) / 10 ** 6,
-      // loopStart = (loopStartFrame - start) * (1 / fps) * 1000
+      // 单个周期的运行时长
+      (Math.floor(frames * frameDuration * 10 ** 6)) / 10 ** 6,
+      // 第一个周期开始时间偏移量
       loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0,
+      // 循环次数
       loop <= 0 ? Infinity : loop,
+      // 播放顺序
       fillMode == PLAYER_FILL_MODE.BACKWARDS ? 1 : 0
     );
     // 动画绘制过程
-    this.animator!.onUpdate = (value: number, timePercent: number) => {
+    this.animator!.onUpdate = (timePercent: number) => {
+      const value = ~~(reverse ? end - timePercent * frames : timePercent * frames);
       // 是否还有剩余时间
-      const hasRemained = this.currFrame == value;
+      const hasRemained = this.currFrame == (reverse ? value - 1 : value);
       // 当前帧的图片还未绘制完成
       if (this.tail != spriteCount) {
         // 1.2和3均为阔值，保证渲染尽快完成
-        const tmp = hasRemained
+        const nextTail = hasRemained
           ? Math.min(spriteCount * timePercent * 1.2 + 3, spriteCount) << 0
           : spriteCount;
 
-        if (tmp > this.tail) {
+        if (nextTail > this.tail) {
           this.head = this.tail;
-          this.tail = tmp;
+          this.tail = nextTail;
           benchmark.time(`draw`, () => {
             this.brush.draw(this.entity!, this.currFrame, this.head, this.tail);
           });

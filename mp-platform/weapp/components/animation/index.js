@@ -31,6 +31,7 @@ Component({
           container: "#palette",
           secondary: "#secondary",
           loop: 1,
+          playMode: "fallbacks"
         },
         this
       );
@@ -73,7 +74,7 @@ Component({
         console.log(this.properties.url, videoItem);
         await player.mount(videoItem);
         this.setData({ message: "资源装载成功" });
-        player.stepToPercentage(0.3);
+        // player.stepToPercentage(0.3);
         player.start();
         this.setData({ message: "" });
       } catch (ex) {
