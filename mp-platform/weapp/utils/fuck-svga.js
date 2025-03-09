@@ -6168,7 +6168,6 @@ class Animator {
         this.loopStart = loopStart;
         this.fillRule = fillRule;
         this.loopDuration = duration * loop - loopStart;
-        console.log('Animator', 'duration', duration, 'loopStart', loopStart, 'fillRule', fillRule, 'loopDuration', this.loopDuration);
     }
     start() {
         this.isRunning = true;
@@ -6498,6 +6497,7 @@ class Player {
                 }
             });
             this.brush.clearSecondary();
+            console.log('onUpdate', value, this.currFrame);
             this.onProcess?.(~~((value / frames) * 100) / 100, value, frames);
             this.currFrame = value;
             this.tail = 0;

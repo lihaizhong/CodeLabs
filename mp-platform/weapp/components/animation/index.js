@@ -30,7 +30,7 @@ Component({
         {
           container: "#palette",
           secondary: "#secondary",
-          loop: 1,
+          loop: 2,
           playMode: "fallbacks"
         },
         this

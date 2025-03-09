@@ -6168,7 +6168,6 @@ class Animator {
         this.loopStart = loopStart;
         this.fillRule = fillRule;
         this.loopDuration = duration * loop - loopStart;
-        console.log('Animator', 'duration', duration, 'loopStart', loopStart, 'fillRule', fillRule, 'loopDuration', this.loopDuration);
     }
     start() {
         this.isRunning = true;
