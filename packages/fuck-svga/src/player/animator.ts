@@ -1,3 +1,4 @@
+import benchmark from "benchmark";
 import { noop, now } from "../polyfill";
 import type { Brush } from "./brush";
 
@@ -97,7 +98,9 @@ export class Animator {
       TP = ((DT + LS) % D) / D;
     }
 
-    this.onUpdate(TP);
+    benchmark.time('update partial', () => {
+      this.onUpdate(TP);
+    });
     if (!this.isRunning && ended) {
       this.onEnd();
     }

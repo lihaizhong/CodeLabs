@@ -6,7 +6,7 @@
   "packageManager": "pnpm@9.8.0",
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
-    "dev": "parcel serve",
+    "dev": "rm -rf dist .parcel-cache && parcel serve",
     "build": "parcel build",
     "preview": "serve -p 3001 ./dist/",
     "static": "serve -p 5151 public",

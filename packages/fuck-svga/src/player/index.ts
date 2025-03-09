@@ -120,9 +120,9 @@ export class Player {
     this.animator!.stop();
     this.currFrame = 0;
     this.entity = videoEntity;
-    benchmark.clearTime("render");
-    benchmark.clearTime("draw");
-    benchmark.unlockTime("draw");
+    benchmark.clearTime("RENDER");
+    benchmark.clearTime("DRAW");
+    benchmark.unlockTime("DRAW");
 
     const { images, filename, size } = videoEntity;
 
@@ -218,9 +218,7 @@ export class Player {
   }
 
   public stepToFrame(frame: number, andPlay = false) {
-    if (!this.entity || frame < 0 || frame >= this.entity.frames) {
-      return;
-    }
+    if (!this.entity || frame < 0 || frame >= this.entity.frames)  return;
 
     this.pause();
     this.config.loopStartFrame = frame;
@@ -299,34 +297,32 @@ export class Player {
       if (this.tail != spriteCount) {
         // 1.2和3均为阔值，保证渲染尽快完成
         const nextTail = hasRemained
-          ? Math.min(spriteCount * timePercent * 1.2 + 3, spriteCount) << 0
+          ? Math.min(spriteCount * timePercent * 1.1 + 3, spriteCount) << 0
           : spriteCount;
 
         if (nextTail > this.tail) {
           this.head = this.tail;
           this.tail = nextTail;
-          benchmark.time(`draw`, () => {
+          benchmark.time(`DRAW`, () => {
             this.brush.draw(this.entity!, this.currFrame, this.head, this.tail);
           });
         }
       }
 
-      if (hasRemained) {
-        return;
-      }
+      if (hasRemained) return;
 
       this.brush.clearContainer();
       benchmark.time(
-        "render",
+        "RENDER",
         () => this.brush.stick(),
         null,
         (count) => {
           benchmark.log("render count", count);
           benchmark.line(20);
           if (count < benchmark.count) {
-            benchmark.clearTime("draw");
+            benchmark.clearTime("DRAW");
           } else {
-            benchmark.lockTime("draw");
+            benchmark.lockTime("DRAW");
           }
         }
       );

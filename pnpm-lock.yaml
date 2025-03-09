@@ -48,6 +48,15 @@ importers:
       '@ungap/url-search-params':
         specifier: ^0.2.2
         version: 0.2.2
+      fuck-protobuf:
+        specifier: workspace:^
+        version: link:../../packages/fuck-protobuf
+      fuck-svga:
+        specifier: workspace:^
+        version: link:../../packages/fuck-svga
+      weui:
+        specifier: ^2.6.21
+        version: 2.6.21
 
   packages/excelsior-channel:
     devDependencies:
@@ -2318,6 +2327,9 @@ packages:
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
+
+  weui@2.6.21:
+    resolution: {integrity: sha512-SfDZIwEbJm9XANivyNXd9Q7Je9SKus0Vy4H0513jd2BtPefojNtDpCQVvuKEkH3EdseluK7/aRL+pX83xWbfeQ==}
 
   whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
@@ -4664,6 +4676,8 @@ snapshots:
   weak-lru-cache@1.2.2: {}
 
   webidl-conversions@3.0.1: {}
+
+  weui@2.6.21: {}
 
   whatwg-url@5.0.0:
     dependencies:

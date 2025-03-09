@@ -6202,7 +6202,9 @@ class Animator {
             // 本轮动画已消耗的时间比例 = 本轮动画已消耗的时间 / 动画持续时间
             TP = ((DT + LS) % D) / D;
         }
-        this.onUpdate(TP);
+        benchmark.time('update partial', () => {
+            this.onUpdate(TP);
+        });
         if (!this.isRunning && ended) {
             this.onEnd();
         }
@@ -6315,9 +6317,9 @@ class Player {
         this.animator.stop();
         this.currFrame = 0;
         this.entity = videoEntity;
-        benchmark.clearTime("render");
-        benchmark.clearTime("draw");
-        benchmark.unlockTime("draw");
+        benchmark.clearTime("RENDER");
+        benchmark.clearTime("DRAW");
+        benchmark.unlockTime("DRAW");
         const { images, filename, size } = videoEntity;
         this.brush.setRect(size.width, size.height);
         this.brush.clearSecondary();
@@ -6472,12 +6474,12 @@ class Player {
             if (this.tail != spriteCount) {
                 // 1.2和3均为阔值，保证渲染尽快完成
                 const nextTail = hasRemained
-                    ? Math.min(spriteCount * timePercent * 1.2 + 3, spriteCount) << 0
+                    ? Math.min(spriteCount * timePercent * 1.1 + 3, spriteCount) << 0
                     : spriteCount;
                 if (nextTail > this.tail) {
                     this.head = this.tail;
                     this.tail = nextTail;
-                    benchmark.time(`draw`, () => {
+                    benchmark.time(`DRAW`, () => {
                         this.brush.draw(this.entity, this.currFrame, this.head, this.tail);
                     });
                 }
@@ -6486,14 +6488,14 @@ class Player {
                 return;
             }
             this.brush.clearContainer();
-            benchmark.time("render", () => this.brush.stick(), null, (count) => {
+            benchmark.time("RENDER", () => this.brush.stick(), null, (count) => {
                 benchmark.log("render count", count);
                 benchmark.line(20);
                 if (count < benchmark.count) {
-                    benchmark.clearTime("draw");
+                    benchmark.clearTime("DRAW");
                 }
                 else {
-                    benchmark.lockTime("draw");
+                    benchmark.lockTime("DRAW");
                 }
             });
             this.brush.clearSecondary();

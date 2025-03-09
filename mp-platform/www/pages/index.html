@@ -4,11 +4,40 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>首页</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      padding: 60px 40px;
+    }
+  </style>
+  <!-- 引入 WeUI CDN 链接 https://weui.io/ -->
+  <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.3.0/weui.min.css"/>
+  <script type="module">
+    const createButton = (link, desc) => {
+      const $btn = document.createElement('button');
+
+      $btn.classList.add('weui-btn');
+      $btn.classList.add('weui-btn_primary');
+      $btn.innerText = desc;
+      $btn.onclick = () => {
+        window.location.href = link;
+      }
+
+      document.body.appendChild($btn);
+    }
+
+    window.onload = () => {
+      createButton('/navigate-to-miniprogram/index.html', '跳转微信小程序');
+      createButton('/svga/index.html', '跳转SVGA动画');
+      createButton('/svga-analyze/index.html', '跳转SVGA分析');
+      createButton('/qrcode/index.html', '跳转二维码生成器');
+      createButton('/apng/index.html', '跳转APNG动画');
+    }
+  </script>
 </head>
-<body>
-  <button>跳转微信小程序</button>
-  <button>跳转SVGA动画</button>
-  <button>跳转SVGA分析</button>
-  <button>跳转二维码生成器</button>
-</body>
+<body></body>
 </html>

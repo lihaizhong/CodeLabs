@@ -1,5 +1,5 @@
 {
-  "name": "miniprogram-weapp",
+  "name": "miniprogram-www",
   "version": "1.0.0",
   "private": "true",
   "scripts": {
@@ -7,6 +7,9 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ungap/url-search-params": "^0.2.2"
+    "@ungap/url-search-params": "^0.2.2",
+    "fuck-protobuf": "workspace:^",
+    "fuck-svga": "workspace:^",
+    "weui": "^2.6.21"
   }
 }
