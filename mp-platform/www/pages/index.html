@@ -15,8 +15,10 @@
     }
   </style>
   <!-- 引入 WeUI CDN 链接 https://weui.io/ -->
-  <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.3.0/weui.min.css"/>
+  <!-- <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.3.0/weui.min.css"/> -->
   <script type="module">
+    import "weui";
+
     const createButton = (link, desc) => {
       const $btn = document.createElement('button');
 

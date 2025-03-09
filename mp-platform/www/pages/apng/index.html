@@ -5,15 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>APNG动画</title>
   <style>
-    img {
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .apng-container {
+      margin: 40px 20px;
+      text-align: center;
+    }
+
+    .apng-img {
       margin: 20px;
     }
   </style>
 </head>
 <body>
-  <img src="/public/apng/APNG-clock.png" alt="APNG-clock.png">
-  <img src="/public/apng/APNG-cube.png" alt="APNG-cube.png">
-  <img src="/public/apng/APNG-icos4D.png" alt="APNG-icos4D.png">
-  <img src="/public/apng/APNG-pyani.png" alt="APNG-pyani.png">
+  <div class="apng-container">
+    <img class="apng-img" src="/public/apng/APNG-clock.png" alt="APNG-clock.png">
+  </div>
+  <div class="apng-container">
+    <img class="apng-img" src="/public/apng/APNG-cube.png" alt="APNG-cube.png">
+  </div>
+  <div class="apng-container">
+    <img class="apng-img" src="/public/apng/APNG-icos4D.png" alt="APNG-icos4D.png">
+  </div>
+  <div class="apng-container">
+    <img class="apng-img" src="/public/apng/APNG-pyani.png" alt="APNG-pyani.png">
+  </div>
 </body>
 </html>

@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SVGA Player</title>
   <!-- 引入 WeUI CDN 链接 https://weui.io/ -->
-  <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.3.0/weui.min.css"/>
+  <!-- <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.3.0/weui.min.css"/> -->
   <style>
     html,
     body {
@@ -64,6 +64,7 @@
     }
   </style>
   <script type="module">
+    import "weui";
     import { Parser, Player } from "fuck-svga";
     import Page from "../../utils/Page"
     import { svgaSources, getOneAtRandom } from "../../utils/constants";
