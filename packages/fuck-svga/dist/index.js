@@ -6404,9 +6404,8 @@ class Player {
         this.entity = undefined;
     }
     stepToFrame(frame, andPlay = false) {
-        if (!this.entity || frame < 0 || frame >= this.entity.frames) {
+        if (!this.entity || frame < 0 || frame >= this.entity.frames)
             return;
-        }
         this.pause();
         this.config.loopStartFrame = frame;
         if (andPlay) {
@@ -6470,6 +6469,7 @@ class Player {
             const value = ~~(reverse ? end - timePercent * frames : timePercent * frames);
             // 是否还有剩余时间
             const hasRemained = this.currFrame == (reverse ? value - 1 : value);
+            console.log('onUpdate', reverse, this.currFrame, (reverse ? value - 1 : value), hasRemained ? 'don\'t render' : 'need render');
             // 当前帧的图片还未绘制完成
             if (this.tail != spriteCount) {
                 // 1.2和3均为阔值，保证渲染尽快完成
@@ -6484,9 +6484,8 @@ class Player {
                     });
                 }
             }
-            if (hasRemained) {
+            if (hasRemained)
                 return;
-            }
             this.brush.clearContainer();
             benchmark.time("RENDER", () => this.brush.stick(), null, (count) => {
                 benchmark.log("render count", count);

@@ -38,10 +38,10 @@ Component({
       player.onProcess = (percent, frame, frames) => {
         console.log('当前进度', percent, frame, frames)
         console.log('---- UPDATE ----')
-      }
+      };
       player.onEnd = () => {
         console.log('---- END ----')
-      }
+      };
       readyGo.go();
     },
     detached() {

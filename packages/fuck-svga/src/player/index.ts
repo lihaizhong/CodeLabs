@@ -293,11 +293,12 @@ export class Player {
       const value = ~~(reverse ? end - timePercent * frames : timePercent * frames);
       // 是否还有剩余时间
       const hasRemained = this.currFrame == (reverse ? value - 1 : value);
+      console.log('onUpdate', reverse, this.currFrame, (reverse ? value - 1 : value), hasRemained ? 'don\'t render' : 'need render');
       // 当前帧的图片还未绘制完成
       if (this.tail != spriteCount) {
         // 1.2和3均为阔值，保证渲染尽快完成
         const nextTail = hasRemained
-          ? Math.min(spriteCount * timePercent * 1.1 + 3, spriteCount) << 0
+          ? Math.min(spriteCount * timePercent + 3, spriteCount) << 0
           : spriteCount;
 
         if (nextTail > this.tail) {
