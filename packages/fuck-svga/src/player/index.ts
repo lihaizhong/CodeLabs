@@ -7,10 +7,6 @@ import benchmark from "../benchmark";
  */
 export class Player {
   /**
-   * 动画当前帧数
-   */
-  private currFrame: number = 0;
-  /**
    * SVGA 元数据
    * Video Entity
    */
@@ -21,7 +17,7 @@ export class Player {
    */
   private readonly config: PlayerConfig = Object.create({
     loop: 0,
-    fillMode: PLAYER_FILL_MODE.FORWARDS,
+    fillMode: PLAYER_FILL_MODE.BACKWARDS,
     playMode: PLAYER_PLAY_MODE.FORWARDS,
     startFrame: 0,
     endFrame: 0,
@@ -41,14 +37,6 @@ export class Player {
 
   // private isBeIntersection = true;
   // private intersectionObserver: IntersectionObserver | null = null
-  /**
-   * 片段绘制开始位置
-   */
-  private head: number = 0;
-  /**
-   * 片段绘制结束位置
-   */
-  private tail: number = 0;
 
   /**
    * 设置配置项
@@ -76,7 +64,7 @@ export class Player {
 
     Object.assign(this.config, {
       loop: config.loop ?? 0,
-      fillMode: config.fillMode ?? PLAYER_FILL_MODE.FORWARDS,
+      fillMode: config.fillMode ?? PLAYER_FILL_MODE.BACKWARDS,
       playMode: config.playMode ?? PLAYER_PLAY_MODE.FORWARDS,
       startFrame: config.startFrame ?? 0,
       endFrame: config.endFrame ?? 0,
@@ -88,7 +76,6 @@ export class Player {
     // 监听容器是否处于浏览器视窗内
     // this.setIntersectionObserver()
     this.animator = new Animator(this.brush);
-    this.animator.onEnd = () => this.onEnd?.(this.currFrame);
   }
 
   // private setIntersectionObserver (): void {
@@ -118,7 +105,6 @@ export class Player {
     }
 
     this.animator!.stop();
-    this.currFrame = 0;
     this.entity = videoEntity;
 
     const { images, filename, size } = videoEntity;
@@ -168,7 +154,7 @@ export class Player {
   public start(): void {
     this.brush.clearContainer();
     this.startAnimation();
-    this.onStart?.(this.currFrame);
+    this.onStart?.();
   }
 
   /**
@@ -176,7 +162,7 @@ export class Player {
    */
   public resume(): void {
     this.startAnimation();
-    this.onResume?.(this.currFrame);
+    this.onResume?.();
   }
 
   /**
@@ -184,7 +170,7 @@ export class Player {
    */
   public pause(): void {
     this.animator!.stop();
-    this.onPause?.(this.currFrame);
+    this.onPause?.();
   }
 
   /**
@@ -192,9 +178,8 @@ export class Player {
    */
   public stop(): void {
     this.animator!.stop();
-    this.currFrame = 0;
     this.brush.clearContainer();
-    this.onStop?.(this.currFrame);
+    this.onStop?.();
   }
 
   /**
@@ -245,7 +230,6 @@ export class Player {
     const spriteCount = sprites.length;
     const start = startFrame > 0 ? startFrame : 0;
     const end = endFrame > 0 && endFrame < frames ? endFrame : frames;
-    const reverse = playMode == PLAYER_PLAY_MODE.FALLBACKS
 
     if (start > end) {
       throw new Error("StartFrame should greater than EndFrame");
@@ -258,24 +242,33 @@ export class Player {
       frames -= start;
     }
 
-    this.currFrame = loopStartFrame;
+    let currFrame = loopStartFrame;
+
+    let extFrame = 0;
+
     // 顺序播放/倒叙播放
-    if (reverse) {
+    if (playMode == PLAYER_PLAY_MODE.FORWARDS) {
       // 如果开始动画的当前帧是最后一帧，重置为开始帧
-      if (this.currFrame == 0) {
-        this.currFrame = end - 1;
+      if (currFrame == end - 1) {
+        currFrame = start;
+      }
+
+      if (fillMode == PLAYER_FILL_MODE.FORWARDS) {
+        extFrame = 1;
       }
     } else {
       // 如果开始动画的当前帧是最后一帧，重置为开始帧
-      if (this.currFrame == frames - 1) {
-        this.currFrame = start;
+      if (currFrame == 0) {
+        currFrame = end - 1;
+      }
+
+      if (fillMode == PLAYER_FILL_MODE.BACKWARDS) {
+        extFrame = 1;
       }
     }
 
     // 每帧持续的时间
     const frameDuration = 1000 / fps;
-    // 最后一帧的渲染模式
-    const fillRule = fillMode == PLAYER_FILL_MODE.BACKWARDS ? 1 : 0
     // 更新动画基础信息
     this.animator!.setConfig(
       // 单个周期的运行时长
@@ -284,26 +277,40 @@ export class Player {
       loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0,
       // 循环次数
       loop <= 0 ? Infinity : loop,
+      extFrame * frameDuration,
       // 最后一帧的渲染模式
-      fillRule
+      fillMode == PLAYER_FILL_MODE.FORWARDS ? 1 : 0
     );
+
+    // 片段绘制开始位置
+    let head = 0;
+    // 片段绘制结束位置
+    let tail = 0;
+    let nextFrame: number;
     // 动画绘制过程
     this.animator!.onUpdate = (timePercent: number) => {
-      const value = reverse ? end - Math.ceil(timePercent * frames) : Math.floor(timePercent * frames);
+      if (playMode == PLAYER_PLAY_MODE.FALLBACKS) {
+        nextFrame = (timePercent == 0 ? end : Math.ceil((1 - timePercent) * frames)) - 1;
+      } else {
+        nextFrame = timePercent == 1 ? start : Math.floor(timePercent * frames);
+      }
+
       // 是否还有剩余时间
-      const hasRemained = this.currFrame == value;
-      console.log('onUpdate', reverse, timePercent, this.currFrame, value, hasRemained ? 'don\'t render' : 'need render');
+      const hasRemained = currFrame == nextFrame;
+
+      // console.log('onUpdate', timePercent, this.currFrame, nextFrame, hasRemained ? 'don\'t render' : 'need render');
+
       // 当前帧的图片还未绘制完成
-      if (this.tail != spriteCount) {
+      if (tail != spriteCount) {
         // 1.05 和 3 均为阔值，保证渲染尽快完成
         const nextTail = hasRemained
           ? Math.min(spriteCount * timePercent * 1.05 + 2, spriteCount) << 0
           : spriteCount;
 
-        if (nextTail > this.tail) {
-          this.head = this.tail;
-          this.tail = nextTail;
-          this.brush.draw(this.entity!, this.currFrame, this.head, this.tail);
+        if (nextTail > tail) {
+          head = tail;
+          tail = nextTail;
+          this.brush.draw(this.entity!, currFrame, head, tail);
         }
       }
 
@@ -312,11 +319,11 @@ export class Player {
       this.brush.clearContainer();
       this.brush.stick()
       this.brush.clearSecondary();
-      this.currFrame = value;
-      this.tail = 0;
-      this.onProcess?.(~~((value / frames) * 100) / 100, value, frames);
+      this.onProcess?.((~~(timePercent * 100) / 100) || 1);
+      currFrame = nextFrame;
+      tail = 0;
     };
-
+    this.animator!.onEnd = () => this.onEnd?.();
     this.animator!.start();
   }
 }

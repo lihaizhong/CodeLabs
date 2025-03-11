@@ -3,10 +3,6 @@
  */
 export declare class Player {
     /**
-     * 动画当前帧数
-     */
-    private currFrame;
-    /**
      * SVGA 元数据
      * Video Entity
      */
@@ -23,14 +19,6 @@ export declare class Player {
      * 动画实例
      */
     private animator;
-    /**
-     * 片段绘制开始位置
-     */
-    private head;
-    /**
-     * 片段绘制结束位置
-     */
-    private tail;
     /**
      * 设置配置项
      * @param options 可配置项

@@ -23,8 +23,8 @@ export declare class Animator {
     private loopDuration;
     /**
      * 最后停留的目标模式，类似于**animation-fill-mode**
-     * 0: 倒序播放
-     * 1: 正序播放
+     * 0: 第一帧
+     * 1: 最后一帧
      */
     private fillRule;
     onStart: () => void;
@@ -36,9 +36,10 @@ export declare class Animator {
      * @param duration
      * @param loopStart
      * @param loop
+     * @param fillValue
      * @param fillRule
      */
-    setConfig(duration: number, loopStart: number, loop: number, fillRule: number): void;
+    setConfig(duration: number, loopStart: number, loop: number, fillValue: number, fillRule: number): void;
     start(): void;
     stop(): void;
     private doFrame;

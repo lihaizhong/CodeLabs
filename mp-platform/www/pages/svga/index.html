@@ -150,20 +150,20 @@
           container: "#palette",
           // secondary: "#secondary",
           loop: 2,
-          // playMode: "fallbacks"
+          playMode: "fallbacks",
+          fillMode: "forwards"
         });
-        player.onProcess = (percent, frame, frames) => {
-          console.log('--------- 当前进度 ----------', percent, frame, frames)
-          console.log('---- UPDATE ----')
+        player.onProcess = (percent) => {
+          console.log('--------- UPDATE ----------', percent)
         };
         player.onEnd = () => {
           console.log('---- END ----')
         };
-        this.handleSwitchAtRandom();
-        // this.setData({
-        //   current: 40,
-        //   url: svgaSources[40]
-        // })
+        // this.handleSwitchAtRandom();
+        this.setData({
+          current: 40,
+          url: svgaSources[40]
+        })
       },
     })
 

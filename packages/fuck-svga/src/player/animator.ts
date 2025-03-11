@@ -25,8 +25,8 @@ export class Animator {
   private loopDuration: number = 0;
   /**
    * 最后停留的目标模式，类似于**animation-fill-mode**
-   * 0: 倒序播放
-   * 1: 正序播放
+   * 0: 第一帧
+   * 1: 最后一帧
    */
   private fillRule: number = 0;
 
