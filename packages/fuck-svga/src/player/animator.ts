@@ -42,18 +42,20 @@ export class Animator {
    * @param duration
    * @param loopStart
    * @param loop
+   * @param fillValue
    * @param fillRule
    */
   public setConfig(
     duration: number,
     loopStart: number,
     loop: number,
+    fillValue: number,
     fillRule: number
   ) {
     this.duration = duration;
     this.loopStart = loopStart;
     this.fillRule = fillRule;
-    this.loopDuration = duration * loop - loopStart;
+    this.loopDuration = duration * loop + fillValue - loopStart;
   }
 
   public start(): void {

@@ -6466,15 +6466,15 @@ class Player {
         fillMode == "backwards" /* PLAYER_FILL_MODE.BACKWARDS */ ? 1 : 0);
         // 动画绘制过程
         this.animator.onUpdate = (timePercent) => {
-            const value = ~~(reverse ? end - timePercent * frames : timePercent * frames);
+            const value = reverse ? end - Math.ceil(timePercent * frames) : Math.floor(timePercent * frames);
             // 是否还有剩余时间
-            const hasRemained = this.currFrame == (reverse ? value - 1 : value);
-            console.log('onUpdate', reverse, this.currFrame, (reverse ? value - 1 : value), hasRemained ? 'don\'t render' : 'need render');
+            const hasRemained = this.currFrame == value;
+            console.log('onUpdate', reverse, timePercent, this.currFrame, value, hasRemained ? 'don\'t render' : 'need render');
             // 当前帧的图片还未绘制完成
             if (this.tail != spriteCount) {
                 // 1.2和3均为阔值，保证渲染尽快完成
                 const nextTail = hasRemained
-                    ? Math.min(spriteCount * timePercent * 1.1 + 3, spriteCount) << 0
+                    ? Math.min(spriteCount * timePercent * 1.05 + 3, spriteCount) << 0
                     : spriteCount;
                 if (nextTail > this.tail) {
                     this.head = this.tail;
@@ -6498,9 +6498,9 @@ class Player {
                 }
             });
             this.brush.clearSecondary();
-            this.onProcess?.(~~((value / frames) * 100) / 100, value, frames);
             this.currFrame = value;
             this.tail = 0;
+            this.onProcess?.(~~((value / frames) * 100) / 100, value, frames);
         };
         this.animator.start();
     }

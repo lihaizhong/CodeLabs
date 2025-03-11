@@ -120,9 +120,6 @@ export class Player {
     this.animator!.stop();
     this.currFrame = 0;
     this.entity = videoEntity;
-    benchmark.clearTime("RENDER");
-    benchmark.clearTime("DRAW");
-    benchmark.unlockTime("DRAW");
 
     const { images, filename, size } = videoEntity;
 
@@ -277,6 +274,8 @@ export class Player {
 
     // 每帧持续的时间
     const frameDuration = 1000 / fps;
+    // 最后一帧的渲染模式
+    const fillRule = fillMode == PLAYER_FILL_MODE.BACKWARDS ? 1 : 0
     // 更新动画基础信息
     this.animator!.setConfig(
       // 单个周期的运行时长
@@ -285,52 +284,37 @@ export class Player {
       loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0,
       // 循环次数
       loop <= 0 ? Infinity : loop,
-      // 播放顺序
-      fillMode == PLAYER_FILL_MODE.BACKWARDS ? 1 : 0
+      // 最后一帧的渲染模式
+      fillRule
     );
     // 动画绘制过程
     this.animator!.onUpdate = (timePercent: number) => {
-      const value = ~~(reverse ? end - timePercent * frames : timePercent * frames);
+      const value = reverse ? end - Math.ceil(timePercent * frames) : Math.floor(timePercent * frames);
       // 是否还有剩余时间
-      const hasRemained = this.currFrame == (reverse ? value - 1 : value);
-      console.log('onUpdate', reverse, this.currFrame, (reverse ? value - 1 : value), hasRemained ? 'don\'t render' : 'need render');
+      const hasRemained = this.currFrame == value;
+      console.log('onUpdate', reverse, timePercent, this.currFrame, value, hasRemained ? 'don\'t render' : 'need render');
       // 当前帧的图片还未绘制完成
       if (this.tail != spriteCount) {
-        // 1.2和3均为阔值，保证渲染尽快完成
+        // 1.05 和 3 均为阔值，保证渲染尽快完成
         const nextTail = hasRemained
-          ? Math.min(spriteCount * timePercent + 3, spriteCount) << 0
+          ? Math.min(spriteCount * timePercent * 1.05 + 2, spriteCount) << 0
           : spriteCount;
 
         if (nextTail > this.tail) {
           this.head = this.tail;
           this.tail = nextTail;
-          benchmark.time(`DRAW`, () => {
-            this.brush.draw(this.entity!, this.currFrame, this.head, this.tail);
-          });
+          this.brush.draw(this.entity!, this.currFrame, this.head, this.tail);
         }
       }
 
       if (hasRemained) return;
 
       this.brush.clearContainer();
-      benchmark.time(
-        "RENDER",
-        () => this.brush.stick(),
-        null,
-        (count) => {
-          benchmark.log("render count", count);
-          benchmark.line(20);
-          if (count < benchmark.count) {
-            benchmark.clearTime("DRAW");
-          } else {
-            benchmark.lockTime("DRAW");
-          }
-        }
-      );
+      this.brush.stick()
       this.brush.clearSecondary();
-      this.onProcess?.(~~((value / frames) * 100) / 100, value, frames);
       this.currFrame = value;
       this.tail = 0;
+      this.onProcess?.(~~((value / frames) * 100) / 100, value, frames);
     };
 
     this.animator!.start();
