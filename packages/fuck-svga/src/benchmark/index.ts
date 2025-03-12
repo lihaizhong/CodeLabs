@@ -1,4 +1,3 @@
-// const now = () => (typeof performance != 'undefined' ? performance.now() : Date.now());
 const stopwatch = {
   time(label: string): void {
     console.time?.(label);

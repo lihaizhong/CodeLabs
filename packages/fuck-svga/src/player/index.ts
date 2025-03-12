@@ -56,7 +56,7 @@ export class Player {
   ): Promise<void> {
     let config: PlayerConfigOptions;
 
-    if (typeof options == "string") {
+    if (typeof options === "string") {
       config = { container: options };
     } else {
       config = options;
@@ -88,7 +88,7 @@ export class Player {
   //     })
   //     this.intersectionObserver.observe(this.config.container)
   //   } else {
-  //     if (this.intersectionObserver != null) this.intersectionObserver.disconnect()
+  //     if (this.intersectionObserver !== null) this.intersectionObserver.disconnect()
   //     this.config.isUseIntersectionObserver = false
   //     this.isBeIntersection = true
   //   }
@@ -246,22 +246,22 @@ export class Player {
     let extFrame = 0;
 
     // 顺序播放/倒叙播放
-    if (playMode == PLAYER_PLAY_MODE.FORWARDS) {
+    if (playMode === PLAYER_PLAY_MODE.FORWARDS) {
       // 如果开始动画的当前帧是最后一帧，重置为开始帧
-      if (currFrame == end - 1) {
+      if (currFrame === end - 1) {
         currFrame = start;
       }
 
-      if (fillMode == PLAYER_FILL_MODE.FORWARDS) {
+      if (fillMode === PLAYER_FILL_MODE.FORWARDS) {
         extFrame = 1;
       }
     } else {
       // 如果开始动画的当前帧是最后一帧，重置为开始帧
-      if (currFrame == 0) {
+      if (currFrame === 0) {
         currFrame = end - 1;
       }
 
-      if (fillMode == PLAYER_FILL_MODE.BACKWARDS) {
+      if (fillMode === PLAYER_FILL_MODE.BACKWARDS) {
         extFrame = 1;
       }
     }
@@ -293,23 +293,23 @@ export class Player {
     let drawPercent: number
     // 动画绘制过程
     this.animator!.onUpdate = (timePercent: number) => {
-      if (playMode == PLAYER_PLAY_MODE.FALLBACKS) {
+      if (playMode === PLAYER_PLAY_MODE.FALLBACKS) {
         percent = 1 - timePercent
-        nextFrame = (timePercent == 0 ? end : Math.ceil(percent * frames)) - 1
+        nextFrame = (timePercent === 0 ? end : Math.ceil(percent * frames)) - 1
         drawPercent = Math.abs(1 - percent * frames + currFrame)
       } else {
         percent = timePercent
-        nextFrame = timePercent == 1 ? start : Math.floor(percent * frames)
+        nextFrame = timePercent === 1 ? start : Math.floor(percent * frames)
         drawPercent = Math.abs(percent * frames - currFrame)
       }
 
       // 是否还有剩余时间
-      const hasRemained = currFrame == nextFrame;
+      const hasRemained = currFrame === nextFrame;
 
       // console.log('onUpdate', timePercent, this.currFrame, nextFrame, hasRemained ? 'don\'t render' : 'need render');
 
       // 当前帧的图片还未绘制完成
-      if (tail != spriteCount) {
+      if (tail !== spriteCount) {
         // 1.05 和 3 均为阔值，保证渲染尽快完成
         const nextTail = hasRemained
           ? Math.min(spriteCount * drawPercent * 1.05 + 2, spriteCount) << 0

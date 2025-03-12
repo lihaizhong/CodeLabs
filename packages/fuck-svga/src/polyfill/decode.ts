@@ -71,9 +71,9 @@ export function matob(base64: string): string {
       (r2 = b64c.indexOf(string.charAt(i++)));
 
     result +=
-      r1 == 64
+      r1 === 64
         ? String.fromCharCode((bitmap >> 16) & 255)
-        : r2 == 64
+        : r2 === 64
         ? String.fromCharCode((bitmap >> 16) & 255, (bitmap >> 8) & 255)
         : String.fromCharCode(
             (bitmap >> 16) & 255,

@@ -18,7 +18,7 @@ export class Parser {
     const header = new Uint8Array(data, 0, 4);
     const u8a = new Uint8Array(data);
 
-    if (header.toString() == "80,75,3,4") {
+    if (header.toString() === "80,75,3,4") {
       throw new Error("this parser only support version@2 of SVGA.");
     }
 

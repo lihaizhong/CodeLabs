@@ -11,19 +11,19 @@ export const SE = {
 
 function getEnvironment() {
   // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
-  if (typeof window != "undefined") {
+  if (typeof window !== "undefined") {
     return SE.H5;
   }
   
-  if (typeof tt != "undefined") {
+  if (typeof tt !== "undefined") {
     return SE.DOUYIN;
   }
   
-  if (typeof my != "undefined") {
+  if (typeof my !== "undefined") {
     return SE.ALIPAY;
   }
   
-  if (typeof wx != "undefined") {
+  if (typeof wx !== "undefined") {
     return SE.WECHAT;
   }
 

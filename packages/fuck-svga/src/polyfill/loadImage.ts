@@ -13,7 +13,7 @@ async function genImageSource(
   filename: string,
   prefix?: string
 ): Promise<string> {
-  if (typeof data == "string") {
+  if (typeof data === "string") {
     return data;
   }
 
@@ -61,7 +61,7 @@ export function loadImage(
 
     img.onload = () => {
       // 如果 data 是 URL/base64 或者 img.src 是 base64
-      if (img.src.startsWith("data:") || typeof data == "string") {
+      if (img.src.startsWith("data:") || typeof data === "string") {
         resolve(img);
       } else {
         removeTmpFile(img.src).then(() => resolve(img));

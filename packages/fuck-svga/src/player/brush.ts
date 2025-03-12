@@ -72,13 +72,13 @@ export class Brush {
 
     // set clear
     if (
-      type == "O" &&
+      type === "O" &&
       // OffscreenCanvas 在 Firefox 浏览器无法被清理历史内容
       Env.is(SE.H5) &&
       navigator.userAgent.includes("Firefox")
     ) {
       model.clear = "CR";
-    } else if ((type == "O" && Env.is(SE.DOUYIN)) || Env.is(SE.ALIPAY)) {
+    } else if ((type === "O" && Env.is(SE.DOUYIN)) || Env.is(SE.ALIPAY)) {
       model.clear = "CL";
     } else {
       model.clear = "RE";
@@ -86,9 +86,9 @@ export class Brush {
 
     // set render
     if (
-      (type == "C" &&
-        (Env.is(SE.DOUYIN) || (platform == "IOS" && Env.is(SE.ALIPAY)))) ||
-      (type == "O" && Env.is(SE.WECHAT))
+      (type === "C" &&
+        (Env.is(SE.DOUYIN) || (platform === "IOS" && Env.is(SE.ALIPAY)))) ||
+      (type === "O" && Env.is(SE.WECHAT))
     ) {
       model.render = "PU";
     } else {
@@ -127,14 +127,14 @@ export class Brush {
 
     // #region set secondary screen implement
     // ------- 创建副屏 ---------
-    if (mode == 'simple') {
+    if (mode === 'simple') {
       this.Y = this.X;
       this.YC = this.XC;
       this.setModel('C');
     } else {
       let ofsResult;
 
-      if (typeof ofsSelector == "string" && ofsSelector != "") {
+      if (typeof ofsSelector === "string" && ofsSelector !== "") {
         ofsResult = await getCanvas(ofsSelector, component);
         ofsResult.canvas.width = width;
         ofsResult.canvas.height = height;
@@ -152,7 +152,7 @@ export class Brush {
     // #region clear main screen implement
     // ------- 生成主屏清理函数 -------
     // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
-    if (model.clear == "CL") {
+    if (model.clear === "CL") {
       this.clearContainer = () => {
         const { W, H } = this;
         this.XC!.clearRect(0, 0, W, H);
@@ -167,7 +167,7 @@ export class Brush {
     // #endregion clear main screen implement
 
 
-    if (mode == 'simple') {
+    if (mode === 'simple') {
       this.clearSecondary = this.stick = noop
     } else {
       // #region clear secondary screen implement
