@@ -243,7 +243,6 @@ export class Player {
     }
 
     let currFrame = loopStartFrame;
-
     let extFrame = 0;
 
     // 顺序播放/倒叙播放
@@ -277,6 +276,7 @@ export class Player {
       loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0,
       // 循环次数
       loop <= 0 ? Infinity : loop,
+      // 最后一帧不在周期内，需要单独计算
       extFrame * frameDuration,
       // 最后一帧的渲染模式
       fillMode == PLAYER_FILL_MODE.FORWARDS ? 1 : 0

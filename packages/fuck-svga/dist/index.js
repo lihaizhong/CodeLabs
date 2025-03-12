@@ -6450,7 +6450,9 @@ class Player {
         // 第一个周期开始时间偏移量
         loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0, 
         // 循环次数
-        loop <= 0 ? Infinity : loop, extFrame * frameDuration, 
+        loop <= 0 ? Infinity : loop, 
+        // 最后一帧不在周期内，需要单独计算
+        extFrame * frameDuration, 
         // 最后一帧的渲染模式
         fillMode == "forwards" /* PLAYER_FILL_MODE.FORWARDS */ ? 1 : 0);
         // 片段绘制开始位置
