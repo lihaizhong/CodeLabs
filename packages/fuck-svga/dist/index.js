@@ -4856,64 +4856,23 @@ const br = getBridge();
 
 // const now = () => (typeof performance != 'undefined' ? performance.now() : Date.now());
 const stopwatch = {
-    // a: {} as Record<string, number>,
-    l: {},
-    t: {},
-    increment(label) {
-        if (stopwatch.t[label] == undefined) {
-            stopwatch.t[label] = 0;
-        }
-        stopwatch.t[label]++;
-    },
-    getCount(label) {
-        return stopwatch.t[label] || 0;
-    },
     time(label) {
         console.time?.(label);
     },
     timeEnd(label) {
         console.timeEnd?.(label);
-    },
-    clearTime(label) {
-        delete stopwatch.t[label];
-    },
-    isLock(label) {
-        return !!stopwatch.l[label];
-    },
-    lock(label) {
-        stopwatch.l[label] = true;
-    },
-    unlock(label) {
-        delete stopwatch.l[label];
-    },
+    }
 };
 var benchmark = {
     count: 20,
     label(label) {
         console.log(label);
     },
-    time(label, callback, beforeCallback, afterCallback) {
-        stopwatch.increment(label);
-        const count = stopwatch.getCount(label);
-        if (stopwatch.isLock(label) || (this.count != 0 && count > this.count)) {
-            callback(count);
-        }
-        else {
-            beforeCallback?.(count);
-            stopwatch.time(label);
-            callback(count);
-            stopwatch.timeEnd(label);
-            afterCallback?.(count);
-        }
-    },
-    clearTime(label) {
-        stopwatch.clearTime(label);
-    },
-    lockTime(label) {
-        stopwatch.lock(label);
-    },
-    unlockTime(label) {
-        stopwatch.unlock(label);
+    async time(label, callback) {
+        stopwatch.time(label);
+        const result = await callback();
+        stopwatch.timeEnd(label);
+        return result;
     },
     line(size = 40) {
         console.log("-".repeat(size));
@@ -6058,9 +6017,8 @@ class Brush {
      */
     loadImage(images, filename) {
         let imageArr = [];
-        benchmark.clearTime("load image");
+        this.materials.clear();
         benchmark.time("load image", () => {
-            this.materials.clear();
             for (let key in images) {
                 const p = loadImage(this, images[key], key, filename).then((img) => {
                     this.materials.set(key, img);
@@ -6459,14 +6417,22 @@ class Player {
         let head = 0;
         // 片段绘制结束位置
         let tail = 0;
+        // 下一帧
         let nextFrame;
+        let percent;
+        // 一帧图片的绘制百分比
+        let drawPercent;
         // 动画绘制过程
         this.animator.onUpdate = (timePercent) => {
             if (playMode == "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */) {
-                nextFrame = (timePercent == 0 ? end : Math.ceil((1 - timePercent) * frames)) - 1;
+                percent = 1 - timePercent;
+                nextFrame = (timePercent == 0 ? end : Math.ceil(percent * frames)) - 1;
+                drawPercent = Math.abs(1 - percent * frames + currFrame);
             }
             else {
-                nextFrame = timePercent == 1 ? start : Math.floor(timePercent * frames);
+                percent = timePercent;
+                nextFrame = timePercent == 1 ? start : Math.floor(percent * frames);
+                drawPercent = Math.abs(percent * frames - currFrame);
             }
             // 是否还有剩余时间
             const hasRemained = currFrame == nextFrame;
@@ -6475,7 +6441,7 @@ class Player {
             if (tail != spriteCount) {
                 // 1.05 和 3 均为阔值，保证渲染尽快完成
                 const nextTail = hasRemained
-                    ? Math.min(spriteCount * timePercent * 1.05 + 2, spriteCount) << 0
+                    ? Math.min(spriteCount * drawPercent * 1.05 + 2, spriteCount) << 0
                     : spriteCount;
                 if (nextTail > tail) {
                     head = tail;
@@ -6488,7 +6454,7 @@ class Player {
             this.brush.clearContainer();
             this.brush.stick();
             this.brush.clearSecondary();
-            this.onProcess?.((~~(timePercent * 100) / 100) || 1);
+            this.onProcess?.(~~(percent * 100) / 100);
             currFrame = nextFrame;
             tail = 0;
         };
@@ -6527,7 +6493,6 @@ class Poster {
         this.currFrame = currFrame || 0;
         this.brush.setRect(size.width, size.height);
         this.brush.clearSecondary();
-        benchmark.clearTime("render");
         return this.brush.loadImage(images, filename);
     }
     /**

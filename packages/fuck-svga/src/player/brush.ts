@@ -243,9 +243,8 @@ export class Brush {
   public loadImage(images: RawImages, filename: string): Promise<void[]> {
     let imageArr: Promise<void>[] = [];
 
-    benchmark.clearTime("load image");
+    this.materials.clear();
     benchmark.time("load image", () => {
-      this.materials.clear();
       for (let key in images) {
         const p = loadImage(this, images[key], key, filename).then((img) => {
           this.materials.set(key, img);
@@ -253,7 +252,7 @@ export class Brush {
 
         imageArr.push(p);
       }
-    })
+    });
 
     return Promise.all<void>(imageArr);
   }

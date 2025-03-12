@@ -286,13 +286,21 @@ export class Player {
     let head = 0;
     // 片段绘制结束位置
     let tail = 0;
+    // 下一帧
     let nextFrame: number;
+    let percent: number
+    // 一帧图片的绘制百分比
+    let drawPercent: number
     // 动画绘制过程
     this.animator!.onUpdate = (timePercent: number) => {
       if (playMode == PLAYER_PLAY_MODE.FALLBACKS) {
-        nextFrame = (timePercent == 0 ? end : Math.ceil((1 - timePercent) * frames)) - 1;
+        percent = 1 - timePercent
+        nextFrame = (timePercent == 0 ? end : Math.ceil(percent * frames)) - 1
+        drawPercent = Math.abs(1 - percent * frames + currFrame)
       } else {
-        nextFrame = timePercent == 1 ? start : Math.floor(timePercent * frames);
+        percent = timePercent
+        nextFrame = timePercent == 1 ? start : Math.floor(percent * frames)
+        drawPercent = Math.abs(percent * frames - currFrame)
       }
 
       // 是否还有剩余时间
@@ -304,7 +312,7 @@ export class Player {
       if (tail != spriteCount) {
         // 1.05 和 3 均为阔值，保证渲染尽快完成
         const nextTail = hasRemained
-          ? Math.min(spriteCount * timePercent * 1.05 + 2, spriteCount) << 0
+          ? Math.min(spriteCount * drawPercent * 1.05 + 2, spriteCount) << 0
           : spriteCount;
 
         if (nextTail > tail) {
@@ -319,7 +327,7 @@ export class Player {
       this.brush.clearContainer();
       this.brush.stick()
       this.brush.clearSecondary();
-      this.onProcess?.((~~(timePercent * 100) / 100) || 1);
+      this.onProcess?.(~~(percent * 100) / 100);
       currFrame = nextFrame;
       tail = 0;
     };

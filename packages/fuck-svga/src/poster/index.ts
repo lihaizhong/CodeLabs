@@ -41,7 +41,6 @@ export class Poster {
     this.currFrame = currFrame || 0;
     this.brush.setRect(size.width, size.height);
     this.brush.clearSecondary();
-    benchmark.clearTime("render");
 
     return this.brush.loadImage(images, filename);
   }
