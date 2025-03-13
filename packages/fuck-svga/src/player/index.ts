@@ -110,6 +110,7 @@ export class Player {
     this.animator!.stop();
     this.entity = videoEntity;
     this.brush.clearSecondary();
+    this.brush.clearMaterials();
 
     return this.brush.loadImage(images, filename);
   }
@@ -186,6 +187,7 @@ export class Player {
   public clear(): void {
     this.brush.clearContainer();
     this.brush.clearSecondary();
+    this.brush.clearMaterials();
   }
 
   /**

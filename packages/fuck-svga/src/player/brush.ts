@@ -285,6 +285,13 @@ export class Brush {
   }
 
   /**
+   * 清理素材库
+   */
+  public clearMaterials() {
+    this.materials.clear();
+  }
+
+  /**
    * 注册刷新屏幕的回调函数
    * @param cb 
    */
@@ -320,7 +327,7 @@ export class Brush {
   public destroy() {
     this.clearContainer();
     this.clearSecondary();
-    this.materials.clear();
+    this.clearMaterials();
     this.X = this.XC = this.Y = this.YC = null;
     this.clearContainer = this.clearSecondary = this.stick = noop;
   }

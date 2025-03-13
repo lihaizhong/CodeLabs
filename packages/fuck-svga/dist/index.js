@@ -6051,6 +6051,12 @@ class Brush {
         return this.X.toDataURL(type, encoderOptions);
     }
     /**
+     * 清理素材库
+     */
+    clearMaterials() {
+        this.materials.clear();
+    }
+    /**
      * 注册刷新屏幕的回调函数
      * @param cb
      */
@@ -6352,6 +6358,7 @@ class Player {
         this.animator.stop();
         this.entity = videoEntity;
         this.brush.clearSecondary();
+        this.brush.clearMaterials();
         return this.brush.loadImage(images, filename);
     }
     /**
@@ -6421,6 +6428,7 @@ class Player {
     clear() {
         this.brush.clearContainer();
         this.brush.clearSecondary();
+        this.brush.clearMaterials();
     }
     /**
      * 销毁实例

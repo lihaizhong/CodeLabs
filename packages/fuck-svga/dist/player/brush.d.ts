@@ -72,6 +72,10 @@ export declare class Brush {
      */
     getImage(type?: string, encoderOptions?: number): string;
     /**
+     * 清理素材库
+     */
+    clearMaterials(): void;
+    /**
      * 注册刷新屏幕的回调函数
      * @param cb
      */
