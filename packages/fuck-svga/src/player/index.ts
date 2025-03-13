@@ -176,9 +176,11 @@ export class Player {
    * 清理容器画布
    */
   public clear(): void {
-    this.brush.clearContainer();
-    this.brush.clearSecondary();
-    this.brush.clearMaterials();
+    const { brush } = this;
+
+    brush.clearContainer();
+    brush.clearSecondary();
+    brush.clearMaterials();
   }
 
   /**

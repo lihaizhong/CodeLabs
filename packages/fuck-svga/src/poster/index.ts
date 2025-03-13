@@ -9,19 +9,37 @@ export class Poster {
    */
   private entity: Video | undefined = undefined;
 
-  private currFrame: number = 0;
+  private frame: number = 0;
+
+  private contentMode = PLAYER_CONTENT_MODE.FILL;
 
   private brush = new Brush("poster");
 
   /**
    * 设置配置项
-   * @param container canvas selector
+   * @param options 可配置项
    */
   public setConfig(
-    container: string,
+    options: string | PosterConfig,
     component?: WechatMiniprogram.Component.TrivialInstance | null
   ): Promise<void> {
-    return this.brush.register(container, '', component);
+    let config: PosterConfig;
+
+    if (typeof options === "string") {
+      config = { container: options };
+    } else {
+      config = options;
+    }
+
+    if (config.contentMode) {
+      this.contentMode = config.contentMode;
+    }
+
+    if (typeof config.frame === 'number') {
+      this.frame = config.frame;
+    }
+
+    return this.brush.register(config.container, '', component);
   }
 
   /**
@@ -30,7 +48,7 @@ export class Poster {
    * @param currFrame
    * @returns
    */
-  public mount(videoEntity: Video, currFrame?: number): Promise<void | void[]> {
+  public mount(videoEntity: Video): Promise<void | void[]> {
     if (!videoEntity) {
       throw new Error("videoEntity undefined");
     }
@@ -38,8 +56,7 @@ export class Poster {
     const { images, filename } = videoEntity;
 
     this.entity = videoEntity;
-    this.currFrame = currFrame || 0;
-    this.brush.clearSecondary();
+    this.clear();
 
     return this.brush.loadImage(images, filename);
   }
@@ -106,13 +123,15 @@ export class Poster {
    * 绘制海报
    */
   public draw(): void {
+    const { brush, entity, contentMode, frame } = this;
+
     benchmark.time(
       "render",
       () => {
-        this.brush.clearSecondary();
-        this.brush.fitSize(PLAYER_CONTENT_MODE.FILL, this.entity!.size);
-        this.brush.draw(this.entity!, this.currFrame, 0, this.entity!.sprites.length);
-        this.brush.stick();
+        brush.clearSecondary();
+        brush.fitSize(contentMode, entity!.size);
+        brush.draw(entity!, frame, 0, entity!.sprites.length);
+        brush.stick();
       }
     );
   }
@@ -121,7 +140,11 @@ export class Poster {
    * 清理海报
    */
   public clear(): void {
-    this.brush.clearContainer();
+    const { brush } = this;
+
+    brush.clearContainer();
+    brush.clearSecondary();
+    brush.clearMaterials();
   }
 
   /**

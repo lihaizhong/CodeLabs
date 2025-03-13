@@ -315,18 +315,18 @@ export class Brush {
   }
 
   /**
-   * 清理素材库
-   */
-  public clearMaterials() {
-    this.materials.clear();
-  }
-
-  /**
    * 注册刷新屏幕的回调函数
    * @param cb 
    */
   public flush(cb: () => void): void {
     ((Env.is(SE.H5) ? br : this.X) as WechatMiniprogram.Canvas).requestAnimationFrame(cb);
+  }
+
+  /**
+   * 清理素材库
+   */
+  public clearMaterials() {
+    this.materials.clear();
   }
 
   public clearContainer: () => void = noop;
