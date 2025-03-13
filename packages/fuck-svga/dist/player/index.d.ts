@@ -39,12 +39,6 @@ export declare class Player {
      */
     setItem(key: keyof PlayerConfig, value: any): void;
     /**
-     * 设置canvas的宽高
-     * @param width
-     * @param height
-     */
-    setRect(width: number, height: number): void;
-    /**
      * 装载 SVGA 数据元
      * @param videoEntity SVGA 数据源
      * @returns Promise<void>
@@ -106,7 +100,19 @@ export declare class Player {
      * 销毁实例
      */
     destroy(): void;
+    /**
+     * 指定开始帧动画
+     * @param frame
+     * @param andPlay
+     * @returns
+     */
     stepToFrame(frame: number, andPlay?: boolean): void;
+    /**
+     * 指定开始百分比动画
+     * @param percent
+     * @param andPlay
+     * @returns
+     */
     stepToPercentage(percent: number, andPlay?: boolean): void;
     /**
      * 开始绘制动画

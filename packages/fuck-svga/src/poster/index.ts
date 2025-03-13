@@ -35,11 +35,10 @@ export class Poster {
       throw new Error("videoEntity undefined");
     }
 
-    const { images, filename, size } = videoEntity;
+    const { images, filename } = videoEntity;
 
     this.entity = videoEntity;
     this.currFrame = currFrame || 0;
-    this.brush.setRect(size.width, size.height);
     this.brush.clearSecondary();
 
     return this.brush.loadImage(images, filename);
@@ -111,6 +110,7 @@ export class Poster {
       "render",
       () => {
         this.brush.clearSecondary();
+        this.brush.fitSize(PLAYER_CONTENT_MODE.FILL, this.entity!.size);
         this.brush.draw(this.entity!, this.currFrame, 0, this.entity!.sprites.length);
         this.brush.stick();
       }

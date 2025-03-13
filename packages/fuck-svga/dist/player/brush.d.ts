@@ -37,6 +37,7 @@ export declare class Brush {
      * 素材
      */
     materials: Map<string, Bitmap>;
+    globalTransform?: GlobalTransform;
     constructor(mode?: TBrushMode);
     private setModel;
     /**
@@ -46,12 +47,6 @@ export declare class Brush {
      * @param component
      */
     register(selector: string, ofsSelector?: string, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
-    /**
-     * 设置宽高
-     * @param width 宽度
-     * @param height 高度
-     */
-    setRect(width: number, height: number): void;
     /**
      * 加载图片集
      * @param images 图片数据
@@ -71,6 +66,8 @@ export declare class Brush {
      * @returns
      */
     getImage(type?: string, encoderOptions?: number): string;
+    getRect(): ViewportRect;
+    fitSize(contentMode: PLAYER_CONTENT_MODE, videoSize: ViewportRect): void;
     /**
      * 清理素材库
      */

@@ -62,6 +62,8 @@ export class Brush {
    */
   public materials: Map<string, Bitmap> = new Map();
 
+  public globalTransform?: GlobalTransform;
+
   constructor(private readonly mode: TBrushMode = 'animation') {}
 
   private setModel(type: "C" | "O"): void {
@@ -267,6 +269,51 @@ export class Brush {
     return this.X!.toDataURL(type, encoderOptions);
   }
 
+  public getRect(): ViewportRect {
+    const { W, H } = this;
+
+    return { width: W, height: H };
+  }
+
+  public fitSize(contentMode: PLAYER_CONTENT_MODE, videoSize: ViewportRect): void {
+    const { Y } = this
+    let scaleX = 1.0;
+    let scaleY = 1.0;
+    let translateX = 0.0;
+    let translateY = 0.0;
+    
+    if (contentMode === PLAYER_CONTENT_MODE.FILL) {
+      scaleX = Y!.width / videoSize.width;
+      scaleY = Y!.height / videoSize.height;
+    } else if ([PLAYER_CONTENT_MODE.ASPECT_FILL, PLAYER_CONTENT_MODE.ASPECT_FIT].includes(contentMode)) {
+      const imageRatio = videoSize.width / videoSize.height;
+      const viewRatio = Y!.width / Y!.height;
+
+      if (
+        (imageRatio >= viewRatio && contentMode === PLAYER_CONTENT_MODE.ASPECT_FIT)
+        || (imageRatio <= viewRatio && contentMode === PLAYER_CONTENT_MODE.ASPECT_FILL)
+      ) {
+        scaleX = scaleY = Y!.width / videoSize.width;
+        translateY = (Y!.height - videoSize.height * scaleY) / 2.0;
+      } else if (
+        (imageRatio < viewRatio && contentMode === PLAYER_CONTENT_MODE.ASPECT_FIT)
+        || (imageRatio > viewRatio && contentMode === PLAYER_CONTENT_MODE.ASPECT_FILL)
+      ) {
+        scaleX = scaleY = Y!.height / videoSize.height;
+        translateX = (Y!.width - videoSize.width * scaleX) / 2.0;
+      }
+    }
+
+    this.globalTransform = {
+      a: scaleX,
+      b: 0.0,
+      c: 0.0,
+      d: scaleY,
+      tx: translateX,
+      ty: translateY,
+    }
+  }
+
   /**
    * 清理素材库
    */
@@ -299,7 +346,7 @@ export class Brush {
     start: number,
     end: number
   ) {
-    render(this.YC!, this.materials, videoEntity, currentFrame, start, end);
+    render(this.YC!, this.materials, videoEntity, currentFrame, start, end, this.globalTransform);
   }
 
   public stick: () => void = noop;

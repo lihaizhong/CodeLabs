@@ -32,7 +32,8 @@ function render(
   videoEntity: Video,
   currentFrame: number,
   head: number,
-  tail: number
+  tail: number,
+  globalTransform?: GlobalTransform,
 ): void {
   const { sprites, replaceElements, dynamicElements } = videoEntity;
 
@@ -49,7 +50,8 @@ function render(
       currentFrame,
       bitmap,
       replaceElement,
-      dynamicElement
+      dynamicElement,
+      globalTransform
     );
   }
 }
@@ -58,17 +60,29 @@ function drawSprite(
   context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
   sprite: VideoSprite,
   currentFrame: number,
-  bitmap: Bitmap | undefined,
-  replaceElement: ReplaceElement | undefined,
-  dynamicElement: DynamicElement | undefined
+  bitmap?: Bitmap,
+  replaceElement?: ReplaceElement,
+  dynamicElement?: DynamicElement,
+  globalTransform?: GlobalTransform
 ): void {
   const frame = sprite.frames[currentFrame];
 
   if (frame.alpha < 0.05) return;
 
   context.save();
-  context.globalAlpha = frame.alpha;
 
+  if (globalTransform) {
+    context.transform(
+      globalTransform.a,
+      globalTransform.b,
+      globalTransform.c,
+      globalTransform.d,
+      globalTransform.tx,
+      globalTransform.ty
+    );
+  }
+
+  context.globalAlpha = frame.alpha;
   context.transform(
     frame.transform?.a ?? 1,
     frame.transform?.b ?? 0,

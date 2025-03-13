@@ -321,3 +321,17 @@ type PlayerConfigOptions = Partial<PlayerConfig> & {
    */
   secondary?: string;
 };
+
+interface ViewportRect {
+  width: number;
+  height: number;
+}
+
+interface GlobalTransform {
+  a: number;
+  b: number;
+  c: number;
+  d: number;
+  tx: number;
+  ty: number;
+}

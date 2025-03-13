@@ -228,6 +228,7 @@ export class Player {
    * 开始绘制动画
    */
   private startAnimation(): void {
+    const { entity } = this
     const { playMode } = this.config;
     const {
       currFrame,
@@ -235,8 +236,9 @@ export class Player {
       endFrame,
       totalFrame,
       spriteCount,
+      contentMode,
       aniConfig,
-    } = this.config.getConfig(this.entity!);
+    } = this.config.getConfig(entity!);
     const { duration, loopStart, loop, fillValue } = aniConfig;
 
     // 片段绘制开始位置
@@ -253,6 +255,7 @@ export class Player {
 
     // 更新动画基础信息
     this.animator!.setConfig(duration, loopStart, loop, fillValue);
+    this.brush.fitSize(contentMode, entity!.size);
     // 动画绘制过程
     this.animator!.onUpdate = (timePercent: number) => {
       if (playMode === PLAYER_PLAY_MODE.FALLBACKS) {
@@ -280,7 +283,7 @@ export class Player {
         if (nextTail > tail) {
           head = tail;
           tail = nextTail;
-          this.brush.draw(this.entity!, currentFrame, head, tail);
+          this.brush.draw(entity!, currentFrame, head, tail);
         }
       }
 
@@ -289,6 +292,7 @@ export class Player {
       this.brush.clearContainer();
       this.brush.stick();
       this.brush.clearSecondary();
+      this.brush.fitSize(contentMode, entity!.size);
       this.onProcess?.(~~(percent * 100) / 100);
       currentFrame = nextFrame;
       tail = 0;

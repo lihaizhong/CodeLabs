@@ -5334,8 +5334,8 @@ function getCanvas(selector, component) {
         };
         if (Env.is(SE.H5)) {
             const canvas = document.querySelector(selector);
-            const { width, height } = canvas.style;
-            initCanvas(canvas, parseFloat(width), parseFloat(height));
+            const { clientWidth, clientHeight } = canvas;
+            initCanvas(canvas, clientWidth, clientHeight);
         }
         else {
             let query = br.createSelectorQuery();
@@ -5536,7 +5536,7 @@ const now = () => {
  * - A: arcTo，从起始点绘制一条弧线到指定点。
  */
 const validMethods = "MLHVCSQZmlhvcsqz";
-function render(context, materials, videoEntity, currentFrame, head, tail) {
+function render(context, materials, videoEntity, currentFrame, head, tail, globalTransform) {
     const { sprites, replaceElements, dynamicElements } = videoEntity;
     for (let i = head; i < tail; i++) {
         const sprite = sprites[i];
@@ -5544,14 +5544,17 @@ function render(context, materials, videoEntity, currentFrame, head, tail) {
         const bitmap = materials.get(imageKey);
         const replaceElement = replaceElements[imageKey];
         const dynamicElement = dynamicElements[imageKey];
-        drawSprite(context, sprite, currentFrame, bitmap, replaceElement, dynamicElement);
+        drawSprite(context, sprite, currentFrame, bitmap, replaceElement, dynamicElement, globalTransform);
     }
 }
-function drawSprite(context, sprite, currentFrame, bitmap, replaceElement, dynamicElement) {
+function drawSprite(context, sprite, currentFrame, bitmap, replaceElement, dynamicElement, globalTransform) {
     const frame = sprite.frames[currentFrame];
     if (frame.alpha < 0.05)
         return;
     context.save();
+    if (globalTransform) {
+        context.transform(globalTransform.a, globalTransform.b, globalTransform.c, globalTransform.d, globalTransform.tx, globalTransform.ty);
+    }
     context.globalAlpha = frame.alpha;
     context.transform(frame.transform?.a ?? 1, frame.transform?.b ?? 0, frame.transform?.c ?? 0, frame.transform?.d ?? 1, frame.transform?.tx ?? 0, frame.transform?.ty ?? 0);
     if (bitmap) {
@@ -5852,6 +5855,7 @@ class Brush {
      * 素材
      */
     materials = new Map();
+    globalTransform;
     constructor(mode = 'animation') {
         this.mode = mode;
     }
@@ -5999,20 +6003,6 @@ class Brush {
         }
     }
     /**
-     * 设置宽高
-     * @param width 宽度
-     * @param height 高度
-     */
-    setRect(width, height) {
-        const { X, Y } = this;
-        if (X.width !== width) {
-            X.width = Y.width = this.W = width;
-        }
-        if (X.height !== height) {
-            X.height = Y.height = this.H = height;
-        }
-    }
-    /**
      * 加载图片集
      * @param images 图片数据
      * @param filename 文件名称
@@ -6050,6 +6040,43 @@ class Brush {
     getImage(type = 'image/png', encoderOptions = 0.92) {
         return this.X.toDataURL(type, encoderOptions);
     }
+    getRect() {
+        const { W, H } = this;
+        return { width: W, height: H };
+    }
+    fitSize(contentMode, videoSize) {
+        const { Y } = this;
+        let scaleX = 1.0;
+        let scaleY = 1.0;
+        let translateX = 0.0;
+        let translateY = 0.0;
+        if (contentMode === "fill" /* PLAYER_CONTENT_MODE.FILL */) {
+            scaleX = Y.width / videoSize.width;
+            scaleY = Y.height / videoSize.height;
+        }
+        else if (["aspect-fill" /* PLAYER_CONTENT_MODE.ASPECT_FILL */, "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */].includes(contentMode)) {
+            const imageRatio = videoSize.width / videoSize.height;
+            const viewRatio = Y.width / Y.height;
+            if ((imageRatio >= viewRatio && contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */)
+                || (imageRatio <= viewRatio && contentMode === "aspect-fill" /* PLAYER_CONTENT_MODE.ASPECT_FILL */)) {
+                scaleX = scaleY = Y.width / videoSize.width;
+                translateY = (Y.height - videoSize.height * scaleY) / 2.0;
+            }
+            else if ((imageRatio < viewRatio && contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */)
+                || (imageRatio > viewRatio && contentMode === "aspect-fill" /* PLAYER_CONTENT_MODE.ASPECT_FILL */)) {
+                scaleX = scaleY = Y.height / videoSize.height;
+                translateX = (Y.width - videoSize.width * scaleX) / 2.0;
+            }
+        }
+        this.globalTransform = {
+            a: scaleX,
+            b: 0.0,
+            c: 0.0,
+            d: scaleY,
+            tx: translateX,
+            ty: translateY,
+        };
+    }
     /**
      * 清理素材库
      */
@@ -6073,7 +6100,7 @@ class Brush {
      * @param end
      */
     draw(videoEntity, currentFrame, start, end) {
-        render(this.YC, this.materials, videoEntity, currentFrame, start, end);
+        render(this.YC, this.materials, videoEntity, currentFrame, start, end, this.globalTransform);
     }
     stick = noop;
     /**
@@ -6082,7 +6109,7 @@ class Brush {
     destroy() {
         this.clearContainer();
         this.clearSecondary();
-        this.materials.clear();
+        this.clearMaterials();
         this.X = this.XC = this.Y = this.YC = null;
         this.clearContainer = this.clearSecondary = this.stick = noop;
     }
@@ -6174,29 +6201,36 @@ class Animator {
 class Config {
     fillMode = "backwards" /* PLAYER_FILL_MODE.BACKWARDS */;
     playMode = "forwards" /* PLAYER_PLAY_MODE.FORWARDS */;
+    contentMode = "fill" /* PLAYER_CONTENT_MODE.FILL */;
     startFrame = 0;
     endFrame = 0;
     loopStartFrame = 0;
     loop = 0;
     // public isUseIntersectionObserver = false;
     register(config) {
-        if (typeof config.loop === 'number' && config.loop >= 0) {
+        if (typeof config.loop === "number" && config.loop >= 0) {
             this.loop = config.loop;
         }
-        if (config.fillMode && ["forwards" /* PLAYER_FILL_MODE.FORWARDS */, "backwards" /* PLAYER_FILL_MODE.BACKWARDS */].includes(config.fillMode)) {
+        if (config.fillMode &&
+            ["forwards" /* PLAYER_FILL_MODE.FORWARDS */, "backwards" /* PLAYER_FILL_MODE.BACKWARDS */].includes(config.fillMode)) {
             this.fillMode = config.fillMode;
         }
-        if (config.playMode && ["forwards" /* PLAYER_PLAY_MODE.FORWARDS */, "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */].includes(config.playMode)) {
+        if (config.playMode &&
+            ["forwards" /* PLAYER_PLAY_MODE.FORWARDS */, "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */].includes(config.playMode)) {
             this.playMode = config.playMode;
         }
-        if (typeof config.startFrame === 'number' && config.startFrame >= 0) {
+        if (typeof config.startFrame === "number" && config.startFrame >= 0) {
             this.startFrame = config.startFrame;
         }
-        if (typeof config.endFrame === 'number' && config.endFrame >= 0) {
+        if (typeof config.endFrame === "number" && config.endFrame >= 0) {
             this.endFrame = config.endFrame;
         }
-        if (typeof config.loopStartFrame === 'number' && config.loopStartFrame >= 0) {
+        if (typeof config.loopStartFrame === "number" &&
+            config.loopStartFrame >= 0) {
             this.loopStartFrame = config.loopStartFrame;
+        }
+        if (typeof config.contentMode === "string") {
+            this.contentMode = config.contentMode;
         }
         // if (typeof config.isUseIntersectionObserver === 'boolean') {
         //   this.isUseIntersectionObserver = config.isUseIntersectionObserver
@@ -6206,14 +6240,14 @@ class Config {
         this.register({ [key]: value });
     }
     getConfig(entity) {
-        const { playMode, loopStartFrame, startFrame, endFrame, fillMode, loop, } = this;
+        const { playMode, loopStartFrame, startFrame, endFrame, fillMode, loop } = this;
         const { fps, sprites } = entity;
         let { frames } = entity;
         const spriteCount = sprites.length;
         const start = startFrame > 0 ? startFrame : 0;
         const end = endFrame > 0 && endFrame < frames ? endFrame : frames;
         if (start > end) {
-            throw new Error('StartFrame should greater than EndFrame');
+            throw new Error("StartFrame should greater than EndFrame");
         }
         // 更新活动帧总数
         if (end < frames) {
@@ -6246,6 +6280,7 @@ class Config {
         // 每帧持续的时间
         const frameDuration = 1000 / fps;
         return {
+            contentMode: this.contentMode,
             currFrame,
             startFrame: start,
             endFrame: end,
@@ -6321,14 +6356,6 @@ class Player {
      */
     setItem(key, value) {
         this.config.setItem(key, value);
-    }
-    /**
-     * 设置canvas的宽高
-     * @param width
-     * @param height
-     */
-    setRect(width, height) {
-        this.brush.setRect(width, height);
     }
     // private setIntersectionObserver (): void {
     //   if (hasIntersectionObserver && this.config.isUseIntersectionObserver) {
@@ -6439,6 +6466,12 @@ class Player {
         this.animator = null;
         this.entity = undefined;
     }
+    /**
+     * 指定开始帧动画
+     * @param frame
+     * @param andPlay
+     * @returns
+     */
     stepToFrame(frame, andPlay = false) {
         if (!this.entity || frame < 0 || frame >= this.entity.frames)
             return;
@@ -6448,6 +6481,12 @@ class Player {
             this.startAnimation();
         }
     }
+    /**
+     * 指定开始百分比动画
+     * @param percent
+     * @param andPlay
+     * @returns
+     */
     stepToPercentage(percent, andPlay = false) {
         if (!this.entity)
             return;
@@ -6458,8 +6497,9 @@ class Player {
      * 开始绘制动画
      */
     startAnimation() {
+        const { entity } = this;
         const { playMode } = this.config;
-        const { currFrame, startFrame, endFrame, totalFrame, spriteCount, aniConfig, } = this.config.getConfig(this.entity);
+        const { currFrame, startFrame, endFrame, totalFrame, spriteCount, contentMode, aniConfig, } = this.config.getConfig(entity);
         const { duration, loopStart, loop, fillValue } = aniConfig;
         // 片段绘制开始位置
         let head = 0;
@@ -6474,6 +6514,7 @@ class Player {
         let drawPercent;
         // 更新动画基础信息
         this.animator.setConfig(duration, loopStart, loop, fillValue);
+        this.brush.fitSize(contentMode, entity.size);
         // 动画绘制过程
         this.animator.onUpdate = (timePercent) => {
             if (playMode === "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */) {
@@ -6499,7 +6540,7 @@ class Player {
                 if (nextTail > tail) {
                     head = tail;
                     tail = nextTail;
-                    this.brush.draw(this.entity, currentFrame, head, tail);
+                    this.brush.draw(entity, currentFrame, head, tail);
                 }
             }
             if (hasRemained)
@@ -6507,6 +6548,7 @@ class Player {
             this.brush.clearContainer();
             this.brush.stick();
             this.brush.clearSecondary();
+            this.brush.fitSize(contentMode, entity.size);
             this.onProcess?.(~~(percent * 100) / 100);
             currentFrame = nextFrame;
             tail = 0;
@@ -6541,10 +6583,9 @@ class Poster {
         if (!videoEntity) {
             throw new Error("videoEntity undefined");
         }
-        const { images, filename, size } = videoEntity;
+        const { images, filename } = videoEntity;
         this.entity = videoEntity;
         this.currFrame = currFrame || 0;
-        this.brush.setRect(size.width, size.height);
         this.brush.clearSecondary();
         return this.brush.loadImage(images, filename);
     }
@@ -6606,6 +6647,7 @@ class Poster {
     draw() {
         benchmark.time("render", () => {
             this.brush.clearSecondary();
+            this.brush.fitSize("fill" /* PLAYER_CONTENT_MODE.FILL */, this.entity.size);
             this.brush.draw(this.entity, this.currFrame, 0, this.entity.sprites.length);
             this.brush.stick();
         });

@@ -1,6 +1,7 @@
 export declare class Config {
     fillMode: PLAYER_FILL_MODE;
     playMode: PLAYER_PLAY_MODE;
+    contentMode: PLAYER_CONTENT_MODE;
     startFrame: number;
     endFrame: number;
     loopStartFrame: number;
@@ -8,6 +9,7 @@ export declare class Config {
     register(config: Partial<PlayerConfig>): void;
     setItem(key: keyof PlayerConfig, value: any): void;
     getConfig(entity: Video): {
+        contentMode: PLAYER_CONTENT_MODE;
         currFrame: number;
         startFrame: number;
         endFrame: number;

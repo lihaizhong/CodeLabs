@@ -37,9 +37,9 @@ export function getCanvas(
 
     if (Env.is(SE.H5)) {
       const canvas = document.querySelector(selector) as HTMLCanvasElement;
-      const { width, height } = canvas.style;
+      const { clientWidth, clientHeight } = canvas;
 
-      initCanvas(canvas, parseFloat(width), parseFloat(height));
+      initCanvas(canvas, clientWidth, clientHeight);
     } else {
       let query = (br as WechatMiniprogram.Wx).createSelectorQuery();
 

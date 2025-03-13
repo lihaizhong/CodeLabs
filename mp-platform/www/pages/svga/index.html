@@ -153,7 +153,6 @@
           // playMode: "fallbacks",
           // fillMode: "forwards"
         });
-        player.setRect(window.innerWidth * 0.8, window.innerHeight * 0.8);
         player.onProcess = (percent) => {
           console.log('--------- UPDATE ----------', percent)
         };
@@ -185,7 +184,7 @@
 <body>
   <div class="ani-container">
     <canvas type="2d" id="palette" class="svga-palette"></canvas>
-    <canvas type="2d" id="secondary" class="svga-palette svga-secondary"></canvas>
+    <!-- <canvas type="2d" id="secondary" class="svga-palette svga-secondary"></canvas> -->
   </div>
 
   <div id="popup" class="svga-error-popup">{{ message }}</div>
