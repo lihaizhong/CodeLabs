@@ -75,6 +75,9 @@ git submodule update --init --recursive
 - [掌握JavaScript中的二进制运算，提升你的编程技能](https://developer.aliyun.com/article/1511057)
 - [JS 二进制详解](https://juejin.cn/post/6933152793721208845)
 - [运算符](https://wangdoc.com/javascript/operators/)
+- [ArrayBuffer简析](https://www.cnblogs.com/fuckgiser/p/5045234.html)
+
+![Type Array具体类型](https://images2015.cnblogs.com/blog/800175/201512/800175-20151214144542365-1500823264.png)
 
 ### SVGA
 

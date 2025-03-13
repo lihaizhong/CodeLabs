@@ -19,7 +19,7 @@ interface IBrushModel {
   render: "PU" | "DR";
 }
 
-type TBrushMode = 'simple' | 'normal'
+type TBrushMode = 'poster' | 'animation'
 
 export class Brush {
   /**
@@ -62,7 +62,7 @@ export class Brush {
    */
   public materials: Map<string, Bitmap> = new Map();
 
-  constructor(private readonly mode: TBrushMode = 'normal') {}
+  constructor(private readonly mode: TBrushMode = 'animation') {}
 
   private setModel(type: "C" | "O"): void {
     const { model } = this;
@@ -127,7 +127,7 @@ export class Brush {
 
     // #region set secondary screen implement
     // ------- 创建副屏 ---------
-    if (mode === 'simple') {
+    if (mode === 'poster') {
       this.Y = this.X;
       this.YC = this.XC;
       this.setModel('C');
@@ -167,7 +167,7 @@ export class Brush {
     // #endregion clear main screen implement
 
 
-    if (mode === 'simple') {
+    if (mode === 'poster') {
       this.clearSecondary = this.stick = noop
     } else {
       // #region clear secondary screen implement
@@ -230,8 +230,13 @@ export class Brush {
   public setRect(width: number, height: number): void {
     const { X, Y } = this;
 
-    X!.width = Y!.width = this.W = width;
-    X!.height = Y!.height = this.H = height;
+    if (X!.width !== width) {
+      X!.width = Y!.width = this.W = width
+    }
+
+    if (X!.height !== height) {
+      X!.height = Y!.height = this.H = height
+    }
   }
 
   /**

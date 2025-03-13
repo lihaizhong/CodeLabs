@@ -1,6 +1,6 @@
 import { Brush } from "./brush";
 import { Animator } from "./animator";
-import benchmark from "../benchmark";
+import { Config } from "./config";
 
 /**
  * SVGA 播放器
@@ -15,15 +15,7 @@ export class Player {
   /**
    * 当前配置项
    */
-  private readonly config: PlayerConfig = Object.create({
-    loop: 0,
-    fillMode: PLAYER_FILL_MODE.BACKWARDS,
-    playMode: PLAYER_PLAY_MODE.FORWARDS,
-    startFrame: 0,
-    endFrame: 0,
-    loopStartFrame: 0,
-    // isUseIntersectionObserver: false,
-  });
+  private readonly config = new Config();
 
   /**
    * 刷头实例
@@ -62,20 +54,29 @@ export class Player {
       config = options;
     }
 
-    Object.assign(this.config, {
-      loop: config.loop ?? 0,
-      fillMode: config.fillMode ?? PLAYER_FILL_MODE.BACKWARDS,
-      playMode: config.playMode ?? PLAYER_PLAY_MODE.FORWARDS,
-      startFrame: config.startFrame ?? 0,
-      endFrame: config.endFrame ?? 0,
-      loopStartFrame: config.loopStartFrame ?? 0,
-    });
+    this.config.register(config);
     await this.brush.register(config.container, config.secondary, component);
-    // this.config.isUseIntersectionObserver =
-    //   config.isUseIntersectionObserver ?? false;
     // 监听容器是否处于浏览器视窗内
     // this.setIntersectionObserver()
     this.animator = new Animator(this.brush);
+  }
+
+  /**
+   * 更新配置
+   * @param key
+   * @param value
+   */
+  public setItem(key: keyof PlayerConfig, value: any): void {
+    this.config.setItem(key, value);
+  }
+
+  /**
+   * 设置canvas的宽高
+   * @param width
+   * @param height
+   */
+  public setRect(width: number, height: number): void {
+    this.brush.setRect(width, height);
   }
 
   // private setIntersectionObserver (): void {
@@ -104,12 +105,10 @@ export class Player {
       throw new Error("videoEntity undefined");
     }
 
+    const { images, filename } = videoEntity;
+
     this.animator!.stop();
     this.entity = videoEntity;
-
-    const { images, filename, size } = videoEntity;
-
-    this.brush.setRect(size.width, size.height);
     this.brush.clearSecondary();
 
     return this.brush.loadImage(images, filename);
@@ -152,7 +151,6 @@ export class Player {
    * 开始播放
    */
   public start(): void {
-    this.brush.clearContainer();
     this.startAnimation();
     this.onStart?.();
   }
@@ -161,7 +159,7 @@ export class Player {
    * 重新播放
    */
   public resume(): void {
-    this.startAnimation();
+    this.animator!.start();
     this.onResume?.();
   }
 
@@ -187,6 +185,7 @@ export class Player {
    */
   public clear(): void {
     this.brush.clearContainer();
+    this.brush.clearSecondary();
   }
 
   /**
@@ -200,7 +199,7 @@ export class Player {
   }
 
   public stepToFrame(frame: number, andPlay = false) {
-    if (!this.entity || frame < 0 || frame >= this.entity.frames)  return;
+    if (!this.entity || frame < 0 || frame >= this.entity.frames) return;
 
     this.pause();
     this.config.loopStartFrame = frame;
@@ -215,7 +214,7 @@ export class Player {
     const { frames } = this.entity;
 
     this.stepToFrame(
-      (Math.round((percent < 0 ? 0 : percent) * frames) % frames),
+      Math.round((percent < 0 ? 0 : percent) * frames) % frames,
       andPlay
     );
   }
@@ -224,111 +223,69 @@ export class Player {
    * 开始绘制动画
    */
   private startAnimation(): void {
-    const { playMode, loopStartFrame, startFrame, endFrame, fillMode, loop } =
-      this.config;
-    let { frames, fps, sprites } = this.entity!;
-    const spriteCount = sprites.length;
-    const start = startFrame > 0 ? startFrame : 0;
-    const end = endFrame > 0 && endFrame < frames ? endFrame : frames;
-
-    if (start > end) {
-      throw new Error("StartFrame should greater than EndFrame");
-    }
-
-    // 更新活动帧总数
-    if (end < frames) {
-      frames = end - start;
-    } else if (start > 0) {
-      frames -= start;
-    }
-
-    let currFrame = loopStartFrame;
-    let extFrame = 0;
-
-    // 顺序播放/倒叙播放
-    if (playMode === PLAYER_PLAY_MODE.FORWARDS) {
-      // 如果开始动画的当前帧是最后一帧，重置为开始帧
-      if (currFrame === end - 1) {
-        currFrame = start;
-      }
-
-      if (fillMode === PLAYER_FILL_MODE.FORWARDS) {
-        extFrame = 1;
-      }
-    } else {
-      // 如果开始动画的当前帧是最后一帧，重置为开始帧
-      if (currFrame === 0) {
-        currFrame = end - 1;
-      }
-
-      if (fillMode === PLAYER_FILL_MODE.BACKWARDS) {
-        extFrame = 1;
-      }
-    }
-
-    // 每帧持续的时间
-    const frameDuration = 1000 / fps;
-    // 更新动画基础信息
-    this.animator!.setConfig(
-      // 单个周期的运行时长
-      (Math.floor(frames * frameDuration * 10 ** 6)) / 10 ** 6,
-      // 第一个周期开始时间偏移量
-      loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0,
-      // 循环次数
-      loop <= 0 ? Infinity : loop,
-      // 最后一帧不在周期内，需要单独计算
-      extFrame * frameDuration,
-      // 最后一帧的渲染模式
-      fillMode == PLAYER_FILL_MODE.FORWARDS ? 1 : 0
-    );
+    const { playMode } = this.config;
+    const {
+      currFrame,
+      startFrame,
+      endFrame,
+      totalFrame,
+      spriteCount,
+      aniConfig,
+    } = this.config.getConfig(this.entity!);
+    const { duration, loopStart, loop, fillValue } = aniConfig;
 
     // 片段绘制开始位置
     let head = 0;
     // 片段绘制结束位置
     let tail = 0;
+    let currentFrame = currFrame;
     // 下一帧
     let nextFrame: number;
-    let percent: number
-    // 一帧图片的绘制百分比
-    let drawPercent: number
+    // 当前已完成的百分比
+    let percent: number;
+    // 当前需要绘制的百分比
+    let drawPercent: number;
+
+    // 更新动画基础信息
+    this.animator!.setConfig(duration, loopStart, loop, fillValue);
     // 动画绘制过程
     this.animator!.onUpdate = (timePercent: number) => {
       if (playMode === PLAYER_PLAY_MODE.FALLBACKS) {
-        percent = 1 - timePercent
-        nextFrame = (timePercent === 0 ? end : Math.ceil(percent * frames)) - 1
-        drawPercent = Math.abs(1 - percent * frames + currFrame)
+        percent = 1 - timePercent;
+        nextFrame =
+          (timePercent == 0 ? endFrame : Math.ceil(percent * totalFrame)) - 1;
+        drawPercent = Math.abs(1 - percent * totalFrame + currentFrame);
       } else {
-        percent = timePercent
-        nextFrame = timePercent === 1 ? start : Math.floor(percent * frames)
-        drawPercent = Math.abs(percent * frames - currFrame)
+        percent = timePercent;
+        nextFrame =
+          timePercent === 1 ? startFrame : Math.floor(percent * totalFrame);
+        drawPercent = Math.abs(percent * totalFrame - currentFrame);
       }
 
       // 是否还有剩余时间
-      const hasRemained = currFrame === nextFrame;
-
-      // console.log('onUpdate', timePercent, this.currFrame, nextFrame, hasRemained ? 'don\'t render' : 'need render');
+      const hasRemained = currentFrame === nextFrame;
 
       // 当前帧的图片还未绘制完成
       if (tail !== spriteCount) {
-        // 1.05 和 3 均为阔值，保证渲染尽快完成
+        // 1.15 和 3 均为阔值，保证渲染尽快完成
         const nextTail = hasRemained
-          ? Math.min(spriteCount * drawPercent * 1.05 + 2, spriteCount) << 0
+          ? Math.min(spriteCount * drawPercent * 1.15 + 2, spriteCount) << 0
           : spriteCount;
 
         if (nextTail > tail) {
           head = tail;
           tail = nextTail;
-          this.brush.draw(this.entity!, currFrame, head, tail);
+          this.brush.draw(this.entity!, currentFrame, head, tail);
         }
       }
 
       if (hasRemained) return;
 
       this.brush.clearContainer();
-      this.brush.stick()
+      this.brush.stick();
       this.brush.clearSecondary();
       this.onProcess?.(~~(percent * 100) / 100);
-      currFrame = nextFrame;
+      currentFrame = nextFrame;
       tail = 0;
     };
     this.animator!.onEnd = () => this.onEnd?.();

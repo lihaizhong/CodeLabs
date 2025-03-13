@@ -23,12 +23,6 @@ export class Animator {
    * 循环持续时间
    */
   private loopDuration: number = 0;
-  /**
-   * 最后停留的目标模式，类似于**animation-fill-mode**
-   * 0: 第一帧
-   * 1: 最后一帧
-   */
-  private fillRule: number = 0;
 
   /* ---- 事件钩子 ---- */
   public onStart: () => void = noop;
@@ -43,18 +37,15 @@ export class Animator {
    * @param loopStart
    * @param loop
    * @param fillValue
-   * @param fillRule
    */
   public setConfig(
     duration: number,
     loopStart: number,
     loop: number,
-    fillValue: number,
-    fillRule: number
+    fillValue: number
   ) {
     this.duration = duration;
     this.loopStart = loopStart;
-    this.fillRule = fillRule;
     this.loopDuration = duration * loop + fillValue - loopStart;
   }
 
@@ -83,7 +74,6 @@ export class Animator {
       duration: D,
       loopStart: LS,
       loopDuration: LD,
-      fillRule: FR,
     } = this;
     // 本轮动画已消耗的时间比例（Percentage of speed time）
     let TP: number;
@@ -92,7 +82,7 @@ export class Animator {
     // 运行时间 大于等于 循环持续时间
     if (DT >= LD) {
       // 动画已结束
-      TP = FR ? 0.0 : 1.0;
+      TP = 1.0;
       ended = true;
       this.stop();
     } else {

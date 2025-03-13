@@ -11,7 +11,7 @@ export class Poster {
 
   private currFrame: number = 0;
 
-  private brush = new Brush("simple");
+  private brush = new Brush("poster");
 
   /**
    * 设置配置项

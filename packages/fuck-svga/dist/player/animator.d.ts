@@ -21,12 +21,6 @@ export declare class Animator {
      * 循环持续时间
      */
     private loopDuration;
-    /**
-     * 最后停留的目标模式，类似于**animation-fill-mode**
-     * 0: 第一帧
-     * 1: 最后一帧
-     */
-    private fillRule;
     onStart: () => void;
     onUpdate: (timePercent: number) => void;
     onEnd: () => void;
@@ -37,9 +31,8 @@ export declare class Animator {
      * @param loopStart
      * @param loop
      * @param fillValue
-     * @param fillRule
      */
-    setConfig(duration: number, loopStart: number, loop: number, fillValue: number, fillRule: number): void;
+    setConfig(duration: number, loopStart: number, loop: number, fillValue: number): void;
     start(): void;
     stop(): void;
     private doFrame;

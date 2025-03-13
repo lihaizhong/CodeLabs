@@ -1,4 +1,4 @@
-type TBrushMode = 'simple' | 'normal';
+type TBrushMode = 'poster' | 'animation';
 export declare class Brush {
     private readonly mode;
     /**

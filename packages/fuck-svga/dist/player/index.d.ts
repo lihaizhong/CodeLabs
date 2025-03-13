@@ -33,6 +33,18 @@ export declare class Player {
      */
     setConfig(options: string | PlayerConfigOptions, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
     /**
+     * 更新配置
+     * @param key
+     * @param value
+     */
+    setItem(key: keyof PlayerConfig, value: any): void;
+    /**
+     * 设置canvas的宽高
+     * @param width
+     * @param height
+     */
+    setRect(width: number, height: number): void;
+    /**
      * 装载 SVGA 数据元
      * @param videoEntity SVGA 数据源
      * @returns Promise<void>
