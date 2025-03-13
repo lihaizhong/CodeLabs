@@ -250,6 +250,25 @@ const enum PLAYER_PLAY_MODE {
   FALLBACKS = 'fallbacks',
 }
 
+const enum PLAYER_CONTENT_MODE {
+  /**
+   * 缩放图片填满 Canvas，图片可能出现变形
+   */
+  FILL = 'fill',
+  /**
+   * 等比例缩放至整张图片填满 Canvas，不足部分留白
+   */
+  ASPECT_FIT = 'aspect-fit',
+  /**
+   * 等比例缩放至图片填满 Canvas，超出部分不展示
+   */
+  ASPECT_FILL = 'aspect-fill',
+  /**
+   * 图片对齐 Canvas 中心，超出部分不展示
+   */
+  CENTER = 'center'
+}
+
 type PlayerEventCallback = () => void;
 
 type PlayerProcessEventCallback = (percent: number) => void;
@@ -269,6 +288,10 @@ interface PlayerConfig {
    * 播放模式，默认值 forwards
    */
   playMode: PLAYER_PLAY_MODE;
+  /**
+   * 填充模式，类似于 content-mode。
+   */
+  contentMode: PLAYER_CONTENT_MODE;
   /**
    * 开始播放的帧数，默认值 0
    */

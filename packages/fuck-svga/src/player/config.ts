@@ -11,6 +11,15 @@ export class Config {
 
   public loop = 0;
 
+  public globalTransform?: {
+    a: number;
+    b: number;
+    c: number;
+    d: number;
+    tx: number;
+    ty: number;
+  };
+
   // public isUseIntersectionObserver = false;
 
   public register(config: Partial<PlayerConfig>) {

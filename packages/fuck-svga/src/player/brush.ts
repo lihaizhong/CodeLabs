@@ -223,23 +223,6 @@ export class Brush {
   }
 
   /**
-   * 设置宽高
-   * @param width 宽度
-   * @param height 高度
-   */
-  public setRect(width: number, height: number): void {
-    const { X, Y } = this;
-
-    if (X!.width !== width) {
-      X!.width = Y!.width = this.W = width
-    }
-
-    if (X!.height !== height) {
-      X!.height = Y!.height = this.H = height
-    }
-  }
-
-  /**
    * 加载图片集
    * @param images 图片数据
    * @param filename 文件名称

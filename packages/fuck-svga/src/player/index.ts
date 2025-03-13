@@ -70,15 +70,6 @@ export class Player {
     this.config.setItem(key, value);
   }
 
-  /**
-   * 设置canvas的宽高
-   * @param width
-   * @param height
-   */
-  public setRect(width: number, height: number): void {
-    this.brush.setRect(width, height);
-  }
-
   // private setIntersectionObserver (): void {
   //   if (hasIntersectionObserver && this.config.isUseIntersectionObserver) {
   //     this.intersectionObserver = new IntersectionObserver(entries => {
@@ -200,6 +191,12 @@ export class Player {
     this.entity = undefined;
   }
 
+  /**
+   * 指定开始帧动画
+   * @param frame
+   * @param andPlay
+   * @returns
+   */
   public stepToFrame(frame: number, andPlay = false) {
     if (!this.entity || frame < 0 || frame >= this.entity.frames) return;
 
@@ -210,6 +207,12 @@ export class Player {
     }
   }
 
+  /**
+   * 指定开始百分比动画
+   * @param percent
+   * @param andPlay
+   * @returns
+   */
   public stepToPercentage(percent: number, andPlay: boolean = false) {
     if (!this.entity) return;
 
