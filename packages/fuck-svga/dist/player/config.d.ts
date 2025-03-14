@@ -9,7 +9,6 @@ export declare class Config {
     register(config: Partial<PlayerConfig>): void;
     setItem(key: keyof PlayerConfig, value: any): void;
     getConfig(entity: Video): {
-        contentMode: PLAYER_CONTENT_MODE;
         currFrame: number;
         startFrame: number;
         endFrame: number;

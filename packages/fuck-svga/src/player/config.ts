@@ -114,7 +114,6 @@ export class Config {
     const frameDuration = 1000 / fps;
 
     return {
-      contentMode: this.contentMode,
       currFrame,
       startFrame: start,
       endFrame: end,

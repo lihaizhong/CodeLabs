@@ -4922,34 +4922,6 @@ function writeTmpFile(data, filePath) {
     });
 }
 /**
- * 移除本地文件
- * @param filePath 文件资源地址
- * @returns
- */
-function removeTmpFile(filePath) {
-    const fs = br.getFileSystemManager();
-    return new Promise((resolve) => {
-        fs.access({
-            path: filePath,
-            success() {
-                benchmark.log(`remove file: ${filePath}`);
-                fs.unlink({
-                    filePath,
-                    success: () => resolve(),
-                    fail(err) {
-                        benchmark.log(`remove fail: ${filePath}`, err);
-                        resolve();
-                    },
-                });
-            },
-            fail(err) {
-                benchmark.log(`access fail: ${filePath}`, err);
-                resolve();
-            },
-        });
-    });
-}
-/**
  * 读取本地文件
  * @param filePath 文件资源地址
  * @returns
@@ -5447,6 +5419,20 @@ async function genImageSource(data, filename, prefix) {
     }
 }
 /**
+ * 创建 Image 标签
+ * @param brush
+ * @param src
+ * @returns
+ */
+function createImage(brush, src) {
+    return new Promise((resolve, reject) => {
+        const img = brush.createImage();
+        img.onload = resolve;
+        img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${img.src}`));
+        img.src = src;
+    });
+}
+/**
  * 加载图片
  * @param brush 创建图片对象
  * @param data 图片数据
@@ -5464,20 +5450,7 @@ function loadImage(brush, data, filename, prefix) {
             return Promise.resolve(data);
         }
     }
-    return new Promise((resolve, reject) => {
-        const img = brush.createImage();
-        img.onload = () => {
-            // 如果 data 是 URL/base64 或者 img.src 是 base64
-            if (img.src.startsWith("data:") || typeof data === "string") {
-                resolve(img);
-            }
-            else {
-                removeTmpFile(img.src).then(() => resolve(img));
-            }
-        };
-        img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${img.src}`));
-        genImageSource(data, filename, prefix).then((src) => (img.src = src));
-    });
+    return genImageSource(data, filename, prefix).then((src) => createImage(brush, src));
 }
 
 const noop = () => { };
@@ -6008,7 +5981,7 @@ class Brush {
      * @param filename 文件名称
      * @returns
      */
-    loadImage(images, filename) {
+    loadImages(images, filename) {
         let imageArr = [];
         this.materials.clear();
         benchmark.time("load image", () => {
@@ -6078,17 +6051,17 @@ class Brush {
         };
     }
     /**
-     * 清理素材库
-     */
-    clearMaterials() {
-        this.materials.clear();
-    }
-    /**
      * 注册刷新屏幕的回调函数
      * @param cb
      */
     flush(cb) {
         (Env.is(SE.H5) ? br : this.X).requestAnimationFrame(cb);
+    }
+    /**
+     * 清理素材库
+     */
+    clearMaterials() {
+        this.materials.clear();
     }
     clearContainer = noop;
     clearSecondary = noop;
@@ -6280,7 +6253,6 @@ class Config {
         // 每帧持续的时间
         const frameDuration = 1000 / fps;
         return {
-            contentMode: this.contentMode,
             currFrame,
             startFrame: start,
             endFrame: end,
@@ -6386,7 +6358,7 @@ class Player {
         this.entity = videoEntity;
         this.brush.clearSecondary();
         this.brush.clearMaterials();
-        return this.brush.loadImage(images, filename);
+        return this.brush.loadImages(images, filename);
     }
     /**
      * 开始播放事件回调
@@ -6453,9 +6425,10 @@ class Player {
      * 清理容器画布
      */
     clear() {
-        this.brush.clearContainer();
-        this.brush.clearSecondary();
-        this.brush.clearMaterials();
+        const { brush } = this;
+        brush.clearContainer();
+        brush.clearSecondary();
+        brush.clearMaterials();
     }
     /**
      * 销毁实例
@@ -6497,9 +6470,9 @@ class Player {
      * 开始绘制动画
      */
     startAnimation() {
-        const { entity } = this;
-        const { playMode } = this.config;
-        const { currFrame, startFrame, endFrame, totalFrame, spriteCount, contentMode, aniConfig, } = this.config.getConfig(entity);
+        const { entity, config, animator, brush } = this;
+        const { playMode, contentMode } = config;
+        const { currFrame, startFrame, endFrame, totalFrame, spriteCount, aniConfig, } = config.getConfig(entity);
         const { duration, loopStart, loop, fillValue } = aniConfig;
         // 片段绘制开始位置
         let head = 0;
@@ -6513,10 +6486,10 @@ class Player {
         // 当前需要绘制的百分比
         let drawPercent;
         // 更新动画基础信息
-        this.animator.setConfig(duration, loopStart, loop, fillValue);
-        this.brush.fitSize(contentMode, entity.size);
+        animator.setConfig(duration, loopStart, loop, fillValue);
+        brush.fitSize(contentMode, entity.size);
         // 动画绘制过程
-        this.animator.onUpdate = (timePercent) => {
+        animator.onUpdate = (timePercent) => {
             if (playMode === "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */) {
                 percent = 1 - timePercent;
                 nextFrame =
@@ -6540,21 +6513,20 @@ class Player {
                 if (nextTail > tail) {
                     head = tail;
                     tail = nextTail;
-                    this.brush.draw(entity, currentFrame, head, tail);
+                    brush.draw(entity, currentFrame, head, tail);
                 }
             }
             if (hasRemained)
                 return;
-            this.brush.clearContainer();
-            this.brush.stick();
-            this.brush.clearSecondary();
-            this.brush.fitSize(contentMode, entity.size);
-            this.onProcess?.(~~(percent * 100) / 100);
+            brush.clearContainer();
+            brush.stick();
+            brush.clearSecondary();
             currentFrame = nextFrame;
             tail = 0;
+            this.onProcess?.(~~(percent * 100) / 100);
         };
-        this.animator.onEnd = () => this.onEnd?.();
-        this.animator.start();
+        animator.onEnd = () => this.onEnd?.();
+        animator.start();
     }
 }
 
@@ -6564,14 +6536,28 @@ class Poster {
      * Video Entity
      */
     entity = undefined;
-    currFrame = 0;
+    frame = 0;
+    contentMode = "fill" /* PLAYER_CONTENT_MODE.FILL */;
     brush = new Brush("poster");
     /**
      * 设置配置项
-     * @param container canvas selector
+     * @param options 可配置项
      */
-    setConfig(container, component) {
-        return this.brush.register(container, '', component);
+    setConfig(options, component) {
+        let config;
+        if (typeof options === "string") {
+            config = { container: options };
+        }
+        else {
+            config = options;
+        }
+        if (config.contentMode) {
+            this.contentMode = config.contentMode;
+        }
+        if (typeof config.frame === 'number') {
+            this.frame = config.frame;
+        }
+        return this.brush.register(config.container, '', component);
     }
     /**
      * 装载 SVGA 数据元
@@ -6579,15 +6565,14 @@ class Poster {
      * @param currFrame
      * @returns
      */
-    mount(videoEntity, currFrame) {
+    mount(videoEntity) {
         if (!videoEntity) {
             throw new Error("videoEntity undefined");
         }
         const { images, filename } = videoEntity;
         this.entity = videoEntity;
-        this.currFrame = currFrame || 0;
-        this.brush.clearSecondary();
-        return this.brush.loadImage(images, filename);
+        this.clear();
+        return this.brush.loadImages(images, filename);
     }
     /**
      * 开始绘画事件回调
@@ -6645,18 +6630,22 @@ class Poster {
      * 绘制海报
      */
     draw() {
+        const { brush, entity, contentMode, frame } = this;
         benchmark.time("render", () => {
-            this.brush.clearSecondary();
-            this.brush.fitSize("fill" /* PLAYER_CONTENT_MODE.FILL */, this.entity.size);
-            this.brush.draw(this.entity, this.currFrame, 0, this.entity.sprites.length);
-            this.brush.stick();
+            brush.clearSecondary();
+            brush.fitSize(contentMode, entity.size);
+            brush.draw(entity, frame, 0, entity.sprites.length);
+            brush.stick();
         });
     }
     /**
      * 清理海报
      */
     clear() {
-        this.brush.clearContainer();
+        const { brush } = this;
+        brush.clearContainer();
+        brush.clearSecondary();
+        brush.clearMaterials();
     }
     /**
      * 销毁海报

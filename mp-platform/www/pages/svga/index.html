@@ -24,7 +24,7 @@
 
     .svga-palette {
       width: 80vw;
-      height: 80vh;
+      height: 50vh;
     }
 
     .svga-secondary {
@@ -68,8 +68,9 @@
     import "weui";
     import { Parser, Player } from "fuck-svga";
     import Page from "../../utils/Page"
-    import { svgaSources, getOneAtRandom } from "../../utils/constants";
+    import { svgaSources, svgaLargeFiles, getOneAtRandom } from "../../utils/constants";
 
+    const files = svgaLargeFiles
     let parser, player
 
     Page({
@@ -91,7 +92,7 @@
       },
 
       handleSwitchAtRandom() {
-        const { ranIndex, url } = getOneAtRandom();
+        const { ranIndex, url } = getOneAtRandom(files);
 
         this.setData({
           url,
@@ -104,11 +105,11 @@
         let prev = current - 1;
 
         if (prev < 0) {
-          prev = svgaSources.length - 1;
+          prev = files.length - 1;
         }
 
         this.setData({
-          url: svgaSources[prev],
+          url: files[prev],
           current: prev,
         });
       },
@@ -117,12 +118,12 @@
         const { current } = this.data;
         let next = current + 1;
 
-        if (next > svgaSources.length - 1) {
+        if (next > files.length - 1) {
           next = 0;
         }
 
         this.setData({
-          url: svgaSources[next],
+          url: files[next],
           current: next,
         });
       },
@@ -149,9 +150,10 @@
         await player.setConfig({
           container: "#palette",
           // secondary: "#secondary",
-          loop: 2,
+          loop: 1,
           // playMode: "fallbacks",
-          // fillMode: "forwards"
+          // fillMode: "forwards",
+          contentMode: "aspect-fill"
         });
         player.onProcess = (percent) => {
           console.log('--------- UPDATE ----------', percent)
@@ -161,8 +163,8 @@
         };
         // this.handleSwitchAtRandom();
         this.setData({
-          current: 40,
-          url: svgaSources[40]
+          current: 0,
+          url: files[0]
         })
       },
     })

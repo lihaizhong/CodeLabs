@@ -230,7 +230,7 @@ export class Brush {
    * @param filename 文件名称
    * @returns 
    */
-  public loadImage(images: RawImages, filename: string): Promise<void[]> {
+  public loadImages(images: RawImages, filename: string): Promise<void[]> {
     let imageArr: Promise<void>[] = [];
 
     this.materials.clear();

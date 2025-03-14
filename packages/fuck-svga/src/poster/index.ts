@@ -58,7 +58,7 @@ export class Poster {
     this.entity = videoEntity;
     this.clear();
 
-    return this.brush.loadImage(images, filename);
+    return this.brush.loadImages(images, filename);
   }
 
   /**

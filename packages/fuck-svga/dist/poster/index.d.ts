@@ -4,20 +4,21 @@ export declare class Poster {
      * Video Entity
      */
     private entity;
-    private currFrame;
+    private frame;
+    private contentMode;
     private brush;
     /**
      * 设置配置项
-     * @param container canvas selector
+     * @param options 可配置项
      */
-    setConfig(container: string, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
+    setConfig(options: string | PosterConfig, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
     /**
      * 装载 SVGA 数据元
      * @param videoEntity SVGA 数据源
      * @param currFrame
      * @returns
      */
-    mount(videoEntity: Video, currFrame?: number): Promise<void | void[]>;
+    mount(videoEntity: Video): Promise<void | void[]>;
     /**
      * 开始绘画事件回调
      */

@@ -53,7 +53,7 @@ export declare class Brush {
      * @param filename 文件名称
      * @returns
      */
-    loadImage(images: RawImages, filename: string): Promise<void[]>;
+    loadImages(images: RawImages, filename: string): Promise<void[]>;
     /**
      * 创建图片标签
      * @returns
@@ -69,14 +69,14 @@ export declare class Brush {
     getRect(): ViewportRect;
     fitSize(contentMode: PLAYER_CONTENT_MODE, videoSize: ViewportRect): void;
     /**
-     * 清理素材库
-     */
-    clearMaterials(): void;
-    /**
      * 注册刷新屏幕的回调函数
      * @param cb
      */
     flush(cb: () => void): void;
+    /**
+     * 清理素材库
+     */
+    clearMaterials(): void;
     clearContainer: () => void;
     clearSecondary: () => void;
     /**

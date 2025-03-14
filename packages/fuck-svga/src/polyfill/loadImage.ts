@@ -26,9 +26,28 @@ async function genImageSource(
     // FIXME: IOS设备Uint8Array转base64时间较长，使用图片缓存形式速度会更快
     return await writeTmpFile(toBuffer(data), genFilePath(filename, prefix));
   } catch (ex: any) {
-    console.warn(`图片缓存失败：${ex.message}`)
+    console.warn(`图片缓存失败：${ex.message}`);
     return toBase64(data);
   }
+}
+
+/**
+ * 创建 Image 标签
+ * @param brush 
+ * @param src 
+ * @returns 
+ */
+function createImage(
+  brush: { createImage: () => PlatformImage },
+  src: string
+): Promise<PlatformImage> {
+  return new Promise((resolve, reject) => {
+    const img = brush.createImage();
+
+    img.onload = resolve;
+    img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${img.src}`));
+    img.src = src;
+  });
 }
 
 /**
@@ -56,21 +75,7 @@ export function loadImage(
     }
   }
 
-  return new Promise((resolve, reject) => {
-    const img = brush.createImage();
-
-    img.onload = () => {
-      // 如果 data 是 URL/base64 或者 img.src 是 base64
-      if (img.src.startsWith("data:") || typeof data === "string") {
-        resolve(img);
-      } else {
-        removeTmpFile(img.src).then(() => resolve(img));
-      }
-    };
-    img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${img.src}`));
-
-    genImageSource(data as Uint8Array | string, filename, prefix).then(
-      (src) => (img.src = src)
-    );
-  });
+  return genImageSource(data as Uint8Array | string, filename, prefix).then(
+    (src: string) => createImage(brush, src)
+  );
 }

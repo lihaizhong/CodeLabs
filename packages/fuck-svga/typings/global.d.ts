@@ -6,8 +6,16 @@ type PlatformOffscreenCanvas =
 
 type PlatformImage = HTMLImageElement | WechatMiniprogram.Image;
 
+type Bitmap = PlatformImage | PlatformOffscreenCanvas | ImageBitmap;
+
+type RawImage = string | Uint8Array;
+
 interface RawImages {
-  [key: string]: string | Uint8Array;
+  [key: string]: RawImage;
+}
+
+interface PlatformImages {
+  [key: string]: Bitmap;
 }
 
 interface Rect {
@@ -181,8 +189,6 @@ interface VideoSprite {
   frames: IVideoFrame[];
 }
 
-type Bitmap = PlatformImage | PlatformOffscreenCanvas | ImageBitmap;
-
 type ReplaceElement =
   | PlatformImage
   | ImageBitmap
@@ -228,7 +234,7 @@ interface Video {
   sprites: VideoSprite[];
 }
 
-const enum PLAYER_FILL_MODE {
+enum PLAYER_FILL_MODE {
   /**
    * 播放完成后停在首帧
    */
@@ -239,7 +245,7 @@ const enum PLAYER_FILL_MODE {
   BACKWARDS = 'backwards',
 }
 
-const enum PLAYER_PLAY_MODE {
+enum PLAYER_PLAY_MODE {
   /**
    * 顺序播放
    */
@@ -250,7 +256,7 @@ const enum PLAYER_PLAY_MODE {
   FALLBACKS = 'fallbacks',
 }
 
-const enum PLAYER_CONTENT_MODE {
+enum PLAYER_CONTENT_MODE {
   /**
    * 缩放图片填满 Canvas，图片可能出现变形
    */

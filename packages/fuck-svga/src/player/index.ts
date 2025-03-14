@@ -103,7 +103,7 @@ export class Player {
     this.brush.clearSecondary();
     this.brush.clearMaterials();
 
-    return this.brush.loadImage(images, filename);
+    return this.brush.loadImages(images, filename);
   }
 
   /**
@@ -230,17 +230,16 @@ export class Player {
    * 开始绘制动画
    */
   private startAnimation(): void {
-    const { entity } = this
-    const { playMode } = this.config;
+    const { entity, config, animator, brush } = this
+    const { playMode, contentMode } = config;
     const {
       currFrame,
       startFrame,
       endFrame,
       totalFrame,
       spriteCount,
-      contentMode,
       aniConfig,
-    } = this.config.getConfig(entity!);
+    } = config.getConfig(entity!);
     const { duration, loopStart, loop, fillValue } = aniConfig;
 
     // 片段绘制开始位置
@@ -256,10 +255,10 @@ export class Player {
     let drawPercent: number;
 
     // 更新动画基础信息
-    this.animator!.setConfig(duration, loopStart, loop, fillValue);
-    this.brush.fitSize(contentMode, entity!.size);
+    animator!.setConfig(duration, loopStart, loop, fillValue);
+    brush.fitSize(contentMode, entity!.size);
     // 动画绘制过程
-    this.animator!.onUpdate = (timePercent: number) => {
+    animator!.onUpdate = (timePercent: number) => {
       if (playMode === PLAYER_PLAY_MODE.FALLBACKS) {
         percent = 1 - timePercent;
         nextFrame =
@@ -285,21 +284,20 @@ export class Player {
         if (nextTail > tail) {
           head = tail;
           tail = nextTail;
-          this.brush.draw(entity!, currentFrame, head, tail);
+          brush.draw(entity!, currentFrame, head, tail);
         }
       }
 
       if (hasRemained) return;
 
-      this.brush.clearContainer();
-      this.brush.stick();
-      this.brush.clearSecondary();
-      this.brush.fitSize(contentMode, entity!.size);
-      this.onProcess?.(~~(percent * 100) / 100);
+      brush.clearContainer();
+      brush.stick();
+      brush.clearSecondary();
       currentFrame = nextFrame;
       tail = 0;
+      this.onProcess?.(~~(percent * 100) / 100);
     };
-    this.animator!.onEnd = () => this.onEnd?.();
-    this.animator!.start();
+    animator!.onEnd = () => this.onEnd?.();
+    animator!.start();
   }
 }
