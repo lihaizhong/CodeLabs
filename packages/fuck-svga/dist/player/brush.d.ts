@@ -1,4 +1,4 @@
-type TBrushMode = 'poster' | 'animation';
+type TBrushMode = "poster" | "animation";
 export declare class Brush {
     private readonly mode;
     /**
@@ -33,10 +33,7 @@ export declare class Brush {
      * 粉刷模式
      */
     private model;
-    /**
-     * 素材
-     */
-    materials: Map<string, Bitmap>;
+    private IM;
     globalTransform?: GlobalTransform;
     constructor(mode?: TBrushMode);
     private setModel;
@@ -53,7 +50,7 @@ export declare class Brush {
      * @param filename 文件名称
      * @returns
      */
-    loadImages(images: RawImages, filename: string): Promise<void[]>;
+    loadImages(images: RawImages, filename: string): Promise<void>;
     /**
      * 创建图片标签
      * @returns

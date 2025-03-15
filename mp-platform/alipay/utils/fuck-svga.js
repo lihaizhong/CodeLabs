@@ -4816,16 +4816,16 @@ const SE = {
 };
 function getEnvironment() {
     // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
-    if (typeof window != "undefined") {
+    if (typeof window !== "undefined") {
         return SE.H5;
     }
-    if (typeof tt != "undefined") {
+    if (typeof tt !== "undefined") {
         return SE.DOUYIN;
     }
-    if (typeof my != "undefined") {
+    if (typeof my !== "undefined") {
         return SE.ALIPAY;
     }
-    if (typeof wx != "undefined") {
+    if (typeof wx !== "undefined") {
         return SE.WECHAT;
     }
     throw new Error("Unsupported app");
@@ -4842,7 +4842,7 @@ const Env = {
 
 function getBridge() {
     if (Env.is(SE.H5)) {
-        return window;
+        return globalThis;
     }
     if (Env.is(SE.ALIPAY)) {
         return my;
@@ -4854,7 +4854,6 @@ function getBridge() {
 }
 const br = getBridge();
 
-// const now = () => (typeof performance != 'undefined' ? performance.now() : Date.now());
 const stopwatch = {
     time(label) {
         console.time?.(label);
@@ -5104,7 +5103,7 @@ class VideoEntity {
                 ty: FT?.ty ?? 0.0,
             };
             let shapes = this.formatShapes(mFrame.shapes || []);
-            if (mFrame.shapes[0]?.type == 3 && lastShapes) {
+            if (mFrame.shapes[0]?.type === 3 && lastShapes) {
                 shapes = lastShapes;
             }
             else {
@@ -5229,7 +5228,7 @@ class VideoEntity {
                 tx: ShF?.tx ?? 0.0,
                 ty: ShF?.ty ?? 0.0,
             };
-            if (mShape.type == 0 && shape) {
+            if (mShape.type === 0 && shape) {
                 shapes.push({
                     type: "shape" /* SHAPE_TYPE.SHAPE */,
                     path: shape,
@@ -5237,7 +5236,7 @@ class VideoEntity {
                     transform: ST,
                 });
             }
-            else if (mShape.type == 1 && rect) {
+            else if (mShape.type === 1 && rect) {
                 shapes.push({
                     type: "rect" /* SHAPE_TYPE.RECT */,
                     path: rect,
@@ -5245,7 +5244,7 @@ class VideoEntity {
                     transform: ST,
                 });
             }
-            else if (mShape.type == 2 && ellipse) {
+            else if (mShape.type === 2 && ellipse) {
                 shapes.push({
                     type: "ellipse" /* SHAPE_TYPE.ELLIPSE */,
                     path: ellipse,
@@ -5271,7 +5270,7 @@ class Parser {
     static parseVideoEntity(data, url) {
         const header = new Uint8Array(data, 0, 4);
         const u8a = new Uint8Array(data);
-        if (header.toString() == "80,75,3,4") {
+        if (header.toString() === "80,75,3,4") {
             throw new Error("this parser only support version@2 of SVGA.");
         }
         let entity;
@@ -5301,7 +5300,7 @@ class Parser {
  */
 function getDevicePixelRatio() {
     if (Env.is(SE.H5)) {
-        return window.devicePixelRatio;
+        return globalThis.devicePixelRatio;
     }
     if ("getWindowInfo" in br) {
         return br.getWindowInfo().pixelRatio;
@@ -5335,8 +5334,8 @@ function getCanvas(selector, component) {
         };
         if (Env.is(SE.H5)) {
             const canvas = document.querySelector(selector);
-            const { width, height } = canvas.style;
-            initCanvas(canvas, parseFloat(width), parseFloat(height));
+            const { clientWidth, clientHeight } = canvas;
+            initCanvas(canvas, clientWidth, clientHeight);
         }
         else {
             let query = br.createSelectorQuery();
@@ -5390,21 +5389,50 @@ function getOffscreenCanvas(options) {
     return { canvas, ctx };
 }
 
+// miniprogram btoa/atob polyfill
+const b64c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+/**
+ * btoa implementation
+ * 将一个二进制字符串（例如，将字符串中的每一个字节都视为一个二进制数据字节）编码为 Base64 编码的 ASCII 字符串
+ * https://developer.mozilla.org/zh-CN/docs/Web/API/Window/btoa
+ * @param data 二进制字符串
+ * @returns
+ */
+function mbtoa(data) {
+    if (Env.is(SE.H5)) {
+        return btoa(data);
+    }
+    let bitmap, a, b, c, result = "", rest = data.length % 3;
+    for (let i = 0; i < data.length;) {
+        if ((a = data.charCodeAt(i++)) > 255 ||
+            (b = data.charCodeAt(i++)) > 255 ||
+            (c = data.charCodeAt(i++)) > 255) {
+            throw new TypeError('Failed to execute "btoa" on "Window": The string to be encoded contains characters outside of the Latin1 range.');
+        }
+        bitmap = (a << 16) | (b << 8) | c;
+        result +=
+            b64c.charAt((bitmap >> 18) & 63) +
+                b64c.charAt((bitmap >> 12) & 63) +
+                b64c.charAt((bitmap >> 6) & 63) +
+                b64c.charAt(bitmap & 63);
+    }
+    return rest ? result.slice(0, rest - 3) + "===".substring(rest) : result;
+}
 /**
  * 将ArrayBuffer转为base64
  * @param data 二进制数据
  * @returns
  */
 function toBase64(data) {
-    const buf = toBuffer(data);
-    let b64;
-    if (Env.is(SE.H5)) {
-        b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
-    }
-    else {
-        // FIXME: 如果arrayBufferToBase64被废除，可以使用mbtoa代替
-        b64 = br.arrayBufferToBase64(buf);
-    }
+    // const buf = toBuffer(data);
+    const b64 = mbtoa(String.fromCharCode(...data));
+    // if (Env.is(SE.H5)) {
+    //   b64 = btoa(String.fromCharCode(...data));
+    // } else {
+    //   // FIXME: 如果arrayBufferToBase64被废除，可以使用mbtoa代替
+    //   // b64 = (br as WechatMiniprogram.Wx).arrayBufferToBase64(buf);
+    //   b64 = mbtoa(String.fromCharCode(...data));
+    // }
     return `data:image/png;base64,${b64}`;
 }
 /**
@@ -5414,7 +5442,7 @@ function toBase64(data) {
  * @returns
  */
 function toBitmap(data) {
-    return createImageBitmap(new Blob([toBuffer(data)]));
+    return globalThis.createImageBitmap(new Blob([toBuffer(data)]));
 }
 /**
  * Uint8Array转换成ArrayBuffer
@@ -5431,7 +5459,7 @@ function toBuffer(data) {
  * @returns
  */
 async function genImageSource(data, filename, prefix) {
-    if (typeof data == "string") {
+    if (typeof data === "string") {
         return data;
     }
     // FIXME: 支付宝小程序IDE保存临时文件会失败
@@ -5448,6 +5476,28 @@ async function genImageSource(data, filename, prefix) {
     }
 }
 /**
+ * 创建 Image 标签
+ * @param brush
+ * @param src
+ * @returns
+ */
+function createImage(brush, src) {
+    return new Promise((resolve, reject) => {
+        const img = brush.createImage();
+        img.onload = () => {
+            // 如果 data 是 URL/base64 或者 img.src 是 base64
+            if (src.startsWith('data:') || typeof src === 'string') {
+                resolve(img);
+            }
+            else {
+                removeTmpFile(src).then(() => resolve(img)).catch(() => resolve(img));
+            }
+        };
+        img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${img.src}`));
+        img.src = src;
+    });
+}
+/**
  * 加载图片
  * @param brush 创建图片对象
  * @param data 图片数据
@@ -5458,27 +5508,17 @@ async function genImageSource(data, filename, prefix) {
 function loadImage(brush, data, filename, prefix) {
     if (Env.is(SE.H5)) {
         // 由于ImageBitmap在图片渲染上有优势，故优先使用
-        if (data instanceof Uint8Array && "createImageBitmap" in window) {
+        if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
             return toBitmap(data);
         }
         if (data instanceof ImageBitmap) {
             return Promise.resolve(data);
         }
     }
-    return new Promise((resolve, reject) => {
-        const img = brush.createImage();
-        img.onload = () => {
-            // 如果 data 是 URL/base64 或者 img.src 是 base64
-            if (img.src.startsWith("data:") || typeof data == "string") {
-                resolve(img);
-            }
-            else {
-                removeTmpFile(img.src).then(() => resolve(img));
-            }
-        };
-        img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${img.src}`));
-        genImageSource(data, filename, prefix).then((src) => (img.src = src));
-    });
+    if (typeof data === 'string' && /^http(s)?:\/\//.test(data)) {
+        return createImage(brush, data);
+    }
+    return genImageSource(data, filename, prefix).then((src) => createImage(brush, src));
 }
 
 const noop = () => { };
@@ -5513,7 +5553,7 @@ const platform = getPlatform().toLocaleUpperCase();
 
 const now = () => {
     // performance可以提供更高精度的时间测量，且不受系统时间的调整（如更改系统时间或同步时间）的影响
-    if (typeof performance != "undefined") {
+    if (typeof performance !== "undefined") {
         return performance.now();
     }
     return Date.now();
@@ -5537,7 +5577,7 @@ const now = () => {
  * - A: arcTo，从起始点绘制一条弧线到指定点。
  */
 const validMethods = "MLHVCSQZmlhvcsqz";
-function render(context, materials, videoEntity, currentFrame, head, tail) {
+function render(context, materials, videoEntity, currentFrame, head, tail, globalTransform) {
     const { sprites, replaceElements, dynamicElements } = videoEntity;
     for (let i = head; i < tail; i++) {
         const sprite = sprites[i];
@@ -5545,14 +5585,17 @@ function render(context, materials, videoEntity, currentFrame, head, tail) {
         const bitmap = materials.get(imageKey);
         const replaceElement = replaceElements[imageKey];
         const dynamicElement = dynamicElements[imageKey];
-        drawSprite(context, sprite, currentFrame, bitmap, replaceElement, dynamicElement);
+        drawSprite(context, sprite, currentFrame, bitmap, replaceElement, dynamicElement, globalTransform);
     }
 }
-function drawSprite(context, sprite, currentFrame, bitmap, replaceElement, dynamicElement) {
+function drawSprite(context, sprite, currentFrame, bitmap, replaceElement, dynamicElement, globalTransform) {
     const frame = sprite.frames[currentFrame];
     if (frame.alpha < 0.05)
         return;
     context.save();
+    if (globalTransform) {
+        context.transform(globalTransform.a, globalTransform.b, globalTransform.c, globalTransform.d, globalTransform.tx, globalTransform.ty);
+    }
     context.globalAlpha = frame.alpha;
     context.transform(frame.transform?.a ?? 1, frame.transform?.b ?? 0, frame.transform?.c ?? 0, frame.transform?.d ?? 1, frame.transform?.tx ?? 0, frame.transform?.ty ?? 0);
     if (bitmap) {
@@ -5620,7 +5663,7 @@ function drawBezier(context, d, transform, styles) {
             .split("|||");
         for (let i = 0; i < segments.length; i++) {
             const segment = segments[i];
-            if (segment.length == 0) {
+            if (segment.length === 0) {
                 continue;
             }
             const firstLetter = segment.substring(0, 1);
@@ -5694,10 +5737,10 @@ function drawBezierElement(context, currentPoint, method, args) {
             context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
             break;
         case "S":
-            if (currentPoint.x1 != undefined &&
-                currentPoint.y1 != undefined &&
-                currentPoint.x2 != undefined &&
-                currentPoint.y2 != undefined) {
+            if (currentPoint.x1 !== undefined &&
+                currentPoint.y1 !== undefined &&
+                currentPoint.x2 !== undefined &&
+                currentPoint.y2 !== undefined) {
                 currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
                 currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;
                 currentPoint.x2 = +args[0];
@@ -5715,10 +5758,10 @@ function drawBezierElement(context, currentPoint, method, args) {
             }
             break;
         case "s":
-            if (currentPoint.x1 != undefined &&
-                currentPoint.y1 != undefined &&
-                currentPoint.x2 != undefined &&
-                currentPoint.y2 != undefined) {
+            if (currentPoint.x1 !== undefined &&
+                currentPoint.y1 !== undefined &&
+                currentPoint.x2 !== undefined &&
+                currentPoint.y2 !== undefined) {
                 currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
                 currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;
                 currentPoint.x2 = currentPoint.x + +args[0];
@@ -5815,6 +5858,69 @@ function drawRect(context, x, y, width, height, cornerRadius, transform, styles)
     context.restore();
 }
 
+class ImageManager {
+    // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
+    pool = [];
+    /**
+     * 素材
+     */
+    materials = new Map();
+    getMaterials() {
+        return this.materials;
+    }
+    clear() {
+        this.materials.clear();
+        this.pool.forEach((img) => {
+            img.onload = null;
+            img.onerror = null;
+            img.src = "";
+        });
+    }
+    /**
+     * 加载图片集
+     * @param images 图片数据
+     * @param filename 文件名称
+     * @returns
+     */
+    loadImage(images, brush, filename) {
+        const imageArr = [];
+        Object.keys(images).forEach((key) => {
+            const image = images[key];
+            if ((Env.is(SE.H5) && image instanceof Image) ||
+                (image.width && image.height)) {
+                imageArr.push(Promise.resolve(image));
+            }
+            else {
+                const p = loadImage(brush, image, key, filename).then((img) => {
+                    this.materials.set(key, img);
+                    return img;
+                });
+                imageArr.push(p);
+            }
+        });
+        return Promise.all(imageArr).then((imgs) => {
+            this.pool = imgs.filter((img) => (Env.is(SE.H5) && img instanceof Image) ||
+                (img.src !== undefined &&
+                    img.width !== undefined &&
+                    img.height !== undefined));
+        });
+    }
+    /**
+     * 创建图片标签
+     * @returns
+     */
+    createImage(canvas) {
+        const [img] = this.pool.splice(0, 1);
+        if (img) {
+            return img;
+        }
+        if (Env.is(SE.H5)) {
+            return new Image();
+        }
+        return canvas.createImage();
+    }
+}
+
 class Brush {
     mode;
     /**
@@ -5849,11 +5955,9 @@ class Brush {
      * 粉刷模式
      */
     model = {};
-    /**
-     * 素材
-     */
-    materials = new Map();
-    constructor(mode = 'normal') {
+    IM = new ImageManager();
+    globalTransform;
+    constructor(mode = "animation") {
         this.mode = mode;
     }
     setModel(type) {
@@ -5861,22 +5965,22 @@ class Brush {
         // set type
         model.type = type;
         // set clear
-        if (type == "O" &&
+        if (type === "O" &&
             // OffscreenCanvas 在 Firefox 浏览器无法被清理历史内容
             Env.is(SE.H5) &&
             navigator.userAgent.includes("Firefox")) {
             model.clear = "CR";
         }
-        else if ((type == "O" && Env.is(SE.DOUYIN)) || Env.is(SE.ALIPAY)) {
+        else if ((type === "O" && Env.is(SE.DOUYIN)) || Env.is(SE.ALIPAY)) {
             model.clear = "CL";
         }
         else {
             model.clear = "RE";
         }
         // set render
-        if ((type == "C" &&
-            (Env.is(SE.DOUYIN) || (platform == "IOS" && Env.is(SE.ALIPAY)))) ||
-            (type == "O" && Env.is(SE.WECHAT))) {
+        if ((type === "C" &&
+            (Env.is(SE.DOUYIN) || (platform === "IOS" && Env.is(SE.ALIPAY)))) ||
+            (type === "O" && Env.is(SE.WECHAT))) {
             model.render = "PU";
         }
         else {
@@ -5908,14 +6012,14 @@ class Brush {
         // #endregion set main screen implement
         // #region set secondary screen implement
         // ------- 创建副屏 ---------
-        if (mode == 'simple') {
+        if (mode === "poster") {
             this.Y = this.X;
             this.YC = this.XC;
-            this.setModel('C');
+            this.setModel("C");
         }
         else {
             let ofsResult;
-            if (typeof ofsSelector == "string" && ofsSelector != "") {
+            if (typeof ofsSelector === "string" && ofsSelector !== "") {
                 ofsResult = await getCanvas(ofsSelector, component);
                 ofsResult.canvas.width = width;
                 ofsResult.canvas.height = height;
@@ -5932,7 +6036,7 @@ class Brush {
         // #region clear main screen implement
         // ------- 生成主屏清理函数 -------
         // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
-        if (model.clear == "CL") {
+        if (model.clear === "CL") {
             this.clearContainer = () => {
                 const { W, H } = this;
                 this.XC.clearRect(0, 0, W, H);
@@ -5946,7 +6050,7 @@ class Brush {
             };
         }
         // #endregion clear main screen implement
-        if (mode == 'simple') {
+        if (mode === "poster") {
             this.clearSecondary = this.stick = noop;
         }
         else {
@@ -6000,43 +6104,20 @@ class Brush {
         }
     }
     /**
-     * 设置宽高
-     * @param width 宽度
-     * @param height 高度
-     */
-    setRect(width, height) {
-        const { X, Y } = this;
-        X.width = Y.width = this.W = width;
-        X.height = Y.height = this.H = height;
-    }
-    /**
      * 加载图片集
      * @param images 图片数据
      * @param filename 文件名称
      * @returns
      */
-    loadImage(images, filename) {
-        let imageArr = [];
-        this.materials.clear();
-        benchmark.time("load image", () => {
-            for (let key in images) {
-                const p = loadImage(this, images[key], key, filename).then((img) => {
-                    this.materials.set(key, img);
-                });
-                imageArr.push(p);
-            }
-        });
-        return Promise.all(imageArr);
+    loadImages(images, filename) {
+        return this.IM.loadImage(images, this, filename);
     }
     /**
      * 创建图片标签
      * @returns
      */
     createImage() {
-        if (Env.is(SE.H5)) {
-            return new Image();
-        }
-        return this.X.createImage();
+        return this.IM.createImage(this.X);
     }
     /**
      * 生成图片
@@ -6044,8 +6125,52 @@ class Brush {
      * @param encoderOptions
      * @returns
      */
-    getImage(type = 'image/png', encoderOptions = 0.92) {
+    getImage(type = "image/png", encoderOptions = 0.92) {
         return this.X.toDataURL(type, encoderOptions);
+    }
+    getRect() {
+        const { W, H } = this;
+        return { width: W, height: H };
+    }
+    fitSize(contentMode, videoSize) {
+        const { Y } = this;
+        let scaleX = 1.0;
+        let scaleY = 1.0;
+        let translateX = 0.0;
+        let translateY = 0.0;
+        if (contentMode === "fill" /* PLAYER_CONTENT_MODE.FILL */) {
+            scaleX = Y.width / videoSize.width;
+            scaleY = Y.height / videoSize.height;
+        }
+        else if ([
+            "aspect-fill" /* PLAYER_CONTENT_MODE.ASPECT_FILL */,
+            "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */,
+        ].includes(contentMode)) {
+            const imageRatio = videoSize.width / videoSize.height;
+            const viewRatio = Y.width / Y.height;
+            if ((imageRatio >= viewRatio &&
+                contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */) ||
+                (imageRatio <= viewRatio &&
+                    contentMode === "aspect-fill" /* PLAYER_CONTENT_MODE.ASPECT_FILL */)) {
+                scaleX = scaleY = Y.width / videoSize.width;
+                translateY = (Y.height - videoSize.height * scaleY) / 2.0;
+            }
+            else if ((imageRatio < viewRatio &&
+                contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */) ||
+                (imageRatio > viewRatio &&
+                    contentMode === "aspect-fill" /* PLAYER_CONTENT_MODE.ASPECT_FILL */)) {
+                scaleX = scaleY = Y.height / videoSize.height;
+                translateX = (Y.width - videoSize.width * scaleX) / 2.0;
+            }
+        }
+        this.globalTransform = {
+            a: scaleX,
+            b: 0.0,
+            c: 0.0,
+            d: scaleY,
+            tx: translateX,
+            ty: translateY,
+        };
     }
     /**
      * 注册刷新屏幕的回调函数
@@ -6053,6 +6178,12 @@ class Brush {
      */
     flush(cb) {
         (Env.is(SE.H5) ? br : this.X).requestAnimationFrame(cb);
+    }
+    /**
+     * 清理素材库
+     */
+    clearMaterials() {
+        this.IM.clear();
     }
     clearContainer = noop;
     clearSecondary = noop;
@@ -6064,7 +6195,7 @@ class Brush {
      * @param end
      */
     draw(videoEntity, currentFrame, start, end) {
-        render(this.YC, this.materials, videoEntity, currentFrame, start, end);
+        render(this.YC, this.IM.getMaterials(), videoEntity, currentFrame, start, end, this.globalTransform);
     }
     stick = noop;
     /**
@@ -6073,7 +6204,7 @@ class Brush {
     destroy() {
         this.clearContainer();
         this.clearSecondary();
-        this.materials.clear();
+        this.clearMaterials();
         this.X = this.XC = this.Y = this.YC = null;
         this.clearContainer = this.clearSecondary = this.stick = noop;
     }
@@ -6101,12 +6232,6 @@ class Animator {
      * 循环持续时间
      */
     loopDuration = 0;
-    /**
-     * 最后停留的目标模式，类似于**animation-fill-mode**
-     * 0: 第一帧
-     * 1: 最后一帧
-     */
-    fillRule = 0;
     /* ---- 事件钩子 ---- */
     onStart = noop;
     onUpdate = noop;
@@ -6120,12 +6245,10 @@ class Animator {
      * @param loopStart
      * @param loop
      * @param fillValue
-     * @param fillRule
      */
-    setConfig(duration, loopStart, loop, fillValue, fillRule) {
+    setConfig(duration, loopStart, loop, fillValue) {
         this.duration = duration;
         this.loopStart = loopStart;
-        this.fillRule = fillRule;
         this.loopDuration = duration * loop + fillValue - loopStart;
     }
     start() {
@@ -6146,14 +6269,14 @@ class Animator {
         }
     }
     doDeltaTime(DT) {
-        const { duration: D, loopStart: LS, loopDuration: LD, fillRule: FR, } = this;
+        const { duration: D, loopStart: LS, loopDuration: LD, } = this;
         // 本轮动画已消耗的时间比例（Percentage of speed time）
         let TP;
         let ended = false;
         // 运行时间 大于等于 循环持续时间
         if (DT >= LD) {
             // 动画已结束
-            TP = FR ? 0.0 : 1.0;
+            TP = 1.0;
             ended = true;
             this.stop();
         }
@@ -6170,6 +6293,107 @@ class Animator {
     }
 }
 
+class Config {
+    fillMode = "backwards" /* PLAYER_FILL_MODE.BACKWARDS */;
+    playMode = "forwards" /* PLAYER_PLAY_MODE.FORWARDS */;
+    contentMode = "fill" /* PLAYER_CONTENT_MODE.FILL */;
+    startFrame = 0;
+    endFrame = 0;
+    loopStartFrame = 0;
+    loop = 0;
+    // public isUseIntersectionObserver = false;
+    register(config) {
+        if (typeof config.loop === "number" && config.loop >= 0) {
+            this.loop = config.loop;
+        }
+        if (config.fillMode &&
+            ["forwards" /* PLAYER_FILL_MODE.FORWARDS */, "backwards" /* PLAYER_FILL_MODE.BACKWARDS */].includes(config.fillMode)) {
+            this.fillMode = config.fillMode;
+        }
+        if (config.playMode &&
+            ["forwards" /* PLAYER_PLAY_MODE.FORWARDS */, "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */].includes(config.playMode)) {
+            this.playMode = config.playMode;
+        }
+        if (typeof config.startFrame === "number" && config.startFrame >= 0) {
+            this.startFrame = config.startFrame;
+        }
+        if (typeof config.endFrame === "number" && config.endFrame >= 0) {
+            this.endFrame = config.endFrame;
+        }
+        if (typeof config.loopStartFrame === "number" &&
+            config.loopStartFrame >= 0) {
+            this.loopStartFrame = config.loopStartFrame;
+        }
+        if (typeof config.contentMode === "string") {
+            this.contentMode = config.contentMode;
+        }
+        // if (typeof config.isUseIntersectionObserver === 'boolean') {
+        //   this.isUseIntersectionObserver = config.isUseIntersectionObserver
+        // }
+    }
+    setItem(key, value) {
+        this.register({ [key]: value });
+    }
+    getConfig(entity) {
+        const { playMode, loopStartFrame, startFrame, endFrame, fillMode, loop } = this;
+        const { fps, sprites } = entity;
+        let { frames } = entity;
+        const spriteCount = sprites.length;
+        const start = startFrame > 0 ? startFrame : 0;
+        const end = endFrame > 0 && endFrame < frames ? endFrame : frames;
+        if (start > end) {
+            throw new Error("StartFrame should greater than EndFrame");
+        }
+        // 更新活动帧总数
+        if (end < frames) {
+            frames = end - start;
+        }
+        else if (start > 0) {
+            frames -= start;
+        }
+        let currFrame = loopStartFrame;
+        let extFrame = 0;
+        // 顺序播放/倒叙播放
+        if (playMode === "forwards" /* PLAYER_PLAY_MODE.FORWARDS */) {
+            // 如果开始动画的当前帧是最后一帧，重置为开始帧
+            if (currFrame === end - 1) {
+                currFrame = start;
+            }
+            if (fillMode === "forwards" /* PLAYER_FILL_MODE.FORWARDS */) {
+                extFrame = 1;
+            }
+        }
+        else {
+            // 如果开始动画的当前帧是最后一帧，重置为开始帧
+            if (currFrame === 0) {
+                currFrame = end - 1;
+            }
+            if (fillMode === "backwards" /* PLAYER_FILL_MODE.BACKWARDS */) {
+                extFrame = 1;
+            }
+        }
+        // 每帧持续的时间
+        const frameDuration = 1000 / fps;
+        return {
+            currFrame,
+            startFrame: start,
+            endFrame: end,
+            totalFrame: frames,
+            spriteCount,
+            aniConfig: {
+                // 单个周期的运行时长
+                duration: Math.floor(frames * frameDuration * 10 ** 6) / 10 ** 6,
+                // 第一个周期开始时间偏移量
+                loopStart: loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0,
+                // 循环次数
+                loop: loop === 0 ? Infinity : loop,
+                // 最后一帧不在周期内，需要单独计算
+                fillValue: extFrame * frameDuration,
+            },
+        };
+    }
+}
+
 /**
  * SVGA 播放器
  */
@@ -6182,15 +6406,7 @@ class Player {
     /**
      * 当前配置项
      */
-    config = Object.create({
-        loop: 0,
-        fillMode: "backwards" /* PLAYER_FILL_MODE.BACKWARDS */,
-        playMode: "forwards" /* PLAYER_PLAY_MODE.FORWARDS */,
-        startFrame: 0,
-        endFrame: 0,
-        loopStartFrame: 0,
-        // isUseIntersectionObserver: false,
-    });
+    config = new Config();
     /**
      * 刷头实例
      */
@@ -6215,26 +6431,25 @@ class Player {
      */
     async setConfig(options, component) {
         let config;
-        if (typeof options == "string") {
+        if (typeof options === "string") {
             config = { container: options };
         }
         else {
             config = options;
         }
-        Object.assign(this.config, {
-            loop: config.loop ?? 0,
-            fillMode: config.fillMode ?? "backwards" /* PLAYER_FILL_MODE.BACKWARDS */,
-            playMode: config.playMode ?? "forwards" /* PLAYER_PLAY_MODE.FORWARDS */,
-            startFrame: config.startFrame ?? 0,
-            endFrame: config.endFrame ?? 0,
-            loopStartFrame: config.loopStartFrame ?? 0,
-        });
+        this.config.register(config);
         await this.brush.register(config.container, config.secondary, component);
-        // this.config.isUseIntersectionObserver =
-        //   config.isUseIntersectionObserver ?? false;
         // 监听容器是否处于浏览器视窗内
         // this.setIntersectionObserver()
         this.animator = new Animator(this.brush);
+    }
+    /**
+     * 更新配置
+     * @param key
+     * @param value
+     */
+    setItem(key, value) {
+        this.config.setItem(key, value);
     }
     // private setIntersectionObserver (): void {
     //   if (hasIntersectionObserver && this.config.isUseIntersectionObserver) {
@@ -6246,7 +6461,7 @@ class Player {
     //     })
     //     this.intersectionObserver.observe(this.config.container)
     //   } else {
-    //     if (this.intersectionObserver != null) this.intersectionObserver.disconnect()
+    //     if (this.intersectionObserver !== null) this.intersectionObserver.disconnect()
     //     this.config.isUseIntersectionObserver = false
     //     this.isBeIntersection = true
     //   }
@@ -6260,12 +6475,12 @@ class Player {
         if (!videoEntity) {
             throw new Error("videoEntity undefined");
         }
+        const { images, filename } = videoEntity;
         this.animator.stop();
         this.entity = videoEntity;
-        const { images, filename, size } = videoEntity;
-        this.brush.setRect(size.width, size.height);
         this.brush.clearSecondary();
-        return this.brush.loadImage(images, filename);
+        this.brush.clearMaterials();
+        return this.brush.loadImages(images, filename);
     }
     /**
      * 开始播放事件回调
@@ -6303,7 +6518,6 @@ class Player {
      * 开始播放
      */
     start() {
-        this.brush.clearContainer();
         this.startAnimation();
         this.onStart?.();
     }
@@ -6311,7 +6525,7 @@ class Player {
      * 重新播放
      */
     resume() {
-        this.startAnimation();
+        this.animator.start();
         this.onResume?.();
     }
     /**
@@ -6333,7 +6547,10 @@ class Player {
      * 清理容器画布
      */
     clear() {
-        this.brush.clearContainer();
+        const { brush } = this;
+        brush.clearContainer();
+        brush.clearSecondary();
+        brush.clearMaterials();
     }
     /**
      * 销毁实例
@@ -6344,6 +6561,12 @@ class Player {
         this.animator = null;
         this.entity = undefined;
     }
+    /**
+     * 指定开始帧动画
+     * @param frame
+     * @param andPlay
+     * @returns
+     */
     stepToFrame(frame, andPlay = false) {
         if (!this.entity || frame < 0 || frame >= this.entity.frames)
             return;
@@ -6353,113 +6576,79 @@ class Player {
             this.startAnimation();
         }
     }
+    /**
+     * 指定开始百分比动画
+     * @param percent
+     * @param andPlay
+     * @returns
+     */
     stepToPercentage(percent, andPlay = false) {
         if (!this.entity)
             return;
         const { frames } = this.entity;
-        this.stepToFrame((Math.round((percent < 0 ? 0 : percent) * frames) % frames), andPlay);
+        this.stepToFrame(Math.round((percent < 0 ? 0 : percent) * frames) % frames, andPlay);
     }
     /**
      * 开始绘制动画
      */
     startAnimation() {
-        const { playMode, loopStartFrame, startFrame, endFrame, fillMode, loop } = this.config;
-        let { frames, fps, sprites } = this.entity;
-        const spriteCount = sprites.length;
-        const start = startFrame > 0 ? startFrame : 0;
-        const end = endFrame > 0 && endFrame < frames ? endFrame : frames;
-        if (start > end) {
-            throw new Error("StartFrame should greater than EndFrame");
-        }
-        // 更新活动帧总数
-        if (end < frames) {
-            frames = end - start;
-        }
-        else if (start > 0) {
-            frames -= start;
-        }
-        let currFrame = loopStartFrame;
-        let extFrame = 0;
-        // 顺序播放/倒叙播放
-        if (playMode == "forwards" /* PLAYER_PLAY_MODE.FORWARDS */) {
-            // 如果开始动画的当前帧是最后一帧，重置为开始帧
-            if (currFrame == end - 1) {
-                currFrame = start;
-            }
-            if (fillMode == "forwards" /* PLAYER_FILL_MODE.FORWARDS */) {
-                extFrame = 1;
-            }
-        }
-        else {
-            // 如果开始动画的当前帧是最后一帧，重置为开始帧
-            if (currFrame == 0) {
-                currFrame = end - 1;
-            }
-            if (fillMode == "backwards" /* PLAYER_FILL_MODE.BACKWARDS */) {
-                extFrame = 1;
-            }
-        }
-        // 每帧持续的时间
-        const frameDuration = 1000 / fps;
-        // 更新动画基础信息
-        this.animator.setConfig(
-        // 单个周期的运行时长
-        (Math.floor(frames * frameDuration * 10 ** 6)) / 10 ** 6, 
-        // 第一个周期开始时间偏移量
-        loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0, 
-        // 循环次数
-        loop <= 0 ? Infinity : loop, 
-        // 最后一帧不在周期内，需要单独计算
-        extFrame * frameDuration, 
-        // 最后一帧的渲染模式
-        fillMode == "forwards" /* PLAYER_FILL_MODE.FORWARDS */ ? 1 : 0);
+        const { entity, config, animator, brush } = this;
+        const { playMode, contentMode } = config;
+        const { currFrame, startFrame, endFrame, totalFrame, spriteCount, aniConfig, } = config.getConfig(entity);
+        const { duration, loopStart, loop, fillValue } = aniConfig;
         // 片段绘制开始位置
         let head = 0;
         // 片段绘制结束位置
         let tail = 0;
+        let currentFrame = currFrame;
         // 下一帧
         let nextFrame;
+        // 当前已完成的百分比
         let percent;
-        // 一帧图片的绘制百分比
+        // 当前需要绘制的百分比
         let drawPercent;
+        // 更新动画基础信息
+        animator.setConfig(duration, loopStart, loop, fillValue);
+        brush.fitSize(contentMode, entity.size);
         // 动画绘制过程
-        this.animator.onUpdate = (timePercent) => {
-            if (playMode == "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */) {
+        animator.onUpdate = (timePercent) => {
+            if (playMode === "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */) {
                 percent = 1 - timePercent;
-                nextFrame = (timePercent == 0 ? end : Math.ceil(percent * frames)) - 1;
-                drawPercent = Math.abs(1 - percent * frames + currFrame);
+                nextFrame =
+                    (timePercent == 0 ? endFrame : Math.ceil(percent * totalFrame)) - 1;
+                drawPercent = Math.abs(1 - percent * totalFrame + currentFrame);
             }
             else {
                 percent = timePercent;
-                nextFrame = timePercent == 1 ? start : Math.floor(percent * frames);
-                drawPercent = Math.abs(percent * frames - currFrame);
+                nextFrame =
+                    timePercent === 1 ? startFrame : Math.floor(percent * totalFrame);
+                drawPercent = Math.abs(percent * totalFrame - currentFrame);
             }
             // 是否还有剩余时间
-            const hasRemained = currFrame == nextFrame;
-            // console.log('onUpdate', timePercent, this.currFrame, nextFrame, hasRemained ? 'don\'t render' : 'need render');
+            const hasRemained = currentFrame === nextFrame;
             // 当前帧的图片还未绘制完成
-            if (tail != spriteCount) {
-                // 1.05 和 3 均为阔值，保证渲染尽快完成
+            if (tail !== spriteCount) {
+                // 1.15 和 3 均为阔值，保证渲染尽快完成
                 const nextTail = hasRemained
-                    ? Math.min(spriteCount * drawPercent * 1.05 + 2, spriteCount) << 0
+                    ? Math.min(spriteCount * drawPercent * 1.15 + 2, spriteCount) << 0
                     : spriteCount;
                 if (nextTail > tail) {
                     head = tail;
                     tail = nextTail;
-                    this.brush.draw(this.entity, currFrame, head, tail);
+                    brush.draw(entity, currentFrame, head, tail);
                 }
             }
             if (hasRemained)
                 return;
-            this.brush.clearContainer();
-            this.brush.stick();
-            this.brush.clearSecondary();
-            this.onProcess?.(~~(percent * 100) / 100);
-            currFrame = nextFrame;
+            brush.clearContainer();
+            brush.stick();
+            brush.clearSecondary();
+            currentFrame = nextFrame;
             tail = 0;
+            this.onProcess?.(~~(percent * 100) / 100);
         };
-        this.animator.onEnd = () => this.onEnd?.();
-        this.animator.start();
+        animator.onEnd = () => this.onEnd?.();
+        animator.start();
     }
 }
 
@@ -6469,14 +6658,28 @@ class Poster {
      * Video Entity
      */
     entity = undefined;
-    currFrame = 0;
-    brush = new Brush("simple");
+    frame = 0;
+    contentMode = "fill" /* PLAYER_CONTENT_MODE.FILL */;
+    brush = new Brush("poster");
     /**
      * 设置配置项
-     * @param container canvas selector
+     * @param options 可配置项
      */
-    setConfig(container, component) {
-        return this.brush.register(container, '', component);
+    setConfig(options, component) {
+        let config;
+        if (typeof options === "string") {
+            config = { container: options };
+        }
+        else {
+            config = options;
+        }
+        if (config.contentMode) {
+            this.contentMode = config.contentMode;
+        }
+        if (typeof config.frame === 'number') {
+            this.frame = config.frame;
+        }
+        return this.brush.register(config.container, '', component);
     }
     /**
      * 装载 SVGA 数据元
@@ -6484,16 +6687,14 @@ class Poster {
      * @param currFrame
      * @returns
      */
-    mount(videoEntity, currFrame) {
+    mount(videoEntity) {
         if (!videoEntity) {
             throw new Error("videoEntity undefined");
         }
-        const { images, filename, size } = videoEntity;
+        const { images, filename } = videoEntity;
         this.entity = videoEntity;
-        this.currFrame = currFrame || 0;
-        this.brush.setRect(size.width, size.height);
-        this.brush.clearSecondary();
-        return this.brush.loadImage(images, filename);
+        this.clear();
+        return this.brush.loadImages(images, filename);
     }
     /**
      * 开始绘画事件回调
@@ -6551,17 +6752,22 @@ class Poster {
      * 绘制海报
      */
     draw() {
+        const { brush, entity, contentMode, frame } = this;
         benchmark.time("render", () => {
-            this.brush.clearSecondary();
-            this.brush.draw(this.entity, this.currFrame, 0, this.entity.sprites.length);
-            this.brush.stick();
+            brush.clearSecondary();
+            brush.fitSize(contentMode, entity.size);
+            brush.draw(entity, frame, 0, entity.sprites.length);
+            brush.stick();
         });
     }
     /**
      * 清理海报
      */
     clear() {
-        this.brush.clearContainer();
+        const { brush } = this;
+        brush.clearContainer();
+        brush.clearSecondary();
+        brush.clearMaterials();
     }
     /**
      * 销毁海报

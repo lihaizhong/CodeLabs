@@ -9,6 +9,7 @@ import {
 } from "../polyfill";
 import { Env, SE } from "../env";
 import render from "./render";
+import { ImageManager } from "./image-manager";
 
 interface IBrushModel {
   // canvas or offscreen
@@ -19,7 +20,7 @@ interface IBrushModel {
   render: "PU" | "DR";
 }
 
-type TBrushMode = 'poster' | 'animation'
+type TBrushMode = "poster" | "animation";
 
 export class Brush {
   /**
@@ -57,14 +58,12 @@ export class Brush {
    * 粉刷模式
    */
   private model: IBrushModel = {} as IBrushModel;
-  /**
-   * 素材
-   */
-  public materials: Map<string, Bitmap> = new Map();
+
+  private IM = new ImageManager();
 
   public globalTransform?: GlobalTransform;
 
-  constructor(private readonly mode: TBrushMode = 'animation') {}
+  constructor(private readonly mode: TBrushMode = "animation") {}
 
   private setModel(type: "C" | "O"): void {
     const { model } = this;
@@ -106,9 +105,9 @@ export class Brush {
 
   /**
    * 注册画笔，根据环境判断生成最优的绘制方式
-   * @param selector 
-   * @param ofsSelector 
-   * @param component 
+   * @param selector
+   * @param ofsSelector
+   * @param component
    */
   public async register(
     selector: string,
@@ -129,10 +128,10 @@ export class Brush {
 
     // #region set secondary screen implement
     // ------- 创建副屏 ---------
-    if (mode === 'poster') {
+    if (mode === "poster") {
       this.Y = this.X;
       this.YC = this.XC;
-      this.setModel('C');
+      this.setModel("C");
     } else {
       let ofsResult;
 
@@ -168,9 +167,8 @@ export class Brush {
     }
     // #endregion clear main screen implement
 
-
-    if (mode === 'poster') {
-      this.clearSecondary = this.stick = noop
+    if (mode === "poster") {
+      this.clearSecondary = this.stick = noop;
     } else {
       // #region clear secondary screen implement
       // ------- 生成副屏清理函数 --------
@@ -228,44 +226,27 @@ export class Brush {
    * 加载图片集
    * @param images 图片数据
    * @param filename 文件名称
-   * @returns 
+   * @returns
    */
-  public loadImages(images: RawImages, filename: string): Promise<void[]> {
-    let imageArr: Promise<void>[] = [];
-
-    this.materials.clear();
-    benchmark.time("load image", () => {
-      for (let key in images) {
-        const p = loadImage(this, images[key], key, filename).then((img) => {
-          this.materials.set(key, img);
-        });
-
-        imageArr.push(p);
-      }
-    });
-
-    return Promise.all<void>(imageArr);
+  public loadImages(images: RawImages, filename: string): Promise<void> {
+    return this.IM.loadImage(images, this, filename);
   }
 
   /**
    * 创建图片标签
-   * @returns 
+   * @returns
    */
   public createImage(): PlatformImage {
-    if (Env.is(SE.H5)) {
-      return new Image();
-    }
-
-    return (this.X as WechatMiniprogram.Canvas).createImage();
+    return this.IM.createImage(this.X!);
   }
 
   /**
    * 生成图片
-   * @param type 
-   * @param encoderOptions 
-   * @returns 
+   * @param type
+   * @param encoderOptions
+   * @returns
    */
-  public getImage(type: string = 'image/png', encoderOptions: number = 0.92) {
+  public getImage(type: string = "image/png", encoderOptions: number = 0.92) {
     return this.X!.toDataURL(type, encoderOptions);
   }
 
@@ -275,29 +256,41 @@ export class Brush {
     return { width: W, height: H };
   }
 
-  public fitSize(contentMode: PLAYER_CONTENT_MODE, videoSize: ViewportRect): void {
-    const { Y } = this
+  public fitSize(
+    contentMode: PLAYER_CONTENT_MODE,
+    videoSize: ViewportRect
+  ): void {
+    const { Y } = this;
     let scaleX = 1.0;
     let scaleY = 1.0;
     let translateX = 0.0;
     let translateY = 0.0;
-    
+
     if (contentMode === PLAYER_CONTENT_MODE.FILL) {
       scaleX = Y!.width / videoSize.width;
       scaleY = Y!.height / videoSize.height;
-    } else if ([PLAYER_CONTENT_MODE.ASPECT_FILL, PLAYER_CONTENT_MODE.ASPECT_FIT].includes(contentMode)) {
+    } else if (
+      [
+        PLAYER_CONTENT_MODE.ASPECT_FILL,
+        PLAYER_CONTENT_MODE.ASPECT_FIT,
+      ].includes(contentMode)
+    ) {
       const imageRatio = videoSize.width / videoSize.height;
       const viewRatio = Y!.width / Y!.height;
 
       if (
-        (imageRatio >= viewRatio && contentMode === PLAYER_CONTENT_MODE.ASPECT_FIT)
-        || (imageRatio <= viewRatio && contentMode === PLAYER_CONTENT_MODE.ASPECT_FILL)
+        (imageRatio >= viewRatio &&
+          contentMode === PLAYER_CONTENT_MODE.ASPECT_FIT) ||
+        (imageRatio <= viewRatio &&
+          contentMode === PLAYER_CONTENT_MODE.ASPECT_FILL)
       ) {
         scaleX = scaleY = Y!.width / videoSize.width;
         translateY = (Y!.height - videoSize.height * scaleY) / 2.0;
       } else if (
-        (imageRatio < viewRatio && contentMode === PLAYER_CONTENT_MODE.ASPECT_FIT)
-        || (imageRatio > viewRatio && contentMode === PLAYER_CONTENT_MODE.ASPECT_FILL)
+        (imageRatio < viewRatio &&
+          contentMode === PLAYER_CONTENT_MODE.ASPECT_FIT) ||
+        (imageRatio > viewRatio &&
+          contentMode === PLAYER_CONTENT_MODE.ASPECT_FILL)
       ) {
         scaleX = scaleY = Y!.height / videoSize.height;
         translateX = (Y!.width - videoSize.width * scaleX) / 2.0;
@@ -311,22 +304,24 @@ export class Brush {
       d: scaleY,
       tx: translateX,
       ty: translateY,
-    }
+    };
   }
 
   /**
    * 注册刷新屏幕的回调函数
-   * @param cb 
+   * @param cb
    */
   public flush(cb: () => void): void {
-    ((Env.is(SE.H5) ? br : this.X) as WechatMiniprogram.Canvas).requestAnimationFrame(cb);
+    (
+      (Env.is(SE.H5) ? br : this.X) as WechatMiniprogram.Canvas
+    ).requestAnimationFrame(cb);
   }
 
   /**
    * 清理素材库
    */
   public clearMaterials() {
-    this.materials.clear();
+    this.IM.clear();
   }
 
   public clearContainer: () => void = noop;
@@ -335,10 +330,10 @@ export class Brush {
 
   /**
    * 绘制图片片段
-   * @param videoEntity 
-   * @param currentFrame 
-   * @param start 
-   * @param end 
+   * @param videoEntity
+   * @param currentFrame
+   * @param start
+   * @param end
    */
   public draw(
     videoEntity: Video,
@@ -346,7 +341,15 @@ export class Brush {
     start: number,
     end: number
   ) {
-    render(this.YC!, this.materials, videoEntity, currentFrame, start, end, this.globalTransform);
+    render(
+      this.YC!,
+      this.IM.getMaterials(),
+      videoEntity,
+      currentFrame,
+      start,
+      end,
+      this.globalTransform
+    );
   }
 
   public stick: () => void = noop;

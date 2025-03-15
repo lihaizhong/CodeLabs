@@ -11,22 +11,26 @@ const b64re =
  * btoa implementation
  * 将一个二进制字符串（例如，将字符串中的每一个字节都视为一个二进制数据字节）编码为 Base64 编码的 ASCII 字符串
  * https://developer.mozilla.org/zh-CN/docs/Web/API/Window/btoa
- * @param string 二进制字符串
+ * @param data 二进制字符串
  * @returns
  */
-export function mbtoa(string: string): string {
+export function mbtoa(data: string): string {
+  if (Env.is(SE.H5)) {
+    return btoa(data)
+  }
+
   let bitmap,
     a,
     b,
     c,
     result = "",
-    rest = string.length % 3;
+    rest = data.length % 3;
 
-  for (let i = 0; i < string.length; ) {
+  for (let i = 0; i < data.length; ) {
     if (
-      (a = string.charCodeAt(i++)) > 255 ||
-      (b = string.charCodeAt(i++)) > 255 ||
-      (c = string.charCodeAt(i++)) > 255
+      (a = data.charCodeAt(i++)) > 255 ||
+      (b = data.charCodeAt(i++)) > 255 ||
+      (c = data.charCodeAt(i++)) > 255
     ) {
       throw new TypeError(
         'Failed to execute "btoa" on "Window": The string to be encoded contains characters outside of the Latin1 range.'
@@ -48,11 +52,15 @@ export function mbtoa(string: string): string {
  * atob implementation
  * 对经过 Base64 编码的字符串进行解码
  * https://developer.mozilla.org/zh-CN/docs/Web/API/Window/atob
- * @param base64 base64字符串
+ * @param data base64字符串
  * @returns
  */
-export function matob(base64: string): string {
-  let string = String(base64).replace(/[\t\n\f\r ]+/g, "");
+export function matob(data: string): string {
+  if (Env.is(SE.H5)) {
+    return atob(data)
+  }
+
+  let string = String(data).replace(/[\t\n\f\r ]+/g, "");
   if (!b64re.test(string)) {
     throw new TypeError(
       'Failed to execute "atob" on "Window": The string to be decoded is not correctly encoded.'
@@ -91,15 +99,16 @@ export function matob(base64: string): string {
  * @returns
  */
 export function toBase64(data: Uint8Array): string {
-  const buf = toBuffer(data);
-  let b64: string;
+  // const buf = toBuffer(data);
+  const b64: string = mbtoa(String.fromCharCode(...data));
 
-  if (Env.is(SE.H5)) {
-    b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
-  } else {
-    // FIXME: 如果arrayBufferToBase64被废除，可以使用mbtoa代替
-    b64 = (br as WechatMiniprogram.Wx).arrayBufferToBase64(buf);
-  }
+  // if (Env.is(SE.H5)) {
+  //   b64 = btoa(String.fromCharCode(...data));
+  // } else {
+  //   // FIXME: 如果arrayBufferToBase64被废除，可以使用mbtoa代替
+  //   // b64 = (br as WechatMiniprogram.Wx).arrayBufferToBase64(buf);
+  //   b64 = mbtoa(String.fromCharCode(...data));
+  // }
 
   return `data:image/png;base64,${b64}`;
 }
@@ -111,7 +120,7 @@ export function toBase64(data: Uint8Array): string {
  * @returns
  */
 export function toBitmap(data: Uint8Array): Promise<ImageBitmap> {
-  return createImageBitmap(new Blob([toBuffer(data)]));
+  return globalThis.createImageBitmap(new Blob([toBuffer(data)]));
 }
 
 /**

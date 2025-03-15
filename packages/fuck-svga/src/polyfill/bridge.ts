@@ -2,7 +2,7 @@ import { Env, SE } from "../env";
 
 function getBridge() {
   if (Env.is(SE.H5)) {
-    return window;
+    return globalThis;
   }
   
   if (Env.is(SE.ALIPAY)) {

@@ -234,7 +234,7 @@ interface Video {
   sprites: VideoSprite[];
 }
 
-enum PLAYER_FILL_MODE {
+const enum PLAYER_FILL_MODE {
   /**
    * 播放完成后停在首帧
    */
@@ -245,7 +245,7 @@ enum PLAYER_FILL_MODE {
   BACKWARDS = 'backwards',
 }
 
-enum PLAYER_PLAY_MODE {
+const enum PLAYER_PLAY_MODE {
   /**
    * 顺序播放
    */
@@ -256,7 +256,7 @@ enum PLAYER_PLAY_MODE {
   FALLBACKS = 'fallbacks',
 }
 
-enum PLAYER_CONTENT_MODE {
+const enum PLAYER_CONTENT_MODE {
   /**
    * 缩放图片填满 Canvas，图片可能出现变形
    */

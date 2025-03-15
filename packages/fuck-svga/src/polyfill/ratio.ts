@@ -6,7 +6,7 @@ import { br } from "./bridge";
  */
 function getDevicePixelRatio(): number {
   if (Env.is(SE.H5)) {
-    return window.devicePixelRatio;
+    return globalThis.devicePixelRatio;
   }
   
   if ("getWindowInfo" in br) {

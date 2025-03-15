@@ -4842,7 +4842,7 @@ const Env = {
 
 function getBridge() {
     if (Env.is(SE.H5)) {
-        return window;
+        return globalThis;
     }
     if (Env.is(SE.ALIPAY)) {
         return my;
@@ -4917,6 +4917,34 @@ function writeTmpFile(data, filePath) {
                         reject(err);
                     },
                 });
+            },
+        });
+    });
+}
+/**
+ * 移除本地文件
+ * @param filePath 文件资源地址
+ * @returns
+ */
+function removeTmpFile(filePath) {
+    const fs = br.getFileSystemManager();
+    return new Promise((resolve) => {
+        fs.access({
+            path: filePath,
+            success() {
+                benchmark.log(`remove file: ${filePath}`);
+                fs.unlink({
+                    filePath,
+                    success: () => resolve(),
+                    fail(err) {
+                        benchmark.log(`remove fail: ${filePath}`, err);
+                        resolve();
+                    },
+                });
+            },
+            fail(err) {
+                benchmark.log(`access fail: ${filePath}`, err);
+                resolve();
             },
         });
     });
@@ -5272,7 +5300,7 @@ class Parser {
  */
 function getDevicePixelRatio() {
     if (Env.is(SE.H5)) {
-        return window.devicePixelRatio;
+        return globalThis.devicePixelRatio;
     }
     if ("getWindowInfo" in br) {
         return br.getWindowInfo().pixelRatio;
@@ -5361,21 +5389,50 @@ function getOffscreenCanvas(options) {
     return { canvas, ctx };
 }
 
+// miniprogram btoa/atob polyfill
+const b64c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+/**
+ * btoa implementation
+ * 将一个二进制字符串（例如，将字符串中的每一个字节都视为一个二进制数据字节）编码为 Base64 编码的 ASCII 字符串
+ * https://developer.mozilla.org/zh-CN/docs/Web/API/Window/btoa
+ * @param data 二进制字符串
+ * @returns
+ */
+function mbtoa(data) {
+    if (Env.is(SE.H5)) {
+        return btoa(data);
+    }
+    let bitmap, a, b, c, result = "", rest = data.length % 3;
+    for (let i = 0; i < data.length;) {
+        if ((a = data.charCodeAt(i++)) > 255 ||
+            (b = data.charCodeAt(i++)) > 255 ||
+            (c = data.charCodeAt(i++)) > 255) {
+            throw new TypeError('Failed to execute "btoa" on "Window": The string to be encoded contains characters outside of the Latin1 range.');
+        }
+        bitmap = (a << 16) | (b << 8) | c;
+        result +=
+            b64c.charAt((bitmap >> 18) & 63) +
+                b64c.charAt((bitmap >> 12) & 63) +
+                b64c.charAt((bitmap >> 6) & 63) +
+                b64c.charAt(bitmap & 63);
+    }
+    return rest ? result.slice(0, rest - 3) + "===".substring(rest) : result;
+}
 /**
  * 将ArrayBuffer转为base64
  * @param data 二进制数据
  * @returns
  */
 function toBase64(data) {
-    const buf = toBuffer(data);
-    let b64;
-    if (Env.is(SE.H5)) {
-        b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
-    }
-    else {
-        // FIXME: 如果arrayBufferToBase64被废除，可以使用mbtoa代替
-        b64 = br.arrayBufferToBase64(buf);
-    }
+    // const buf = toBuffer(data);
+    const b64 = mbtoa(String.fromCharCode(...data));
+    // if (Env.is(SE.H5)) {
+    //   b64 = btoa(String.fromCharCode(...data));
+    // } else {
+    //   // FIXME: 如果arrayBufferToBase64被废除，可以使用mbtoa代替
+    //   // b64 = (br as WechatMiniprogram.Wx).arrayBufferToBase64(buf);
+    //   b64 = mbtoa(String.fromCharCode(...data));
+    // }
     return `data:image/png;base64,${b64}`;
 }
 /**
@@ -5385,7 +5442,7 @@ function toBase64(data) {
  * @returns
  */
 function toBitmap(data) {
-    return createImageBitmap(new Blob([toBuffer(data)]));
+    return globalThis.createImageBitmap(new Blob([toBuffer(data)]));
 }
 /**
  * Uint8Array转换成ArrayBuffer
@@ -5427,7 +5484,15 @@ async function genImageSource(data, filename, prefix) {
 function createImage(brush, src) {
     return new Promise((resolve, reject) => {
         const img = brush.createImage();
-        img.onload = resolve;
+        img.onload = () => {
+            // 如果 data 是 URL/base64 或者 img.src 是 base64
+            if (src.startsWith('data:') || typeof src === 'string') {
+                resolve(img);
+            }
+            else {
+                removeTmpFile(src).then(() => resolve(img)).catch(() => resolve(img));
+            }
+        };
         img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${img.src}`));
         img.src = src;
     });
@@ -5443,12 +5508,15 @@ function createImage(brush, src) {
 function loadImage(brush, data, filename, prefix) {
     if (Env.is(SE.H5)) {
         // 由于ImageBitmap在图片渲染上有优势，故优先使用
-        if (data instanceof Uint8Array && "createImageBitmap" in window) {
+        if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
             return toBitmap(data);
         }
         if (data instanceof ImageBitmap) {
             return Promise.resolve(data);
         }
+    }
+    if (typeof data === 'string' && /^http(s)?:\/\//.test(data)) {
+        return createImage(brush, data);
     }
     return genImageSource(data, filename, prefix).then((src) => createImage(brush, src));
 }
@@ -5790,6 +5858,69 @@ function drawRect(context, x, y, width, height, cornerRadius, transform, styles)
     context.restore();
 }
 
+class ImageManager {
+    // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
+    pool = [];
+    /**
+     * 素材
+     */
+    materials = new Map();
+    getMaterials() {
+        return this.materials;
+    }
+    clear() {
+        this.materials.clear();
+        this.pool.forEach((img) => {
+            img.onload = null;
+            img.onerror = null;
+            img.src = "";
+        });
+    }
+    /**
+     * 加载图片集
+     * @param images 图片数据
+     * @param filename 文件名称
+     * @returns
+     */
+    loadImage(images, brush, filename) {
+        const imageArr = [];
+        Object.keys(images).forEach((key) => {
+            const image = images[key];
+            if ((Env.is(SE.H5) && image instanceof Image) ||
+                (image.width && image.height)) {
+                imageArr.push(Promise.resolve(image));
+            }
+            else {
+                const p = loadImage(brush, image, key, filename).then((img) => {
+                    this.materials.set(key, img);
+                    return img;
+                });
+                imageArr.push(p);
+            }
+        });
+        return Promise.all(imageArr).then((imgs) => {
+            this.pool = imgs.filter((img) => (Env.is(SE.H5) && img instanceof Image) ||
+                (img.src !== undefined &&
+                    img.width !== undefined &&
+                    img.height !== undefined));
+        });
+    }
+    /**
+     * 创建图片标签
+     * @returns
+     */
+    createImage(canvas) {
+        const [img] = this.pool.splice(0, 1);
+        if (img) {
+            return img;
+        }
+        if (Env.is(SE.H5)) {
+            return new Image();
+        }
+        return canvas.createImage();
+    }
+}
+
 class Brush {
     mode;
     /**
@@ -5824,12 +5955,9 @@ class Brush {
      * 粉刷模式
      */
     model = {};
-    /**
-     * 素材
-     */
-    materials = new Map();
+    IM = new ImageManager();
     globalTransform;
-    constructor(mode = 'animation') {
+    constructor(mode = "animation") {
         this.mode = mode;
     }
     setModel(type) {
@@ -5884,10 +6012,10 @@ class Brush {
         // #endregion set main screen implement
         // #region set secondary screen implement
         // ------- 创建副屏 ---------
-        if (mode === 'poster') {
+        if (mode === "poster") {
             this.Y = this.X;
             this.YC = this.XC;
-            this.setModel('C');
+            this.setModel("C");
         }
         else {
             let ofsResult;
@@ -5922,7 +6050,7 @@ class Brush {
             };
         }
         // #endregion clear main screen implement
-        if (mode === 'poster') {
+        if (mode === "poster") {
             this.clearSecondary = this.stick = noop;
         }
         else {
@@ -5982,27 +6110,14 @@ class Brush {
      * @returns
      */
     loadImages(images, filename) {
-        let imageArr = [];
-        this.materials.clear();
-        benchmark.time("load image", () => {
-            for (let key in images) {
-                const p = loadImage(this, images[key], key, filename).then((img) => {
-                    this.materials.set(key, img);
-                });
-                imageArr.push(p);
-            }
-        });
-        return Promise.all(imageArr);
+        return this.IM.loadImage(images, this, filename);
     }
     /**
      * 创建图片标签
      * @returns
      */
     createImage() {
-        if (Env.is(SE.H5)) {
-            return new Image();
-        }
-        return this.X.createImage();
+        return this.IM.createImage(this.X);
     }
     /**
      * 生成图片
@@ -6010,7 +6125,7 @@ class Brush {
      * @param encoderOptions
      * @returns
      */
-    getImage(type = 'image/png', encoderOptions = 0.92) {
+    getImage(type = "image/png", encoderOptions = 0.92) {
         return this.X.toDataURL(type, encoderOptions);
     }
     getRect() {
@@ -6027,16 +6142,23 @@ class Brush {
             scaleX = Y.width / videoSize.width;
             scaleY = Y.height / videoSize.height;
         }
-        else if (["aspect-fill" /* PLAYER_CONTENT_MODE.ASPECT_FILL */, "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */].includes(contentMode)) {
+        else if ([
+            "aspect-fill" /* PLAYER_CONTENT_MODE.ASPECT_FILL */,
+            "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */,
+        ].includes(contentMode)) {
             const imageRatio = videoSize.width / videoSize.height;
             const viewRatio = Y.width / Y.height;
-            if ((imageRatio >= viewRatio && contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */)
-                || (imageRatio <= viewRatio && contentMode === "aspect-fill" /* PLAYER_CONTENT_MODE.ASPECT_FILL */)) {
+            if ((imageRatio >= viewRatio &&
+                contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */) ||
+                (imageRatio <= viewRatio &&
+                    contentMode === "aspect-fill" /* PLAYER_CONTENT_MODE.ASPECT_FILL */)) {
                 scaleX = scaleY = Y.width / videoSize.width;
                 translateY = (Y.height - videoSize.height * scaleY) / 2.0;
             }
-            else if ((imageRatio < viewRatio && contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */)
-                || (imageRatio > viewRatio && contentMode === "aspect-fill" /* PLAYER_CONTENT_MODE.ASPECT_FILL */)) {
+            else if ((imageRatio < viewRatio &&
+                contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */) ||
+                (imageRatio > viewRatio &&
+                    contentMode === "aspect-fill" /* PLAYER_CONTENT_MODE.ASPECT_FILL */)) {
                 scaleX = scaleY = Y.height / videoSize.height;
                 translateX = (Y.width - videoSize.width * scaleX) / 2.0;
             }
@@ -6061,7 +6183,7 @@ class Brush {
      * 清理素材库
      */
     clearMaterials() {
-        this.materials.clear();
+        this.IM.clear();
     }
     clearContainer = noop;
     clearSecondary = noop;
@@ -6073,7 +6195,7 @@ class Brush {
      * @param end
      */
     draw(videoEntity, currentFrame, start, end) {
-        render(this.YC, this.materials, videoEntity, currentFrame, start, end, this.globalTransform);
+        render(this.YC, this.IM.getMaterials(), videoEntity, currentFrame, start, end, this.globalTransform);
     }
     stick = noop;
     /**

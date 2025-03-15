@@ -44,7 +44,14 @@ function createImage(
   return new Promise((resolve, reject) => {
     const img = brush.createImage();
 
-    img.onload = resolve;
+    img.onload = () => {
+      // 如果 data 是 URL/base64 或者 img.src 是 base64
+      if (src.startsWith('data:') || typeof src === 'string') {
+        resolve(img)
+      } else {
+        removeTmpFile(src).then(() => resolve(img)).catch(() => resolve(img))
+      }
+    };
     img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${img.src}`));
     img.src = src;
   });
@@ -66,13 +73,17 @@ export function loadImage(
 ): Promise<PlatformImage | ImageBitmap> {
   if (Env.is(SE.H5)) {
     // 由于ImageBitmap在图片渲染上有优势，故优先使用
-    if (data instanceof Uint8Array && "createImageBitmap" in window) {
+    if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
       return toBitmap(data);
     }
 
     if (data instanceof ImageBitmap) {
       return Promise.resolve(data);
     }
+  }
+
+  if (typeof data === 'string' && /^http(s)?:\/\//.test(data)) {
+    return createImage(brush, data);
   }
 
   return genImageSource(data as Uint8Array | string, filename, prefix).then(
