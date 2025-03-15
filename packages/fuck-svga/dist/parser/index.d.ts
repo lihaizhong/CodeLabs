@@ -8,7 +8,13 @@ export declare class Parser {
      * @param url 视频地址
      * @returns
      */
-    static parseVideoEntity(data: ArrayBuffer, url: string): Video;
+    static parseVideo(data: ArrayBuffer, url: string): Video;
+    /**
+     * 读取文件资源
+     * @param url 文件资源地址
+     * @returns
+     */
+    download(url: string): Promise<ArrayBuffer | null>;
     /**
      * 通过 url 下载并解析 SVGA 文件
      * @param url SVGA 文件的下载链接

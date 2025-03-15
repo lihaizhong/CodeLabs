@@ -11,6 +11,15 @@ export class ImageManager {
    */
   private materials: Map<string, Bitmap> = new Map();
 
+  private isImage(img: any) {
+    return (
+      (Env.is(SE.H5) && img instanceof Image) ||
+      ((img as PlatformImage).src !== undefined &&
+        (img as PlatformImage).width !== undefined &&
+        (img as PlatformImage).height !== undefined)
+    );
+  }
+
   public getMaterials() {
     return this.materials;
   }
@@ -21,7 +30,7 @@ export class ImageManager {
       img.onload = null;
       img.onerror = null;
       img.src = "";
-    })
+    });
   }
 
   /**
@@ -30,7 +39,7 @@ export class ImageManager {
    * @param filename 文件名称
    * @returns
    */
-  public loadImage(
+  public async loadImage(
     images: RawImages | PlatformImages,
     brush: Brush,
     filename: string
@@ -40,13 +49,10 @@ export class ImageManager {
     Object.keys(images).forEach((key: string) => {
       const image = images[key];
 
-      if (
-        (Env.is(SE.H5) && image instanceof Image) ||
-        ((image as PlatformImage).width && (image as PlatformImage).height)
-      ) {
+      if (this.isImage(image)) {
         imageArr.push(Promise.resolve(image as PlatformImage | ImageBitmap));
       } else {
-        const p = loadImage(brush, image as RawImage, key, filename).then(
+        const p = loadImage(brush, image as RawImage, filename, key).then(
           (img: PlatformImage | ImageBitmap) => {
             this.materials.set(key, img);
 
@@ -58,15 +64,10 @@ export class ImageManager {
       }
     });
 
-    return Promise.all<PlatformImage | ImageBitmap>(imageArr).then((imgs) => {
-      this.pool = imgs.filter(
-        (img) =>
-          (Env.is(SE.H5) && img instanceof Image) ||
-          ((img as PlatformImage).src !== undefined &&
-            (img as PlatformImage).width !== undefined &&
-            (img as PlatformImage).height !== undefined)
-      ) as PlatformImage[];
-    });
+    const imgs = await Promise.all<PlatformImage | ImageBitmap>(imageArr);
+    this.pool = imgs.filter((img: PlatformImage | ImageBitmap) =>
+      this.isImage(img)
+    ) as PlatformImage[];
   }
 
   /**

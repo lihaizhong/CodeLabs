@@ -2,6 +2,7 @@ import { br } from "./bridge";
 import { genFilePath, removeTmpFile, writeTmpFile } from "./fsm";
 import { Env, SE } from "../env";
 import { toBase64, toBitmap, toBuffer } from "./decode";
+import { isRemote } from "./download";
 
 /**
  * 创建图片src元信息
@@ -82,7 +83,7 @@ export function loadImage(
     }
   }
 
-  if (typeof data === 'string' && /^http(s)?:\/\//.test(data)) {
+  if (typeof data === 'string' && isRemote(data)) {
     return createImage(brush, data);
   }
 

@@ -4854,6 +4854,137 @@ function getBridge() {
 }
 const br = getBridge();
 
+/**
+ * 获取当前显示设备的物理像素分辨率与CSS 像素分辨率之比
+ */
+function getDevicePixelRatio() {
+    if (Env.is(SE.H5)) {
+        return globalThis.devicePixelRatio;
+    }
+    if ("getWindowInfo" in br) {
+        return br.getWindowInfo().pixelRatio;
+    }
+    if ("getSystemInfoSync" in br) {
+        return br.getSystemInfoSync().pixelRatio;
+    }
+    return 1;
+}
+const dpr = getDevicePixelRatio();
+
+/**
+ * 获取Canvas及其Context
+ * @param selector
+ * @param component
+ * @returns
+ */
+function getCanvas(selector, component) {
+    return new Promise((resolve, reject) => {
+        // 获取并重置Canvas
+        const initCanvas = (canvas, width = 0, height = 0) => {
+            if (!canvas) {
+                reject(new Error("canvas not found."));
+                return;
+            }
+            const ctx = canvas.getContext("2d");
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+            resolve({ canvas, ctx });
+        };
+        if (Env.is(SE.H5)) {
+            const canvas = document.querySelector(selector);
+            const { clientWidth, clientHeight } = canvas;
+            initCanvas(canvas, clientWidth, clientHeight);
+        }
+        else {
+            let query = br.createSelectorQuery();
+            if (component) {
+                query = query.in(component);
+            }
+            query
+                .select(selector)
+                .fields({ node: true, size: true }, (res) => {
+                const { node, width, height } = res || {};
+                initCanvas(node, width, height);
+            })
+                .exec();
+        }
+    });
+}
+/**
+ * 创建离屏Canvas
+ * @param options 离屏Canvas参数
+ * @returns
+ */
+function createOffscreenCanvas(options) {
+    if (Env.is(SE.H5)) {
+        return new OffscreenCanvas(options.width, options.height);
+    }
+    if (Env.is(SE.ALIPAY)) {
+        return my.createOffscreenCanvas({
+            width: options.width,
+            height: options.height,
+        });
+    }
+    if (Env.is(SE.DOUYIN)) {
+        const canvas = tt.createOffscreenCanvas();
+        canvas.width = options.width;
+        canvas.height = options.height;
+        return canvas;
+    }
+    return wx.createOffscreenCanvas({
+        ...options,
+        type: "2d",
+    });
+}
+/**
+ * 获取离屏Canvas及其Context
+ * @param options
+ * @returns
+ */
+function getOffscreenCanvas(options) {
+    const canvas = createOffscreenCanvas(options);
+    const ctx = canvas.getContext("2d");
+    return { canvas, ctx };
+}
+
+/**
+ * 读取远程文件
+ * @param url 文件资源地址
+ * @returns
+ */
+function readRemoteFile(url) {
+    // H5环境
+    if (Env.is(SE.H5)) {
+        return fetch(url).then((response) => {
+            if (response.ok) {
+                return response.arrayBuffer();
+            }
+            else {
+                throw new Error(`HTTP error, status=${response.status}, statusText=${response.statusText}`);
+            }
+        });
+    }
+    // 小程序环境
+    return new Promise((resolve, reject) => {
+        br.request({
+            url,
+            // @ts-ignore 支付宝小程序必须有该字段
+            dataType: "arraybuffer",
+            responseType: "arraybuffer",
+            enableCache: true,
+            success: (res) => resolve(res.data),
+            fail: reject,
+        });
+    });
+}
+/**
+ * 是否是远程链接
+ * @param url 链接
+ * @returns
+ */
+const isRemote = (url) => /^http(s)?:\/\//.test(url);
+
 const stopwatch = {
     time(label) {
         console.time?.(label);
@@ -4935,16 +5066,16 @@ function removeTmpFile(filePath) {
                 benchmark.log(`remove file: ${filePath}`);
                 fs.unlink({
                     filePath,
-                    success: () => resolve(),
+                    success: () => resolve(filePath),
                     fail(err) {
                         benchmark.log(`remove fail: ${filePath}`, err);
-                        resolve();
+                        resolve(filePath);
                     },
                 });
             },
             fail(err) {
                 benchmark.log(`access fail: ${filePath}`, err);
-                resolve();
+                resolve(filePath);
             },
         });
     });
@@ -4971,52 +5102,175 @@ function readFile(filePath) {
     });
 }
 
+// miniprogram btoa/atob polyfill
+const b64c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 /**
- * 读取远程文件
- * @param url 文件资源地址
+ * btoa implementation
+ * 将一个二进制字符串（例如，将字符串中的每一个字节都视为一个二进制数据字节）编码为 Base64 编码的 ASCII 字符串
+ * https://developer.mozilla.org/zh-CN/docs/Web/API/Window/btoa
+ * @param data 二进制字符串
  * @returns
  */
-function readRemoteFile(url) {
-    // H5环境
+function mbtoa(data) {
     if (Env.is(SE.H5)) {
-        return fetch(url).then((response) => {
-            if (response.ok) {
-                return response.arrayBuffer();
+        return btoa(data);
+    }
+    let bitmap, a, b, c, result = "", rest = data.length % 3;
+    for (let i = 0; i < data.length;) {
+        if ((a = data.charCodeAt(i++)) > 255 ||
+            (b = data.charCodeAt(i++)) > 255 ||
+            (c = data.charCodeAt(i++)) > 255) {
+            throw new TypeError('Failed to execute "btoa" on "Window": The string to be encoded contains characters outside of the Latin1 range.');
+        }
+        bitmap = (a << 16) | (b << 8) | c;
+        result +=
+            b64c.charAt((bitmap >> 18) & 63) +
+                b64c.charAt((bitmap >> 12) & 63) +
+                b64c.charAt((bitmap >> 6) & 63) +
+                b64c.charAt(bitmap & 63);
+    }
+    return rest ? result.slice(0, rest - 3) + "===".substring(rest) : result;
+}
+/**
+ * 将ArrayBuffer转为base64
+ * @param data 二进制数据
+ * @returns
+ */
+function toBase64(data) {
+    // const buf = toBuffer(data);
+    // const b64: string = mbtoa(String.fromCharCode(...data));
+    // if (Env.is(SE.H5)) {
+    //   b64 = btoa(String.fromCharCode(...data));
+    // } else {
+    //   // FIXME: 如果arrayBufferToBase64被废除，可以使用mbtoa代替
+    //   // b64 = (br as WechatMiniprogram.Wx).arrayBufferToBase64(buf);
+    //   b64 = mbtoa(String.fromCharCode(...data));
+    // }
+    return `data:image/png;base64,${mbtoa(String.fromCharCode(...data))}`;
+}
+/**
+ * 生成ImageBitmap数据
+ * 目前仅H5支持
+ * @param data 二进制数据
+ * @returns
+ */
+function toBitmap(data) {
+    return globalThis.createImageBitmap(new Blob([toBuffer(data)]));
+}
+/**
+ * Uint8Array转换成ArrayBuffer
+ * @param data
+ * @returns
+ */
+function toBuffer(data) {
+    return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+}
+
+/**
+ * 创建图片src元信息
+ * @param data
+ * @returns
+ */
+async function genImageSource(data, filename, prefix) {
+    if (typeof data === "string") {
+        return data;
+    }
+    // FIXME: 支付宝小程序IDE保存临时文件会失败
+    if (Env.is(SE.H5) || (Env.is(SE.ALIPAY) && br.isIDE)) {
+        return toBase64(data);
+    }
+    try {
+        // FIXME: IOS设备Uint8Array转base64时间较长，使用图片缓存形式速度会更快
+        return await writeTmpFile(toBuffer(data), genFilePath(filename, prefix));
+    }
+    catch (ex) {
+        console.warn(`图片缓存失败：${ex.message}`);
+        return toBase64(data);
+    }
+}
+/**
+ * 创建 Image 标签
+ * @param brush
+ * @param src
+ * @returns
+ */
+function createImage(brush, src) {
+    return new Promise((resolve, reject) => {
+        const img = brush.createImage();
+        img.onload = () => {
+            // 如果 data 是 URL/base64 或者 img.src 是 base64
+            if (src.startsWith('data:') || typeof src === 'string') {
+                resolve(img);
             }
             else {
-                throw new Error(`HTTP error, status=${response.status}, statusText=${response.statusText}`);
+                removeTmpFile(src).then(() => resolve(img)).catch(() => resolve(img));
             }
-        });
-    }
-    // 小程序环境
-    return new Promise((resolve, reject) => {
-        br.request({
-            url,
-            // @ts-ignore 支付宝小程序必须有该字段
-            dataType: "arraybuffer",
-            responseType: "arraybuffer",
-            enableCache: true,
-            success: (res) => resolve(res.data),
-            fail: reject,
-        });
+        };
+        img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${img.src}`));
+        img.src = src;
     });
 }
 /**
- * 读取文件资源
- * @param url 文件资源地址
+ * 加载图片
+ * @param brush 创建图片对象
+ * @param data 图片数据
+ * @param filename 图片名称
+ * @param prefix 文件名称前缀
  * @returns
  */
-function download(url) {
-    // 读取远程文件
-    if (/^http(s)?:\/\//.test(url)) {
-        return readRemoteFile(url);
+function loadImage(brush, data, filename, prefix) {
+    if (Env.is(SE.H5)) {
+        // 由于ImageBitmap在图片渲染上有优势，故优先使用
+        if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
+            return toBitmap(data);
+        }
+        if (data instanceof ImageBitmap) {
+            return Promise.resolve(data);
+        }
     }
-    // 读取本地文件
-    if (Env.not(SE.H5)) {
-        return readFile(url);
+    if (typeof data === 'string' && isRemote(data)) {
+        return createImage(brush, data);
     }
-    return Promise.resolve(null);
+    return genImageSource(data, filename, prefix).then((src) => createImage(brush, src));
 }
+
+const noop = () => { };
+
+function getPlatform() {
+    if (Env.is(SE.H5)) {
+        const UA = navigator.userAgent;
+        if (/(Android)/i.test(UA)) {
+            return "Android";
+        }
+        if (/(iPhone|iPad|iPod|iOS)/i.test(UA)) {
+            return "iOS";
+        }
+        if (/(OpenHarmony|ArkWeb)/i.test(UA)) {
+            return "OpenHarmony";
+        }
+    }
+    else {
+        if (Env.is(SE.ALIPAY)) {
+            return br.getDeviceBaseInfo().platform;
+        }
+        if (Env.is(SE.DOUYIN)) {
+            return br.getDeviceInfoSync().platform;
+        }
+        if (Env.is(SE.WECHAT)) {
+            return br.getDeviceInfo().platform;
+        }
+    }
+    return "UNKNOWN";
+}
+const platform = getPlatform().toLocaleUpperCase();
+
+const now = () => {
+    // performance可以提供更高精度的时间测量，且不受系统时间的调整（如更改系统时间或同步时间）的影响
+    if (typeof performance !== "undefined") {
+        return performance.now();
+    }
+    return Date.now();
+};
 
 class VideoEntity {
     /**
@@ -5267,7 +5521,7 @@ class Parser {
      * @param url 视频地址
      * @returns
      */
-    static parseVideoEntity(data, url) {
+    static parseVideo(data, url) {
         const header = new Uint8Array(data, 0, 4);
         const u8a = new Uint8Array(data);
         if (header.toString() === "80,75,3,4") {
@@ -5281,283 +5535,34 @@ class Parser {
         });
         return entity;
     }
-    // static parsePlacardEntity(data: any[]) {}
+    /**
+     * 读取文件资源
+     * @param url 文件资源地址
+     * @returns
+     */
+    download(url) {
+        // 读取远程文件
+        if (isRemote(url)) {
+            return readRemoteFile(url);
+        }
+        // 读取本地文件
+        if (Env.not(SE.H5)) {
+            return readFile(url);
+        }
+        return Promise.resolve(null);
+    }
     /**
      * 通过 url 下载并解析 SVGA 文件
      * @param url SVGA 文件的下载链接
      * @returns Promise<SVGA 数据源
      */
     async load(url) {
-        const data = await download(url);
+        const data = await this.download(url);
         benchmark.label(url);
         benchmark.line();
-        return Parser.parseVideoEntity(data, url);
+        return Parser.parseVideo(data, url);
     }
 }
-
-/**
- * 获取当前显示设备的物理像素分辨率与CSS 像素分辨率之比
- */
-function getDevicePixelRatio() {
-    if (Env.is(SE.H5)) {
-        return globalThis.devicePixelRatio;
-    }
-    if ("getWindowInfo" in br) {
-        return br.getWindowInfo().pixelRatio;
-    }
-    if ("getSystemInfoSync" in br) {
-        return br.getSystemInfoSync().pixelRatio;
-    }
-    return 1;
-}
-const dpr = getDevicePixelRatio();
-
-/**
- * 获取Canvas及其Context
- * @param selector
- * @param component
- * @returns
- */
-function getCanvas(selector, component) {
-    return new Promise((resolve, reject) => {
-        // 获取并重置Canvas
-        const initCanvas = (canvas, width = 0, height = 0) => {
-            if (!canvas) {
-                reject(new Error("canvas not found."));
-                return;
-            }
-            const ctx = canvas.getContext("2d");
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
-            ctx.scale(dpr, dpr);
-            resolve({ canvas, ctx });
-        };
-        if (Env.is(SE.H5)) {
-            const canvas = document.querySelector(selector);
-            const { clientWidth, clientHeight } = canvas;
-            initCanvas(canvas, clientWidth, clientHeight);
-        }
-        else {
-            let query = br.createSelectorQuery();
-            if (component) {
-                query = query.in(component);
-            }
-            query
-                .select(selector)
-                .fields({ node: true, size: true }, (res) => {
-                const { node, width, height } = res || {};
-                initCanvas(node, width, height);
-            })
-                .exec();
-        }
-    });
-}
-/**
- * 创建离屏Canvas
- * @param options 离屏Canvas参数
- * @returns
- */
-function createOffscreenCanvas(options) {
-    if (Env.is(SE.H5)) {
-        return new OffscreenCanvas(options.width, options.height);
-    }
-    if (Env.is(SE.ALIPAY)) {
-        return my.createOffscreenCanvas({
-            width: options.width,
-            height: options.height,
-        });
-    }
-    if (Env.is(SE.DOUYIN)) {
-        const canvas = tt.createOffscreenCanvas();
-        canvas.width = options.width;
-        canvas.height = options.height;
-        return canvas;
-    }
-    return wx.createOffscreenCanvas({
-        ...options,
-        type: "2d",
-    });
-}
-/**
- * 获取离屏Canvas及其Context
- * @param options
- * @returns
- */
-function getOffscreenCanvas(options) {
-    const canvas = createOffscreenCanvas(options);
-    const ctx = canvas.getContext("2d");
-    return { canvas, ctx };
-}
-
-// miniprogram btoa/atob polyfill
-const b64c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-/**
- * btoa implementation
- * 将一个二进制字符串（例如，将字符串中的每一个字节都视为一个二进制数据字节）编码为 Base64 编码的 ASCII 字符串
- * https://developer.mozilla.org/zh-CN/docs/Web/API/Window/btoa
- * @param data 二进制字符串
- * @returns
- */
-function mbtoa(data) {
-    if (Env.is(SE.H5)) {
-        return btoa(data);
-    }
-    let bitmap, a, b, c, result = "", rest = data.length % 3;
-    for (let i = 0; i < data.length;) {
-        if ((a = data.charCodeAt(i++)) > 255 ||
-            (b = data.charCodeAt(i++)) > 255 ||
-            (c = data.charCodeAt(i++)) > 255) {
-            throw new TypeError('Failed to execute "btoa" on "Window": The string to be encoded contains characters outside of the Latin1 range.');
-        }
-        bitmap = (a << 16) | (b << 8) | c;
-        result +=
-            b64c.charAt((bitmap >> 18) & 63) +
-                b64c.charAt((bitmap >> 12) & 63) +
-                b64c.charAt((bitmap >> 6) & 63) +
-                b64c.charAt(bitmap & 63);
-    }
-    return rest ? result.slice(0, rest - 3) + "===".substring(rest) : result;
-}
-/**
- * 将ArrayBuffer转为base64
- * @param data 二进制数据
- * @returns
- */
-function toBase64(data) {
-    // const buf = toBuffer(data);
-    const b64 = mbtoa(String.fromCharCode(...data));
-    // if (Env.is(SE.H5)) {
-    //   b64 = btoa(String.fromCharCode(...data));
-    // } else {
-    //   // FIXME: 如果arrayBufferToBase64被废除，可以使用mbtoa代替
-    //   // b64 = (br as WechatMiniprogram.Wx).arrayBufferToBase64(buf);
-    //   b64 = mbtoa(String.fromCharCode(...data));
-    // }
-    return `data:image/png;base64,${b64}`;
-}
-/**
- * 生成ImageBitmap数据
- * 目前仅H5支持
- * @param data 二进制数据
- * @returns
- */
-function toBitmap(data) {
-    return globalThis.createImageBitmap(new Blob([toBuffer(data)]));
-}
-/**
- * Uint8Array转换成ArrayBuffer
- * @param data
- * @returns
- */
-function toBuffer(data) {
-    return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-}
-
-/**
- * 创建图片src元信息
- * @param data
- * @returns
- */
-async function genImageSource(data, filename, prefix) {
-    if (typeof data === "string") {
-        return data;
-    }
-    // FIXME: 支付宝小程序IDE保存临时文件会失败
-    if (Env.is(SE.H5) || (Env.is(SE.ALIPAY) && br.isIDE)) {
-        return toBase64(data);
-    }
-    try {
-        // FIXME: IOS设备Uint8Array转base64时间较长，使用图片缓存形式速度会更快
-        return await writeTmpFile(toBuffer(data), genFilePath(filename, prefix));
-    }
-    catch (ex) {
-        console.warn(`图片缓存失败：${ex.message}`);
-        return toBase64(data);
-    }
-}
-/**
- * 创建 Image 标签
- * @param brush
- * @param src
- * @returns
- */
-function createImage(brush, src) {
-    return new Promise((resolve, reject) => {
-        const img = brush.createImage();
-        img.onload = () => {
-            // 如果 data 是 URL/base64 或者 img.src 是 base64
-            if (src.startsWith('data:') || typeof src === 'string') {
-                resolve(img);
-            }
-            else {
-                removeTmpFile(src).then(() => resolve(img)).catch(() => resolve(img));
-            }
-        };
-        img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${img.src}`));
-        img.src = src;
-    });
-}
-/**
- * 加载图片
- * @param brush 创建图片对象
- * @param data 图片数据
- * @param filename 图片名称
- * @param prefix 文件名称前缀
- * @returns
- */
-function loadImage(brush, data, filename, prefix) {
-    if (Env.is(SE.H5)) {
-        // 由于ImageBitmap在图片渲染上有优势，故优先使用
-        if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
-            return toBitmap(data);
-        }
-        if (data instanceof ImageBitmap) {
-            return Promise.resolve(data);
-        }
-    }
-    if (typeof data === 'string' && /^http(s)?:\/\//.test(data)) {
-        return createImage(brush, data);
-    }
-    return genImageSource(data, filename, prefix).then((src) => createImage(brush, src));
-}
-
-const noop = () => { };
-
-function getPlatform() {
-    if (Env.is(SE.H5)) {
-        const UA = navigator.userAgent;
-        if (/(Android)/i.test(UA)) {
-            return "Android";
-        }
-        if (/(iPhone|iPad|iPod|iOS)/i.test(UA)) {
-            return "iOS";
-        }
-        if (/(OpenHarmony|ArkWeb)/i.test(UA)) {
-            return "OpenHarmony";
-        }
-    }
-    else {
-        if (Env.is(SE.ALIPAY)) {
-            return br.getDeviceBaseInfo().platform;
-        }
-        if (Env.is(SE.DOUYIN)) {
-            return br.getDeviceInfoSync().platform;
-        }
-        if (Env.is(SE.WECHAT)) {
-            return br.getDeviceInfo().platform;
-        }
-    }
-    return "UNKNOWN";
-}
-const platform = getPlatform().toLocaleUpperCase();
-
-const now = () => {
-    // performance可以提供更高精度的时间测量，且不受系统时间的调整（如更改系统时间或同步时间）的影响
-    if (typeof performance !== "undefined") {
-        return performance.now();
-    }
-    return Date.now();
-};
 
 /**
  * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Tutorial/Paths
@@ -5865,6 +5870,12 @@ class ImageManager {
      * 素材
      */
     materials = new Map();
+    isImage(img) {
+        return ((Env.is(SE.H5) && img instanceof Image) ||
+            (img.src !== undefined &&
+                img.width !== undefined &&
+                img.height !== undefined));
+    }
     getMaterials() {
         return this.materials;
     }
@@ -5882,28 +5893,23 @@ class ImageManager {
      * @param filename 文件名称
      * @returns
      */
-    loadImage(images, brush, filename) {
+    async loadImage(images, brush, filename) {
         const imageArr = [];
         Object.keys(images).forEach((key) => {
             const image = images[key];
-            if ((Env.is(SE.H5) && image instanceof Image) ||
-                (image.width && image.height)) {
+            if (this.isImage(image)) {
                 imageArr.push(Promise.resolve(image));
             }
             else {
-                const p = loadImage(brush, image, key, filename).then((img) => {
+                const p = loadImage(brush, image, filename, key).then((img) => {
                     this.materials.set(key, img);
                     return img;
                 });
                 imageArr.push(p);
             }
         });
-        return Promise.all(imageArr).then((imgs) => {
-            this.pool = imgs.filter((img) => (Env.is(SE.H5) && img instanceof Image) ||
-                (img.src !== undefined &&
-                    img.width !== undefined &&
-                    img.height !== undefined));
-        });
+        const imgs = await Promise.all(imageArr);
+        this.pool = imgs.filter((img) => this.isImage(img));
     }
     /**
      * 创建图片标签
@@ -6787,5 +6793,156 @@ class Poster {
     }
 }
 
-export { Brush, Env, Parser, Player, Poster, SE as SUPPORTED_ENV, download, getCanvas, getOffscreenCanvas, loadImage };
+class VideoPool {
+    point = 0;
+    maxRemain = 3;
+    remainStart = 0;
+    remainEnd = 0;
+    buckets = [];
+    parser = new Parser();
+    get length() {
+        return this.buckets.length;
+    }
+    updateRemainPoints() {
+        this.remainStart = Math.ceil(this.point - (this.maxRemain - 1) / 2);
+        if (this.remainStart < 0) {
+            this.remainStart = 0;
+        }
+        this.remainEnd = this.remainStart + this.maxRemain;
+        if (this.remainEnd > this.length) {
+            this.remainEnd = this.length;
+        }
+    }
+    getNeedUpdatePoints(point) {
+        const { remainStart, remainEnd } = this;
+        this.point = point;
+        this.updateRemainPoints();
+        if (this.remainStart > remainEnd || this.remainEnd < remainStart) {
+            return [
+                {
+                    action: "remove",
+                    start: remainStart,
+                    end: remainEnd,
+                },
+                {
+                    action: "add",
+                    start: this.remainStart,
+                    end: this.remainEnd,
+                },
+            ];
+        }
+        if (this.remainStart > remainStart && this.remainEnd > remainEnd) {
+            return [
+                {
+                    action: "remove",
+                    start: remainStart,
+                    end: this.remainStart,
+                },
+                {
+                    action: "add",
+                    start: remainEnd,
+                    end: this.remainEnd,
+                },
+            ];
+        }
+        if (this.remainStart < remainStart && this.remainEnd < remainEnd) {
+            return [
+                {
+                    action: "remove",
+                    start: this.remainEnd,
+                    end: remainEnd,
+                },
+                {
+                    action: "add",
+                    start: this.remainStart,
+                    end: remainStart,
+                },
+            ];
+        }
+        return [];
+    }
+    async getBucket(point) {
+        if (point < 0 || point >= this.length) {
+            return this.buckets[this.point];
+        }
+        const waits = this.getNeedUpdatePoints(point).map(({ action, start, end }) => {
+            const waiting = [];
+            for (let i = start; i < end; i++) {
+                const bucket = this.buckets[i];
+                if (action === "remove") {
+                    bucket.entity = null;
+                    waiting.push(Promise.resolve());
+                }
+                else if (action === "add") {
+                    const p = this.parser.load(bucket.local).then((video) => {
+                        bucket.entity = video;
+                    });
+                    waiting.push(p);
+                }
+            }
+            return Promise.all(waiting);
+        });
+        await Promise.all(waits);
+        return this.get();
+    }
+    async prepare(urls, point, maxRemain) {
+        const { parser } = this;
+        if (typeof point === "number" && point > 0 && point < urls.length) {
+            this.point = point;
+        }
+        else {
+            this.point = 0;
+        }
+        if (typeof maxRemain === "number" && maxRemain > 0) {
+            this.maxRemain = maxRemain;
+        }
+        else {
+            this.maxRemain = 3;
+        }
+        this.updateRemainPoints();
+        this.buckets = await Promise.all(urls.map(async (url, index) => {
+            const bucket = {
+                origin: url,
+                local: "",
+                entity: null,
+            };
+            const buff = await parser.download(bucket.origin);
+            if (buff !== null) {
+                if (Env.is(SE.H5)) {
+                    bucket.local = url;
+                    bucket.entity = Parser.parseVideo(buff, url);
+                }
+                else {
+                    const filePath = genFilePath(url.substring(url.lastIndexOf("/") + 1));
+                    await writeTmpFile(buff, filePath);
+                    bucket.local = filePath;
+                    if (this.remainStart >= index && index < this.remainEnd) {
+                        bucket.entity = Parser.parseVideo(buff, url);
+                    }
+                }
+            }
+            return bucket;
+        }));
+    }
+    get() {
+        return this.getBucket(this.point);
+    }
+    prev() {
+        return this.getBucket(this.point - 1);
+    }
+    next() {
+        return this.getBucket(this.point + 1);
+    }
+    go(pos) {
+        return this.getBucket(pos);
+    }
+    clear() {
+        const { buckets } = this;
+        this.buckets = [];
+        this.point = 0;
+        return Promise.all(buckets.map((bucket) => removeTmpFile(bucket.local)));
+    }
+}
+
+export { Brush, Env, Parser, Player, Poster, SE as SUPPORTED_ENV, VideoPool, getCanvas, getOffscreenCanvas };
 //# sourceMappingURL=index.js.map

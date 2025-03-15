@@ -11,7 +11,7 @@ export declare function writeTmpFile(data: ArrayBuffer, filePath: string): Promi
  * @param filePath 文件资源地址
  * @returns
  */
-export declare function removeTmpFile(filePath: string): Promise<void>;
+export declare function removeTmpFile(filePath: string): Promise<string>;
 /**
  * 读取本地文件
  * @param filePath 文件资源地址

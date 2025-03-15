@@ -5,6 +5,7 @@ export declare class ImageManager {
      * 素材
      */
     private materials;
+    private isImage;
     getMaterials(): Map<string, Bitmap>;
     clear(): void;
     /**

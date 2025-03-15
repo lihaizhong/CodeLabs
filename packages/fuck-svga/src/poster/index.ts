@@ -1,6 +1,6 @@
 import { Brush } from "../player/brush";
-import benchmark from "../benchmark";
 import { loadImage } from "../polyfill";
+import benchmark from "../benchmark";
 
 export class Poster {
   /**

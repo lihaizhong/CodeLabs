@@ -1,6 +1,8 @@
 import { unzlibSync } from "fflate";
 import { MovieEntity } from "fuck-protobuf";
-import { download } from "../polyfill/download";
+import { Env, SE } from "env";
+import { readFile } from "../polyfill";
+import { isRemote, readRemoteFile } from "../polyfill/download";
 import { VideoEntity } from "./video-entity";
 import benchmark from "../benchmark";
 
@@ -14,7 +16,7 @@ export class Parser {
    * @param url 视频地址
    * @returns
    */
-  static parseVideoEntity(data: ArrayBuffer, url: string): Video {
+  static parseVideo(data: ArrayBuffer, url: string): Video {
     const header = new Uint8Array(data, 0, 4);
     const u8a = new Uint8Array(data);
 
@@ -36,18 +38,35 @@ export class Parser {
     return entity!;
   }
 
-  // static parsePlacardEntity(data: any[]) {}
+  /**
+   * 读取文件资源
+   * @param url 文件资源地址
+   * @returns
+   */
+  public download(url: string): Promise<ArrayBuffer | null> {
+    // 读取远程文件
+    if (isRemote(url)) {
+      return readRemoteFile(url);
+    }
+  
+    // 读取本地文件
+    if (Env.not(SE.H5)) {
+      return readFile(url);
+    }
+  
+    return Promise.resolve(null);
+  }
 
   /**
    * 通过 url 下载并解析 SVGA 文件
    * @param url SVGA 文件的下载链接
    * @returns Promise<SVGA 数据源
    */
-  async load(url: string): Promise<Video> {
-    const data = await download(url);
+  public async load(url: string): Promise<Video> {
+    const data = await this.download(url);
 
     benchmark.label(url);
     benchmark.line();
-    return Parser.parseVideoEntity(data!, url);
+    return Parser.parseVideo(data!, url);
   }
 }

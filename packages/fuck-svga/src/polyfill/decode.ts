@@ -100,7 +100,7 @@ export function matob(data: string): string {
  */
 export function toBase64(data: Uint8Array): string {
   // const buf = toBuffer(data);
-  const b64: string = mbtoa(String.fromCharCode(...data));
+  // const b64: string = mbtoa(String.fromCharCode(...data));
 
   // if (Env.is(SE.H5)) {
   //   b64 = btoa(String.fromCharCode(...data));
@@ -110,7 +110,7 @@ export function toBase64(data: Uint8Array): string {
   //   b64 = mbtoa(String.fromCharCode(...data));
   // }
 
-  return `data:image/png;base64,${b64}`;
+  return `data:image/png;base64,${mbtoa(String.fromCharCode(...data))}`;
 }
 
 /**

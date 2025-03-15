@@ -1,5 +1,4 @@
 import { br } from "./bridge";
-import { readFile } from "./fsm";
 import { Env, SE } from "../env";
 
 /**
@@ -7,7 +6,7 @@ import { Env, SE } from "../env";
  * @param url 文件资源地址
  * @returns
  */
-function readRemoteFile(url: string): Promise<ArrayBuffer> {
+export function readRemoteFile(url: string): Promise<ArrayBuffer> {
   // H5环境
   if (Env.is(SE.H5)) {
     return fetch(url).then((response) => {
@@ -36,20 +35,8 @@ function readRemoteFile(url: string): Promise<ArrayBuffer> {
 }
 
 /**
- * 读取文件资源
- * @param url 文件资源地址
- * @returns
+ * 是否是远程链接
+ * @param url 链接
+ * @returns 
  */
-export function download(url: string): Promise<ArrayBuffer | null> {
-  // 读取远程文件
-  if (/^http(s)?:\/\//.test(url)) {
-    return readRemoteFile(url);
-  }
-
-  // 读取本地文件
-  if (Env.not(SE.H5)) {
-    return readFile(url);
-  }
-
-  return Promise.resolve(null);
-}
+export const isRemote = (url: string) => /^http(s)?:\/\//.test(url);

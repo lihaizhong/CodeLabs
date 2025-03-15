@@ -55,7 +55,7 @@ export function writeTmpFile(
  * @param filePath 文件资源地址
  * @returns
  */
-export function removeTmpFile(filePath: string): Promise<void> {
+export function removeTmpFile(filePath: string): Promise<string> {
   const fs = (br as WechatMiniprogram.Wx).getFileSystemManager();
 
   return new Promise((resolve) => {
@@ -65,16 +65,16 @@ export function removeTmpFile(filePath: string): Promise<void> {
         benchmark.log(`remove file: ${filePath}`);
         fs.unlink({
           filePath,
-          success: () => resolve(),
+          success: () => resolve(filePath),
           fail(err: any) {
             benchmark.log(`remove fail: ${filePath}`, err);
-            resolve();
+            resolve(filePath);
           },
         });
       },
       fail(err: any) {
         benchmark.log(`access fail: ${filePath}`, err);
-        resolve();
+        resolve(filePath);
       },
     });
   });
