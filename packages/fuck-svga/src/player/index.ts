@@ -290,12 +290,14 @@ export class Player {
 
       if (hasRemained) return;
 
+      const frame = currentFrame;
+
       brush.clearContainer();
       brush.stick();
       brush.clearSecondary();
       currentFrame = nextFrame;
       tail = 0;
-      this.onProcess?.(~~(percent * 100) / 100);
+      this.onProcess?.(~~(percent * 100) / 100, frame);
     };
     animator!.onEnd = () => this.onEnd?.();
     animator!.start();

@@ -277,7 +277,7 @@ const enum PLAYER_CONTENT_MODE {
 
 type PlayerEventCallback = () => void;
 
-type PlayerProcessEventCallback = (percent: number) => void;
+type PlayerProcessEventCallback = (percent: number, frame: number) => void;
 
 type PosterEventCallback = () => void;
 
