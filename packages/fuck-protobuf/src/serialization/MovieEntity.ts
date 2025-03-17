@@ -1,9 +1,9 @@
 // import base64 from "@protobufjs/base64";
-import Reader from "../../serialization/Reader";
+import Reader from "../io/Reader";
 // import Writer from "../serialization/Writer";
 import SpriteEntity from "./SpriteEntity";
 import MovieParams from "./MovieParams";
-import { emptyObject } from "../../utils";
+import { emptyObject } from "../utils";
 
 /**
  * Properties of a MovieEntity.

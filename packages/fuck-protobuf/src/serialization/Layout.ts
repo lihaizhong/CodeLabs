@@ -1,37 +1,34 @@
-import Reader from "../../serialization/Reader";
+import Reader from "../io/Reader";
 // import Writer from "../serialization/Writer";
-// import ShapeEntity from "./ShapeEntity";
 // import { toJSONOptions } from "../utils";
 
 /**
- * Properties of a RectArgs.
- * @memberof com.opensource.svga.ShapeEntity
- * @interface IRectArgs
- * @property {number|null} [x] RectArgs x
- * @property {number|null} [y] RectArgs y
- * @property {number|null} [width] RectArgs width
- * @property {number|null} [height] RectArgs height
- * @property {number|null} [cornerRadius] RectArgs cornerRadius
+ * Properties of a Layout.
+ * @memberof com.opensource.svga
+ * @interface ILayout
+ * @property {number|null} [x] Layout x
+ * @property {number|null} [y] Layout y
+ * @property {number|null} [width] Layout width
+ * @property {number|null} [height] Layout height
  */
-export interface RectArgsProps {
+export interface LayoutProps {
   x: number | null;
   y: number | null;
   width: number | null;
   height: number | null;
-  cornerRadius: number | null;
 }
 
-// export class RectArgsWriter {
+// export class LayoutWriter {
 //   /**
-//    * Encodes the specified RectArgs message. Does not implicitly {@link com.opensource.svga.ShapeEntity.RectArgs.verify|verify} messages.
+//    * Encodes the specified Layout message. Does not implicitly {@link com.opensource.svga.Layout.verify|verify} messages.
 //    * @function encode
-//    * @memberof com.opensource.svga.ShapeEntity.RectArgs
+//    * @memberof com.opensource.svga.Layout
 //    * @static
-//    * @param {com.opensource.svga.ShapeEntity.IRectArgs} message RectArgs message or plain object to encode
+//    * @param {com.opensource.svga.ILayout} message Layout message or plain object to encode
 //    * @param {$protobuf.Writer} [writer] Writer to encode to
 //    * @returns {$protobuf.Writer} Writer
 //    */
-//   static encode(message: RectArgs, writer: Writer): Writer {
+//   static encode(message: Layout, writer: Writer): Writer {
 //     if (!writer) {
 //       writer = Writer.create();
 //     }
@@ -47,45 +44,40 @@ export interface RectArgsProps {
 //     if (message.height != null && Object.hasOwn(message, "height")) {
 //       writer.uint32(/* id 4, wireType 5 =*/ 37).float(message.height);
 //     }
-//     if (
-//       message.cornerRadius != null &&
-//       Object.hasOwn(message, "cornerRadius")
-//     ) {
-//       writer.uint32(/* id 5, wireType 5 =*/ 45).float(message.cornerRadius);
-//     }
 
 //     return writer;
 //   }
+
 //   /**
-//    * Encodes the specified RectArgs message, length delimited. Does not implicitly {@link com.opensource.svga.ShapeEntity.RectArgs.verify|verify} messages.
+//    * Encodes the specified Layout message, length delimited. Does not implicitly {@link com.opensource.svga.Layout.verify|verify} messages.
 //    * @function encodeDelimited
-//    * @memberof com.opensource.svga.ShapeEntity.RectArgs
+//    * @memberof com.opensource.svga.Layout
 //    * @static
-//    * @param {com.opensource.svga.ShapeEntity.IRectArgs} message RectArgs message or plain object to encode
+//    * @param {com.opensource.svga.ILayout} message Layout message or plain object to encode
 //    * @param {$protobuf.Writer} [writer] Writer to encode to
 //    * @returns {$protobuf.Writer} Writer
 //    */
-//   static encodeDelimited(message: RectArgs, writer: Writer): Writer {
-//     return RectArgs.encode(message, writer).ldelim();
+//   static encodeDelimited(message: Layout, writer: Writer): Writer {
+//     return Layout.encode(message, writer).ldelim();
 //   }
 // }
 
-export default class RectArgs {
+export default class Layout {
   /**
-   * Decodes a RectArgs message from the specified reader or buffer.
+   * Decodes a Layout message from the specified reader or buffer.
    * @function decode
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
+   * @memberof com.opensource.svga.Layout
    * @static
    * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
    * @param {number} [length] Message length if known beforehand
-   * @returns {com.opensource.svga.ShapeEntity.RectArgs} RectArgs
+   * @returns {com.opensource.svga.Layout} Layout
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(reader: Reader | Uint8Array, length?: number): RectArgs {
+  static decode(reader: Reader | Uint8Array, length?: number): Layout {
     reader = Reader.create(reader);
     const end = length == undefined ? reader.len : reader.pos + length;
-    const message = new RectArgs();
+    const message = new Layout();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -105,10 +97,6 @@ export default class RectArgs {
           message.height = reader.float();
           break;
         }
-        case 5: {
-          message.cornerRadius = reader.float();
-          break;
-        }
         default:
           reader.skipType(tag & 7);
           break;
@@ -119,25 +107,25 @@ export default class RectArgs {
   }
 
   /**
-   * Decodes a RectArgs message from the specified reader or buffer, length delimited.
+   * Decodes a Layout message from the specified reader or buffer, length delimited.
    * @function decodeDelimited
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
+   * @memberof com.opensource.svga.Layout
    * @static
    * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-   * @returns {com.opensource.svga.ShapeEntity.RectArgs} RectArgs
+   * @returns {com.opensource.svga.Layout} Layout
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  // static decodeDelimited(reader: Reader | Uint8Array): RectArgs {
+  // static decodeDelimited(reader: Reader | Uint8Array): Layout {
   //   reader = Reader.create(reader);
 
   //   return this.decode(reader, reader.uint32());
   // }
 
   /**
-   * Verifies a RectArgs message.
+   * Verifies a Layout message.
    * @function verify
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
+   * @memberof com.opensource.svga.Layout
    * @static
    * @param {Object.<string,*>} message Plain object to verify
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
@@ -166,31 +154,23 @@ export default class RectArgs {
   //       return "height: number expected";
   //     }
   //   }
-  //   if (
-  //     message.cornerRadius != null &&
-  //     message.hasOwnProperty("cornerRadius")
-  //   ) {
-  //     if (typeof message.cornerRadius != "number") {
-  //       return "cornerRadius: number expected";
-  //     }
-  //   }
 
   //   return null;
   // }
 
   /**
-   * Creates a RectArgs message from a plain object. Also converts values to their respective internal types.
+   * Creates a Layout message from a plain object. Also converts values to their respective internal types.
    * @function fromObject
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
+   * @memberof com.opensource.svga.Layout
    * @static
    * @param {Object.<string,*>} object Plain object
-   * @returns {com.opensource.svga.ShapeEntity.RectArgs} RectArgs
+   * @returns {com.opensource.svga.Layout} Layout
    */
-  // static fromObject(object: Record<string, any>): RectArgs {
-  //   if (object instanceof ShapeEntity.RectArgs) {
+  // static fromObject(object: Record<string, any>): Layout {
+  //   if (object instanceof Layout) {
   //     return object;
   //   }
-  //   const message = new ShapeEntity.RectArgs();
+  //   const message = new Layout();
   //   if (object.x != null) {
   //     message.x = +object.x;
   //   }
@@ -203,24 +183,21 @@ export default class RectArgs {
   //   if (object.height != null) {
   //     message.height = +object.height;
   //   }
-  //   if (object.cornerRadius != null) {
-  //     message.cornerRadius = +object.cornerRadius;
-  //   }
 
   //   return message;
   // }
 
   /**
-   * Creates a plain object from a RectArgs message. Also converts values to other types if specified.
+   * Creates a plain object from a Layout message. Also converts values to other types if specified.
    * @function toObject
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
+   * @memberof com.opensource.svga.Layout
    * @static
-   * @param {com.opensource.svga.ShapeEntity.RectArgs} message RectArgs
+   * @param {com.opensource.svga.Layout} message Layout
    * @param {$protobuf.IConversionOptions} [options] Conversion options
    * @returns {Object.<string,*>} Plain object
    */
   // static toObject(
-  //   message: RectArgs,
+  //   message: Layout,
   //   options: Record<string, any>
   // ): Record<string, any> {
   //   if (!options) {
@@ -232,7 +209,6 @@ export default class RectArgs {
   //     object.y = 0;
   //     object.width = 0;
   //     object.height = 0;
-  //     object.cornerRadius = 0;
   //   }
   //   if (message.x != null && message.hasOwnProperty("x")) {
   //     object.x =
@@ -254,23 +230,14 @@ export default class RectArgs {
   //         ? "" + message.height
   //         : message.height;
   //   }
-  //   if (
-  //     message.cornerRadius != null &&
-  //     message.hasOwnProperty("cornerRadius")
-  //   ) {
-  //     object.cornerRadius =
-  //       options.json && !isFinite(message.cornerRadius)
-  //         ? "" + message.cornerRadius
-  //         : message.cornerRadius;
-  //   }
 
   //   return object;
   // }
 
   /**
-   * Gets the default type url for RectArgs
+   * Gets the default type url for Layout
    * @function getTypeUrl
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
+   * @memberof com.opensource.svga.Layout
    * @static
    * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
    * @returns {string} The default type url
@@ -280,54 +247,47 @@ export default class RectArgs {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 
-  //   return typeUrlPrefix + "/com.opensource.svga.ShapeEntity.RectArgs";
+  //   return typeUrlPrefix + "/com.opensource.svga.Layout";
   // }
 
   /**
-   * RectArgs x.
+   * Layout x.
    * @member {number} x
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
+   * @memberof com.opensource.svga.Layout
    * @instance
    */
   x: number = 0;
   /**
-   * RectArgs y.
+   * Layout y.
    * @member {number} y
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
+   * @memberof com.opensource.svga.Layout
    * @instance
    */
   y: number = 0;
   /**
-   * RectArgs width.
+   * Layout width.
    * @member {number} width
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
+   * @memberof com.opensource.svga.Layout
    * @instance
    */
   width: number = 0;
   /**
-   * RectArgs height.
+   * Layout height.
    * @member {number} height
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
+   * @memberof com.opensource.svga.Layout
    * @instance
    */
   height: number = 0;
-  /**
-   * RectArgs cornerRadius.
-   * @member {number} cornerRadius
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
-   * @instance
-   */
-  cornerRadius: number = 0;
 
   /**
-   * Constructs a new RectArgs.
-   * @memberof com.opensource.svga.ShapeEntity
-   * @classdesc Represents a RectArgs.
-   * @implements IRectArgs
+   * Constructs a new Layout.
+   * @memberof com.opensource.svga
+   * @classdesc Represents a Layout.
+   * @implements ILayout
    * @constructor
-   * @param {com.opensource.svga.ShapeEntity.IRectArgs=} [properties] Properties to set
+   * @param {com.opensource.svga.ILayout=} [properties] Properties to set
    */
-  constructor(properties?: RectArgsProps) {
+  constructor(properties?: LayoutProps) {
     if (properties) {
       if (properties.x != null) {
         this.x = properties.x
@@ -344,21 +304,17 @@ export default class RectArgs {
       if (properties.height != null) {
         this.height = properties.height
       }
-
-      if (properties.cornerRadius != null) {
-        this.cornerRadius = properties.cornerRadius
-      }
     }
   }
 
   /**
-   * Converts this RectArgs to JSON.
+   * Converts this Layout to JSON.
    * @function toJSON
-   * @memberof com.opensource.svga.ShapeEntity.RectArgs
+   * @memberof com.opensource.svga.Layout
    * @instance
    * @returns {Object.<string,*>} JSON object
    */
-  // toJSON(): Record<string, any> {
-  //   return RectArgs.toObject(this, toJSONOptions);
+  // toJSON() {
+  //   return Layout.toObject(this, toJSONOptions);
   // }
 }

@@ -1,4 +1,4 @@
-import { isString } from "../utils";
+import { isString } from "../../src/utils";
 
 export default class LongBits {
   /**

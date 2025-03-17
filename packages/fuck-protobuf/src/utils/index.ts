@@ -1,45 +1,45 @@
-import { LongBits } from "../dts";
+// import { LongBits } from "../../archive/dts";
 
 export function noop() {}
 
-export function writeByte(val: number, buf: Uint8Array, pos: number) {
-  buf[pos] = val & 255;
-}
+// export function writeByte(val: number, buf: Uint8Array, pos: number) {
+//   buf[pos] = val & 255;
+// }
 
-export function writeBytes(val: number[], buf: Uint8Array, pos: number) {
-  // also works for plain array values
-  buf.set(val, pos);
-}
+// export function writeBytes(val: number[], buf: Uint8Array, pos: number) {
+//   // also works for plain array values
+//   buf.set(val, pos);
+// }
 
-export function writeVarint32(val: number, buf: Uint8Array, pos: number) {
-  while (val > 127) {
-    buf[pos++] = (val & 127) | 128;
-    val >>>= 7;
-  }
-  buf[pos] = val;
-}
+// export function writeVarint32(val: number, buf: Uint8Array, pos: number) {
+//   while (val > 127) {
+//     buf[pos++] = (val & 127) | 128;
+//     val >>>= 7;
+//   }
+//   buf[pos] = val;
+// }
 
-export function writeVarint64(val: LongBits, buf: Uint8Array, pos: number) {
-  while (val.hi) {
-    buf[pos++] = (val.lo & 127) | 128;
-    val.lo = ((val.lo >>> 7) | (val.hi << 25)) >>> 0;
-    val.hi >>>= 7;
-  }
+// export function writeVarint64(val: LongBits, buf: Uint8Array, pos: number) {
+//   while (val.hi) {
+//     buf[pos++] = (val.lo & 127) | 128;
+//     val.lo = ((val.lo >>> 7) | (val.hi << 25)) >>> 0;
+//     val.hi >>>= 7;
+//   }
 
-  while (val.lo > 127) {
-    buf[pos++] = (val.lo & 127) | 128;
-    val.lo = val.lo >>> 7;
-  }
+//   while (val.lo > 127) {
+//     buf[pos++] = (val.lo & 127) | 128;
+//     val.lo = val.lo >>> 7;
+//   }
 
-  buf[pos++] = val.lo;
-}
+//   buf[pos++] = val.lo;
+// }
 
-export function writeFixed32(val: number, buf: Uint8Array, pos: number) {
-  buf[pos] = val & 255;
-  buf[pos + 1] = (val >>> 8) & 255;
-  buf[pos + 2] = (val >>> 16) & 255;
-  buf[pos + 3] = val >>> 24;
-}
+// export function writeFixed32(val: number, buf: Uint8Array, pos: number) {
+//   buf[pos] = val & 255;
+//   buf[pos + 1] = (val >>> 8) & 255;
+//   buf[pos + 2] = (val >>> 16) & 255;
+//   buf[pos + 3] = val >>> 24;
+// }
 
 /**
  * Tests if the specified value is an string.

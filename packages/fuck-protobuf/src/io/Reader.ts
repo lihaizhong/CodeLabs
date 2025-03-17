@@ -1,5 +1,5 @@
-import float from "../decode/float";
-import utf8 from "../decode/utf8";
+import float from "./float";
+import utf8 from "./utf8";
 // import { LongBits } from "../dts";
 
 export default class Reader {

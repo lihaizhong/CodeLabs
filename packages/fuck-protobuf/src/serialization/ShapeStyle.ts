@@ -1,4 +1,4 @@
-import Reader from "../../serialization/Reader";
+import Reader from "../io/Reader";
 // import Writer from "../serialization/Writer";
 import LineCap from "./LineCap";
 import LineJoin from "./LineJoin";
