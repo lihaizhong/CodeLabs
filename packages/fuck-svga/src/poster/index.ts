@@ -129,17 +129,12 @@ export class Poster {
   public draw(): void {
     if (!this.entity) return;
 
-    const { brush, entity, contentMode, frame } = this;
+    const { brush, entity, contentMode, frame, onStart, onEnd } = this;
 
-    benchmark.time(
-      "render",
-      () => {
-        brush.clearSecondary();
-        brush.resize(contentMode, entity!.size);
-        brush.draw(entity!, frame, 0, entity!.sprites.length);
-        brush.stick();
-      }
-    );
+    onStart?.();
+    brush.resize(contentMode, entity!.size);
+    brush.draw(entity!, frame, 0, entity!.sprites.length);
+    onEnd?.();
   }
 
   /**

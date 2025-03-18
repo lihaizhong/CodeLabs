@@ -6782,13 +6782,11 @@ class Poster {
     draw() {
         if (!this.entity)
             return;
-        const { brush, entity, contentMode, frame } = this;
-        benchmark.time("render", () => {
-            brush.clearSecondary();
-            brush.resize(contentMode, entity.size);
-            brush.draw(entity, frame, 0, entity.sprites.length);
-            brush.stick();
-        });
+        const { brush, entity, contentMode, frame, onStart, onEnd } = this;
+        onStart?.();
+        brush.resize(contentMode, entity.size);
+        brush.draw(entity, frame, 0, entity.sprites.length);
+        onEnd?.();
     }
     /**
      * 获取海报元数据
