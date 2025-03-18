@@ -2,6 +2,13 @@ import { br } from "./bridge";
 import { Env, SE } from "../env";
 
 /**
+ * 是否是远程链接
+ * @param url 链接
+ * @returns 
+ */
+export const isRemote = (url: string) => /^http(s)?:\/\//.test(url);
+
+/**
  * 读取远程文件
  * @param url 文件资源地址
  * @returns
@@ -33,10 +40,3 @@ export function readRemoteFile(url: string): Promise<ArrayBuffer> {
     });
   });
 }
-
-/**
- * 是否是远程链接
- * @param url 链接
- * @returns 
- */
-export const isRemote = (url: string) => /^http(s)?:\/\//.test(url);

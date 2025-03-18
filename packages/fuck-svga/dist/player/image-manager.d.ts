@@ -5,8 +5,20 @@ export declare class ImageManager {
      * 素材
      */
     private materials;
+    /**
+     * 判断是不是图片
+     * @param img
+     * @returns
+     */
     private isImage;
+    /**
+     * 获取图片素材
+     * @returns
+     */
     getMaterials(): Map<string, Bitmap>;
+    /**
+     * 清理素材
+     */
     clear(): void;
     /**
      * 加载图片集

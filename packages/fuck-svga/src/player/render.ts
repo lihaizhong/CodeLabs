@@ -24,16 +24,16 @@ interface CurrentPoint {
  * * 弧线命令
  * - A: arcTo，从起始点绘制一条弧线到指定点。
  */
-const validMethods = "MLHVCSQZmlhvcsqz";
+const VALID_METHODS = "MLHVCSQZmlhvcsqz";
 
 function render(
-  context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
+  context: PlatformRenderingContext2D,
   materials: Map<string, Bitmap>,
   videoEntity: Video,
   currentFrame: number,
   head: number,
   tail: number,
-  globalTransform?: GlobalTransform,
+  globalTransform?: GlobalTransform
 ): void {
   const { sprites, replaceElements, dynamicElements } = videoEntity;
 
@@ -57,7 +57,7 @@ function render(
 }
 
 function drawSprite(
-  context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
+  context: PlatformRenderingContext2D,
   sprite: VideoSprite,
   currentFrame: number,
   bitmap?: Bitmap,
@@ -127,7 +127,7 @@ function drawSprite(
 }
 
 function drawShape(
-  context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
+  context: PlatformRenderingContext2D,
   shape: VideoFrameShape
 ): void {
   switch (shape.type) {
@@ -161,12 +161,10 @@ function drawShape(
 }
 
 function resetShapeStyles(
-  context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
+  context: PlatformRenderingContext2D,
   styles: VideoStyles | undefined
 ): void {
-  if (!styles) {
-    return;
-  }
+  if (!styles) return;
 
   context.strokeStyle = styles.stroke || "transparent";
 
@@ -193,7 +191,7 @@ function resetShapeStyles(
 }
 
 function drawBezier(
-  context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
+  context: PlatformRenderingContext2D,
   d: string | undefined,
   transform: Transform | undefined,
   styles: VideoStyles
@@ -225,7 +223,7 @@ function drawBezier(
       }
 
       const firstLetter = segment.substring(0, 1);
-      if (validMethods.includes(firstLetter)) {
+      if (VALID_METHODS.includes(firstLetter)) {
         drawBezierElement(
           context,
           currentPoint,
@@ -245,7 +243,7 @@ function drawBezier(
 }
 
 function drawBezierElement(
-  context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
+  context: PlatformRenderingContext2D,
   currentPoint: CurrentPoint,
   method: string,
   args: string[]
@@ -421,7 +419,7 @@ function drawBezierElement(
 }
 
 function drawEllipse(
-  context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
+  context: PlatformRenderingContext2D,
   x: number,
   y: number,
   radiusX: number,
@@ -468,7 +466,7 @@ function drawEllipse(
 }
 
 function drawRect(
-  context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
+  context: PlatformRenderingContext2D,
   x: number,
   y: number,
   width: number,

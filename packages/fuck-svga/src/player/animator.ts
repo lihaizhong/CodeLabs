@@ -90,9 +90,7 @@ export class Animator {
       TP = ((DT + LS) % D) / D;
     }
 
-    benchmark.time('update partial', () => {
-      this.onUpdate(TP);
-    });
+    benchmark.time('update partial', () => this.onUpdate(TP));
     if (!this.isRunning && ended) {
       this.onEnd();
     }

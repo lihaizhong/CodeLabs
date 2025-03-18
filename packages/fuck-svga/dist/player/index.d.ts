@@ -93,10 +93,6 @@ export declare class Player {
      */
     stop(): void;
     /**
-     * 清理容器画布
-     */
-    clear(): void;
-    /**
      * 销毁实例
      */
     destroy(): void;

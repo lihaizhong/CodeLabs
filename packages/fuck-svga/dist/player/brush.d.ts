@@ -63,19 +63,19 @@ export declare class Brush {
      * @returns
      */
     getImage(type?: string, encoderOptions?: number): string;
-    getRect(): ViewportRect;
-    fitSize(contentMode: PLAYER_CONTENT_MODE, videoSize: ViewportRect): void;
+    resize(contentMode: PLAYER_CONTENT_MODE, videoSize: ViewportRect): void;
     /**
      * 注册刷新屏幕的回调函数
      * @param cb
      */
     flush(cb: () => void): void;
+    clearContainer: () => void;
+    clearSecondary: () => void;
     /**
      * 清理素材库
      */
     clearMaterials(): void;
-    clearContainer: () => void;
-    clearSecondary: () => void;
+    clear(mode?: 'front' | 'back' | 'all'): void;
     /**
      * 绘制图片片段
      * @param videoEntity

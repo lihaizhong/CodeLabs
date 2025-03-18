@@ -12,6 +12,7 @@ export declare class Poster {
      * @param options 可配置项
      */
     setConfig(options: string | PosterConfig, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
+    setContentMode(contentMode: PLAYER_CONTENT_MODE): void;
     /**
      * 装载 SVGA 数据元
      * @param videoEntity SVGA 数据源
@@ -60,6 +61,13 @@ export declare class Poster {
      */
     draw(): void;
     /**
+     * 获取海报元数据
+     * @param type
+     * @param encoderOptions
+     * @returns
+     */
+    toDataURL(type?: string, encoderOptions?: number): string;
+    /**
      * 清理海报
      */
     clear(): void;
@@ -67,11 +75,4 @@ export declare class Poster {
      * 销毁海报
      */
     destroy(): void;
-    /**
-     * 获取海报元数据
-     * @param type
-     * @param encoderOptions
-     * @returns
-     */
-    toDataURL(type?: string, encoderOptions?: number): string;
 }

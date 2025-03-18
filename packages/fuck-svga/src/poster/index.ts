@@ -42,6 +42,10 @@ export class Poster {
     return this.brush.register(config.container, '', component);
   }
 
+  public setContentMode(contentMode: PLAYER_CONTENT_MODE): void {
+    this.contentMode = contentMode;
+  }
+
   /**
    * 装载 SVGA 数据元
    * @param videoEntity SVGA 数据源
@@ -56,7 +60,7 @@ export class Poster {
     const { images, filename } = videoEntity;
 
     this.entity = videoEntity;
-    this.clear();
+    this.brush.clear();
 
     return this.brush.loadImages(images, filename);
   }
@@ -139,6 +143,16 @@ export class Poster {
   }
 
   /**
+   * 获取海报元数据
+   * @param type 
+   * @param encoderOptions 
+   * @returns 
+   */
+  public toDataURL(type?: string, encoderOptions?: number): string {
+    return this.brush.getImage(type, encoderOptions);
+  }
+
+  /**
    * 清理海报
    */
   public clear(): void {
@@ -151,15 +165,5 @@ export class Poster {
   public destroy(): void {
     this.brush.destroy();
     this.entity = undefined;
-  }
-
-  /**
-   * 获取海报元数据
-   * @param type 
-   * @param encoderOptions 
-   * @returns 
-   */
-  public toDataURL(type?: string, encoderOptions?: number): string {
-    return this.brush.getImage(type, encoderOptions);
   }
 }

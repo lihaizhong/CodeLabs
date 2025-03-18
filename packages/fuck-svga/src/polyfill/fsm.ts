@@ -14,6 +14,14 @@ export function genFilePath(filename: string, prefix?: string) {
   return `${USER_DATA_PATH}/${prefix ? `${prefix}.` : ""}${filename}`;
 }
 
+let fsm: WechatMiniprogram.FileSystemManager | null = null;
+
+function getFileSystemManager() {
+  if (fsm === null) {
+    fsm = (br as WechatMiniprogram.Wx).getFileSystemManager();
+  }
+}
+
 /**
  * 写入本地文件
  * @param data 文件内容
@@ -24,17 +32,16 @@ export function writeTmpFile(
   data: ArrayBuffer,
   filePath: string
 ): Promise<string> {
-  const fs = (br as WechatMiniprogram.Wx).getFileSystemManager();
-
+  getFileSystemManager();
   benchmark.log(`write file: ${filePath}`);
   return new Promise<string>((resolve, reject) => {
-    fs.access({
+    fsm!.access({
       path: filePath,
       success() {
         resolve(filePath);
       },
       fail() {
-        fs.writeFile({
+        fsm!.writeFile({
           filePath,
           data,
           success() {
@@ -56,14 +63,13 @@ export function writeTmpFile(
  * @returns
  */
 export function removeTmpFile(filePath: string): Promise<string> {
-  const fs = (br as WechatMiniprogram.Wx).getFileSystemManager();
-
+  getFileSystemManager();
   return new Promise((resolve) => {
-    fs.access({
+    fsm!.access({
       path: filePath,
       success() {
         benchmark.log(`remove file: ${filePath}`);
-        fs.unlink({
+        fsm!.unlink({
           filePath,
           success: () => resolve(filePath),
           fail(err: any) {
@@ -86,13 +92,12 @@ export function removeTmpFile(filePath: string): Promise<string> {
  * @returns
  */
 export function readFile(filePath: string): Promise<ArrayBuffer> {
-  const fs = (br as WechatMiniprogram.Wx).getFileSystemManager();
-
+  getFileSystemManager();
   return new Promise((resolve, reject) => {
-    fs.access({
+    fsm!.access({
       path: filePath,
       success() {
-        fs.readFile({
+        fsm!.readFile({
           filePath,
           success: (res: any) => resolve(res.data as ArrayBuffer),
           fail: reject,

@@ -1,3 +1,40 @@
+/**
+ * Supported Application
+ * 目前已支持微信小程序、支付宝小程序、抖音小程序、H5
+ */
+var SE;
+(function (SE) {
+    SE["WECHAT"] = "weapp";
+    SE["ALIPAY"] = "alipay";
+    SE["DOUYIN"] = "tt";
+    SE["H5"] = "h5";
+})(SE || (SE = {}));
+function getEnvironment() {
+    // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
+    if (typeof window !== "undefined") {
+        return SE.H5;
+    }
+    if (typeof tt !== "undefined") {
+        return SE.DOUYIN;
+    }
+    if (typeof my !== "undefined") {
+        return SE.ALIPAY;
+    }
+    if (typeof wx !== "undefined") {
+        return SE.WECHAT;
+    }
+    throw new Error("Unsupported app");
+}
+let env = getEnvironment();
+const Env = {
+    is: (environment) => env === environment,
+    not: (environment) => env !== environment,
+    get: () => env,
+    set: (environment) => {
+        env = environment;
+    }
+};
+
 // DEFLATE is a complex format; to read this code, you should probably check the RFC first:
 // https://tools.ietf.org/html/rfc1951
 // You may also wish to take a look at the guide I made about this program:
@@ -4804,42 +4841,6 @@ function requireCrc32 () {
 
 requireCrc32();
 
-/**
- * Supported Application
- * 目前已支持微信小程序、支付宝小程序、抖音小程序、H5
- */
-const SE = {
-    WECHAT: 1,
-    ALIPAY: 2,
-    DOUYIN: 3,
-    H5: 4
-};
-function getEnvironment() {
-    // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
-    if (typeof window !== "undefined") {
-        return SE.H5;
-    }
-    if (typeof tt !== "undefined") {
-        return SE.DOUYIN;
-    }
-    if (typeof my !== "undefined") {
-        return SE.ALIPAY;
-    }
-    if (typeof wx !== "undefined") {
-        return SE.WECHAT;
-    }
-    throw new Error("Unsupported app");
-}
-let env = getEnvironment();
-const Env = {
-    is: (environment) => env === environment,
-    not: (environment) => env !== environment,
-    get: () => env,
-    set: (environment) => {
-        env = environment;
-    }
-};
-
 function getBridge() {
     if (Env.is(SE.H5)) {
         return globalThis;
@@ -4949,6 +4950,12 @@ function getOffscreenCanvas(options) {
 }
 
 /**
+ * 是否是远程链接
+ * @param url 链接
+ * @returns
+ */
+const isRemote = (url) => /^http(s)?:\/\//.test(url);
+/**
  * 读取远程文件
  * @param url 文件资源地址
  * @returns
@@ -4978,12 +4985,6 @@ function readRemoteFile(url) {
         });
     });
 }
-/**
- * 是否是远程链接
- * @param url 链接
- * @returns
- */
-const isRemote = (url) => /^http(s)?:\/\//.test(url);
 
 const stopwatch = {
     time(label) {
@@ -5021,6 +5022,12 @@ const { USER_DATA_PATH = '' } = Env.is(SE.H5)
 function genFilePath(filename, prefix) {
     return `${USER_DATA_PATH}/${prefix ? `${prefix}.` : ""}${filename}`;
 }
+let fsm = null;
+function getFileSystemManager() {
+    if (fsm === null) {
+        fsm = br.getFileSystemManager();
+    }
+}
 /**
  * 写入本地文件
  * @param data 文件内容
@@ -5028,16 +5035,16 @@ function genFilePath(filename, prefix) {
  * @returns
  */
 function writeTmpFile(data, filePath) {
-    const fs = br.getFileSystemManager();
+    getFileSystemManager();
     benchmark.log(`write file: ${filePath}`);
     return new Promise((resolve, reject) => {
-        fs.access({
+        fsm.access({
             path: filePath,
             success() {
                 resolve(filePath);
             },
             fail() {
-                fs.writeFile({
+                fsm.writeFile({
                     filePath,
                     data,
                     success() {
@@ -5058,13 +5065,13 @@ function writeTmpFile(data, filePath) {
  * @returns
  */
 function removeTmpFile(filePath) {
-    const fs = br.getFileSystemManager();
+    getFileSystemManager();
     return new Promise((resolve) => {
-        fs.access({
+        fsm.access({
             path: filePath,
             success() {
                 benchmark.log(`remove file: ${filePath}`);
-                fs.unlink({
+                fsm.unlink({
                     filePath,
                     success: () => resolve(filePath),
                     fail(err) {
@@ -5086,12 +5093,12 @@ function removeTmpFile(filePath) {
  * @returns
  */
 function readFile(filePath) {
-    const fs = br.getFileSystemManager();
+    getFileSystemManager();
     return new Promise((resolve, reject) => {
-        fs.access({
+        fsm.access({
             path: filePath,
             success() {
-                fs.readFile({
+                fsm.readFile({
                     filePath,
                     success: (res) => resolve(res.data),
                     fail: reject,
@@ -5516,6 +5523,14 @@ class VideoEntity {
  */
 class Parser {
     /**
+     * 截取文件名称
+     * @param url
+     * @returns
+     */
+    static getFileName(url) {
+        return url.substring(url.lastIndexOf('/') + 1);
+    }
+    /**
      * 解析视频实体
      * @param data 视频二进制数据
      * @param url 视频地址
@@ -5531,7 +5546,7 @@ class Parser {
         benchmark.time("unzlibSync", () => {
             const inflateData = unzlibSync(u8a);
             const movieData = MovieEntity.decode(inflateData);
-            entity = new VideoEntity(movieData, url.substring(url.lastIndexOf("/") + 1));
+            entity = new VideoEntity(movieData, Parser.getFileName(url));
         });
         return entity;
     }
@@ -5581,7 +5596,7 @@ class Parser {
  * * 弧线命令
  * - A: arcTo，从起始点绘制一条弧线到指定点。
  */
-const validMethods = "MLHVCSQZmlhvcsqz";
+const VALID_METHODS = "MLHVCSQZmlhvcsqz";
 function render(context, materials, videoEntity, currentFrame, head, tail, globalTransform) {
     const { sprites, replaceElements, dynamicElements } = videoEntity;
     for (let i = head; i < tail; i++) {
@@ -5632,9 +5647,8 @@ function drawShape(context, shape) {
     }
 }
 function resetShapeStyles(context, styles) {
-    if (!styles) {
+    if (!styles)
         return;
-    }
     context.strokeStyle = styles.stroke || "transparent";
     if (styles.strokeWidth > 0) {
         context.lineWidth = styles.strokeWidth;
@@ -5672,7 +5686,7 @@ function drawBezier(context, d, transform, styles) {
                 continue;
             }
             const firstLetter = segment.substring(0, 1);
-            if (validMethods.includes(firstLetter)) {
+            if (VALID_METHODS.includes(firstLetter)) {
                 drawBezierElement(context, currentPoint, firstLetter, segment.substring(1).trim().split(" "));
             }
         }
@@ -5870,22 +5884,35 @@ class ImageManager {
      * 素材
      */
     materials = new Map();
+    /**
+     * 判断是不是图片
+     * @param img
+     * @returns
+     */
     isImage(img) {
         return ((Env.is(SE.H5) && img instanceof Image) ||
             (img.src !== undefined &&
                 img.width !== undefined &&
                 img.height !== undefined));
     }
+    /**
+     * 获取图片素材
+     * @returns
+     */
     getMaterials() {
         return this.materials;
     }
+    /**
+     * 清理素材
+     */
     clear() {
         this.materials.clear();
-        this.pool.forEach((img) => {
+        for (let i = 0; i < this.pool.length; i++) {
+            const img = this.pool[i];
             img.onload = null;
             img.onerror = null;
             img.src = "";
-        });
+        }
     }
     /**
      * 加载图片集
@@ -6134,11 +6161,7 @@ class Brush {
     getImage(type = "image/png", encoderOptions = 0.92) {
         return this.X.toDataURL(type, encoderOptions);
     }
-    getRect() {
-        const { W, H } = this;
-        return { width: W, height: H };
-    }
-    fitSize(contentMode, videoSize) {
+    resize(contentMode, videoSize) {
         const { Y } = this;
         let scaleX = 1.0;
         let scaleY = 1.0;
@@ -6185,14 +6208,23 @@ class Brush {
     flush(cb) {
         (Env.is(SE.H5) ? br : this.X).requestAnimationFrame(cb);
     }
+    clearContainer = noop;
+    clearSecondary = noop;
     /**
      * 清理素材库
      */
     clearMaterials() {
         this.IM.clear();
     }
-    clearContainer = noop;
-    clearSecondary = noop;
+    clear(mode = 'all') {
+        if (mode === 'all' || mode === 'front') {
+            this.clearContainer();
+        }
+        if (mode === 'all' || mode === 'back') {
+            this.clearSecondary();
+            this.clearMaterials();
+        }
+    }
     /**
      * 绘制图片片段
      * @param videoEntity
@@ -6208,9 +6240,7 @@ class Brush {
      * 销毁画笔
      */
     destroy() {
-        this.clearContainer();
-        this.clearSecondary();
-        this.clearMaterials();
+        this.clear();
         this.X = this.XC = this.Y = this.YC = null;
         this.clearContainer = this.clearSecondary = this.stick = noop;
     }
@@ -6290,9 +6320,7 @@ class Animator {
             // 本轮动画已消耗的时间比例 = 本轮动画已消耗的时间 / 动画持续时间
             TP = ((DT + LS) % D) / D;
         }
-        benchmark.time('update partial', () => {
-            this.onUpdate(TP);
-        });
+        benchmark.time('update partial', () => this.onUpdate(TP));
         if (!this.isRunning && ended) {
             this.onEnd();
         }
@@ -6484,8 +6512,7 @@ class Player {
         const { images, filename } = videoEntity;
         this.animator.stop();
         this.entity = videoEntity;
-        this.brush.clearSecondary();
-        this.brush.clearMaterials();
+        this.brush.clear('back');
         return this.brush.loadImages(images, filename);
     }
     /**
@@ -6546,17 +6573,8 @@ class Player {
      */
     stop() {
         this.animator.stop();
-        this.brush.clearContainer();
+        this.brush.clear();
         this.onStop?.();
-    }
-    /**
-     * 清理容器画布
-     */
-    clear() {
-        const { brush } = this;
-        brush.clearContainer();
-        brush.clearSecondary();
-        brush.clearMaterials();
     }
     /**
      * 销毁实例
@@ -6615,7 +6633,7 @@ class Player {
         let drawPercent;
         // 更新动画基础信息
         animator.setConfig(duration, loopStart, loop, fillValue);
-        brush.fitSize(contentMode, entity.size);
+        brush.resize(contentMode, entity.size);
         // 动画绘制过程
         animator.onUpdate = (timePercent) => {
             if (playMode === "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */) {
@@ -6646,12 +6664,13 @@ class Player {
             }
             if (hasRemained)
                 return;
+            const frame = currentFrame;
             brush.clearContainer();
             brush.stick();
             brush.clearSecondary();
             currentFrame = nextFrame;
             tail = 0;
-            this.onProcess?.(~~(percent * 100) / 100);
+            this.onProcess?.(~~(percent * 100) / 100, frame);
         };
         animator.onEnd = () => this.onEnd?.();
         animator.start();
@@ -6687,6 +6706,9 @@ class Poster {
         }
         return this.brush.register(config.container, '', component);
     }
+    setContentMode(contentMode) {
+        this.contentMode = contentMode;
+    }
     /**
      * 装载 SVGA 数据元
      * @param videoEntity SVGA 数据源
@@ -6699,7 +6721,7 @@ class Poster {
         }
         const { images, filename } = videoEntity;
         this.entity = videoEntity;
-        this.clear();
+        this.brush.clear();
         return this.brush.loadImages(images, filename);
     }
     /**
@@ -6758,29 +6780,15 @@ class Poster {
      * 绘制海报
      */
     draw() {
+        if (!this.entity)
+            return;
         const { brush, entity, contentMode, frame } = this;
         benchmark.time("render", () => {
             brush.clearSecondary();
-            brush.fitSize(contentMode, entity.size);
+            brush.resize(contentMode, entity.size);
             brush.draw(entity, frame, 0, entity.sprites.length);
             brush.stick();
         });
-    }
-    /**
-     * 清理海报
-     */
-    clear() {
-        const { brush } = this;
-        brush.clearContainer();
-        brush.clearSecondary();
-        brush.clearMaterials();
-    }
-    /**
-     * 销毁海报
-     */
-    destroy() {
-        this.brush.destroy();
-        this.entity = undefined;
     }
     /**
      * 获取海报元数据
@@ -6791,32 +6799,93 @@ class Poster {
     toDataURL(type, encoderOptions) {
         return this.brush.getImage(type, encoderOptions);
     }
+    /**
+     * 清理海报
+     */
+    clear() {
+        this.brush.clear();
+    }
+    /**
+     * 销毁海报
+     */
+    destroy() {
+        this.brush.destroy();
+        this.entity = undefined;
+    }
 }
 
-class VideoPool {
+class VideoManager {
+    /**
+     * 视频池的当前指针位置
+     */
     point = 0;
+    /**
+     * 视频的最大留存数量，其他视频将放在磁盘上缓存
+     */
     maxRemain = 3;
+    /**
+     * 留存视频的开始指针位置
+     */
     remainStart = 0;
+    /**
+     * 留存视频的结束指针位置
+     */
     remainEnd = 0;
+    /**
+     * 视频加载模式
+     * 快速加载模式：可保证当前视频加载完成后，尽快播放；其他请求将使用Promise的方式保存在bucket中，以供后续使用
+     * 完整加载模式：可保证所有视频加载完成，确保播放切换的流畅性
+     */
+    loadMode = "fast";
+    /**
+     * 视频池的所有数据
+     */
     buckets = [];
+    /**
+     * SVGA解析器
+     */
     parser = new Parser();
+    /**
+     * 获取视频池大小
+     */
     get length() {
         return this.buckets.length;
     }
+    /**
+     * 更新留存指针位置
+     */
     updateRemainPoints() {
-        this.remainStart = Math.ceil(this.point - (this.maxRemain - 1) / 2);
-        if (this.remainStart < 0) {
+        if (this.point < Math.ceil(this.maxRemain / 2)) {
             this.remainStart = 0;
+            this.remainEnd = this.maxRemain;
         }
-        this.remainEnd = this.remainStart + this.maxRemain;
-        if (this.remainEnd > this.length) {
+        else if (this.length - this.point < Math.floor(this.maxRemain / 2)) {
+            this.remainStart = this.remainEnd - this.maxRemain;
             this.remainEnd = this.length;
         }
+        else {
+            this.remainStart = Math.floor(this.point - this.maxRemain / 2);
+            this.remainEnd = this.remainStart + this.maxRemain;
+        }
     }
-    getNeedUpdatePoints(point) {
+    /**
+     * 更新留存指针位置
+     * @param point 最新的指针位置
+     * @returns
+     */
+    getBucketOperators(point) {
         const { remainStart, remainEnd } = this;
         this.point = point;
         this.updateRemainPoints();
+        if (remainStart === remainEnd) {
+            return [
+                {
+                    action: "add",
+                    start: this.remainStart,
+                    end: this.remainEnd,
+                },
+            ];
+        }
         if (this.remainStart > remainEnd || this.remainEnd < remainStart) {
             return [
                 {
@@ -6861,88 +6930,161 @@ class VideoPool {
         }
         return [];
     }
+    /**
+     * 获取当前的视频信息
+     * @param point 最新的指针位置
+     * @returns
+     */
     async getBucket(point) {
         if (point < 0 || point >= this.length) {
             return this.buckets[this.point];
         }
-        const waits = this.getNeedUpdatePoints(point).map(({ action, start, end }) => {
-            const waiting = [];
-            for (let i = start; i < end; i++) {
-                const bucket = this.buckets[i];
-                if (action === "remove") {
-                    bucket.entity = null;
-                    waiting.push(Promise.resolve());
+        const operators = this.getBucketOperators(point);
+        if (operators.length) {
+            const waits = operators.map(({ action, start, end }) => {
+                const waiting = [];
+                for (let i = start; i < end; i++) {
+                    const bucket = this.buckets[i];
+                    if (action === "remove") {
+                        bucket.entity = null;
+                    }
+                    else if (action === "add") {
+                        const p = this.parser.load(bucket.local || bucket.origin);
+                        bucket.promise = p;
+                        if (this.loadMode === "whole" || this.point === i) {
+                            waiting.push(p);
+                        }
+                    }
                 }
-                else if (action === "add") {
-                    const p = this.parser.load(bucket.local).then((video) => {
-                        bucket.entity = video;
-                    });
-                    waiting.push(p);
-                }
-            }
-            return Promise.all(waiting);
-        });
-        await Promise.all(waits);
+                return Promise.all(waiting);
+            });
+            await Promise.all(waits);
+        }
         return this.get();
     }
+    /**
+     * 视频加载模式
+     * @param loadMode
+     */
+    setLoadMode(loadMode) {
+        this.loadMode = loadMode;
+    }
+    /**
+     * 预加载视频到本地磁盘中
+     * @param urls 视频远程地址
+     * @param point 当前指针位置
+     * @param maxRemain 最大留存数量
+     */
     async prepare(urls, point, maxRemain) {
-        const { parser } = this;
-        if (typeof point === "number" && point > 0 && point < urls.length) {
-            this.point = point;
-        }
-        else {
-            this.point = 0;
-        }
-        if (typeof maxRemain === "number" && maxRemain > 0) {
-            this.maxRemain = maxRemain;
-        }
-        else {
-            this.maxRemain = 3;
-        }
+        const { parser, loadMode } = this;
+        this.point =
+            typeof point === "number" && point > 0 && point < urls.length ? point : 0;
+        this.maxRemain =
+            typeof maxRemain === "number" && maxRemain > 0 ? maxRemain : 3;
         this.updateRemainPoints();
         this.buckets = await Promise.all(urls.map(async (url, index) => {
             const bucket = {
                 origin: url,
                 local: "",
                 entity: null,
+                promise: null,
             };
-            const buff = await parser.download(bucket.origin);
-            if (buff !== null) {
-                if (Env.is(SE.H5)) {
-                    bucket.local = url;
-                    bucket.entity = Parser.parseVideo(buff, url);
+            if (Env.is(SE.H5)) {
+                bucket.local = url;
+                if (this.remainStart <= index && index < this.remainEnd) {
+                    if (loadMode === "whole" || index === this.point) {
+                        bucket.entity = await parser.load(url);
+                    }
+                    else {
+                        bucket.promise = parser.load(url);
+                    }
                 }
-                else {
-                    const filePath = genFilePath(url.substring(url.lastIndexOf("/") + 1));
+                return bucket;
+            }
+            const filePath = genFilePath(Parser.getFileName(url), "full");
+            const downloadAwait = parser.download(bucket.origin);
+            if (loadMode === "whole" || index === this.point) {
+                const buff = await downloadAwait;
+                if (buff) {
                     await writeTmpFile(buff, filePath);
                     bucket.local = filePath;
-                    if (this.remainStart >= index && index < this.remainEnd) {
+                    if (this.remainStart <= index && index < this.remainEnd) {
                         bucket.entity = Parser.parseVideo(buff, url);
                     }
                 }
             }
+            else {
+                bucket.promise = downloadAwait
+                    .then((buff) => buff ? writeTmpFile(buff, filePath).then(() => buff) : buff)
+                    .then((buff) => {
+                    if (buff) {
+                        bucket.local = filePath;
+                        if (this.remainStart <= index && index < this.remainEnd) {
+                            return Parser.parseVideo(buff, url);
+                        }
+                    }
+                    return null;
+                });
+            }
             return bucket;
         }));
     }
-    get() {
-        return this.getBucket(this.point);
+    /**
+     * 获取当前帧的bucket
+     * @returns
+     */
+    async get() {
+        const bucket = this.buckets[this.point];
+        if (bucket.promise) {
+            bucket.entity = await bucket.promise;
+            bucket.promise = null;
+            return bucket;
+        }
+        if (bucket.entity === null) {
+            bucket.entity = await this.parser.load(bucket.local || bucket.origin);
+            return bucket;
+        }
+        return bucket;
     }
+    /**
+     * 获取前一个bucket
+     * @returns
+     */
     prev() {
         return this.getBucket(this.point - 1);
     }
+    /**
+     * 获取后一个bucket
+     * @returns
+     */
     next() {
         return this.getBucket(this.point + 1);
     }
+    /**
+     * 获取指定位置的bucket
+     * @param pos
+     * @returns
+     */
     go(pos) {
         return this.getBucket(pos);
     }
+    /**
+     * 清理所有的bucket
+     * @returns
+     */
     clear() {
         const { buckets } = this;
         this.buckets = [];
-        this.point = 0;
+        this.point = this.remainStart = this.remainEnd = 0;
+        this.maxRemain = 3;
         return Promise.all(buckets.map((bucket) => removeTmpFile(bucket.local)));
     }
 }
 
-export { Brush, Env, Parser, Player, Poster, SE as SUPPORTED_ENV, VideoPool, getCanvas, getOffscreenCanvas };
+const Svga = {
+    env: Env,
+    SUPPORTED_ENV: SE
+};
+
+export { Brush, Parser, Player, Poster, Svga, VideoManager, getCanvas, getOffscreenCanvas };
 //# sourceMappingURL=index.js.map

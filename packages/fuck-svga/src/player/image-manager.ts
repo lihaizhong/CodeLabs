@@ -11,6 +11,11 @@ export class ImageManager {
    */
   private materials: Map<string, Bitmap> = new Map();
 
+  /**
+   * 判断是不是图片
+   * @param img
+   * @returns
+   */
   private isImage(img: any) {
     return (
       (Env.is(SE.H5) && img instanceof Image) ||
@@ -20,17 +25,27 @@ export class ImageManager {
     );
   }
 
+  /**
+   * 获取图片素材
+   * @returns
+   */
   public getMaterials() {
     return this.materials;
   }
 
+  /**
+   * 清理素材
+   */
   public clear() {
     this.materials.clear();
-    this.pool.forEach((img) => {
+
+    for (let i = 0; i < this.pool.length; i++) {
+      const img = this.pool[i];
+
       img.onload = null;
       img.onerror = null;
       img.src = "";
-    });
+    }
   }
 
   /**
@@ -53,7 +68,7 @@ export class ImageManager {
         imageArr.push(Promise.resolve(image as PlatformImage | ImageBitmap));
       } else {
         const p = loadImage(brush, image as RawImage, filename, key).then(
-          (img: PlatformImage | ImageBitmap) => {
+          (img) => {
             this.materials.set(key, img);
 
             return img;
@@ -65,9 +80,7 @@ export class ImageManager {
     });
 
     const imgs = await Promise.all<PlatformImage | ImageBitmap>(imageArr);
-    this.pool = imgs.filter((img: PlatformImage | ImageBitmap) =>
-      this.isImage(img)
-    ) as PlatformImage[];
+    this.pool = imgs.filter((img) => this.isImage(img)) as PlatformImage[];
   }
 
   /**

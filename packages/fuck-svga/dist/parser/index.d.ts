@@ -3,6 +3,12 @@
  */
 export declare class Parser {
     /**
+     * 截取文件名称
+     * @param url
+     * @returns
+     */
+    static getFileName(url: string): string;
+    /**
      * 解析视频实体
      * @param data 视频二进制数据
      * @param url 视频地址
