@@ -123,13 +123,15 @@ export class Poster {
    * 绘制海报
    */
   public draw(): void {
+    if (!this.entity) return;
+
     const { brush, entity, contentMode, frame } = this;
 
     benchmark.time(
       "render",
       () => {
         brush.clearSecondary();
-        brush.fitSize(contentMode, entity!.size);
+        brush.resize(contentMode, entity!.size);
         brush.draw(entity!, frame, 0, entity!.sprites.length);
         brush.stick();
       }
@@ -140,11 +142,7 @@ export class Poster {
    * 清理海报
    */
   public clear(): void {
-    const { brush } = this;
-
-    brush.clearContainer();
-    brush.clearSecondary();
-    brush.clearMaterials();
+    this.brush.clear();
   }
 
   /**

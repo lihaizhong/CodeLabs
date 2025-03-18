@@ -250,13 +250,7 @@ export class Brush {
     return this.X!.toDataURL(type, encoderOptions);
   }
 
-  public getRect(): ViewportRect {
-    const { W, H } = this;
-
-    return { width: W, height: H };
-  }
-
-  public fitSize(
+  public resize(
     contentMode: PLAYER_CONTENT_MODE,
     videoSize: ViewportRect
   ): void {
@@ -317,6 +311,10 @@ export class Brush {
     ).requestAnimationFrame(cb);
   }
 
+  public clearContainer: () => void = noop;
+
+  public clearSecondary: () => void = noop;
+
   /**
    * 清理素材库
    */
@@ -324,9 +322,16 @@ export class Brush {
     this.IM.clear();
   }
 
-  public clearContainer: () => void = noop;
+  public clear(mode: 'front' | 'back' | 'all' = 'all') {
+    if (mode === 'all' || mode === 'front') {
+      this.clearContainer();
+    }
 
-  public clearSecondary: () => void = noop;
+    if (mode === 'all' || mode === 'back') {
+      this.clearSecondary();
+      this.clearMaterials();
+    }
+  }
 
   /**
    * 绘制图片片段
@@ -358,9 +363,7 @@ export class Brush {
    * 销毁画笔
    */
   public destroy() {
-    this.clearContainer();
-    this.clearSecondary();
-    this.clearMaterials();
+    this.clear();
     this.X = this.XC = this.Y = this.YC = null;
     this.clearContainer = this.clearSecondary = this.stick = noop;
   }

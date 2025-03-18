@@ -100,8 +100,7 @@ export class Player {
 
     this.animator!.stop();
     this.entity = videoEntity;
-    this.brush.clearSecondary();
-    this.brush.clearMaterials();
+    this.brush.clear('back');
 
     return this.brush.loadImages(images, filename);
   }
@@ -168,19 +167,8 @@ export class Player {
    */
   public stop(): void {
     this.animator!.stop();
-    this.brush.clearContainer();
+    this.brush.clear();
     this.onStop?.();
-  }
-
-  /**
-   * 清理容器画布
-   */
-  public clear(): void {
-    const { brush } = this;
-
-    brush.clearContainer();
-    brush.clearSecondary();
-    brush.clearMaterials();
   }
 
   /**
@@ -256,7 +244,7 @@ export class Player {
 
     // 更新动画基础信息
     animator!.setConfig(duration, loopStart, loop, fillValue);
-    brush.fitSize(contentMode, entity!.size);
+    brush.resize(contentMode, entity!.size);
     // 动画绘制过程
     animator!.onUpdate = (timePercent: number) => {
       if (playMode === PLAYER_PLAY_MODE.FALLBACKS) {

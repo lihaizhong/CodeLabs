@@ -9,6 +9,8 @@ export interface Bucket {
   local: string;
   // 实例
   entity: Video | ArrayBuffer | null;
+  // 下载实例中
+  promise: Promise<Video | null> | null;
 }
 
 export interface NeedUpdatePoint {
@@ -17,23 +19,50 @@ export interface NeedUpdatePoint {
   end: number;
 }
 
+export type LoadMode = "fast" | "whole";
+
 export class VideoManager {
+  /**
+   * 视频池的当前指针位置
+   */
   private point: number = 0;
-
+  /**
+   * 视频的最大留存数量，其他视频将放在磁盘上缓存
+   */
   private maxRemain: number = 3;
-
+  /**
+   * 留存视频的开始指针位置
+   */
   private remainStart: number = 0;
-
+  /**
+   * 留存视频的结束指针位置
+   */
   private remainEnd: number = 0;
-
+  /**
+   * 视频加载模式
+   * 快速加载模式：可保证当前视频加载完成后，尽快播放；其他请求将使用Promise的方式保存在bucket中，以供后续使用
+   * 完整加载模式：可保证所有视频加载完成，确保播放切换的流畅性
+   */
+  private loadMode: LoadMode = "fast";
+  /**
+   * 视频池的所有数据
+   */
   private buckets: Bucket[] = [];
-
+  /**
+   * SVGA解析器
+   */
   private readonly parser = new Parser();
 
+  /**
+   * 获取视频池大小
+   */
   get length(): number {
     return this.buckets.length;
   }
 
+  /**
+   * 更新留存指针位置
+   */
   private updateRemainPoints() {
     if (this.point < Math.ceil(this.maxRemain / 2)) {
       this.remainStart = 0;
@@ -47,7 +76,12 @@ export class VideoManager {
     }
   }
 
-  private getNeedUpdatePoints(point: number): NeedUpdatePoint[] {
+  /**
+   * 更新留存指针位置
+   * @param point 最新的指针位置
+   * @returns
+   */
+  private getBucketOperators(point: number): NeedUpdatePoint[] {
     const { remainStart, remainEnd } = this;
 
     this.point = point;
@@ -111,43 +145,64 @@ export class VideoManager {
     return [];
   }
 
+  /**
+   * 获取当前的视频信息
+   * @param point 最新的指针位置
+   * @returns
+   */
   private async getBucket(point: number): Promise<Bucket> {
     if (point < 0 || point >= this.length) {
       return this.buckets[this.point];
     }
 
-    const waits = this.getNeedUpdatePoints(point).map(
-      ({ action, start, end }) => {
-        const waiting: Promise<void>[] = [];
+    const operators = this.getBucketOperators(point);
+    if (operators.length) {
+      const waits = operators.map(({ action, start, end }) => {
+        const waiting: Promise<Video | null>[] = [];
 
         for (let i = start; i < end; i++) {
           const bucket = this.buckets[i];
           if (action === "remove") {
             bucket.entity = null;
           } else if (action === "add") {
-            const p = this.parser.load(bucket.local).then((video) => {
-              bucket.entity = video;
-            });
+            const p = this.parser.load(bucket.local || bucket.origin);
 
-            waiting.push(p);
+            bucket.promise = p;
+            if (this.loadMode === "whole" || this.point === i) {
+              waiting.push(p);
+            }
           }
         }
 
         return Promise.all(waiting);
-      }
-    );
+      });
 
-    await Promise.all(waits);
+      await Promise.all(waits);
+    }
 
     return this.get();
   }
 
+  /**
+   * 视频加载模式
+   * @param loadMode
+   */
+  setLoadMode(loadMode: LoadMode): void {
+    this.loadMode = loadMode
+  }
+
+  /**
+   * 预加载视频到本地磁盘中
+   * @param urls 视频远程地址
+   * @param point 当前指针位置
+   * @param maxRemain 最大留存数量
+   */
   async prepare(
     urls: string[],
     point?: number,
     maxRemain?: number
   ): Promise<void> {
-    const { parser } = this;
+    const { parser, loadMode } = this;
 
     this.point =
       typeof point === "number" && point > 0 && point < urls.length ? point : 0;
@@ -160,27 +215,50 @@ export class VideoManager {
           origin: url,
           local: "",
           entity: null,
+          promise: null,
         };
 
         if (Env.is(SE.H5)) {
           bucket.local = url;
-          if (this.remainStart >= index && index < this.remainEnd) {
-            bucket.entity = await parser.load(url);
+          if (this.remainStart <= index && index < this.remainEnd) {
+            if (loadMode === "whole" || index === this.point) {
+              bucket.entity = await parser.load(url);
+            } else {
+              bucket.promise = parser.load(url);
+            }
           }
-        } else {
-          const buff = await parser.download(bucket.origin);
+
+          return bucket;
+        }
+
+        const filePath = genFilePath(Parser.getFileName(url), "full");
+        const downloadAwait = parser.download(bucket.origin);
+
+        if (loadMode === "whole" || index === this.point) {
+          const buff = await downloadAwait;
           if (buff) {
-            const filePath = genFilePath(
-              url.substring(url.lastIndexOf("/") + 1),
-              'full'
-            );
             await writeTmpFile(buff, filePath);
 
             bucket.local = filePath;
-            if (this.remainStart >= index && index < this.remainEnd) {
+            if (this.remainStart <= index && index < this.remainEnd) {
               bucket.entity = Parser.parseVideo(buff, url);
             }
           }
+        } else {
+          bucket.promise = downloadAwait
+            .then((buff) =>
+              buff ? writeTmpFile(buff, filePath).then(() => buff) : buff
+            )
+            .then((buff) => {
+              if (buff) {
+                bucket.local = filePath;
+                if (this.remainStart <= index && index < this.remainEnd) {
+                  return Parser.parseVideo(buff, url);
+                }
+              }
+
+              return null;
+            });
         }
 
         return bucket;
@@ -188,22 +266,58 @@ export class VideoManager {
     );
   }
 
-  get(): Bucket {
-    return this.buckets[this.point];
+  /**
+   * 获取当前帧的bucket
+   * @returns 
+   */
+  async get(): Promise<Bucket> {
+    const bucket = this.buckets[this.point];
+
+    if (bucket.promise) {
+      bucket.entity = await bucket.promise;
+      bucket.promise = null;
+
+      return bucket;
+    }
+
+    if (bucket.entity === null) {
+      bucket.entity = await this.parser.load(bucket.local || bucket.origin);
+
+      return bucket;
+    }
+
+    return bucket;
   }
 
+  /**
+   * 获取前一个bucket
+   * @returns 
+   */
   prev(): Promise<Bucket> {
     return this.getBucket(this.point - 1);
   }
 
+  /**
+   * 获取后一个bucket
+   * @returns 
+   */
   next(): Promise<Bucket> {
     return this.getBucket(this.point + 1);
   }
 
+  /**
+   * 获取指定位置的bucket
+   * @param pos 
+   * @returns 
+   */
   go(pos: number): Promise<Bucket> {
     return this.getBucket(pos);
   }
 
+  /**
+   * 清理所有的bucket
+   * @returns 
+   */
   clear(): Promise<string[]> {
     const { buckets } = this;
 
