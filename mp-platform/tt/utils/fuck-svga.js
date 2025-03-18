@@ -6941,24 +6941,22 @@ class VideoManager {
         }
         const operators = this.getBucketOperators(point);
         if (operators.length) {
-            const waits = operators.map(({ action, start, end }) => {
-                const waiting = [];
+            const waitings = [];
+            operators.forEach(({ action, start, end }) => {
                 for (let i = start; i < end; i++) {
                     const bucket = this.buckets[i];
                     if (action === "remove") {
                         bucket.entity = null;
                     }
                     else if (action === "add") {
-                        const p = this.parser.load(bucket.local || bucket.origin);
-                        bucket.promise = p;
+                        bucket.promise = this.parser.load(bucket.local || bucket.origin);
                         if (this.loadMode === "whole" || this.point === i) {
-                            waiting.push(p);
+                            waitings.push(bucket.promise);
                         }
                     }
                 }
-                return Promise.all(waiting);
             });
-            await Promise.all(waits);
+            await Promise.all(waitings);
         }
         return this.get();
     }
@@ -7003,28 +7001,21 @@ class VideoManager {
             }
             const filePath = genFilePath(Parser.getFileName(url), "full");
             const downloadAwait = parser.download(bucket.origin);
-            if (loadMode === "whole" || index === this.point) {
-                const buff = await downloadAwait;
+            const parseVideoAwait = async (buff) => {
                 if (buff) {
                     await writeTmpFile(buff, filePath);
                     bucket.local = filePath;
                     if (this.remainStart <= index && index < this.remainEnd) {
-                        bucket.entity = Parser.parseVideo(buff, url);
+                        return Parser.parseVideo(buff, url);
                     }
                 }
+                return null;
+            };
+            if (loadMode === "whole" || index === this.point) {
+                bucket.entity = await parseVideoAwait(await downloadAwait);
             }
             else {
-                bucket.promise = downloadAwait
-                    .then((buff) => buff ? writeTmpFile(buff, filePath).then(() => buff) : buff)
-                    .then((buff) => {
-                    if (buff) {
-                        bucket.local = filePath;
-                        if (this.remainStart <= index && index < this.remainEnd) {
-                            return Parser.parseVideo(buff, url);
-                        }
-                    }
-                    return null;
-                });
+                bucket.promise = downloadAwait.then(parseVideoAwait);
             }
             return bucket;
         }));
