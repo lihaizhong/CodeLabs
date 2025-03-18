@@ -2,11 +2,11 @@
  * Supported Application
  * 目前已支持微信小程序、支付宝小程序、抖音小程序、H5
  */
-export const SE = {
-  WECHAT: 1,
-  ALIPAY: 2,
-  DOUYIN: 3,
-  H5: 4
+export enum SE {
+  WECHAT = 'weapp',
+  ALIPAY = 'alipay',
+  DOUYIN = 'tt',
+  H5 = 'h5'
 };
 
 function getEnvironment() {
@@ -30,16 +30,16 @@ function getEnvironment() {
   throw new Error("Unsupported app");
 }
 
-let env: number = getEnvironment();
+let env: SE = getEnvironment();
 
 export const Env = {
-  is: (environment: number) => env === environment,
+  is: (environment: SE) => env === environment,
 
-  not: (environment: number) => env !== environment,
+  not: (environment: SE) => env !== environment,
 
   get: () => env,
 
-  set: (environment: number) => {
+  set: (environment: SE) => {
     env = environment;
   }
 }
