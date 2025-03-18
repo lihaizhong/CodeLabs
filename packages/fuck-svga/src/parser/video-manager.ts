@@ -17,7 +17,7 @@ export interface NeedUpdatePoint {
   end: number;
 }
 
-export class VideoPool {
+export class VideoManager {
   private point: number = 0;
 
   private maxRemain: number = 3;
@@ -35,14 +35,15 @@ export class VideoPool {
   }
 
   private updateRemainPoints() {
-    this.remainStart = Math.ceil(this.point - (this.maxRemain - 1) / 2);
-    if (this.remainStart < 0) {
+    if (this.point < Math.ceil(this.maxRemain / 2)) {
       this.remainStart = 0;
-    }
-
-    this.remainEnd = this.remainStart + this.maxRemain;
-    if (this.remainEnd > this.length) {
+      this.remainEnd = this.maxRemain;
+    } else if (this.length - this.point < Math.floor(this.maxRemain / 2)) {
+      this.remainStart = this.remainEnd - this.maxRemain;
       this.remainEnd = this.length;
+    } else {
+      this.remainStart = Math.floor(this.point - this.maxRemain / 2);
+      this.remainEnd = this.remainStart + this.maxRemain;
     }
   }
 
@@ -51,6 +52,16 @@ export class VideoPool {
 
     this.point = point;
     this.updateRemainPoints();
+
+    if (remainStart === remainEnd) {
+      return [
+        {
+          action: "add",
+          start: this.remainStart,
+          end: this.remainEnd,
+        },
+      ];
+    }
 
     if (this.remainStart > remainEnd || this.remainEnd < remainStart) {
       return [
@@ -113,7 +124,6 @@ export class VideoPool {
           const bucket = this.buckets[i];
           if (action === "remove") {
             bucket.entity = null;
-            waiting.push(Promise.resolve());
           } else if (action === "add") {
             const p = this.parser.load(bucket.local).then((video) => {
               bucket.entity = video;
@@ -139,18 +149,10 @@ export class VideoPool {
   ): Promise<void> {
     const { parser } = this;
 
-    if (typeof point === "number" && point > 0 && point < urls.length) {
-      this.point = point;
-    } else {
-      this.point = 0;
-    }
-
-    if (typeof maxRemain === "number" && maxRemain > 0) {
-      this.maxRemain = maxRemain;
-    } else {
-      this.maxRemain = 3;
-    }
-
+    this.point =
+      typeof point === "number" && point > 0 && point < urls.length ? point : 0;
+    this.maxRemain =
+      typeof maxRemain === "number" && maxRemain > 0 ? maxRemain : 3;
     this.updateRemainPoints();
     this.buckets = await Promise.all(
       urls.map(async (url: string, index: number) => {
@@ -160,20 +162,21 @@ export class VideoPool {
           entity: null,
         };
 
-        const buff = await parser.download(bucket.origin);
-
-        if (buff !== null) {
-          if (Env.is(SE.H5)) {
-            bucket.local = url;
-            bucket.entity = Parser.parseVideo(buff, url);
-          } else {
+        if (Env.is(SE.H5)) {
+          bucket.local = url;
+          if (this.remainStart >= index && index < this.remainEnd) {
+            bucket.entity = await parser.load(url);
+          }
+        } else {
+          const buff = await parser.download(bucket.origin);
+          if (buff) {
             const filePath = genFilePath(
-              url.substring(url.lastIndexOf("/") + 1)
+              url.substring(url.lastIndexOf("/") + 1),
+              'full'
             );
             await writeTmpFile(buff, filePath);
 
             bucket.local = filePath;
-
             if (this.remainStart >= index && index < this.remainEnd) {
               bucket.entity = Parser.parseVideo(buff, url);
             }
@@ -185,8 +188,8 @@ export class VideoPool {
     );
   }
 
-  get(): Promise<Bucket> {
-    return this.getBucket(this.point);
+  get(): Bucket {
+    return this.buckets[this.point];
   }
 
   prev(): Promise<Bucket> {
@@ -205,7 +208,9 @@ export class VideoPool {
     const { buckets } = this;
 
     this.buckets = [];
-    this.point = 0;
+    this.point = this.remainStart = this.remainEnd = 0;
+    this.maxRemain = 3;
+
     return Promise.all(
       buckets.map((bucket: Bucket) => removeTmpFile(bucket.local))
     );

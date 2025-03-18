@@ -1,3 +1,40 @@
+/**
+ * Supported Application
+ * 目前已支持微信小程序、支付宝小程序、抖音小程序、H5
+ */
+var SE;
+(function (SE) {
+    SE["WECHAT"] = "weapp";
+    SE["ALIPAY"] = "alipay";
+    SE["DOUYIN"] = "tt";
+    SE["H5"] = "h5";
+})(SE || (SE = {}));
+function getEnvironment() {
+    // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
+    if (typeof window !== "undefined") {
+        return SE.H5;
+    }
+    if (typeof tt !== "undefined") {
+        return SE.DOUYIN;
+    }
+    if (typeof my !== "undefined") {
+        return SE.ALIPAY;
+    }
+    if (typeof wx !== "undefined") {
+        return SE.WECHAT;
+    }
+    throw new Error("Unsupported app");
+}
+let env = getEnvironment();
+const Env = {
+    is: (environment) => env === environment,
+    not: (environment) => env !== environment,
+    get: () => env,
+    set: (environment) => {
+        env = environment;
+    }
+};
+
 // DEFLATE is a complex format; to read this code, you should probably check the RFC first:
 // https://tools.ietf.org/html/rfc1951
 // You may also wish to take a look at the guide I made about this program:
@@ -4804,42 +4841,6 @@ function requireCrc32 () {
 
 requireCrc32();
 
-/**
- * Supported Application
- * 目前已支持微信小程序、支付宝小程序、抖音小程序、H5
- */
-const SE = {
-    WECHAT: 1,
-    ALIPAY: 2,
-    DOUYIN: 3,
-    H5: 4
-};
-function getEnvironment() {
-    // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
-    if (typeof window !== "undefined") {
-        return SE.H5;
-    }
-    if (typeof tt !== "undefined") {
-        return SE.DOUYIN;
-    }
-    if (typeof my !== "undefined") {
-        return SE.ALIPAY;
-    }
-    if (typeof wx !== "undefined") {
-        return SE.WECHAT;
-    }
-    throw new Error("Unsupported app");
-}
-let env = getEnvironment();
-const Env = {
-    is: (environment) => env === environment,
-    not: (environment) => env !== environment,
-    get: () => env,
-    set: (environment) => {
-        env = environment;
-    }
-};
-
 function getBridge() {
     if (Env.is(SE.H5)) {
         return globalThis;
@@ -6646,12 +6647,13 @@ class Player {
             }
             if (hasRemained)
                 return;
+            const frame = currentFrame;
             brush.clearContainer();
             brush.stick();
             brush.clearSecondary();
             currentFrame = nextFrame;
             tail = 0;
-            this.onProcess?.(~~(percent * 100) / 100);
+            this.onProcess?.(~~(percent * 100) / 100, frame);
         };
         animator.onEnd = () => this.onEnd?.();
         animator.start();
@@ -6793,7 +6795,7 @@ class Poster {
     }
 }
 
-class VideoPool {
+class VideoManager {
     point = 0;
     maxRemain = 3;
     remainStart = 0;
@@ -6804,19 +6806,32 @@ class VideoPool {
         return this.buckets.length;
     }
     updateRemainPoints() {
-        this.remainStart = Math.ceil(this.point - (this.maxRemain - 1) / 2);
-        if (this.remainStart < 0) {
+        if (this.point < Math.ceil(this.maxRemain / 2)) {
             this.remainStart = 0;
+            this.remainEnd = this.maxRemain;
         }
-        this.remainEnd = this.remainStart + this.maxRemain;
-        if (this.remainEnd > this.length) {
+        else if (this.length - this.point < Math.floor(this.maxRemain / 2)) {
+            this.remainStart = this.remainEnd - this.maxRemain;
             this.remainEnd = this.length;
+        }
+        else {
+            this.remainStart = Math.floor(this.point - this.maxRemain / 2);
+            this.remainEnd = this.remainStart + this.maxRemain;
         }
     }
     getNeedUpdatePoints(point) {
         const { remainStart, remainEnd } = this;
         this.point = point;
         this.updateRemainPoints();
+        if (remainStart === remainEnd) {
+            return [
+                {
+                    action: "add",
+                    start: this.remainStart,
+                    end: this.remainEnd,
+                },
+            ];
+        }
         if (this.remainStart > remainEnd || this.remainEnd < remainStart) {
             return [
                 {
@@ -6871,7 +6886,6 @@ class VideoPool {
                 const bucket = this.buckets[i];
                 if (action === "remove") {
                     bucket.entity = null;
-                    waiting.push(Promise.resolve());
                 }
                 else if (action === "add") {
                     const p = this.parser.load(bucket.local).then((video) => {
@@ -6887,18 +6901,10 @@ class VideoPool {
     }
     async prepare(urls, point, maxRemain) {
         const { parser } = this;
-        if (typeof point === "number" && point > 0 && point < urls.length) {
-            this.point = point;
-        }
-        else {
-            this.point = 0;
-        }
-        if (typeof maxRemain === "number" && maxRemain > 0) {
-            this.maxRemain = maxRemain;
-        }
-        else {
-            this.maxRemain = 3;
-        }
+        this.point =
+            typeof point === "number" && point > 0 && point < urls.length ? point : 0;
+        this.maxRemain =
+            typeof maxRemain === "number" && maxRemain > 0 ? maxRemain : 3;
         this.updateRemainPoints();
         this.buckets = await Promise.all(urls.map(async (url, index) => {
             const bucket = {
@@ -6906,14 +6912,16 @@ class VideoPool {
                 local: "",
                 entity: null,
             };
-            const buff = await parser.download(bucket.origin);
-            if (buff !== null) {
-                if (Env.is(SE.H5)) {
-                    bucket.local = url;
-                    bucket.entity = Parser.parseVideo(buff, url);
+            if (Env.is(SE.H5)) {
+                bucket.local = url;
+                if (this.remainStart >= index && index < this.remainEnd) {
+                    bucket.entity = await parser.load(url);
                 }
-                else {
-                    const filePath = genFilePath(url.substring(url.lastIndexOf("/") + 1));
+            }
+            else {
+                const buff = await parser.download(bucket.origin);
+                if (buff) {
+                    const filePath = genFilePath(url.substring(url.lastIndexOf("/") + 1), 'full');
                     await writeTmpFile(buff, filePath);
                     bucket.local = filePath;
                     if (this.remainStart >= index && index < this.remainEnd) {
@@ -6925,7 +6933,7 @@ class VideoPool {
         }));
     }
     get() {
-        return this.getBucket(this.point);
+        return this.buckets[this.point];
     }
     prev() {
         return this.getBucket(this.point - 1);
@@ -6939,10 +6947,16 @@ class VideoPool {
     clear() {
         const { buckets } = this;
         this.buckets = [];
-        this.point = 0;
+        this.point = this.remainStart = this.remainEnd = 0;
+        this.maxRemain = 3;
         return Promise.all(buckets.map((bucket) => removeTmpFile(bucket.local)));
     }
 }
 
-export { Brush, Env, Parser, Player, Poster, SE as SUPPORTED_ENV, VideoPool, getCanvas, getOffscreenCanvas };
+const Svga = {
+    env: Env,
+    SUPPORTED_ENV: SE
+};
+
+export { Brush, Parser, Player, Poster, Svga, VideoManager, getCanvas, getOffscreenCanvas };
 //# sourceMappingURL=index.js.map

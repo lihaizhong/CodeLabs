@@ -8,7 +8,7 @@ export interface NeedUpdatePoint {
     start: number;
     end: number;
 }
-export declare class VideoPool {
+export declare class VideoManager {
     private point;
     private maxRemain;
     private remainStart;
@@ -20,7 +20,7 @@ export declare class VideoPool {
     private getNeedUpdatePoints;
     private getBucket;
     prepare(urls: string[], point?: number, maxRemain?: number): Promise<void>;
-    get(): Promise<Bucket>;
+    get(): Bucket;
     prev(): Promise<Bucket>;
     next(): Promise<Bucket>;
     go(pos: number): Promise<Bucket>;

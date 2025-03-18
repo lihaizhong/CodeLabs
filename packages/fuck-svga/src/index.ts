@@ -1,7 +1,13 @@
+import { Env, SE } from "./env";
+
 export { Parser } from "./parser";
 export { Player } from "./player";
 export { Poster } from "./poster";
-export { VideoPool } from "./parser/video-pool";
+export { VideoManager } from "./parser/video-manager";
 export { Brush } from "./player/brush";
 export { getOffscreenCanvas, getCanvas } from "./polyfill";
-export { Env, SE as SUPPORTED_ENV } from "./env";
+
+export const Svga = {
+  env: Env,
+  SUPPORTED_ENV: SE
+};
