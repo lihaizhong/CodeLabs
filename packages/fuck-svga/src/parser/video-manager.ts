@@ -81,7 +81,7 @@ export class VideoManager {
    * @param point 最新的指针位置
    * @returns
    */
-  private getBucketOperators(point: number): NeedUpdatePoint[] {
+  private updateBucketOperators(point: number): NeedUpdatePoint[] {
     const { remainStart, remainEnd } = this;
 
     this.point = point;
@@ -155,7 +155,7 @@ export class VideoManager {
       return this.buckets[this.point];
     }
 
-    const operators = this.getBucketOperators(point);
+    const operators = this.updateBucketOperators(point);
     if (operators.length) {
       const waitings: Promise<Video | null>[] = [];
 

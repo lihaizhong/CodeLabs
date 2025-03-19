@@ -54,7 +54,7 @@ export declare class VideoManager {
      * @param point 最新的指针位置
      * @returns
      */
-    private getBucketOperators;
+    private updateBucketOperators;
     /**
      * 获取当前的视频信息
      * @param point 最新的指针位置
