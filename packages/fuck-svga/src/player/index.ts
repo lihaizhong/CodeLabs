@@ -100,7 +100,8 @@ export class Player {
 
     this.animator!.stop();
     this.entity = videoEntity;
-    this.brush.clear('back');
+    this.brush.clearSecondary();
+    this.brush.clearMaterials();
 
     return this.brush.loadImages(images, filename);
   }
@@ -150,7 +151,7 @@ export class Player {
    * 重新播放
    */
   public resume(): void {
-    this.animator!.start();
+    this.animator!.resume();
     this.onResume?.();
   }
 
@@ -158,7 +159,7 @@ export class Player {
    * 暂停播放
    */
   public pause(): void {
-    this.animator!.stop();
+    this.animator!.pause();
     this.onPause?.();
   }
 
@@ -167,7 +168,8 @@ export class Player {
    */
   public stop(): void {
     this.animator!.stop();
-    this.brush.clear();
+    this.brush.clearContainer();
+    this.brush.clearSecondary();
     this.onStop?.();
   }
 

@@ -1,5 +1,5 @@
 .svga-palette {
-  width: 100vw;
+  width: 85vw;
   height: 88vh;
 }
 
@@ -18,4 +18,32 @@
   padding: 15px;
   background: #fff;
   border-radius: 3px;
+}
+
+.svga-settings {
+  position: fixed;
+  top: 30%;
+  right: 0;
+  width: 88rpx;
+  background: #000000;
+  opacity: 0.65;
+}
+
+.svga-setting {
+  box-sizing: border-box;
+  width: 100%;
+  height: 88rpx;
+  padding: 0;
+  font-size: 10rpx;
+  color: #ffffff;
+  background: transparent;
+  border: none;
+}
+
+.svga-setting::after {
+  display: none;
+}
+
+.svga-setting + .svga-setting {
+  border-top: 1rpx solid #ffffff;
 }

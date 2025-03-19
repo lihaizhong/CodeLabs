@@ -322,17 +322,6 @@ export class Brush {
     this.IM.clear();
   }
 
-  public clear(mode: 'front' | 'back' | 'all' = 'all') {
-    if (mode === 'all' || mode === 'front') {
-      this.clearContainer();
-    }
-
-    if (mode === 'all' || mode === 'back') {
-      this.clearSecondary();
-      this.clearMaterials();
-    }
-  }
-
   /**
    * 绘制图片片段
    * @param videoEntity
@@ -363,7 +352,9 @@ export class Brush {
    * 销毁画笔
    */
   public destroy() {
-    this.clear();
+    this.clearContainer();
+    this.clearSecondary();
+    this.clearMaterials();
     this.X = this.XC = this.Y = this.YC = null;
     this.clearContainer = this.clearSecondary = this.stick = noop;
   }

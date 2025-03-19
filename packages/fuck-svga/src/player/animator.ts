@@ -56,6 +56,18 @@ export class Animator {
     this.doFrame();
   }
 
+  public resume(): void {
+    this.isRunning = true
+    this.startTime = now()
+    this.doFrame()
+  }
+
+  public pause(): void {
+    this.isRunning = false
+    // 设置暂停的位置
+    this.loopStart = (now() - this.startTime + this.loopStart) % this.duration
+  }
+
   public stop(): void {
     this.isRunning = false;
   }

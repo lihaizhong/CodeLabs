@@ -1,6 +1,5 @@
 import { Brush } from "../player/brush";
 import { loadImage } from "../polyfill";
-import benchmark from "../benchmark";
 
 export class Poster {
   /**
@@ -60,7 +59,7 @@ export class Poster {
     const { images, filename } = videoEntity;
 
     this.entity = videoEntity;
-    this.brush.clear();
+    this.brush.clearMaterials();
 
     return this.brush.loadImages(images, filename);
   }
@@ -132,6 +131,7 @@ export class Poster {
     const { brush, entity, contentMode, frame, onStart, onEnd } = this;
 
     onStart?.();
+    brush.clearContainer();
     brush.resize(contentMode, entity!.size);
     brush.draw(entity!, frame, 0, entity!.sprites.length);
     onEnd?.();
@@ -151,7 +151,8 @@ export class Poster {
    * 清理海报
    */
   public clear(): void {
-    this.brush.clear();
+    this.brush.clearContainer();
+    this.brush.clearMaterials();
   }
 
   /**

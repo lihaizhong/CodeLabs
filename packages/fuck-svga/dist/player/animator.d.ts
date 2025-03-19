@@ -34,6 +34,8 @@ export declare class Animator {
      */
     setConfig(duration: number, loopStart: number, loop: number, fillValue: number): void;
     start(): void;
+    resume(): void;
+    pause(): void;
     stop(): void;
     private doFrame;
     private doDeltaTime;

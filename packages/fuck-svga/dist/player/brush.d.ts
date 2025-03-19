@@ -75,7 +75,6 @@ export declare class Brush {
      * 清理素材库
      */
     clearMaterials(): void;
-    clear(mode?: 'front' | 'back' | 'all'): void;
     /**
      * 绘制图片片段
      * @param videoEntity

@@ -46,7 +46,7 @@ Component({
     },
     detached() {
       readyGo.reset();
-      this.stop();
+      player?.destroy();
       player = null;
       parser = null;
     },
@@ -82,10 +82,17 @@ Component({
         this.setData({ message: ex.message + "\n" + ex.stack });
       }
     },
-    stop() {
-      if (player) {
-        player.stop();
-      }
+    handlePlay() {
+      player?.start()
     },
+    handleResume() {
+      player?.resume()
+    },
+    handlePause() {
+      player?.pause()
+    },
+    handleStop() {
+      player?.stop()
+    }
   },
 });
