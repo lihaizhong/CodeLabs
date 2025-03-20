@@ -7,20 +7,20 @@
  * @description 为避免在短时间内多次触发造成的性能影响，我们需要主动去过滤一些触发
  */
 export function throttle(fn, interval = 500) {
-	let timer = null;
-	let firstTime = true;
+	let __timer__ = null;
+	let __firstTime__ = true;
 
 	return function internalThrottle(...rest) {
-		if (firstTime) {
+		if (__firstTime__) {
 			// 第一次调用不需要做延迟执行
 			fn.apply(this, rest);
-			firstTime = false;
+			__firstTime__ = false;
 		} else {
 			// 计时器还没销毁，延迟尚未完成
-			if (timer) {
-				timer = setTimeout(() => {
+			if (__timer__) {
+				__timer__ = setTimeout(() => {
 					fn.apply(this, rest);
-					timer = null;
+					__timer__ = null;
 				}, interval);
 			}
 		}
@@ -34,13 +34,13 @@ export function throttle(fn, interval = 500) {
  * @returns 为避免在短时间内多次触发造成的性能影响，我们需要过滤未完成的操作
  */
 export function debounce(fn, interval = 500) {
-	let timer = null;
+	let __timer__ = null;
 
 	return function internalDebounce(...rest) {
-		clearTimeout(timer);
-		timer = setTimeout(() => {
+		clearTimeout(__timer__);
+		__timer__ = setTimeout(() => {
 			fn.apply(this, rest);
-			timer = null;
+			__timer__ = null;
 		}, interval);
 	};
 }
