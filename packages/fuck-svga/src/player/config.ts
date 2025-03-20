@@ -1,18 +1,36 @@
 export class Config {
+  /**
+   * 最后停留的目标模式，类似于 animation-fill-mode，默认值 forwards。
+   */
   public fillMode = PLAYER_FILL_MODE.BACKWARDS;
-
+  /**
+   * 播放模式，默认值 forwards
+   */
   public playMode = PLAYER_PLAY_MODE.FORWARDS;
-
+  /**
+   * 填充模式，类似于 content-mode。
+   */
   public contentMode = PLAYER_CONTENT_MODE.FILL;
-
+  /**
+   * 开始播放的帧数，默认值 0
+   */
   public startFrame = 0;
-
+  /**
+   * 结束播放的帧数，默认值 0
+   */
   public endFrame = 0;
-
+  /**
+   * 循环播放的开始帧，默认值 0
+   */
   public loopStartFrame = 0;
-
+  /**
+   * 循环次数，默认值 0（无限循环）
+   */
   public loop = 0;
-
+  /**
+   * 是否开启动画容器视窗检测，默认值 false
+   * 开启后利用 Intersection Observer API 检测动画容器是否处于视窗内，若处于视窗外，停止描绘渲染帧避免造成资源消耗
+   */
   // public isUseIntersectionObserver = false;
 
   public register(config: Partial<PlayerConfig>) {

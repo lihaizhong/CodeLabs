@@ -1,4 +1,4 @@
-import benchmark from "benchmark";
+import benchmark from "../benchmark";
 import { noop, now } from "../polyfill";
 import type { Brush } from "./brush";
 

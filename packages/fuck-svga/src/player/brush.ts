@@ -5,7 +5,6 @@ import {
   noop,
   platform,
   br,
-  loadImage,
 } from "../polyfill";
 import { Env, SE } from "../env";
 import render from "./render";

@@ -1,5 +1,5 @@
-import { Env, SE } from "env";
-import { loadImage } from "polyfill";
+import { Env, SE } from "../env";
+import { loadImage } from "../polyfill";
 import { Brush } from "./brush";
 
 export class ImageManager {

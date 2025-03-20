@@ -1,5 +1,4 @@
 import { Env, SE } from "../env";
-import { br } from "./bridge";
 
 // miniprogram btoa/atob polyfill
 const b64c =

@@ -1,6 +1,6 @@
 import { unzlibSync } from "fflate";
+import { Env, SE } from "../env";
 import { MovieEntity } from "../extensions/protobuf";
-import { Env, SE } from "env";
 import { readFile } from "../polyfill";
 import { isRemote, readRemoteFile } from "../polyfill/download";
 import { VideoEntity } from "./video-entity";
