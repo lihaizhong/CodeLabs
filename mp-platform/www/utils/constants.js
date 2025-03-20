@@ -1,3 +1,5 @@
+const REPLACE_SVGA_URL = `${window.location.origin}/public/svga`;
+
 export const svgaSources = [
   "https://assets.2dfire.com/frontend/9ce0cce7205fbebba380ed44879e5660.svga",
   "https://assets.2dfire.com/frontend/1ddb590515d196f07c411794633e4406.svga",
@@ -54,13 +56,13 @@ export const svgaSources = [
   "https://assets.2dfire.com/frontend/e5ed31cec6b576cd67df0271b69320aa.svga",
   "https://assets.2dfire.com/frontend/ad6d6a788bb88520f908bb0fe04a75ca.svga",
   "https://assets.2dfire.com/frontend/45eadf03bee2013daa407fd4b91e29f5.svga",
-].map((url) => url.replace('https://assets.2dfire.com/frontend', `${location.origin}/public/svga`));
+].map((url) => url.replace('https://assets.2dfire.com/frontend', REPLACE_SVGA_URL));
 
 export const svgaLargeFiles = [
   'frame01.svga',
   'frame02.svga',
   'frame03.svga'
-].map((url) => `${window.location.origin}/public/svga/large/${url}`)
+].map((url) => `${REPLACE_SVGA_URL}/large/${url}`)
 
 export function getOneAtRandom(files) {
   const ranIndex = Math.floor(Math.random() * files.length)
