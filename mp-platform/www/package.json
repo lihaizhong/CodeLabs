@@ -8,7 +8,6 @@
   "license": "ISC",
   "dependencies": {
     "@ungap/url-search-params": "^0.2.2",
-    "fuck-protobuf": "workspace:^",
     "fuck-svga": "workspace:^",
     "weui": "^2.6.21"
   }

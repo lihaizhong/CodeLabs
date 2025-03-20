@@ -25,8 +25,8 @@
     }
   </style>
   <script type="module">
+    import { createQRCodeToGIF, createQRCodeToPNG, createQRCodeToHTML } from "fuck-svga";
     import { createQrCodeImg } from "../../utils/qrcode";
-    import { createQRCodeToGIF, createQRCodeToPNG, createQRCodeToHTML } from "../../utils/fuck-protobuf";
 
     function insertContainer(title, source, size, type = 'img') {
       const $root = document.body;

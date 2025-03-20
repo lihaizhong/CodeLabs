@@ -1,5 +1,5 @@
 import { unzlibSync } from "fflate";
-import { MovieEntity } from "fuck-protobuf";
+import { MovieEntity } from "../extensions/protobuf";
 import { Env, SE } from "env";
 import { readFile } from "../polyfill";
 import { isRemote, readRemoteFile } from "../polyfill/download";

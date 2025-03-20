@@ -3,7 +3,7 @@ import type {
   MovieEntity,
   ShapeEntity,
   SpriteEntity,
-} from "fuck-protobuf";
+} from "../extensions/protobuf";
 
 export class VideoEntity implements Video {
   /**
