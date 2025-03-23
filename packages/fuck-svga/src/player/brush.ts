@@ -228,7 +228,7 @@ export class Brush {
    * @returns
    */
   public loadImages(images: RawImages, filename: string): Promise<void> {
-    return this.IM.loadImage(images, this, filename);
+    return this.IM.loadImages(images, this, filename);
   }
 
   /**
