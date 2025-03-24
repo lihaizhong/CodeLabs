@@ -80,7 +80,7 @@ export class Config {
     // }
   }
 
-  public setItem(key: keyof PlayerConfig, value: any) {
+  public setItem<T extends keyof PlayerConfig>(key: T, value: PlayerConfig[T]) {
     this.register({ [key]: value });
   }
 

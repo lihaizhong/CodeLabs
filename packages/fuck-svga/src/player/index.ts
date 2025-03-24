@@ -66,8 +66,8 @@ export class Player {
    * @param key
    * @param value
    */
-  public setItem(key: keyof PlayerConfig, value: any): void {
-    this.config.setItem(key, value);
+  public setItem<T extends keyof PlayerConfig>(key: T, value: PlayerConfig[T]): void {
+    this.config.setItem<T>(key, value);
   }
 
   // private setIntersectionObserver (): void {

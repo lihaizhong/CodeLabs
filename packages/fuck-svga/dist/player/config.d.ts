@@ -32,7 +32,7 @@ export declare class Config {
      * 开启后利用 Intersection Observer API 检测动画容器是否处于视窗内，若处于视窗外，停止描绘渲染帧避免造成资源消耗
      */
     register(config: Partial<PlayerConfig>): void;
-    setItem(key: keyof PlayerConfig, value: any): void;
+    setItem<T extends keyof PlayerConfig>(key: T, value: PlayerConfig[T]): void;
     getConfig(entity: Video): {
         currFrame: number;
         startFrame: number;

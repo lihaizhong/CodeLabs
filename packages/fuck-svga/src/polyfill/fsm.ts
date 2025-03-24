@@ -47,7 +47,7 @@ export function writeTmpFile(
           success() {
             resolve(filePath);
           },
-          fail(err: any) {
+          fail(err: unknown) {
             benchmark.log(`write fail: ${filePath}`, err);
             reject(err);
           },
@@ -72,13 +72,13 @@ export function removeTmpFile(filePath: string): Promise<string> {
         fsm!.unlink({
           filePath,
           success: () => resolve(filePath),
-          fail(err: any) {
+          fail(err: unknown) {
             benchmark.log(`remove fail: ${filePath}`, err);
             resolve(filePath);
           },
         });
       },
-      fail(err: any) {
+      fail(err: unknown) {
         benchmark.log(`access fail: ${filePath}`, err);
         resolve(filePath);
       },

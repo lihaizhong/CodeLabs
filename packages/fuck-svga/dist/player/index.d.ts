@@ -37,7 +37,7 @@ export declare class Player {
      * @param key
      * @param value
      */
-    setItem(key: keyof PlayerConfig, value: any): void;
+    setItem<T extends keyof PlayerConfig>(key: T, value: PlayerConfig[T]): void;
     /**
      * 装载 SVGA 数据元
      * @param videoEntity SVGA 数据源

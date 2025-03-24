@@ -14,8 +14,8 @@ export default {
   },
   async time(
     label: string,
-    callback: () => any
-  ): Promise<any> {
+    callback: () => unknown
+  ): Promise<unknown> {
     stopwatch.time(label);
     const result = await callback();
     stopwatch.timeEnd(label);
@@ -25,7 +25,7 @@ export default {
   line(size: number = 40) {
     console.log("-".repeat(size));
   },
-  log(...message: any[]) {
+  log(...message: unknown[]) {
     console.log("【benchmark】", ...message);
   },
 };

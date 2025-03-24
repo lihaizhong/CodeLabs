@@ -47,7 +47,7 @@ export function noop() {}
  * @param {*} value Value to test
  * @returns {boolean} `true` if the value is an string
  */
-export function isString(val: any) {
+export function isString(val: unknown) {
   return typeof val == "string" || val instanceof String;
 }
 
@@ -57,7 +57,7 @@ export function isString(val: any) {
  * @param {*} value Value to test
  * @returns {boolean} `true` if the value is an object
  */
-export function isObject(val: any) {
+export function isObject(val: unknown) {
   return val && typeof val == "object";
 }
 
@@ -67,7 +67,7 @@ export function isObject(val: any) {
  * @param {*} value Value to test
  * @returns {boolean} `true` if the value is an integer
  */
-export function isInteger(value: any) {
+export function isInteger(value: unknown) {
   return (
     typeof value == "number" && isFinite(value) && Math.floor(value) == value
   );

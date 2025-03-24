@@ -18,7 +18,7 @@ export class ImageManager {
    * @param img
    * @returns
    */
-  private isImage(img: any) {
+  private isImage(img: unknown) {
     return (
       (Env.is(SE.H5) && img instanceof Image) ||
       ((img as PlatformImage).src !== undefined &&
@@ -32,7 +32,7 @@ export class ImageManager {
    * @param img 
    * @returns 
    */
-  private isImageBitmap(img: any) {
+  private isImageBitmap(img: unknown) {
     return (
       (Env.is(SE.H5) && img instanceof ImageBitmap) ||
       ((img as ImageBitmap).width !== undefined &&
