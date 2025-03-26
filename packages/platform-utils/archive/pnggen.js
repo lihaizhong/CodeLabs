@@ -1,36 +1,108 @@
-import { zlibSync } from "fflate";
-// import zlib from "zlib";
-import fs from "fs";
-import CRC from "crc-32";
-// import terminal from "terminal-image";
-// import { encode } from "uint8-to-base64";
+// 引入 fflate 库
+// import { zlibSync } from "fflate";
+import zlib from "zlib";
+import { encode } from "uint8-to-base64";
 
-// File Signature
+// PNG 文件签名
 const PNG_SIGNATURE = new Uint8Array([
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
 ]);
 
-// IHDR Chunk Type
+// IHDR 块类型
 const IHDR_CHUNK_TYPE = [0x49, 0x48, 0x44, 0x52];
 const IHDR_LENGTH = 13;
 
-// IDAT Chunk Type
+// IDAT 块类型
 const IDAT_CHUNK_TYPE = [0x49, 0x44, 0x41, 0x54];
 
-// IEND Chunk Type
+// IEND 块类型
 const IEND_CHUNK_TYPE = [0x49, 0x45, 0x4e, 0x44];
 
-// IEND Chunk
-const IEND = createChunk(0, IEND_CHUNK_TYPE);
+// CRC32 表
+const crcTable = [];
+for (let i = 0; i < 256; i++) {
+  let c = i;
+  for (let j = 0; j < 8; j++) {
+    c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+  }
 
-/**
- * 生成正方形图片
- * @param {number} width
- * @param {number} height
- * @returns {Uint8Array}
- */
-function generateSquareImage(width, height) {
+  crcTable[i] = c;
+}
+
+// 计算 CRC32
+function crc32(buffer) {
+  let crc = 0xffffffff;
+  for (let i = 0; i < buffer.length; i++) {
+    crc = crcTable[(crc ^ buffer[i]) & 0xff] ^ (crc >>> 8);
+  }
+  return crc ^ 0xffffffff;
+}
+
+// 生成 PNG 文件
+function generatePNG(imageData, width, height) {
+  // 创建 IHDR 块
+  const ihdrData = new Uint8Array(13);
+  const view = new DataView(ihdrData.buffer);
+  view.setUint32(0, width); // 宽度
+  view.setUint32(4, height); // 高度
+  view.setUint8(8, 8); // 位深度
+  view.setUint8(9, 6); // 颜色类型（RGBA）
+  view.setUint8(10, 0); // 压缩方法
+  view.setUint8(11, 0); // 过滤方法
+  view.setUint8(12, 0); // 隔行扫描
+
+  const ihdrChunk = createChunk("IHDR", ihdrData);
+
+  // 创建 IDAT 块
+  const idatData = zlib.deflateSync(imageData);
+  const idatChunk = createChunk("IDAT", idatData);
+
+  // 创建 IEND 块
+  const iendChunk = createChunk("IEND", new Uint8Array(0));
+
+  // 组装 PNG 文件
+  const pngData = new Uint8Array(
+    PNG_SIGNATURE.length +
+      ihdrChunk.length +
+      idatChunk.length +
+      iendChunk.length
+  );
+  let offset = 0;
+
+  pngData.set(PNG_SIGNATURE, offset);
+  offset += PNG_SIGNATURE.length;
+  pngData.set(ihdrChunk, offset);
+  offset += ihdrChunk.length;
+  pngData.set(idatChunk, offset);
+  offset += idatChunk.length;
+  pngData.set(iendChunk, offset);
+  offset += iendChunk.length;
+
+  return pngData;
+}
+
+// 创建 PNG 块
+function createChunk(type, data) {
+  const chunk = new Uint8Array(12 + data.length);
+  const view = new DataView(chunk.buffer);
+
+  view.setUint32(0, data.length); // 数据长度
+  chunk.set(
+    [...type].map((c) => c.charCodeAt(0)),
+    4
+  ); // 块类型
+  chunk.set(data, 8); // 数据
+
+  const crc = crc32(new Uint8Array([...chunk.subarray(4, 8), ...data])); // CRC32
+
+  view.setUint32(8 + data.length, crc); // CRC32
+  return chunk;
+}
+
+function main() {
   // Create Pixel Data Buffer
+  const width = 256;
+  const height = 256;
   const pixelData = new Uint32Array(width * height);
   const xMin = width / 4;
   const xMax = width - xMin;
@@ -41,130 +113,26 @@ function generateSquareImage(width, height) {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       if (x < xMax && x > xMin && y < yMax && y > yMin) {
-        pixelData[y * width + x] = 0xff0000ff;
+        pixelData[y * width + x] = 0x000000ff;
+        // console.log("内框", x, y, 0x000000ff);
       } else {
         pixelData[y * width + x] = 0xffffffff;
+        // console.log('外框', x, y, 0xffffffff);
       }
     }
   }
 
-  // Compress Pixel Data
-  // zlib.deflate(pixelData, (err, data) => {
-  //   if (err) {
-  //     throw err
-  //   }
+  const pngData = generatePNG(new Uint8Array(pixelData.buffer), width, height);
 
-  //   // Generate IHDR Chunk
-  //   const IHDR = createChunk(
-  //     IHDR_LENGTH,
-  //     IHDR_CHUNK_TYPE,
-  //     createIHDRData(width, height, 8, 6, 0, 0, 0)
-  //   );
+  console.log("pngData", "data:image/png;base64," + encode(pngData));
+  // console.log(pngData.join(','))
 
-  //   // Generate IDAT Chunk
-  //   const IDAT = createChunk(data.length, IDAT_CHUNK_TYPE, data);
-
-  //   const png = new Uint8Array([...PNG_SIGNATURE, ...IHDR, ...IDAT, ...IEND]);
-
-  //   fs.writeFileSync('auto.png', png, 'binary');
-  // });
-
-  const data = zlibSync(new Uint8Array(pixelData.buffer));
-  // Generate IHDR Chunk
-  const IHDR = createChunk(
-    IHDR_LENGTH,
-    IHDR_CHUNK_TYPE,
-    createIHDRData(width, height, 8, 6, 0, 0, 0)
-  );
-
-  // Generate IDAT Chunk
-  const IDAT = createChunk(data.length, IDAT_CHUNK_TYPE, data);
-
-  const png = new Uint8Array([...PNG_SIGNATURE, ...IHDR, ...IDAT, ...IEND]);
-
-  fs.writeFileSync('auto.png', png, 'binary');
-}
-
-/**
- * 创建IHDR数据
- * @param {number} width
- * @param {number} height
- * @param {number} bitDepth
- * @param {number} colorType
- * @param {number} compression
- * @param {number} filter
- * @param {number} interlace
- * @returns {Uint8Array}
- */
-function createIHDRData(
-  width,
-  height,
-  bitDepth,
-  colorType,
-  compression,
-  filter,
-  interlace
-) {
-  const width32 = new Uint8Array(toBytesInt32(width));
-  const height32 = new Uint8Array(toBytesInt32(height));
-  const bitDepth8 = new Uint8Array(toBytesInt8(bitDepth));
-  const colorType8 = new Uint8Array(toBytesInt8(colorType));
-  const compression8 = new Uint8Array(toBytesInt8(compression));
-  const filter8 = new Uint8Array(toBytesInt8(filter));
-  const interlace8 = new Uint8Array(toBytesInt8(interlace));
-
-  return new Uint8Array([
-    ...width32,
-    ...height32,
-    ...bitDepth8,
-    ...colorType8,
-    ...compression8,
-    ...filter8,
-    ...interlace8,
+  const imageData = new Uint8Array([
+    255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 0, 255,
   ]);
+  const pngData2 = generatePNG(imageData, 2, 2);
+
+  console.log("pngData2", "data:image/png;base64," + encode(pngData2));
 }
 
-/**
- * 创建数据
- * @param {number} dataLength
- * @param {Array.<number>} chunkTypeBuffer
- * @param {Uint8Array | Array.<number>} dataBuffer
- * @returns {Uint8Array}
- */
-function createChunk(dataLength, chunkTypeBuffer, dataBuffer = []) {
-  const length = new Uint8Array(toBytesInt32(dataLength));
-  const chunkType = new Uint8Array(chunkTypeBuffer);
-  const crc = new Uint8Array(toBytesInt32(CRC.buf([...chunkType, ...dataBuffer])));
-
-  return new Uint8Array([...length, ...chunkType, ...dataBuffer, ...crc]);
-}
-
-// Helper Functions
-
-/**
- * 生成4字节的数据
- * @param {number} num 
- * @returns {ArrayBuffer}
- */
-function toBytesInt32(num) {
-  const arr = new ArrayBuffer(4);
-  const view = new DataView(arr);
-
-  view.setUint32(0, num, false);
-  return arr;
-}
-
-/**
- * 生成1个字节的数据
- * @param {number} num 
- * @returns {ArrayBuffer}
- */
-function toBytesInt8(num) {
-  const arr = new ArrayBuffer(1);
-  const view = new DataView(arr);
-
-  view.setUint8(0, num);
-  return arr;
-}
-
-generateSquareImage(128, 128);
+main();
