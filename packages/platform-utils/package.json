@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "crc-32": "^1.2.2",
+    "fast-png": "^6.3.0",
     "fflate": "^0.8.2",
     "uint8-to-base64": "^0.2.0"
   }

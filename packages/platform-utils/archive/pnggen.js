@@ -1,7 +1,9 @@
 // 引入 fflate 库
-// import { zlibSync } from "fflate";
-import zlib from "zlib";
-import { encode } from "uint8-to-base64";
+import { deflateSync } from "fflate";
+// import zlib from "zlib";
+import { encode as encodeBase64 } from "uint8-to-base64";
+import { encode as encodePng } from "fast-png";
+import { crc32 } from "./crc";
 
 // PNG 文件签名
 const PNG_SIGNATURE = new Uint8Array([
@@ -17,26 +19,6 @@ const IDAT_CHUNK_TYPE = [0x49, 0x44, 0x41, 0x54];
 
 // IEND 块类型
 const IEND_CHUNK_TYPE = [0x49, 0x45, 0x4e, 0x44];
-
-// CRC32 表
-const crcTable = [];
-for (let i = 0; i < 256; i++) {
-  let c = i;
-  for (let j = 0; j < 8; j++) {
-    c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-  }
-
-  crcTable[i] = c;
-}
-
-// 计算 CRC32
-function crc32(buffer) {
-  let crc = 0xffffffff;
-  for (let i = 0; i < buffer.length; i++) {
-    crc = crcTable[(crc ^ buffer[i]) & 0xff] ^ (crc >>> 8);
-  }
-  return crc ^ 0xffffffff;
-}
 
 // 生成 PNG 文件
 function generatePNG(imageData, width, height) {
@@ -54,7 +36,7 @@ function generatePNG(imageData, width, height) {
   const ihdrChunk = createChunk("IHDR", ihdrData);
 
   // 创建 IDAT 块
-  const idatData = zlib.deflateSync(imageData);
+  const idatData = deflateSync(imageData);
   const idatChunk = createChunk("IDAT", idatData);
 
   // 创建 IEND 块
@@ -122,9 +104,9 @@ function main() {
     }
   }
 
-  const pngData = generatePNG(new Uint8Array(pixelData.buffer), width, height);
+  // const pngData = generatePNG(new Uint8Array(pixelData.buffer), width, height);
 
-  console.log("pngData", "data:image/png;base64," + encode(pngData));
+  // console.log("pngData", "data:image/png;base64," + encodeBase64(pngData));
   // console.log(pngData.join(','))
 
   const imageData = new Uint8Array([
@@ -132,7 +114,11 @@ function main() {
   ]);
   const pngData2 = generatePNG(imageData, 2, 2);
 
-  console.log("pngData2", "data:image/png;base64," + encode(pngData2));
+  console.log("pngData2", "data:image/png;base64," + encodeBase64(pngData2), '\n', pngData2.toString());
+
+  const pngData3 = encodePng({ data: imageData, width: 2, height: 2 });
+
+  console.log('pngData3', "data:image/png;base64," + encodeBase64(pngData3), '\n', pngData3.toString());
 }
 
 main();
