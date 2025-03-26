@@ -43,22 +43,37 @@ function isThenable(val) {
  * 异步任务
  * @param {function} fn
  */
-function nextTick(fn) {
-	// 完成宏任务处理
-	setTimeout(fn, 0);
+function executor(fn) {
+	// 使用浏览器MutationObserver WEB.API实现then方法的微任务机制
+	const observer = new MutationObserver(fn);
+	// 创建文本节点，节约资源
+	const textNode = document.createTextNode('0');
+	observer.observe(textNode, {
+		// 当文本改变时触发回调
+		characterData: true
+	});
+	// 改变文本，回调callback触发
+	textNode.data = '1';
 }
 
-/**
- * 清空执行函数
- * @params fns
- * @params value
- */
-function flushSchedulerQueue(fns, value) {
-	let fn;
+export class SchedulerQueue {
+	constructor() {
+		this.queue = [];
+	}
 
-	// rome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-	while ((fn = fns.shift())) {
-		fn(value);
+	push(fn) {
+		this.queue.push(fn);
+	}
+
+	shift() {
+		return this.queue.shift();
+	}
+
+	flush(value) {
+		while ((fn = fns.shift())) {
+			fn(value);
+		}
+		this.queue = [];
 	}
 }
 
@@ -105,7 +120,7 @@ export default class IPromise {
 	 */
 	static reject(error) {
 		if (isThenable(error)) return error;
-		return new IPromise((resolve, reject) => reject(error));
+		return new IPromise((_resolve, reject) => reject(error));
 	}
 
 	/**
@@ -119,8 +134,8 @@ export default class IPromise {
 
 		this._status = PROMISE_STATUS.PENDING;
 		this._value = null;
-		this._fulfilledQueues = [];
-		this._rejectedQueues = [];
+		this._fulfilledQueues = new SchedulerQueue();
+		this._rejectedQueues = new SchedulerQueue();
 
 		try {
 			// 处理回调函数
@@ -138,10 +153,8 @@ export default class IPromise {
 		if (this._status !== PROMISE_STATUS.PENDING) return;
 
 		const run = () => {
-			const onFulfilled = (value) =>
-				flushSchedulerQueue(this._fulfilledQueues, value);
-			const onRejected = (error) =>
-				flushSchedulerQueue(this._rejectedQueues, error);
+			const onFulfilled = (value) => this._fulfilledQueues.flush(value);
+			const onRejected = (error) => this._rejectedQueues.flush(error);
 
 			if (isThenable(val)) {
 				val.then(
@@ -163,7 +176,7 @@ export default class IPromise {
 			}
 		};
 
-		nextTick(run);
+		executor(run);
 	}
 
 	/**
@@ -186,7 +199,7 @@ export default class IPromise {
 			}
 		};
 
-		nextTick(run);
+		executor(run);
 	}
 
 	/**
@@ -195,7 +208,6 @@ export default class IPromise {
 	 * @param {function} onRejected optional
 	 * @return {Promise}
 	 */
-	// biome-ignore lint/suspicious/noThenProperty: <explanation>
 	then(onFulfilled, onRejected) {
 		const { _value, _status } = this;
 
@@ -207,6 +219,7 @@ export default class IPromise {
 					} else {
 						const res = onFulfilled(value);
 
+						// 如果是Promise场景
 						if (isThenable(res)) {
 							res.then(resolveNext, rejectedNext);
 						} else {
@@ -225,6 +238,7 @@ export default class IPromise {
 					} else {
 						const res = onRejected(err);
 
+						// 如果是Promise场景
 						if (isThenable(res)) {
 							res.then(resolveNext, rejectedNext);
 						} else {
