@@ -1,5 +1,5 @@
 import { br } from "./bridge";
-import { genFilePath, removeTmpFile, writeTmpFile } from "./fsm";
+import { genFilePath, removeFile, writeFile } from "./fsm";
 import { Env, SE } from "../env";
 import { toBase64, toBitmap, toBuffer } from "./decode";
 import { isRemote } from "./download";
@@ -25,7 +25,7 @@ async function genImageSource(
 
   try {
     // FIXME: IOS设备Uint8Array转base64时间较长，使用图片缓存形式速度会更快
-    return await writeTmpFile(toBuffer(data), genFilePath(filename, prefix));
+    return await writeFile(toBuffer(data), genFilePath(filename, prefix));
   } catch (ex: any) {
     console.warn(`图片缓存失败：${ex.message}`);
     return toBase64(data);
@@ -50,7 +50,7 @@ function createImage(
       if (src.startsWith('data:') || typeof src === 'string') {
         resolve(img)
       } else {
-        removeTmpFile(src).then(() => resolve(img)).catch(() => resolve(img))
+        removeFile(src).then(() => resolve(img)).catch(() => resolve(img))
       }
     };
     img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${img.src}`));

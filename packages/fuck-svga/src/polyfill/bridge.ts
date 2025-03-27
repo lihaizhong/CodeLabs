@@ -1,19 +1,18 @@
 import { Env, SE } from "../env";
+import { getProxy } from "./proxy";
 
-function getBridge() {
+export const br = getProxy((_target: any, prop: string) => {
   if (Env.is(SE.H5)) {
-    return globalThis;
+    return (globalThis as any)[prop];
   }
   
   if (Env.is(SE.ALIPAY)) {
-    return my;
+    return my[prop];
   }
   
   if (Env.is(SE.DOUYIN)) {
-    return tt;
+    return tt[prop];
   }
   
-  return wx;
-}
-
-export const br = getBridge();
+  return (wx as any)[prop];
+});

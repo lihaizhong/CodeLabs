@@ -1,17 +1,22 @@
 import { br } from "./bridge";
 import { Env, SE } from "../env";
 import benchmark from "../benchmark";
+import { getProxy } from "./proxy";
 
-const { USER_DATA_PATH = '' } =
-  Env.is(SE.H5)
-    ? {}
-    : Env.is(SE.DOUYIN)
-    ? // @ts-ignore
-      tt.getEnvInfoSync().common
-    : (br as WechatMiniprogram.Wx).env;
+const envInfo = getProxy<{  USER_DATA_PATH: string }>(() => {
+  if (Env.is(SE.H5)) {
+    return {}
+  }
+  
+  if (Env.is(SE.DOUYIN)) {
+    return tt.getEnvInfoSync().common;
+  }
+
+  return (br as WechatMiniprogram.Wx).env;
+});
 
 export function genFilePath(filename: string, prefix?: string) {
-  return `${USER_DATA_PATH}/${prefix ? `${prefix}.` : ""}${filename}`;
+  return `${envInfo.USER_DATA_PATH}/${prefix ? `${prefix}.` : ""}${filename}`;
 }
 
 let fsm: WechatMiniprogram.FileSystemManager | null = null;
@@ -28,7 +33,7 @@ function getFileSystemManager() {
  * @param filePath 文件路径
  * @returns
  */
-export function writeTmpFile(
+export function writeFile(
   data: ArrayBuffer,
   filePath: string
 ): Promise<string> {
@@ -62,7 +67,7 @@ export function writeTmpFile(
  * @param filePath 文件资源地址
  * @returns
  */
-export function removeTmpFile(filePath: string): Promise<string> {
+export function removeFile(filePath: string): Promise<string> {
   getFileSystemManager();
   return new Promise((resolve) => {
     fsm!.access({

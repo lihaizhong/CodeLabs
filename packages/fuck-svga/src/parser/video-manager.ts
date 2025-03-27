@@ -1,6 +1,6 @@
 import { Parser } from ".";
 import { Env, SE } from "../env";
-import { genFilePath, removeTmpFile, writeTmpFile } from "../polyfill/fsm";
+import { genFilePath, removeFile, writeFile } from "../polyfill/fsm";
 
 export interface Bucket {
   // 远程地址
@@ -231,7 +231,7 @@ export class VideoManager {
         const downloadAwait = parser.download(bucket.origin);
         const parseVideoAwait = async (buff: ArrayBuffer | null) => {
           if (buff) {
-            await writeTmpFile(buff, filePath);
+            await writeFile(buff, filePath);
             bucket.local = filePath;
             if (this.remainStart <= index && index < this.remainEnd) {
               return Parser.parseVideo(buff, url);
@@ -312,7 +312,7 @@ export class VideoManager {
     this.maxRemain = 3;
 
     return Promise.all(
-      buckets.map((bucket: Bucket) => removeTmpFile(bucket.local))
+      buckets.map((bucket: Bucket) => removeFile(bucket.local))
     );
   }
 }

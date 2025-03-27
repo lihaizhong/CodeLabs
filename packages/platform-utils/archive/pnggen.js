@@ -20,6 +20,30 @@ const IDAT_CHUNK_TYPE = [0x49, 0x44, 0x41, 0x54];
 // IEND 块类型
 const IEND_CHUNK_TYPE = [0x49, 0x45, 0x4e, 0x44];
 
+function createIHDRChunk() {
+  const ihdrData = new Uint8Array(IHDR_LENGTH);
+  const view = new DataView(ihdrData.buffer);
+
+  // 宽度
+  view.setUint32(0, width);
+  // 高度
+  view.setUint32(4, height);
+  // 位深度
+  view.setUint8(8, 8);
+  // 颜色类型（RGBA）
+  view.setUint8(9, 6);
+  // 压缩方法
+  view.setUint8(10, 0);
+  // 过滤方法
+  view.setUint8(11, 0);
+  // 隔行扫描
+  view.setUint8(12, 0);
+}
+
+function createIDatChunk() {}
+
+function createIENDChunk() {}
+
 // 生成 PNG 文件
 function generatePNG(imageData, width, height) {
   // 创建 IHDR 块
