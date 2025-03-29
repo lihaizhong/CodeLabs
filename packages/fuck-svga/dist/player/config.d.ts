@@ -12,11 +12,11 @@ export declare class Config {
      */
     contentMode: PLAYER_CONTENT_MODE;
     /**
-     * 开始播放的帧数，默认值 0
+     * 开始播放的帧，默认值 0
      */
     startFrame: number;
     /**
-     * 结束播放的帧数，默认值 0
+     * 结束播放的帧，默认值 0
      */
     endFrame: number;
     /**

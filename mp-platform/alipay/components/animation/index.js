@@ -34,10 +34,19 @@ Component({
       await player.setConfig(
         {
           container: "#palette",
-          secondary: "#secondary",
+          loop: 1,
+          playMode: "fallbacks",
+          fillMode: "forwards"
         },
         this
       );
+      player.onProcess = (percent, frame) => {
+        console.log('当前进度', percent, frame)
+        console.log('---- UPDATE ----')
+      };
+      player.onEnd = () => {
+        console.log('---- END ----')
+      };
       readyGo.go();
     },
     detached() {
@@ -59,6 +68,8 @@ Component({
         // my.showLoading();
         const videoItem = await parser.load(this.props.url);
         this.setData({ message: "下载资源成功" });
+
+        console.log(this.props.url, videoItem);
         await player.mount(videoItem);
         this.setData({ message: "资源装载成功" });
         player.start();

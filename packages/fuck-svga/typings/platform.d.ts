@@ -1,47 +1,70 @@
-enum SupportedEnv {
-  WECHAT = "weapp",
-  ALIPAY = "alipay",
-  DOUYIN = "tt",
-  H5 = "h5",
-  UNKNOWN = "unknown",
-}
+type SupportedPlatform = "weapp" | "alipay" | "tt" | "h5" | "unknown";
 
-interface SVGAPlatformGlobal {
-  env: SupportedEnv;
+interface PlatformGlobal {
+  env: SupportedPlatform;
   br: any;
   fsm: any;
   dpr: number;
   sys: string;
 }
 
-interface SVGAPlatform {
-  global: SVGAPlatformGlobal;
+type PlatformProperties =
+  | "path"
+  | "remote"
+  | "local"
+  | "decode"
+  | "image"
+  | "rAF"
+  | "getCanvas"
+  | "getOfsCanvas";
+
+interface PlatformPlugin<T> {
+  name: T;
+  install(this: IPlatform): IPlatform[T] | void;
+}
+
+type PlatformCreateImageInstance = { createImage: () => PlatformImage };
+
+interface IPlatform {
+  global: PlatformGlobal;
 
   noop: () => any;
 
   now: () => number;
 
   remote: {
-    is: () => boolean;
-    read: () => Promise<ArrayBuffer>;
+    is: (url: string) => boolean;
+    read: (url: string) => Promise<ArrayBuffer>;
+  };
+
+  path: {
+    USER_DATA_PATH: string;
+    resolve: (name: string, prefix?: string) => string;
   };
 
   local: {
-    write: () => Promise<void>;
-    read: () => Promise<ArrayBuffer>;
-    remove: () => Promise<void>;
+    write: (data: ArrayBuffer, path: string) => Promise<string>;
+    read: (path: string) => Promise<ArrayBuffer>;
+    remove: (path: string) => Promise<string>;
   };
 
   decode: {
-    toBitmap: () => Promise<ImageBitmap>;
-    toBase64: () => Promise<string>;
+    toBitmap?: (data: Uint8Array) => Promise<ImageBitmap>;
+    toDataURL: (data: Uint8Array) => string;
+    toBuffer: (data: Uint8Array) => ArrayBuffer;
+    utf8: (data: Uint8Array, start: number, end: number) => string;
   };
 
   image: {
-    create: () => Promise<PlatformImage>;
-    load: () => Promise<void>;
-    isImage: () => boolean;
-    isImageBitmap: () => boolean;
+    isImage: (data: unknown) => boolean;
+    isImageBitmap: (data: unknown) => boolean;
+    create: (brush: PlatformCreateImageInstance) => PlatformImage;
+    load: (
+      brush: PlatformCreateImageInstance,
+      data: ImageBitmap | Uint8Array | string,
+      filename: string,
+      prefix?: string
+    ) => Promise<ImageBitmap | PlatformImage>;
   };
 
   rAF: (canvas: WechatMiniprogram.Canvas, callback: () => void) => void;
@@ -55,5 +78,5 @@ interface SVGAPlatform {
     options: WechatMiniprogram.CreateOffscreenCanvasOption
   ) => IGetOffscreenCanvasResult;
 
-  setEnv: (env: SupportedEnv) => void;
+  switch: (env: SupportedPlatform) => void;
 }

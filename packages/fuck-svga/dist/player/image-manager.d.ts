@@ -1,23 +1,14 @@
 import { Brush } from "./brush";
 export declare class ImageManager {
     private images;
+    /**
+     * 图片bitmap
+     */
     private bitmaps;
     /**
      * 素材
      */
     private materials;
-    /**
-     * 判断是不是Image实例
-     * @param img
-     * @returns
-     */
-    private isImage;
-    /**
-     * 判断是不是ImageBitmap实例
-     * @param img
-     * @returns
-     */
-    private isImageBitmap;
     /**
      * 获取图片素材
      * @returns
@@ -34,7 +25,7 @@ export declare class ImageManager {
      * 创建图片标签
      * @returns
      */
-    createImage(canvas: PlatformCanvas): PlatformImage;
+    createImage(canvas: PlatformCreateImageInstance): PlatformImage;
     /**
      * 清理素材
      */

@@ -25,7 +25,7 @@
     }
   </style>
   <script type="module">
-    import { createQRCodeToGIF, createQRCodeToPNG, createQRCodeToHTML } from "fuck-svga";
+    import { createQRCodeToPNG } from "fuck-svga";
     import { createQrCodeImg } from "../../utils/qrcode";
 
     function insertContainer(title, source, size, type = 'img') {
@@ -87,23 +87,23 @@
 
       // --- insertQrCodeToGIF
 
-      insertQrCodeToGIF(size) {
-        console.time('createQRCodeToGIF');
-        const img = createQRCodeToGIF("i generate a gif");
-        console.timeEnd('createQRCodeToGIF');
+      // insertQrCodeToGIF(size) {
+      //   console.time('createQRCodeToGIF');
+      //   const img = createQRCodeToGIF("i generate a gif");
+      //   console.timeEnd('createQRCodeToGIF');
 
-        insertContainer('gif', img, size);
-      },
+      //   insertContainer('gif', img, size);
+      // },
 
       // --- insertQrCodeToHTML
 
-      insertQrCodeToHTML(size) {
-        console.time('createQRCodeToHTML');
-        const img = createQRCodeToHTML("i generate a table tag", { size });
-        console.timeEnd('createQRCodeToHTML');
+      // insertQrCodeToHTML(size) {
+      //   console.time('createQRCodeToHTML');
+      //   const img = createQRCodeToHTML("i generate a table tag", { size });
+      //   console.timeEnd('createQRCodeToHTML');
 
-        insertContainer('html table', img, size, 'html');
-      }
+      //   insertContainer('html table', img, size, 'html');
+      // }
     }
 
     window.onload = () => {
@@ -115,12 +115,12 @@
       setTimeout(() => {
         QRCodeUtils.insertQrCodeToPNG(size);
       }, 0);
-      setTimeout(() => {
-        QRCodeUtils.insertQrCodeToGIF(size);
-      }, 0);
-      setTimeout(() => {
-        QRCodeUtils.insertQrCodeToHTML(size);
-      }, 0);
+      // setTimeout(() => {
+      //   QRCodeUtils.insertQrCodeToGIF(size);
+      // }, 0);
+      // setTimeout(() => {
+      //   QRCodeUtils.insertQrCodeToHTML(size);
+      // }, 0);
     }
   </script>
 </head>

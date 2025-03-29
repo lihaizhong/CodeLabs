@@ -1,5 +1,5 @@
+import { platform } from "../platform";
 import { Brush } from "../player/brush";
-import { loadImage } from "../polyfill";
 
 export class Poster {
   /**
@@ -8,10 +8,19 @@ export class Poster {
    */
   private entity: Video | undefined = undefined;
 
+  /**
+   * 当前的帧，默认值 0
+   */
   private frame: number = 0;
 
+  /**
+   * 填充模式，类似于 content-mode。
+   */
   private contentMode = PLAYER_CONTENT_MODE.FILL;
 
+  /**
+   * 刷头实例
+   */
   private brush = new Brush("poster");
 
   /**
@@ -95,7 +104,7 @@ export class Poster {
   public async setReplaceElementByUrl(key: string, url: string): Promise<void> {
     if (!this.entity) return;
 
-    this.entity!.replaceElements[key] = await loadImage(this.brush, url, url);
+    this.entity!.replaceElements[key] = await platform.image.load(this.brush, url, url);
   }
 
   /**
@@ -119,7 +128,7 @@ export class Poster {
   public async setDynamicElementByUrl(key: string, url: string): Promise<void> {
     if (!this.entity) return;
 
-    this.entity!.dynamicElements[key] = await loadImage(this.brush, url, url);
+    this.entity!.dynamicElements[key] = await platform.image.load(this.brush, url, url);
   }
 
   /**

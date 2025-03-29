@@ -1,3 +1,12 @@
+import pluginPath from "./plugin-path";
+import pluginDecode from "./plugin-decode";
+import pluginDownload from "./plugin-download";
+import pluginCanvas from "./plugin-canvas";
+import pluginOfsCanvas from "./plugin-ofs-canvas";
+import pluginImage from "./plugin-image";
+import pluginRaf from "./plugin-raf";
+import pluginFsm from "./plugin-fsm";
+
 const useNow = () => {
   // performance可以提供更高精度的时间测量，且不受系统时间的调整（如更改系统时间或同步时间）的影响
   if (typeof performance !== "undefined") {
@@ -9,11 +18,22 @@ const useNow = () => {
 
 export const noop: () => any = () => {};
 
-export class Platform implements SVGAPlatform {
-  private plugins: (() => void)[] = [];
+class Platform implements IPlatform {
+  private plugins: PlatformPlugin<PlatformProperties>[] = [
+    pluginPath,
+    pluginDecode,
+    pluginFsm,
+    pluginDownload,
+    pluginRaf,
+    pluginCanvas,
+    pluginOfsCanvas,
 
-  public global: SVGAPlatformGlobal = {
-    env: SupportedEnv.UNKNOWN,
+    // 带依赖的插件，需要放在最后
+    pluginImage
+  ];
+
+  public global: PlatformGlobal = {
+    env: "unknown",
     br: null,
     fsm: null,
     dpr: 1,
@@ -24,19 +44,21 @@ export class Platform implements SVGAPlatform {
 
   public now = useNow();
 
-  public local = {} as SVGAPlatform["local"];
+  public path = {} as IPlatform["path"];
 
-  public remote = {} as SVGAPlatform["remote"];
+  public local = {} as IPlatform["local"];
 
-  public decode = {} as SVGAPlatform["decode"];
+  public remote = {} as IPlatform["remote"];
 
-  public image = {} as SVGAPlatform["image"];
+  public decode = {} as IPlatform["decode"];
 
-  public rAF = noop as SVGAPlatform["rAF"];
+  public image = {} as IPlatform["image"];
 
-  public getCanvas = noop as SVGAPlatform["getCanvas"];
+  public rAF = noop as IPlatform["rAF"];
 
-  public getOfsCanvas = noop as SVGAPlatform["getOfsCanvas"];
+  public getCanvas = noop as IPlatform["getCanvas"];
+
+  public getOfsCanvas = noop as IPlatform["getOfsCanvas"];
 
   constructor() {
     this.global.env = this.autoEnv();
@@ -54,19 +76,19 @@ export class Platform implements SVGAPlatform {
   private autoEnv() {
     // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
     if (typeof window !== "undefined") {
-      return SupportedEnv.H5;
+      return "h5";
     }
 
     if (typeof tt !== "undefined") {
-      return SupportedEnv.DOUYIN;
+      return "tt";
     }
 
     if (typeof my !== "undefined") {
-      return SupportedEnv.ALIPAY;
+      return "alipay";
     }
 
     if (typeof wx !== "undefined") {
-      return SupportedEnv.WECHAT;
+      return "weapp";
     }
 
     throw new Error("Unsupported app");
@@ -74,13 +96,13 @@ export class Platform implements SVGAPlatform {
 
   private useBridge() {
     switch (this.global.env) {
-      case SupportedEnv.H5:
+      case "h5":
         return globalThis;
-      case SupportedEnv.ALIPAY:
+      case "alipay":
         return my;
-      case SupportedEnv.DOUYIN:
+      case "tt":
         return tt;
-      case SupportedEnv.WECHAT:
+      case "weapp":
         return wx;
       default:
     }
@@ -91,7 +113,7 @@ export class Platform implements SVGAPlatform {
   private usePixelRatio() {
     const { env, br } = this.global;
 
-    if (env === SupportedEnv.H5) {
+    if (env === "h5") {
       return globalThis.devicePixelRatio;
     }
 
@@ -119,7 +141,7 @@ export class Platform implements SVGAPlatform {
   private useSystem() {
     const { env, br } = this.global;
 
-    if (env === SupportedEnv.H5) {
+    if (env === "h5") {
       const UA = navigator.userAgent;
 
       if (/(Android)/i.test(UA)) {
@@ -134,15 +156,15 @@ export class Platform implements SVGAPlatform {
         return "OpenHarmony";
       }
     } else {
-      if (env === SupportedEnv.ALIPAY) {
+      if (env === "alipay") {
         return (br as any).getDeviceBaseInfo().platform as string;
       }
 
-      if (env === SupportedEnv.DOUYIN) {
+      if (env === "tt") {
         return (br as any).getDeviceInfoSync().platform as string;
       }
 
-      if (env === SupportedEnv.WECHAT) {
+      if (env === "weapp") {
         return (br as any).getDeviceInfo().platform as string;
       }
     }
@@ -152,12 +174,18 @@ export class Platform implements SVGAPlatform {
 
   private usePlugins() {
     this.plugins.forEach((plugin) => {
-      plugin.call(this);
+      const value = plugin.install.call(this);
+
+      if (value !== undefined) {
+        Reflect.set(this, plugin.name, value);
+      }
     });
   }
 
-  public setEnv(env: SupportedEnv) {
+  public switch(env: SupportedPlatform) {
     this.global.env = env;
     this.init();
   }
 }
+
+export const platform = new Platform();

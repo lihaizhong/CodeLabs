@@ -22,14 +22,14 @@ export declare class Player {
     /**
      * 设置配置项
      * @param options 可配置项
-     * @property {string} container 主屏，播放动画的 Canvas 元素
-     * @property {string} secondary 副屏，播放动画的 Canvas 元素
-     * @property {number} loop 循环次数，默认值 0（无限循环）
-     * @property {string} fillMode 最后停留的目标模式，类似于 animation-fill-mode，接受值 forwards 和 fallbacks，默认值 forwards。
-     * @property {string} playMode 播放模式，接受值 forwards 和 fallbacks ，默认值 forwards。
-     * @property {number} startFrame 单个循环周期内开始播放的帧数，默认值 0
-     * @property {number} endFrame 单个循环周期内结束播放的帧数，默认值 0
-     * @property {number} loopStartFrame 循环播放的开始帧，仅影响第一个周期的开始帧，默认值 0
+     * @property container 主屏，播放动画的 Canvas 元素
+     * @property secondary 副屏，播放动画的 Canvas 元素
+     * @property loop 循环次数，默认值 0（无限循环）
+     * @property fillMode 最后停留的目标模式，类似于 animation-fill-mode，接受值 forwards 和 fallbacks，默认值 forwards。
+     * @property playMode 播放模式，接受值 forwards 和 fallbacks ，默认值 forwards。
+     * @property startFrame 单个循环周期内开始播放的帧数，默认值 0
+     * @property endFrame 单个循环周期内结束播放的帧数，默认值 0
+     * @property loopStartFrame 循环播放的开始帧，仅影响第一个周期的开始帧，默认值 0
      */
     setConfig(options: string | PlayerConfigOptions, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
     /**
@@ -97,17 +97,15 @@ export declare class Player {
      */
     destroy(): void;
     /**
-     * 指定开始帧动画
-     * @param frame
-     * @param andPlay
-     * @returns
+     * 跳转到指定帧
+     * @param frame 目标帧
+     * @param andPlay 是否立即播放
      */
     stepToFrame(frame: number, andPlay?: boolean): void;
     /**
-     * 指定开始百分比动画
-     * @param percent
-     * @param andPlay
-     * @returns
+     * 跳转到指定百分比
+     * @param percent 目标百分比
+     * @param andPlay 是否立即播放
      */
     stepToPercentage(percent: number, andPlay?: boolean): void;
     /**

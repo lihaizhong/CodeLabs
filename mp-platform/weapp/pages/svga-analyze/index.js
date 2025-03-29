@@ -1,5 +1,5 @@
 import { unzlibSync } from "../../utils/fflate";
-import { MovieEntityReader } from "../../utils/svga-protobuf";
+import { SVGADecoder } from "../../utils/fuck-svga";
 import { getOneAtRandom } from "../../utils/constants";
 
 Page({
@@ -29,7 +29,7 @@ Page({
         }
 
         const inflateData = unzlibSync(u8a);
-        const movieData = MovieEntityReader.decode(inflateData);
+        const movieData = SVGADecoder.decode(inflateData);
 
         console.log("movieData", movieData);
 

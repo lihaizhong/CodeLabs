@@ -30,9 +30,19 @@ Component({
         {
           container: "#palette",
           // secondary: "#secondary",
+          loop: 1,
+          playMode: "fallbacks",
+          fillMode: "forwards"
         },
         this
       );
+      player.onProcess = (percent, frame) => {
+        console.log('当前进度', percent, frame)
+        console.log('---- UPDATE ----')
+      };
+      player.onEnd = () => {
+        console.log('---- END ----')
+      };
       readyGo.go();
     },
     detached() {
@@ -51,15 +61,16 @@ Component({
     async initialize() {
       try {
         this.setData({ message: "准备下载资源" });
-        // tt.showLoading();
         const videoItem = await parser.load(this.properties.url);
         this.setData({ message: "下载资源成功" });
+
+        console.log(this.properties.url, videoItem);
         await player.mount(videoItem);
         this.setData({ message: "资源装载成功" });
+        // player.stepToPercentage(0.3);
         player.start();
         this.setData({ message: "" });
       } catch (ex) {
-        // tt.hideLoading();
         console.error("svga初始化失败！", ex);
         this.setData({ message: ex.message + "\n" + ex.stack });
       }

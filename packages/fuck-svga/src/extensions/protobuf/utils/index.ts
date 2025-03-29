@@ -1,6 +1,6 @@
 // import { LongBits } from "../../archive/dts";
 
-export function noop() {}
+// export function noop() {}
 
 // export function writeByte(val: number, buf: Uint8Array, pos: number) {
 //   buf[pos] = val & 255;

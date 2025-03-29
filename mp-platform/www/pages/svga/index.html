@@ -133,9 +133,10 @@
           showPopup("准备下载资源")
           const videoItem = await parser.load(this.data.url);
           showPopup("下载资源成功")
+
+          console.log(this.data.url, videoItem);
           await player.mount(videoItem);
           showPopup("资源装载成功")
-          showPopup("准备开始播放");
           player.start();
           showPopup("");
         } catch (ex) {
@@ -149,14 +150,14 @@
         player = new Player();
         await player.setConfig({
           container: "#palette",
-          // secondary: "#secondary",
           loop: 1,
-          // playMode: "fallbacks",
-          // fillMode: "forwards",
+          playMode: "fallbacks",
+          fillMode: "forwards",
           contentMode: "aspect-fill"
         });
-        player.onProcess = (percent) => {
-          console.log('--------- UPDATE ----------', percent)
+        player.onProcess = (percent, frame) => {
+          console.log('当前进度', percent, frame)
+          console.log('---- UPDATE ----')
         };
         player.onEnd = () => {
           console.log('---- END ----')
@@ -186,7 +187,6 @@
 <body>
   <div class="ani-container">
     <canvas type="2d" id="palette" class="svga-palette"></canvas>
-    <!-- <canvas type="2d" id="secondary" class="svga-palette svga-secondary"></canvas> -->
   </div>
 
   <div id="popup" class="svga-error-popup">{{ message }}</div>

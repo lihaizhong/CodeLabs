@@ -1,14 +1,7 @@
 import benchmark from "../benchmark";
-import {
-  getCanvas,
-  getOffscreenCanvas,
-  noop,
-  platform,
-  br,
-} from "../polyfill";
-import { Env, SE } from "../env";
 import render from "./render";
 import { ImageManager } from "./image-manager";
+import { platform } from "../platform";
 
 interface IBrushModel {
   // canvas or offscreen
@@ -20,6 +13,8 @@ interface IBrushModel {
 }
 
 type TBrushMode = "poster" | "animation";
+
+const { noop } = platform;
 
 export class Brush {
   /**
@@ -66,6 +61,7 @@ export class Brush {
 
   private setModel(type: "C" | "O"): void {
     const { model } = this;
+    const { env, sys } = platform.global;
 
     // set type
     model.type = type;
@@ -74,11 +70,11 @@ export class Brush {
     if (
       type === "O" &&
       // OffscreenCanvas 在 Firefox 浏览器无法被清理历史内容
-      Env.is(SE.H5) &&
+      env === "h5" &&
       navigator.userAgent.includes("Firefox")
     ) {
       model.clear = "CR";
-    } else if ((type === "O" && Env.is(SE.DOUYIN)) || Env.is(SE.ALIPAY)) {
+    } else if ((type === "O" && env === "tt") || env === "alipay") {
       model.clear = "CL";
     } else {
       model.clear = "RE";
@@ -87,8 +83,8 @@ export class Brush {
     // set render
     if (
       (type === "C" &&
-        (Env.is(SE.DOUYIN) || (platform === "IOS" && Env.is(SE.ALIPAY)))) ||
-      (type === "O" && Env.is(SE.WECHAT))
+        (env === "tt" || (sys === "IOS" && env === "alipay"))) ||
+      (type === "O" && env === "weapp") 
     ) {
       model.render = "PU";
     } else {
@@ -114,13 +110,14 @@ export class Brush {
     component?: WechatMiniprogram.Component.TrivialInstance | null
   ) {
     const { model, mode } = this;
+    const { getCanvas, getOfsCanvas } = platform;
     // #region set main screen implement
     // -------- 创建主屏 ---------
-    const { canvas, ctx } = await getCanvas(selector, component);
+    const { canvas, context } = await getCanvas(selector, component);
     const { width, height } = canvas;
     // 添加主屏
     this.X = canvas;
-    this.XC = ctx;
+    this.XC = context;
     this.W = width;
     this.H = height;
     // #endregion set main screen implement
@@ -140,12 +137,12 @@ export class Brush {
         ofsResult.canvas.height = height;
         this.setModel("C");
       } else {
-        ofsResult = getOffscreenCanvas({ width, height });
+        ofsResult = getOfsCanvas({ width, height });
         this.setModel("O");
       }
 
       this.Y = ofsResult.canvas;
-      this.YC = ofsResult.ctx;
+      this.YC = ofsResult.context;
     }
     // #endregion set secondary screen implement
 
@@ -176,9 +173,9 @@ export class Brush {
           this.clearSecondary = () => {
             const { W, H } = this;
             // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
-            const { canvas, ctx } = getOffscreenCanvas({ width: W, height: H });
+            const { canvas, context } = getOfsCanvas({ width: W, height: H });
             this.Y = canvas;
-            this.YC = ctx;
+            this.YC = context;
           };
           break;
         case "CL":
@@ -236,7 +233,7 @@ export class Brush {
    * @returns
    */
   public createImage(): PlatformImage {
-    return this.IM.createImage(this.X!);
+    return this.IM.createImage(this.X as WechatMiniprogram.Canvas);
   }
 
   /**
@@ -305,9 +302,7 @@ export class Brush {
    * @param cb
    */
   public flush(cb: () => void): void {
-    (
-      (Env.is(SE.H5) ? br : this.X) as WechatMiniprogram.Canvas
-    ).requestAnimationFrame(cb);
+    platform.rAF(this.X as WechatMiniprogram.Canvas, cb);
   }
 
   public clearContainer: () => void = noop;

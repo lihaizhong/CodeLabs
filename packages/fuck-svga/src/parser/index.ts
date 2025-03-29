@@ -1,8 +1,6 @@
 import { unzlibSync } from "fflate";
-import { Env, SE } from "../env";
-import { MovieEntity } from "../extensions/protobuf";
-import { readFile } from "../polyfill";
-import { isRemote, readRemoteFile } from "../polyfill/download";
+import { platform } from "../platform";
+import { SVGADecoder } from "../extensions/protobuf";
 import { VideoEntity } from "./video-entity";
 import benchmark from "../benchmark";
 
@@ -35,7 +33,7 @@ export class Parser {
     let entity: VideoEntity;
     benchmark.time("unzlibSync", () => {
       const inflateData = unzlibSync(u8a);
-      const movieData = MovieEntity.decode(inflateData);
+      const movieData = SVGADecoder.decode(inflateData);
 
       entity = new VideoEntity(
         movieData!,
@@ -52,14 +50,16 @@ export class Parser {
    * @returns
    */
   public download(url: string): Promise<ArrayBuffer | null> {
+    const { remote, local, global } = platform;
+
     // 读取远程文件
-    if (isRemote(url)) {
-      return readRemoteFile(url);
+    if (remote.is(url)) {
+      return remote.read(url);
     }
   
     // 读取本地文件
-    if (Env.not(SE.H5)) {
-      return readFile(url);
+    if (global.env !== "h5") {
+      return local.read(url);
     }
   
     return Promise.resolve(null);

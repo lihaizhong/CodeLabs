@@ -1,4 +1,3 @@
-export declare function noop(): void;
 /**
  * Tests if the specified value is an string.
  * @function

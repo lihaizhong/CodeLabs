@@ -6,13 +6,6 @@
  */
 export declare class QRCode {
     private readonly typeNumber;
-    static stringToBytes(s: string): number[];
-    /**
-     * @param unicodeData base64 string of byte array.
-     * [16bit Unicode],[16bit Bytes], ...
-     * @param numChars
-     */
-    static createStringToBytes(unicodeData: string, numChars: number): (s: string) => number[];
     private readonly errorCorrectLevel;
     private modules;
     private moduleCount;

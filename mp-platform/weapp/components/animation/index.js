@@ -30,13 +30,14 @@ Component({
         {
           container: "#palette",
           secondary: "#secondary",
-          loop: 2,
-          playMode: "fallbacks"
+          loop: 1,
+          playMode: "fallbacks",
+          fillMode: "forwards"
         },
         this
       );
-      player.onProcess = (percent, frame, frames) => {
-        console.log('当前进度', percent, frame, frames)
+      player.onProcess = (percent, frame) => {
+        console.log('当前进度', percent, frame)
         console.log('---- UPDATE ----')
       };
       player.onEnd = () => {

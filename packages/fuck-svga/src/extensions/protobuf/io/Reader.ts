@@ -1,5 +1,5 @@
+import { platform } from "../../../platform";
 import float from "./float";
-import utf8 from "./utf8";
 // import { LongBits } from "../dts";
 
 export default class Reader {
@@ -352,7 +352,7 @@ export default class Reader {
   string() {
     const bytes = this.bytes();
 
-    return utf8.read(bytes, 0, bytes.length);
+    return platform.decode.utf8(bytes, 0, bytes.length);
   }
 
   /**

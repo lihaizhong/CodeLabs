@@ -4,8 +4,17 @@ export declare class Poster {
      * Video Entity
      */
     private entity;
+    /**
+     * 当前的帧，默认值 0
+     */
     private frame;
+    /**
+     * 填充模式，类似于 content-mode。
+     */
     private contentMode;
+    /**
+     * 刷头实例
+     */
     private brush;
     /**
      * 设置配置项

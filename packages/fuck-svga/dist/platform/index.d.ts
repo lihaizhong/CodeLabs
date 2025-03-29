@@ -1,16 +1,17 @@
 export declare const noop: () => any;
-export declare class Platform implements SVGAPlatform {
+declare class Platform implements IPlatform {
     private plugins;
-    global: SVGAPlatformGlobal;
+    global: PlatformGlobal;
     noop: () => any;
     now: () => number;
-    local: SVGAPlatform["local"];
-    remote: SVGAPlatform["remote"];
-    decode: SVGAPlatform["decode"];
-    image: SVGAPlatform["image"];
-    rAF: SVGAPlatform["rAF"];
-    getCanvas: SVGAPlatform["getCanvas"];
-    getOfsCanvas: SVGAPlatform["getOfsCanvas"];
+    path: IPlatform["path"];
+    local: IPlatform["local"];
+    remote: IPlatform["remote"];
+    decode: IPlatform["decode"];
+    image: IPlatform["image"];
+    rAF: IPlatform["rAF"];
+    getCanvas: IPlatform["getCanvas"];
+    getOfsCanvas: IPlatform["getOfsCanvas"];
     constructor();
     private init;
     private autoEnv;
@@ -19,5 +20,7 @@ export declare class Platform implements SVGAPlatform {
     private useFileSystemManager;
     private useSystem;
     private usePlugins;
-    setEnv(env: SupportedEnv): void;
+    switch(env: SupportedPlatform): void;
 }
+export declare const platform: Platform;
+export {};

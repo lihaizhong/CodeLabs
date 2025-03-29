@@ -1,7 +1,11 @@
+import { platform } from "../platform";
 import benchmark from "../benchmark";
-import { noop, now } from "../polyfill";
 import type { Brush } from "./brush";
 
+const { now, noop } = platform;
+/**
+ * 动画控制器
+ */
 export class Animator {
   /**
    * 动画是否执行

@@ -1,4 +1,4 @@
-export const hasOwn = (target: any, property: string | symbol) => {
+export const hasOwn = (target: Record<string, any>, property: string | symbol) => {
 	if ("hasOwn" in Object) {
 		return Object.hasOwn(target, property);
 	}
@@ -15,7 +15,7 @@ export const hasOwn = (target: any, property: string | symbol) => {
  * @param value
  * @param type
  */
-export function checkOfStrict(value: any, type: any): boolean {
+export function checkOfStrict(value: unknown, type: any): boolean {
 	if (value === null || value === undefined) {
 		return value === type;
 	}
@@ -28,12 +28,12 @@ export function checkOfStrict(value: any, type: any): boolean {
  * * loose
  * @param value
  */
-export function isDate(value: any): boolean {
+export function isDate(value: unknown): boolean {
 	return (
 		(value instanceof Date ||
 			isString(value) ||
-			(isNumber(value) && value > 0)) &&
-		new Date(value).toString() !== "Invalid Date"
+			(isNumber(value) && (value as number) > 0)) &&
+			isNaN(Date.parse((value as number | string | Date).toString())) === false
 	);
 }
 
@@ -42,7 +42,7 @@ export function isDate(value: any): boolean {
  * * strong
  * @param value
  */
-export function isNull(value: any): boolean {
+export function isNull(value: unknown): boolean {
 	return value === null;
 }
 
@@ -51,17 +51,17 @@ export function isNull(value: any): boolean {
  * * strong
  * @param value
  */
-export function isUndefined(value: any): boolean {
+export function isUndefined(value: unknown): boolean {
 	return typeof value === "undefined";
 }
 
 /**
- * 判断是否是undefined、null或者空字符串
+ * 判断是否是undefined、null
  * * strong
  * @param value
  */
-export function isVoid(value: any): boolean {
-	return isUndefined(value) || isNull(value) || value === "";
+export function isVoid(value: unknown): boolean {
+	return isUndefined(value) || isNull(value);
 }
 
 /**
@@ -69,10 +69,10 @@ export function isVoid(value: any): boolean {
  * * strong
  * @param value
  */
-export function isPrimitive(value: any): boolean {
+export function isPrimitive(value: unknown): boolean {
 	return (
 		value === null ||
-		["undefined", "string", "number", "boolean", "symbol"].includes(
+		["undefined", "string", "number", "boolean", "symbol", "bigint"].includes(
 			typeof value,
 		)
 	);
@@ -83,7 +83,7 @@ export function isPrimitive(value: any): boolean {
  * * strong
  * @param value
  */
-export function isString(value: any): boolean {
+export function isString(value: unknown): boolean {
 	return typeof value === "string";
 }
 
@@ -92,7 +92,7 @@ export function isString(value: any): boolean {
  * * strong
  * @param value
  */
-export function isNumber(value: any): boolean {
+export function isNumber(value: unknown): boolean {
 	return typeof value === "number" && Number.isFinite(value);
 }
 
@@ -101,7 +101,7 @@ export function isNumber(value: any): boolean {
  * * strong
  * @param value
  */
-export function isBoolean(value: any): boolean {
+export function isBoolean(value: unknown): boolean {
 	return typeof value === "boolean";
 }
 
@@ -110,7 +110,7 @@ export function isBoolean(value: any): boolean {
  * * strong
  * @param value
  */
-export function isFunction(value: any): boolean {
+export function isFunction(value: unknown): boolean {
 	return typeof value === "function";
 }
 
@@ -119,7 +119,7 @@ export function isFunction(value: any): boolean {
  * * strong
  * @param value
  */
-export function isArray(value: any): boolean {
+export function isArray(value: unknown): boolean {
 	return Array.isArray(value);
 }
 
@@ -128,7 +128,7 @@ export function isArray(value: any): boolean {
  * * strong
  * @param value
  */
-export function isObject(value: any): boolean {
+export function isObject(value: unknown): boolean {
 	return typeof value === "object" && value !== null;
 }
 
@@ -137,7 +137,7 @@ export function isObject(value: any): boolean {
  * @param value
  * @returns
  */
-export function isPlainObject(value: any): boolean {
+export function isPlainObject(value: unknown): boolean {
 	return checkOfStrict(value, Object);
 }
 
@@ -146,7 +146,7 @@ export function isPlainObject(value: any): boolean {
  * * strong
  * @param value
  */
-export function isRegExp(value: any): boolean {
+export function isRegExp(value: unknown): boolean {
 	return checkOfStrict(value, RegExp);
 }
 
@@ -155,7 +155,7 @@ export function isRegExp(value: any): boolean {
  * * loose
  * @param value
  */
-export function isError(value: any): boolean {
+export function isError(value: unknown): boolean {
 	return value instanceof Error;
 }
 
@@ -164,7 +164,7 @@ export function isError(value: any): boolean {
  * * loose
  * @param value
  */
-export function isPromise(value: any): boolean {
+export function isPromise(value: unknown): boolean {
 	return value instanceof Promise;
 }
 
@@ -173,7 +173,7 @@ export function isPromise(value: any): boolean {
  * * loose
  * @param value
  */
-export function isTruthy(value: any): boolean {
+export function isTruthy(value: unknown): boolean {
 	return value === true || value === 1;
 }
 
@@ -182,10 +182,10 @@ export function isTruthy(value: any): boolean {
  * * loose
  * @param value
  */
-export function isFalsy(value: any): boolean {
+export function isFalsy(value: unknown): boolean {
 	return value === false || value === 0;
 }
 
-export function isBigInt(value: any): boolean {
+export function isBigInt(value: unknown): boolean {
   return typeof value === "bigint";
 }

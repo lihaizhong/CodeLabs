@@ -12,11 +12,11 @@ export class Config {
    */
   public contentMode = PLAYER_CONTENT_MODE.FILL;
   /**
-   * 开始播放的帧数，默认值 0
+   * 开始播放的帧，默认值 0
    */
   public startFrame = 0;
   /**
-   * 结束播放的帧数，默认值 0
+   * 结束播放的帧，默认值 0
    */
   public endFrame = 0;
   /**

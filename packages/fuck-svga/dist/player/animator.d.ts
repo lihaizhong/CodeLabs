@@ -1,4 +1,7 @@
 import type { Brush } from "./brush";
+/**
+ * 动画控制器
+ */
 export declare class Animator {
     private readonly brush;
     /**
