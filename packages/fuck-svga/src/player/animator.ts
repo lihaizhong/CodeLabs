@@ -70,6 +70,7 @@ export class Animator {
 
   public stop(): void {
     this.isRunning = false;
+    this.loopStart = 0;
   }
 
   private doFrame(): void {
