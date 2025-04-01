@@ -1,7 +1,7 @@
 import { platform } from "../platform";
 import { PNGEncoder, QRCode } from "../extensions";
 
-export interface ICreateQrCodeImgOptions {
+export interface IQrCodeImgOptions {
   size?: number;
   typeNumber?: number;
   errorCorrectLevel?: "L" | "M" | "Q" | "H";
@@ -9,7 +9,7 @@ export interface ICreateQrCodeImgOptions {
   white?: string;
 }
 
-function parseOptions(options: ICreateQrCodeImgOptions = {}) {
+function parseOptions(options: IQrCodeImgOptions = {}) {
   const opts = { ...options };
   const typeNumber = opts.typeNumber ?? 4;
   const errorCorrectLevel = opts.errorCorrectLevel ?? "M";
@@ -29,7 +29,7 @@ const calcCellSizeAndMargin = (moduleCount: number, size: number) => {
   }
 };
 
-export function createQRCodeToPNG(text: string, options?: ICreateQrCodeImgOptions) {
+export function createQRCodeToPNG(text: string, options?: IQrCodeImgOptions) {
   const { typeNumber, errorCorrectLevel, size, black, white } =
       parseOptions(options);
     let qr: QRCode;
