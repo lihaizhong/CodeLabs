@@ -9,6 +9,7 @@ export declare class PNGEncoder {
     private createIDATChunk;
     private createIENDChunk;
     setPixel(x: number, y: number, pixel: number): void;
+    write(pixels: Uint8Array | Uint8ClampedArray): void;
     flush(): void;
     toBuffer(): Uint8Array;
 }

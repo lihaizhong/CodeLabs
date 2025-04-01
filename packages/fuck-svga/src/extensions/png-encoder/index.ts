@@ -88,6 +88,24 @@ export class PNGEncoder {
     this.view.setUint32((y * this.width + x) * 4, pixel, false);
   }
 
+  public write(pixels: Uint8Array | Uint8ClampedArray): void {
+    const { width, height } = this;
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const index = (y * width + x) * 4;
+        const pixel = (
+          (pixels[index] << 24) |
+          (pixels[index + 1] << 16) |
+          (pixels[index + 2] << 8) |
+          pixels[index + 3]
+        ) >>> 0;
+
+        this.setPixel(x, y, pixel);
+      }
+    }
+  }
+
   public flush(): void {
     // 1. 文件头（固定 8 字节）
     const pngSignature = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);

@@ -1,3 +1,4 @@
+import { getDataURLFromImageData } from "../helper";
 import { platform } from "../platform";
 import { Brush } from "../player/brush";
 
@@ -21,7 +22,11 @@ export class Poster {
   /**
    * 刷头实例
    */
-  private brush = new Brush("poster");
+  private brush: Brush;
+
+  constructor(width: number, height: number) {
+    this.brush = new Brush("poster", width, height);
+  }
 
   /**
    * 设置配置项
@@ -148,12 +153,10 @@ export class Poster {
 
   /**
    * 获取海报元数据
-   * @param type 
-   * @param encoderOptions 
    * @returns 
    */
-  public toDataURL(type?: string, encoderOptions?: number): string {
-    return this.brush.getImage(type, encoderOptions);
+  public toDataURL(): string {
+    return getDataURLFromImageData(this.brush.getImageData());
   }
 
   /**

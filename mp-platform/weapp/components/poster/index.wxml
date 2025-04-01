@@ -1,2 +1,2 @@
-<canvas type="2d" id="palette" class="svga-palette"></canvas>
+<image class="svga-palette" src="{{ source }}" />
 <view wx:if="{{ message }}" class="svga-error-popup">{{ message }}</view>

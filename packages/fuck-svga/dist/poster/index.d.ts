@@ -16,6 +16,7 @@ export declare class Poster {
      * 刷头实例
      */
     private brush;
+    constructor(width: number, height: number);
     /**
      * 设置配置项
      * @param options 可配置项
@@ -71,11 +72,9 @@ export declare class Poster {
     draw(): void;
     /**
      * 获取海报元数据
-     * @param type
-     * @param encoderOptions
      * @returns
      */
-    toDataURL(type?: string, encoderOptions?: number): string;
+    toDataURL(): string;
     /**
      * 清理海报
      */

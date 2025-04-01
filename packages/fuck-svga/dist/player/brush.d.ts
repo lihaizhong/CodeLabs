@@ -1,6 +1,8 @@
 type TBrushMode = "poster" | "animation";
 export declare class Brush {
     private readonly mode;
+    private W;
+    private H;
     /**
      * 主屏的 Canvas 元素
      * Main Screen
@@ -22,20 +24,21 @@ export declare class Brush {
      */
     private YC;
     /**
-     * canvas宽度
-     */
-    private W;
-    /**
-     * canvas高度
-     */
-    private H;
-    /**
      * 粉刷模式
      */
     private model;
     private IM;
     globalTransform?: GlobalTransform;
-    constructor(mode?: TBrushMode);
+    /**
+     *
+     * @param mode
+     *  - poster: 海报模式
+     *  - animation: 动画模式
+     *  - 默认为 animation
+     * @param W 海报模式必须传入
+     * @param H 海报模式必须传入
+     */
+    constructor(mode?: TBrushMode, W?: number, H?: number);
     private setModel;
     /**
      * 注册画笔，根据环境判断生成最优的绘制方式
@@ -62,7 +65,7 @@ export declare class Brush {
      * @param encoderOptions
      * @returns
      */
-    getImage(type?: string, encoderOptions?: number): string;
+    getImageData(): ImageData;
     resize(contentMode: PLAYER_CONTENT_MODE, videoSize: ViewportRect): void;
     /**
      * 注册刷新屏幕的回调函数

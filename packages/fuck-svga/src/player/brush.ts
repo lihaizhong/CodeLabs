@@ -41,14 +41,6 @@ export class Brush {
     | OffscreenCanvasRenderingContext2D
     | null = null;
   /**
-   * canvas宽度
-   */
-  private W: number = 0;
-  /**
-   * canvas高度
-   */
-  private H: number = 0;
-  /**
    * 粉刷模式
    */
   private model: IBrushModel = {} as IBrushModel;
@@ -57,7 +49,16 @@ export class Brush {
 
   public globalTransform?: GlobalTransform;
 
-  constructor(private readonly mode: TBrushMode = "animation") {}
+  /**
+   * 
+   * @param mode 
+   *  - poster: 海报模式
+   *  - animation: 动画模式
+   *  - 默认为 animation
+   * @param W 海报模式必须传入
+   * @param H 海报模式必须传入
+   */
+  constructor(private readonly mode: TBrushMode = "animation", private W = 0, private H = 0) {}
 
   private setModel(type: "C" | "O"): void {
     const { model } = this;
@@ -113,13 +114,27 @@ export class Brush {
     const { getCanvas, getOfsCanvas } = platform;
     // #region set main screen implement
     // -------- 创建主屏 ---------
-    const { canvas, context } = await getCanvas(selector, component);
-    const { width, height } = canvas;
-    // 添加主屏
-    this.X = canvas;
-    this.XC = context;
-    this.W = width;
-    this.H = height;
+    if (mode === "poster") {
+      const { W, H } = this;
+
+      if (!(W > 0 && H > 0)) {
+        throw new Error(
+          "Poster mode must set width and height when create Brush instance"
+        );
+      }
+
+      const { canvas, context } = getOfsCanvas({ width: W, height: H });
+      this.X = canvas;
+      this.XC = context;
+    } else {
+      const { canvas, context } = await getCanvas(selector, component);
+      const { width, height } = canvas;
+      // 添加主屏
+      this.X = canvas;
+      this.XC = context;
+      this.W = width;
+      this.H = height;
+    }
     // #endregion set main screen implement
 
     // #region set secondary screen implement
@@ -127,17 +142,17 @@ export class Brush {
     if (mode === "poster") {
       this.Y = this.X;
       this.YC = this.XC;
-      this.setModel("C");
+      this.setModel("O");
     } else {
       let ofsResult;
 
       if (typeof ofsSelector === "string" && ofsSelector !== "") {
         ofsResult = await getCanvas(ofsSelector, component);
-        ofsResult.canvas.width = width;
-        ofsResult.canvas.height = height;
+        ofsResult.canvas.width = this.W;
+        ofsResult.canvas.height = this.H;
         this.setModel("C");
       } else {
-        ofsResult = getOfsCanvas({ width, height });
+        ofsResult = getOfsCanvas({ width: this.W, height: this.H });
         this.setModel("O");
       }
 
@@ -242,8 +257,8 @@ export class Brush {
    * @param encoderOptions
    * @returns
    */
-  public getImage(type: string = "image/png", encoderOptions: number = 0.92) {
-    return this.X!.toDataURL(type, encoderOptions);
+  public getImageData() {
+    return this.XC!.getImageData(0, 0, this.W, this.H);
   }
 
   public resize(

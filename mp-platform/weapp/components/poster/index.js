@@ -27,8 +27,9 @@ Component({
 
   lifetimes: {
     async ready() {
+      const { windowWidth: width, windowHeight: height } = wx.getWindowInfo();
       parser = new Parser();
-      poster = new Poster();
+      poster = new Poster(width, height);
       await poster.setConfig("#palette", this);
       readyGo.go();
     },
@@ -41,6 +42,7 @@ Component({
   },
 
   data: {
+    source: "",
     message: "",
   },
 
@@ -53,6 +55,10 @@ Component({
         await poster.mount(videoItem, this.properties.frame);
         this.setData({ message: "资源装载成功" });
         poster.draw();
+
+        this.setData({
+          source: poster.toDataURL(),
+        });
         this.setData({ message: "" });
       } catch (ex) {
         console.error("svga初始化失败！", ex);
