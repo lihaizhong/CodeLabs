@@ -253,8 +253,6 @@ export class Brush {
 
   /**
    * 生成图片
-   * @param type
-   * @param encoderOptions
    * @returns
    */
   public getImageData() {
