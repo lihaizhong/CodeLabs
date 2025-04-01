@@ -61,8 +61,6 @@ export declare class Brush {
     createImage(): PlatformImage;
     /**
      * 生成图片
-     * @param type
-     * @param encoderOptions
      * @returns
      */
     getImageData(): ImageData;
