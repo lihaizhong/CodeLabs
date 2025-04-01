@@ -1,6 +1,7 @@
 import { Brush } from "./brush";
 import { Animator } from "./animator";
 import { Config } from "./config";
+import { platform } from "../platform";
 
 /**
  * SVGA 播放器
@@ -222,6 +223,7 @@ export class Player {
    */
   private startAnimation(): void {
     const { entity, config, animator, brush } = this;
+    const { global, now } = platform;
     const { playMode, contentMode } = config;
     const {
       currFrame,
@@ -236,55 +238,101 @@ export class Player {
 
     // 当前帧
     let currentFrame = currFrame;
-      // 片段绘制结束位置
+    // 片段绘制结束位置
     let tail = 0;
-      // 上一帧
+    let nextTail: number;
+    // 上一帧
     let latestFrame: number;
-      // 下一帧
+    // 下一帧
     let nextFrame: number;
-      // 当前已完成的百分比
+    // 精确帧
+    let exactFrame: number;
+    // 当前已完成的百分比
     let percent: number;
-      // 当前需要绘制的百分比
+    // 当前需要绘制的百分比
     let partialDrawPercent: number;
-      // 是否还有剩余时间
+    // 是否还有剩余时间
     let hasRemained: boolean;
 
     // 更新动画基础信息
     animator!.setConfig(duration, loopStart, loop, fillValue);
     brush.resize(contentMode, entity!.size);
 
-    // 动画绘制过程
-    animator!.onUpdate = (timePercent: number) => {
-      if (isReverseMode) {
-        percent = 1 - timePercent;
-        nextFrame =
-          (timePercent == 0 ? endFrame : Math.ceil(percent * totalFrame)) - 1;
-        partialDrawPercent = Math.abs(1 - percent * totalFrame + currentFrame);
-        // FIXME: 倒序会有一帧的偏差，需要校准当前帧
-        percent = currentFrame / totalFrame;
-      } else {
-        percent = timePercent;
-        nextFrame =
-          timePercent === 1 ? startFrame : Math.floor(percent * totalFrame);
-        partialDrawPercent = Math.abs(percent * totalFrame - currentFrame);
-      }
+    // 分段渲染函数
+    let patchDraw: (before: () => void) => void;
+    if (global.isPerf) {
+      const MAX_DRAW_TIME_PER_FRAME = 8;
+      // 动态调整每次绘制的块大小
+      let dynamicChunkSize = 4; // 初始块大小
+      let startTime: number;
+      let chunk: number;
+      let elapsed: number;
+      // 使用`指数退避算法`平衡渲染速度和流畅度
+      patchDraw = (before: () => void) => {
+        startTime = now();
+        before();
 
-      hasRemained = currentFrame === nextFrame;
-      // 当前帧的图片还未绘制完成
-      if (tail < spriteCount) {
-        // 1.15 和 3 均为阔值，保证渲染尽快完成
-        const nextTail = hasRemained
-          ? Math.min(
-              spriteCount * partialDrawPercent * 1.15 + 2,
-              spriteCount
-            ) | 0
-          : spriteCount;
-
-        if (nextTail > tail) {
+        while (tail < spriteCount) {
+          // 根据当前块大小计算nextTail
+          chunk = Math.min(dynamicChunkSize, spriteCount - tail);
+          nextTail = tail + chunk;
           brush.draw(entity!, currentFrame, tail, nextTail);
           tail = nextTail;
+          // 动态调整块大小
+          elapsed = performance.now() - startTime;
+
+          if (elapsed < 2) {
+            console.log('speed up')
+            dynamicChunkSize = Math.min(dynamicChunkSize * 2, 50); // 加快绘制
+          } else if (elapsed > MAX_DRAW_TIME_PER_FRAME) {
+            console.log('slow down')
+            dynamicChunkSize = Math.max(dynamicChunkSize / 2, 1); // 减慢绘制
+            break;
+          }
         }
-      }
+      };
+    } else {
+      const TAIL_THRESHOLD_FACTOR = 1.15;
+      const TAIL_OFFSET = 2;
+      // 普通模式
+      patchDraw = (before: () => void) => {
+        before();
+        if (tail < spriteCount) {
+          // 1.15 和 2 均为阔值，保证渲染尽快完成
+          nextTail = hasRemained
+            ? Math.min(
+                spriteCount * partialDrawPercent * TAIL_THRESHOLD_FACTOR +
+                  TAIL_OFFSET,
+                spriteCount
+              ) | 0
+            : spriteCount;
+
+          if (nextTail > tail) {
+            brush.draw(entity!, currentFrame, tail, nextTail);
+            tail = nextTail;
+          }
+        }
+      };
+    }
+
+    // 动画绘制过程
+    animator!.onUpdate = (timePercent: number) => {
+      patchDraw(() => {
+        percent = isReverseMode ? 1 - timePercent : timePercent;
+        exactFrame = percent * totalFrame;
+
+        if (isReverseMode) {
+          nextFrame = (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
+          partialDrawPercent = Math.abs(1 - exactFrame + currentFrame);
+          // FIXME: 倒序会有一帧的偏差，需要校准当前帧
+          percent = currentFrame / totalFrame;
+        } else {
+          nextFrame = timePercent === 1 ? startFrame : Math.floor(exactFrame);
+          partialDrawPercent = Math.abs(exactFrame - currentFrame);
+        }
+
+        hasRemained = currentFrame === nextFrame;
+      });
 
       if (hasRemained) return;
 

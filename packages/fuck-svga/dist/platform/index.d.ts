@@ -3,7 +3,7 @@ declare class Platform implements IPlatform {
     private plugins;
     global: PlatformGlobal;
     noop: () => any;
-    now: () => number;
+    now: IPlatform["now"];
     path: IPlatform["path"];
     local: IPlatform["local"];
     remote: IPlatform["remote"];

@@ -199,6 +199,7 @@ export class VideoManager {
   ): Promise<void> {
     const { parser, loadMode } = this;
     const { global, path, local } = platform;
+    const { env } = global;
 
     this.point =
       typeof point === "number" && point > 0 && point < urls.length ? point : 0;
@@ -214,7 +215,7 @@ export class VideoManager {
           promise: null,
         };
 
-        if (global.env === "h5") {
+        if (env === "h5" || env === "tt") {
           bucket.local = url;
           if (this.remainStart <= index && index < this.remainEnd) {
             if (loadMode === "whole" || index === this.point) {
@@ -227,7 +228,7 @@ export class VideoManager {
           return bucket;
         }
 
-        const filePath = path.resolve(Parser.getFileName(url), "full");
+        const filePath = path.resolve(path.filename(url), "full");
         const downloadAwait = parser.download(bucket.origin);
         const parseVideoAwait = async (buff: ArrayBuffer | null) => {
           if (buff) {

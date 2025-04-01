@@ -9,14 +9,6 @@ import benchmark from "../benchmark";
  */
 export class Parser {
   /**
-   * 截取文件名称
-   * @param url 
-   * @returns 
-   */
-  static getFileName(url: string): string {
-    return url.substring(url.lastIndexOf('/') + 1)
-  }
-  /**
    * 解析视频实体
    * @param data 视频二进制数据
    * @param url 视频地址
@@ -37,7 +29,7 @@ export class Parser {
 
       entity = new VideoEntity(
         movieData!,
-        Parser.getFileName(url)
+        platform.path.filename(url)
       );
     });
 

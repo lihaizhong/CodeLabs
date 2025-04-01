@@ -8,10 +8,12 @@ export default definePlugin<"path">({
   name: "path",
   install() {
     const { env, br } = this.global;
+    const filename = (path: string) => path.substring(path.lastIndexOf('/') + 1);
 
     if (env === "h5") {
       return {
         USER_DATA_PATH: "",
+        filename,
         resolve: (_filename: string, _prefix?: string) => "",
       };
     }
@@ -23,6 +25,7 @@ export default definePlugin<"path">({
 
     return {
       USER_DATA_PATH,
+      filename,
       resolve: (filename: string, prefix?: string) =>
         `${USER_DATA_PATH}/${prefix ? `${prefix}.` : ""}${filename}`,
     };

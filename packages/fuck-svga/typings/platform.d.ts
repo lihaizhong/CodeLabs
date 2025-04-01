@@ -5,10 +5,12 @@ interface PlatformGlobal {
   br: any;
   fsm: any;
   dpr: number;
+  isPerf: boolean;
   sys: string;
 }
 
 type PlatformProperties =
+  | "now"
   | "path"
   | "remote"
   | "local"
@@ -39,6 +41,7 @@ interface IPlatform {
 
   path: {
     USER_DATA_PATH: string;
+    filename: (path: string) => string;
     resolve: (name: string, prefix?: string) => string;
   };
 

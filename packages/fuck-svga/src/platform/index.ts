@@ -1,4 +1,5 @@
 import pluginPath from "./plugin-path";
+import pluginNow from "./plugin-now";
 import pluginDecode from "./plugin-decode";
 import pluginDownload from "./plugin-download";
 import pluginCanvas from "./plugin-canvas";
@@ -7,20 +8,13 @@ import pluginImage from "./plugin-image";
 import pluginRaf from "./plugin-raf";
 import pluginFsm from "./plugin-fsm";
 
-const useNow = () => {
-  // performance可以提供更高精度的时间测量，且不受系统时间的调整（如更改系统时间或同步时间）的影响
-  if (typeof performance !== "undefined") {
-    return () => performance.now();
-  }
-
-  return () => Date.now();
-};
 
 export const noop: () => any = () => {};
 
 class Platform implements IPlatform {
   private plugins: PlatformPlugin<PlatformProperties>[] = [
     pluginPath,
+    pluginNow,
     pluginDecode,
     pluginFsm,
     pluginDownload,
@@ -37,12 +31,13 @@ class Platform implements IPlatform {
     br: null,
     fsm: null,
     dpr: 1,
+    isPerf: false,
     sys: "UNKNOWN",
   };
 
   public noop = noop;
 
-  public now = useNow();
+  public now = noop as IPlatform["now"];
 
   public path = {} as IPlatform["path"];
 
