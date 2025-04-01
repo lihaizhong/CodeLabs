@@ -66,7 +66,10 @@ export class Player {
    * @param key
    * @param value
    */
-  public setItem<T extends keyof PlayerConfig>(key: T, value: PlayerConfig[T]): void {
+  public setItem<T extends keyof PlayerConfig>(
+    key: T,
+    value: PlayerConfig[T]
+  ): void {
     this.config.setItem<T>(key, value);
   }
 
@@ -218,7 +221,7 @@ export class Player {
    * 开始绘制动画
    */
   private startAnimation(): void {
-    const { entity, config, animator, brush } = this
+    const { entity, config, animator, brush } = this;
     const { playMode, contentMode } = config;
     const {
       currFrame,
@@ -229,30 +232,30 @@ export class Player {
       aniConfig,
     } = config.getConfig(entity!);
     const { duration, loopStart, loop, fillValue } = aniConfig;
+    const isReverseMode = playMode === PLAYER_PLAY_MODE.FALLBACKS;
 
-    // 片段绘制开始位置
-    let head = 0;
-    // 片段绘制结束位置
-    let tail = 0;
     // 当前帧
     let currentFrame = currFrame;
-    // 上一帧
+      // 片段绘制结束位置
+    let tail = 0;
+      // 上一帧
     let latestFrame: number;
-    // 下一帧
+      // 下一帧
     let nextFrame: number;
-    // 当前已完成的百分比
+      // 当前已完成的百分比
     let percent: number;
-    // 当前需要绘制的百分比
+      // 当前需要绘制的百分比
     let partialDrawPercent: number;
-    // 是否还有剩余时间
-    let hasRemained: boolean
+      // 是否还有剩余时间
+    let hasRemained: boolean;
 
     // 更新动画基础信息
     animator!.setConfig(duration, loopStart, loop, fillValue);
     brush.resize(contentMode, entity!.size);
+
     // 动画绘制过程
     animator!.onUpdate = (timePercent: number) => {
-      if (playMode === PLAYER_PLAY_MODE.FALLBACKS) {
+      if (isReverseMode) {
         percent = 1 - timePercent;
         nextFrame =
           (timePercent == 0 ? endFrame : Math.ceil(percent * totalFrame)) - 1;
@@ -268,26 +271,27 @@ export class Player {
 
       hasRemained = currentFrame === nextFrame;
       // 当前帧的图片还未绘制完成
-      if (tail !== spriteCount) {
+      if (tail < spriteCount) {
         // 1.15 和 3 均为阔值，保证渲染尽快完成
         const nextTail = hasRemained
-          ? Math.min(spriteCount * partialDrawPercent * 1.15 + 2, spriteCount) << 0
+          ? Math.min(
+              spriteCount * partialDrawPercent * 1.15 + 2,
+              spriteCount
+            ) | 0
           : spriteCount;
 
         if (nextTail > tail) {
-          head = tail;
+          brush.draw(entity!, currentFrame, tail, nextTail);
           tail = nextTail;
-          brush.draw(entity!, currentFrame, head, tail);
         }
       }
 
       if (hasRemained) return;
 
-      latestFrame = currentFrame;
-
       brush.clearContainer();
       brush.stick();
       brush.clearSecondary();
+      latestFrame = currentFrame;
       currentFrame = nextFrame;
       tail = 0;
       this.onProcess?.(~~(percent * 100) / 100, latestFrame);
