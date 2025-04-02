@@ -22,11 +22,7 @@ export default definePlugin<"image">({
       return new Promise<PlatformImage>((resolve, reject) => {
         img.onload = () => {
           // 如果 data 是 URL/base64 或者 img.src 是 base64
-          if (
-            env === "h5" ||
-            src.startsWith("data:") ||
-            typeof src === "string"
-          ) {
+          if (/^(?:data:|http(s)?:\/\/)/.test(src)) {
             resolve(img);
           } else {
             local
@@ -70,10 +66,7 @@ export default definePlugin<"image">({
             return Promise.resolve(data);
           }
 
-          const src = genImageSource(data);
-          const img = createImage(brush);
-
-          return loadImage(img, src);
+          return loadImage(createImage(brush), genImageSource(data));
         },
       };
     }
