@@ -4,5 +4,5 @@
  * @package plugin-path 路径处理能力
  * @package plugin-decode 解码能力
  */
-declare const _default: PlatformPlugin<"image">;
+declare const _default: FuckSvga.PlatformPlugin<"image">;
 export default _default;

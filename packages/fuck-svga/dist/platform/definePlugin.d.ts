@@ -1,1 +1,1 @@
-export declare const definePlugin: <T extends PlatformProperties>(plugin: PlatformPlugin<T>) => PlatformPlugin<T>;
+export declare const definePlugin: <T extends FuckSvga.PlatformProperties>(plugin: FuckSvga.PlatformPlugin<T>) => FuckSvga.PlatformPlugin<T>;

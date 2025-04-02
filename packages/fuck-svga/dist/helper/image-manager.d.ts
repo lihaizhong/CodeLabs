@@ -25,7 +25,7 @@ export declare class ImageManager {
      * 创建图片标签
      * @returns
      */
-    createImage(canvas: PlatformCreateImageInstance): PlatformImage;
+    createImage(canvas: FuckSvga.PlatformCreateImageInstance): PlatformImage;
     /**
      * 清理素材
      */

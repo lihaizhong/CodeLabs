@@ -72,7 +72,7 @@ export class ImageManager {
    * 创建图片标签
    * @returns
    */
-  public createImage(canvas: PlatformCreateImageInstance): PlatformImage {
+  public createImage(canvas: FuckSvga.PlatformCreateImageInstance): PlatformImage {
     return this.images.shift() || platform.image.create(canvas);
   }
 

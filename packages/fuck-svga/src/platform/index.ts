@@ -11,8 +11,8 @@ import pluginFsm from "./plugins/plugin-fsm";
 
 export const noop: () => any = () => {};
 
-class Platform implements IPlatform {
-  private plugins: PlatformPlugin<PlatformProperties>[] = [
+class Platform implements FuckSvga.Platform {
+  private plugins: FuckSvga.PlatformPlugin<FuckSvga.PlatformProperties>[] = [
     pluginPath,
     pluginNow,
     pluginDecode,
@@ -26,7 +26,7 @@ class Platform implements IPlatform {
     pluginImage
   ];
 
-  public global: PlatformGlobal = {
+  public global: FuckSvga.PlatformGlobal = {
     env: "unknown",
     br: null,
     fsm: null,
@@ -37,23 +37,23 @@ class Platform implements IPlatform {
 
   public noop = noop;
 
-  public now = noop as IPlatform["now"];
+  public now = noop as FuckSvga.Platform["now"];
 
-  public path = {} as IPlatform["path"];
+  public path = {} as FuckSvga.Platform["path"];
 
-  public local = {} as IPlatform["local"];
+  public local = {} as FuckSvga.Platform["local"];
 
-  public remote = {} as IPlatform["remote"];
+  public remote = {} as FuckSvga.Platform["remote"];
 
-  public decode = {} as IPlatform["decode"];
+  public decode = {} as FuckSvga.Platform["decode"];
 
-  public image = {} as IPlatform["image"];
+  public image = {} as FuckSvga.Platform["image"];
 
-  public rAF = noop as IPlatform["rAF"];
+  public rAF = noop as FuckSvga.Platform["rAF"];
 
-  public getCanvas = noop as IPlatform["getCanvas"];
+  public getCanvas = noop as FuckSvga.Platform["getCanvas"];
 
-  public getOfsCanvas = noop as IPlatform["getOfsCanvas"];
+  public getOfsCanvas = noop as FuckSvga.Platform["getOfsCanvas"];
 
   constructor() {
     this.global.env = this.autoEnv();
@@ -177,7 +177,7 @@ class Platform implements IPlatform {
     });
   }
 
-  public switch(env: SupportedPlatform) {
+  public switch(env: FuckSvga.SupportedPlatform) {
     this.global.env = env;
     this.init();
   }

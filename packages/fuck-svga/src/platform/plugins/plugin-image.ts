@@ -38,7 +38,7 @@ export default definePlugin<"image">({
     }
 
     if (env === "h5") {
-      const createImage = (_: PlatformCreateImageInstance) => new Image();
+      const createImage = (_: FuckSvga.PlatformCreateImageInstance) => new Image();
       const genImageSource = (data: Uint8Array | string) => {
         if (typeof data === "string") {
           return data;
@@ -52,7 +52,7 @@ export default definePlugin<"image">({
         isImageBitmap: (data: unknown) => data instanceof ImageBitmap,
         create: createImage,
         load: (
-          brush: PlatformCreateImageInstance,
+          brush: FuckSvga.PlatformCreateImageInstance,
           data: ImageBitmap | Uint8Array | string,
           _filename: string,
           _prefix?: string
@@ -71,7 +71,7 @@ export default definePlugin<"image">({
       };
     }
 
-    const createImage = (brush: PlatformCreateImageInstance) =>
+    const createImage = (brush: FuckSvga.PlatformCreateImageInstance) =>
       brush.createImage();
     const genImageSource = async (
       data: Uint8Array | string,
@@ -110,7 +110,7 @@ export default definePlugin<"image">({
       isImageBitmap: (_data: unknown) => false,
       create: createImage,
       load: async (
-        brush: PlatformCreateImageInstance,
+        brush: FuckSvga.PlatformCreateImageInstance,
         data: ImageBitmap | Uint8Array | string,
         filename: string,
         prefix?: string

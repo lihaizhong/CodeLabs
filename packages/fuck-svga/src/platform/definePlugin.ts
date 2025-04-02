@@ -1,3 +1,3 @@
-export const definePlugin = <T extends PlatformProperties>(
-  plugin: PlatformPlugin<T>
+export const definePlugin = <T extends FuckSvga.PlatformProperties>(
+  plugin: FuckSvga.PlatformPlugin<T>
 ) => plugin;
