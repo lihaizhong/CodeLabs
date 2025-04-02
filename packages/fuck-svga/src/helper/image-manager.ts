@@ -1,5 +1,5 @@
 import { platform } from "platform";
-import { Brush } from "./brush";
+import { Brush } from "../player/brush";
 
 export class ImageManager {
   // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃

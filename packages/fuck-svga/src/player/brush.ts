@@ -1,7 +1,7 @@
 import { platform } from "platform";
 import benchmark from "benchmark";
 import render from "./render";
-import { ImageManager } from "./image-manager";
+import { ImageManager } from "../helper";
 
 interface IBrushModel {
   // canvas or offscreen

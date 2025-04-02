@@ -1,4 +1,4 @@
-import { Brush } from "./brush";
+import { Brush } from "../player/brush";
 export declare class ImageManager {
     private images;
     /**
