@@ -279,13 +279,11 @@ export class Player {
           brush.draw(entity!, currentFrame, tail, nextTail);
           tail = nextTail;
           // 动态调整块大小
-          elapsed = performance.now() - startTime;
+          elapsed = now() - startTime;
 
-          if (elapsed < 2) {
-            console.log('speed up')
+          if (elapsed < 3) {
             dynamicChunkSize = Math.min(dynamicChunkSize * 2, 50); // 加快绘制
           } else if (elapsed > MAX_DRAW_TIME_PER_FRAME) {
-            console.log('slow down')
             dynamicChunkSize = Math.max(dynamicChunkSize / 2, 1); // 减慢绘制
             break;
           }

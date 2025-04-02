@@ -834,8 +834,16 @@ var pluginNow = definePlugin({
     install() {
         const { env, br } = this.global;
         // performance可以提供更高精度的时间测量，且不受系统时间的调整（如更改系统时间或同步时间）的影响
-        const perf = env === "h5" ? window.performance : br.getPerformance();
-        return (this.global.isPerf = !!(perf && perf.now)) ? () => perf.now() : () => Date.now();
+        const perf = env === "h5" ? globalThis.performance : env === "tt" ? br.performance : br.getPerformance();
+        if (typeof perf?.now === "function") {
+            this.global.isPerf = true;
+            // 数值接近，说明perf.now()获得的是高精度的时间戳
+            if (perf.now() / 1000 - Date.now() < 2) {
+                return () => perf.now() / 1000;
+            }
+            return () => perf.now();
+        }
+        return () => Date.now();
     },
 });
 
@@ -6262,7 +6270,7 @@ class ImageManager {
                     if (isImage(img)) {
                         imageIns.push(img);
                     }
-                    else if (platform.image.isImageBitmap(img)) {
+                    else if (isImageBitmap(img)) {
                         imageBitmapIns.push(img);
                     }
                     return img;
@@ -7037,15 +7045,16 @@ class Player {
         // 更新动画基础信息
         animator.setConfig(duration, loopStart, loop, fillValue);
         brush.resize(contentMode, entity.size);
+        // 动态调整每次绘制的块大小
+        let dynamicChunkSize = 4; // 初始块大小
+        // 分段渲染函数
         let patchDraw;
         if (global.isPerf) {
-            const MAX_DRAW_TIME_PER_FRAME = 10;
-            // 动态调整每次绘制的块大小
-            let dynamicChunkSize = 4; // 初始块大小
+            const MAX_DRAW_TIME_PER_FRAME = 8;
             let startTime;
             let chunk;
             let elapsed;
-            // 使用指数退避算法平衡渲染速度和流畅度
+            // 使用`指数退避算法`平衡渲染速度和流畅度
             patchDraw = (before) => {
                 startTime = now();
                 before();
@@ -7056,13 +7065,11 @@ class Player {
                     brush.draw(entity, currentFrame, tail, nextTail);
                     tail = nextTail;
                     // 动态调整块大小
-                    elapsed = performance.now() - startTime;
-                    if (elapsed < 2) {
-                        console.log('speed up');
+                    elapsed = now() - startTime;
+                    if (elapsed < 3) {
                         dynamicChunkSize = Math.min(dynamicChunkSize * 2, 50); // 加快绘制
                     }
                     else if (elapsed > MAX_DRAW_TIME_PER_FRAME) {
-                        console.log('slow down');
                         dynamicChunkSize = Math.max(dynamicChunkSize / 2, 1); // 减慢绘制
                         break;
                     }

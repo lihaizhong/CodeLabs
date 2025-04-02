@@ -29,7 +29,7 @@ Component({
       await player.setConfig(
         {
           container: "#palette",
-          // secondary: "#secondary",
+          secondary: "#secondary",
           loop: 1,
           playMode: "fallbacks",
           fillMode: "forwards"

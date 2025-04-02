@@ -51,7 +51,7 @@ export class ImageManager {
 
             if (isImage(img)) {
               imageIns.push(img as PlatformImage);
-            } else if (platform.image.isImageBitmap(img)) {
+            } else if (isImageBitmap(img)) {
               imageBitmapIns.push(img as ImageBitmap);
             }
 
