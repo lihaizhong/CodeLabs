@@ -262,6 +262,9 @@ export class Player {
     let patchDraw: (before: () => void) => void;
     if (global.isPerf) {
       const MAX_DRAW_TIME_PER_FRAME = 8;
+      const MAX_ACCELERATE_DRAW_TIME_PER_FRAME = 3;
+      const MAX_DYNAMIC_CHUNK_SIZE = 65;
+      const MIN_DYNAMIC_CHUNK_SIZE = 1;
       // 动态调整每次绘制的块大小
       let dynamicChunkSize = 4; // 初始块大小
       let startTime: number;
@@ -281,16 +284,16 @@ export class Player {
           // 动态调整块大小
           elapsed = now() - startTime;
 
-          if (elapsed < 3) {
-            dynamicChunkSize = Math.min(dynamicChunkSize * 2, 50); // 加快绘制
+          if (elapsed < MAX_ACCELERATE_DRAW_TIME_PER_FRAME) {
+            dynamicChunkSize = Math.min(dynamicChunkSize * 2, MAX_DYNAMIC_CHUNK_SIZE); // 加快绘制
           } else if (elapsed > MAX_DRAW_TIME_PER_FRAME) {
-            dynamicChunkSize = Math.max(dynamicChunkSize / 2, 1); // 减慢绘制
+            dynamicChunkSize = Math.max(dynamicChunkSize / 2, MIN_DYNAMIC_CHUNK_SIZE); // 减慢绘制
             break;
           }
         }
       };
     } else {
-      const TAIL_THRESHOLD_FACTOR = 1.15;
+      const TAIL_THRESHOLD_FACTOR = 1.05;
       const TAIL_OFFSET = 2;
       // 普通模式
       patchDraw = (before: () => void) => {
