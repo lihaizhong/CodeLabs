@@ -11,7 +11,7 @@ export default definePlugin<"now">({
       this.global.isPerf = true;
 
       // 数值接近，说明perf.now()获得的是高精度的时间戳
-      if (perf.now() / 1000 - Date.now() < 2) {
+      if (perf.now() - Date.now() > 0) {
         return () => perf.now() / 1000;
       }
 
