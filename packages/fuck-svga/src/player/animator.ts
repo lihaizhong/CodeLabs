@@ -2,7 +2,7 @@ import { platform } from "../platform";
 import benchmark from "../benchmark";
 import type { Brush } from "./brush";
 
-const { now, noop } = platform;
+const { noop } = platform;
 /**
  * 动画控制器
  */
@@ -55,21 +55,21 @@ export class Animator {
 
   public start(): void {
     this.isRunning = true;
-    this.startTime = now();
+    this.startTime = platform.now();
     this.onStart();
     this.doFrame();
   }
 
   public resume(): void {
     this.isRunning = true
-    this.startTime = now()
+    this.startTime = platform.now()
     this.doFrame()
   }
 
   public pause(): void {
     this.isRunning = false
     // 设置暂停的位置
-    this.loopStart = (now() - this.startTime + this.loopStart) % this.duration
+    this.loopStart = (platform.now() - this.startTime + this.loopStart) % this.duration
   }
 
   public stop(): void {
@@ -79,7 +79,7 @@ export class Animator {
 
   private doFrame(): void {
     if (this.isRunning) {
-      this.doDeltaTime(now() - this.startTime);
+      this.doDeltaTime(platform.now() - this.startTime);
       if (this.isRunning) {
         this.brush.flush(() => this.doFrame());
       }
