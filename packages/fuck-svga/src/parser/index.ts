@@ -1,8 +1,8 @@
 import { unzlibSync } from "fflate";
-import { platform } from "../platform";
-import { SVGADecoder } from "../extensions/protobuf";
+import { platform } from "platform";
+import { SVGADecoder } from "extensions/protobuf";
+import benchmark from "benchmark";
 import { VideoEntity } from "./video-entity";
-import benchmark from "../benchmark";
 
 /**
  * SVGA 下载解析器

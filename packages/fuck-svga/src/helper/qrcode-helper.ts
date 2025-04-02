@@ -1,5 +1,5 @@
-import { platform } from "../platform";
-import { PNGEncoder, QRCode } from "../extensions";
+import { platform } from "platform";
+import { PNGEncoder, QRCode } from "extensions";
 
 export interface IQrCodeImgOptions {
   size?: number;

@@ -1,4 +1,4 @@
-import { platform } from "../platform";
+import { platform } from "platform";
 import { PNGEncoder } from "../extensions";
 
 export function getDataURLFromImageData(imageData: ImageData) {

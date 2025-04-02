@@ -1,7 +1,7 @@
+import { platform } from "platform";
 import { Brush } from "./brush";
 import { Animator } from "./animator";
 import { Config } from "./config";
-import { platform } from "../platform";
 
 /**
  * SVGA 播放器

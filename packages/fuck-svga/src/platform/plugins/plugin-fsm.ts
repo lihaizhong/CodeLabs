@@ -1,5 +1,5 @@
-import benchmark from "../benchmark";
-import { definePlugin } from "./definePlugin";
+import benchmark from "benchmark";
+import { definePlugin } from "../definePlugin";
 
 /**
  * 用于处理本地文件存储

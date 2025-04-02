@@ -1,4 +1,4 @@
-import { platform } from "../../../platform";
+import { platform } from "platform";
 import float from "./float";
 // import { LongBits } from "../dts";
 

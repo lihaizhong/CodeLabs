@@ -1,12 +1,12 @@
-import pluginPath from "./plugin-path";
-import pluginNow from "./plugin-now";
-import pluginDecode from "./plugin-decode";
-import pluginDownload from "./plugin-download";
-import pluginCanvas from "./plugin-canvas";
-import pluginOfsCanvas from "./plugin-ofs-canvas";
-import pluginImage from "./plugin-image";
-import pluginRaf from "./plugin-raf";
-import pluginFsm from "./plugin-fsm";
+import pluginPath from "./plugins/plugin-path";
+import pluginNow from "./plugins/plugin-now";
+import pluginDecode from "./plugins/plugin-decode";
+import pluginDownload from "./plugins/plugin-download";
+import pluginCanvas from "./plugins/plugin-canvas";
+import pluginOfsCanvas from "./plugins/plugin-ofs-canvas";
+import pluginImage from "./plugins/plugin-image";
+import pluginRaf from "./plugins/plugin-raf";
+import pluginFsm from "./plugins/plugin-fsm";
 
 
 export const noop: () => any = () => {};

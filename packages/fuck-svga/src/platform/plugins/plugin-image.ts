@@ -1,4 +1,4 @@
-import { definePlugin } from "./definePlugin";
+import { definePlugin } from "../definePlugin";
 
 /**
  * 图片加载插件

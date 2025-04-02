@@ -1,4 +1,4 @@
-import { definePlugin } from "./definePlugin";
+import { definePlugin } from "../definePlugin";
 
 /**
  * 获取并重置Canvas

@@ -1,4 +1,4 @@
-import { definePlugin } from "./definePlugin";
+import { definePlugin } from "../definePlugin";
 
 /**
  * 用于处理requestAnimationFrame

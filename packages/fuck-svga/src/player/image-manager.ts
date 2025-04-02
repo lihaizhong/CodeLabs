@@ -1,4 +1,4 @@
-import { platform } from "../platform";
+import { platform } from "platform";
 import { Brush } from "./brush";
 
 export class ImageManager {

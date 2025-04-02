@@ -1,4 +1,4 @@
-import { definePlugin } from "./definePlugin";
+import { definePlugin } from "../definePlugin";
 
 // miniprogram btoa/atob polyfill
 const b64c =
