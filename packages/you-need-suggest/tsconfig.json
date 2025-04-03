@@ -4,7 +4,7 @@
     "moduleResolution": "node",
     "noEmitOnError": true,
     "rootDir": ".",
-    "baseUrl": ".",
+    // "baseUrl": ".",
     "sourceMap": true,
     "esModuleInterop": true,
     "lib": ["ESNext"]

@@ -6,7 +6,7 @@
     "noEmitOnError": true,
     "sourceMap": true,
     "esModuleInterop": true,
-    "baseUrl": ".",
+    // "baseUrl": ".",
     "rootDir": ".",
     "outDir": "./dist",
   }

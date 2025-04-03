@@ -1,6 +1,6 @@
-import { platform } from "platform";
-import { getDataURLFromImageData } from "helper";
-import { Brush } from "player/brush";
+import { platform } from "../platform";
+import { getDataURLFromImageData } from "../helper";
+import { Brush } from "../player/brush";
 
 export class Poster {
   /**

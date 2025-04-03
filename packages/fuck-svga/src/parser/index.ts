@@ -1,7 +1,7 @@
 import { unzlibSync } from "fflate";
-import { platform } from "platform";
-import { SVGADecoder } from "extensions/protobuf";
-import benchmark from "benchmark";
+import { platform } from "../platform";
+import { SVGADecoder } from "../extensions/protobuf";
+import benchmark from "../benchmark";
 import { VideoEntity } from "./video-entity";
 
 /**

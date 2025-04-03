@@ -1,5 +1,5 @@
-import { platform } from "platform";
-import benchmark from "benchmark";
+import { platform } from "../platform";
+import benchmark from "../benchmark";
 import render from "./render";
 import { ImageManager } from "../helper";
 

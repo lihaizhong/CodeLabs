@@ -1,5 +1,5 @@
-import { platform } from "platform";
-import { Parser } from "parser";
+import { platform } from "../platform";
+import { Parser } from "../parser";
 
 export interface Bucket {
   // 远程地址

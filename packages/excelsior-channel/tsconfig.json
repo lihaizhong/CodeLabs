@@ -5,7 +5,7 @@
     "noEmitOnError": true,
     "rootDir": ".",
     "outDir": "./dist",
-    "baseUrl": ".",
+    // "baseUrl": ".",
     "sourceMap": true,
     "esModuleInterop": true,
     "lib": ["ESNext", "DOM"]
