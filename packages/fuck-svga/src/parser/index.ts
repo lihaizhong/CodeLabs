@@ -46,12 +46,12 @@ export class Parser {
 
     // 读取远程文件
     if (remote.is(url)) {
-      return remote.read(url);
+      return remote.fetch(url);
     }
   
     // 读取本地文件
     if (global.env !== "h5") {
-      return local.read(url);
+      return local!.read(url);
     }
   
     return Promise.resolve(null);

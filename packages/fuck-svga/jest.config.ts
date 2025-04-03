@@ -5,7 +5,7 @@
 
 import type { Config } from "jest";
 
-const config: Config = {
+export default {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
@@ -16,10 +16,10 @@ const config: Config = {
   // cacheDirectory: "/private/var/folders/m3/cm2m6_9n1_bcq5px23bjyldm0000gn/T/jest_dx",
 
   // Automatically clear mock calls, instances, contexts and results before every test
-  clearMocks: true,
+  // clearMocks: true,
 
   // Indicates whether the coverage information should be collected while executing the test
-  collectCoverage: true,
+  // collectCoverage: true,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
   // collectCoverageFrom: undefined,
@@ -28,9 +28,9 @@ const config: Config = {
   coverageDirectory: "coverage",
 
   // An array of regexp pattern strings used to skip coverage collection
-  // coveragePathIgnorePatterns: [
-  //   "/node_modules/"
-  // ],
+  coveragePathIgnorePatterns: [
+    "/node_modules/"
+  ],
 
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: "v8",
@@ -90,7 +90,7 @@ const config: Config = {
   // ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-  // moduleNameMapper: {},
+  moduleNameMapper: {},
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
@@ -127,19 +127,22 @@ const config: Config = {
 
   // A list of paths to directories that Jest should use to search for files in
   roots: [
-    "<rootDir>/src/extensions",
+    "<rootDir>/src/extensions/png-encoder",
     "<rootDir>/src/helper",
+    "<rootDir>/src/parser",
     "<rootDir>/src/platform",
+    "<rootDir>/src/player",
+    "<rootDir>/src/parser",
   ],
 
   // Allows you to use a custom runner instead of Jest's default test runner
   // runner: "jest-runner",
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
-  // setupFiles: [],
+  setupFiles: ["<rootDir>/src/__test__/setup.ts"],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
-  // setupFilesAfterEnv: [],
+  setupFilesAfterEnv: ["<rootDir>/src/__test__/setupAfterEnv.ts"],
 
   // The number of seconds after which a test is considered as slow and reported as such in the results.
   // slowTestThreshold: 5,
@@ -151,7 +154,7 @@ const config: Config = {
   testEnvironment: "jsdom",
 
   // Options that will be passed to the testEnvironment
-  // testEnvironmentOptions: {},
+  testEnvironmentOptions: {},
 
   // Adds a location field to test results
   // testLocationInResults: false,
@@ -198,6 +201,4 @@ const config: Config = {
 
   // Whether to use watchman for file crawling
   // watchman: true,
-};
-
-export default config;
+} as Config;

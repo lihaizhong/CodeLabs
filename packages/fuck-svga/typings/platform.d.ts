@@ -17,6 +17,7 @@ declare namespace FuckSvga {
     | "local"
     | "decode"
     | "image"
+    | "intersectionObserver"
     | "rAF"
     | "getCanvas"
     | "getOfsCanvas";
@@ -37,7 +38,7 @@ declare namespace FuckSvga {
 
     remote: {
       is: (url: string) => boolean;
-      read: (url: string) => Promise<ArrayBuffer>;
+      fetch: (url: string) => Promise<ArrayBuffer>;
     };
 
     path: {
@@ -50,7 +51,7 @@ declare namespace FuckSvga {
       write: (data: ArrayBuffer, path: string) => Promise<string>;
       read: (path: string) => Promise<ArrayBuffer>;
       remove: (path: string) => Promise<string>;
-    };
+    } | null;
 
     decode: {
       toBitmap?: (data: Uint8Array) => Promise<ImageBitmap>;

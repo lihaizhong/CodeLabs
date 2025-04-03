@@ -89,7 +89,7 @@ export default definePlugin<"image">({
 
       try {
         // FIXME: IOS设备Uint8Array转base64时间较长，使用图片缓存形式速度会更快
-        return local.write(
+        return local!.write(
           decode.toBuffer(data),
           path.resolve(filename, prefix)
         );

@@ -232,7 +232,7 @@ export class VideoManager {
         const downloadAwait = parser.download(bucket.origin);
         const parseVideoAwait = async (buff: ArrayBuffer | null) => {
           if (buff) {
-            await local.write(buff, filePath);
+            await local!.write(buff, filePath);
             bucket.local = filePath;
             if (this.remainStart <= index && index < this.remainEnd) {
               return Parser.parseVideo(buff, url);
@@ -302,10 +302,19 @@ export class VideoManager {
   }
 
   /**
+   * 获取当前指针位置
+   * @returns 
+   */
+  getPoint() {
+    return this.point;
+  }
+
+  /**
    * 清理所有的bucket
    * @returns
    */
   clear(): Promise<string[]> {
+    const { global, local } = platform;
     const { buckets } = this;
 
     this.buckets = [];
@@ -313,7 +322,13 @@ export class VideoManager {
     this.maxRemain = 3;
 
     return Promise.all(
-      buckets.map((bucket: Bucket) => platform.local.remove(bucket.local))
+      buckets.map((bucket: Bucket) => {
+        if (global.env !== "h5" && global.env !== "tt") {
+          return local!.remove(bucket.local);
+        }
+
+        return bucket.local;
+      })
     );
   }
 }
