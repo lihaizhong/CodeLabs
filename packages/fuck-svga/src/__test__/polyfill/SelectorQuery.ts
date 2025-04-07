@@ -1,17 +1,12 @@
-export class SelectorQuery {
-  in(_component: any) {
-    return this;
-  }
-
-  select(selector: string) {
-    return this;
-  }
-
-  fields(options: WechatMiniprogram.Fields, callback: WechatMiniprogram.FieldsCallback) {
-    return this;
-  }
-
-  exec() {
-    return this;
-  }
-}
+export const SelectorQuery = jest.fn(() => ({
+  in: jest.fn().mockReturnThis(),
+  select: jest.fn().mockReturnThis(),
+  fields: jest.fn(() => ({
+    node: {
+      getContext: jest.fn(() => ({})),
+      width: 300,
+      height: 300,
+    }
+  })).mockReturnThis(),
+  exec: jest.fn(),
+}));

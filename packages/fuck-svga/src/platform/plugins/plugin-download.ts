@@ -13,7 +13,7 @@ export default definePlugin<"remote">({
     if (env === "h5") {
       return {
         is: isRemote,
-        read: (url: string) =>
+        fetch: (url: string) =>
           fetch(url).then((response) => {
             if (response.ok) {
               return response.arrayBuffer();
