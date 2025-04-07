@@ -1,4 +1,4 @@
-import { initialPlatformGlobal } from "../../__test__/initial";
+import { initialPlatformGlobal } from "../../__tests__/initial";
 import pluginCanvas from "./plugin-canvas";
 
 describe("pluginCanvas defined", () => {

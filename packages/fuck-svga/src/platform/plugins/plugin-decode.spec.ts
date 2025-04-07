@@ -1,4 +1,4 @@
-import { initialPlatformGlobal } from "../../__test__/initial";
+import { initialPlatformGlobal } from "../../__tests__/initial";
 import pluginDecode from "./plugin-decode";
 
 describe("pluginDecode defined", () => {
