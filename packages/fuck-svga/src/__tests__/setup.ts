@@ -5,7 +5,6 @@ import { initialPlatformGlobal } from "./initial";
 Object.assign(global, {
   TextDecoder,
   TextEncoder,
-  CanvasRenderingContext2D: () => {},
   wx: initialPlatformGlobal.weapp.br,
   tt: initialPlatformGlobal.tt.br,
   my: initialPlatformGlobal.alipay.br,

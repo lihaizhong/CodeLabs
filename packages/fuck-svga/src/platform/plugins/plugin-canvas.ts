@@ -38,7 +38,7 @@ export default definePlugin<"getCanvas">({
     if (env === "h5") {
       return (selector: string) => new Promise((resolve) => {
         const canvas = document.querySelector(selector) as HTMLCanvasElement;
-        const { clientWidth, clientHeight } = canvas;
+        const { clientWidth, clientHeight } = canvas || {};
 
         resolve(initCanvas(canvas, clientWidth, clientHeight, dpr));
       });
