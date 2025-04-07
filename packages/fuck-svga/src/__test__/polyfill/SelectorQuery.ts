@@ -1,4 +1,4 @@
-export const SelectorQuery = jest.fn(() => ({
+export const selectorQuery = jest.fn(() => ({
   in: jest.fn().mockReturnThis(),
   select: jest.fn().mockReturnThis(),
   fields: jest.fn(() => ({

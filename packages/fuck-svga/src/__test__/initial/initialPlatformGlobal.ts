@@ -1,7 +1,7 @@
-import { FileSystemManager, SelectorQuery, mbtoa } from "../polyfill";
+import { fileSystemManager, selectorQuery, mbtoa } from "../polyfill";
 
 const bridge = {
-  createSelectorQuery: () => new SelectorQuery(),
+  createSelectorQuery: () => selectorQuery(),
   arrayBufferToBase64: (buff: ArrayBuffer) =>
     mbtoa(String.fromCharCode(...new Uint8Array(buff))),
   request: (options: any) => {
@@ -13,10 +13,10 @@ const bridge = {
       }, 1000);
     });
   },
-  getFileSystemManager: () => new FileSystemManager(),
+  getFileSystemManager: () => fileSystemManager(),
   getPerformance: () => performance,
 };
-const fsm = new FileSystemManager();
+const fsm = fileSystemManager();
 const getWindowInfo = () => ({
   pixelRatio: 2,
 });

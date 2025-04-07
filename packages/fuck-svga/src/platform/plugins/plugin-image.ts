@@ -9,8 +9,9 @@ import { definePlugin } from "../definePlugin";
 export default definePlugin<"image">({
   name: "image",
   install() {
-    const { local, path, decode } = this;
+    const { local, path, decode, noop } = this;
     const { env, br } = this.global;
+    const cachedImages: Set<string> = new Set();
 
     /**
      * 加载图片
@@ -21,14 +22,16 @@ export default definePlugin<"image">({
     function loadImage(img: PlatformImage, src: string) {
       return new Promise<PlatformImage>((resolve, reject) => {
         img.onload = () => {
-          // 如果 data 是 URL/base64 或者 img.src 是 base64
-          if (/^(?:data:|http(s)?:\/\/)/.test(src)) {
-            resolve(img);
-          } else {
-            local
+          if (cachedImages.has(src)) {
+            local!
               .remove(src)
-              .then(() => resolve(img))
-              .catch(() => resolve(img));
+              .catch(noop)
+              .then(() => {
+                cachedImages.delete(src);
+                resolve(img);
+              });
+          } else {
+            resolve(img);
           }
         };
         img.onerror = () =>
@@ -38,7 +41,8 @@ export default definePlugin<"image">({
     }
 
     if (env === "h5") {
-      const createImage = (_: FuckSvga.PlatformCreateImageInstance) => new Image();
+      const createImage = (_: FuckSvga.PlatformCreateImageInstance) =>
+        new Image();
       const genImageSource = (data: Uint8Array | string) => {
         if (typeof data === "string") {
           return data;
@@ -89,10 +93,12 @@ export default definePlugin<"image">({
 
       try {
         // FIXME: IOS设备Uint8Array转base64时间较长，使用图片缓存形式速度会更快
-        return local!.write(
-          decode.toBuffer(data),
-          path.resolve(filename, prefix)
-        );
+        const filePath = path.resolve(filename, prefix);
+
+        await local!.write(decode.toBuffer(data), filePath);
+        cachedImages.add(filePath);
+
+        return filePath;
       } catch (ex: any) {
         console.warn(`图片缓存失败：${ex.message}`);
         return decode.toDataURL(data);
