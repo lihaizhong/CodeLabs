@@ -1,3 +1,10 @@
 packages:
   - packages/**
   - mp-platform/**
+
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - canvas
+  - lmdb
+  - msgpackr-extract
