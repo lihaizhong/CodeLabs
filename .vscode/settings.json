@@ -29,5 +29,6 @@
   ],
   "marscode.codeCompletionPro": {
     "enableCodeCompletionPro": true
-  }
+  },
+  "marscode.chatLanguage": "cn"
 }

@@ -5,6 +5,5 @@ packages:
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - '@swc/core'
-  - canvas
   - lmdb
   - msgpackr-extract

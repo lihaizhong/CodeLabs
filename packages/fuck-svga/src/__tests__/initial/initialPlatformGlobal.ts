@@ -1,11 +1,11 @@
 import { fileSystemManager, selectorQuery, mbtoa } from "../polyfill";
 
 const bridge = {
-  createSelectorQuery: () => selectorQuery(),
+  createSelectorQuery: selectorQuery,
   arrayBufferToBase64: (buff: ArrayBuffer) =>
     mbtoa(String.fromCharCode(...new Uint8Array(buff))),
-  request: (options: any) => {
-    return new Promise((resolve, reject) => {
+  request: (_options: any) => {
+    return new Promise((resolve, _reject) => {
       setTimeout(() => {
         resolve({
           data: new ArrayBuffer(1024),
@@ -13,10 +13,10 @@ const bridge = {
       }, 1000);
     });
   },
-  getFileSystemManager: () => fileSystemManager(),
-  getPerformance: () => performance,
+  getFileSystemManager: fileSystemManager,
+  getPerformance: jest.fn(),
 };
-const fsm = fileSystemManager();
+
 const getWindowInfo = () => ({
   pixelRatio: 2,
 });
@@ -36,7 +36,7 @@ export const initialPlatformGlobal: Record<
       getWindowInfo,
       getDeviceInfo,
     },
-    fsm,
+    fsm: fileSystemManager,
     dpr: 2,
     isPerf: true,
     sys: "ios",
@@ -52,7 +52,7 @@ export const initialPlatformGlobal: Record<
       getWindowInfo,
       getDeviceBaseInfo: getDeviceInfo,
     },
-    fsm,
+    fsm: fileSystemManager,
     dpr: 2,
     isPerf: true,
     sys: "ios",
@@ -79,7 +79,7 @@ export const initialPlatformGlobal: Record<
           },
         }),
     },
-    fsm,
+    fsm: fileSystemManager,
     dpr: 2,
     isPerf: false,
     sys: "ios",
