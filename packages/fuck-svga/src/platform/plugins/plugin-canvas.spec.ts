@@ -83,11 +83,6 @@ describe("getCanvas 插件", () => {
       height: 300,
     };
 
-    beforeEach(() => {
-      // @ts-ignore
-      global.br = platform.global.br;
-    });
-
     it("检查插件安装是否正常安装", () => {
       const getCanvas = pluginCanvas.install.call(platform);
       const getCanvasForH5 = pluginCanvas.install.call({
@@ -108,7 +103,7 @@ describe("getCanvas 插件", () => {
 
     it("getCanvas 调用成功", () => {
       // @ts-ignore
-      br.createSelectorQuery.mockImplementation(() => ({
+      platform.global.br.createSelectorQuery.mockImplementation(() => ({
         in: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
         fields: jest.fn((_, callback) => {
@@ -126,7 +121,7 @@ describe("getCanvas 插件", () => {
 
     it("getCanvas 调用失败", () => {
       // @ts-ignore
-      br.createSelectorQuery.mockImplementation(() => ({
+      platform.global.br.createSelectorQuery.mockImplementation(() => ({
         in: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
         fields: jest.fn((_, callback) => {
@@ -141,7 +136,7 @@ describe("getCanvas 插件", () => {
 
     it("canvas 尺寸", async () => {
       // @ts-ignore
-      br.createSelectorQuery.mockImplementation(() => ({
+      platform.global.br.createSelectorQuery.mockImplementation(() => ({
         in: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
         fields: jest.fn((_, callback) => {
