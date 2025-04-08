@@ -245,6 +245,10 @@ const enum PLAYER_FILL_MODE {
    * 播放完成后停在尾帧
    */
   BACKWARDS = 'backwards',
+  /**
+   * 播放完成后清空画布
+   */
+  NONE = 'none',
 }
 
 const enum PLAYER_PLAY_MODE {

@@ -224,7 +224,7 @@ export class Player {
   private startAnimation(): void {
     const { entity, config, animator, brush } = this;
     const { global, now } = platform;
-    const { playMode, contentMode } = config;
+    const { fillMode, playMode, contentMode } = config;
     const {
       currFrame,
       startFrame,
@@ -345,7 +345,14 @@ export class Player {
       tail = 0;
       this.onProcess?.(~~(percent * 100) / 100, latestFrame);
     };
-    animator!.onEnd = () => this.onEnd?.();
+    animator!.onEnd = () => {
+      // 如果不保留最后一帧渲染，则清空画布
+      if (fillMode === PLAYER_FILL_MODE.NONE) {
+        brush.clearContainer();
+      }
+
+      this.onEnd?.()
+    };
     animator!.start();
   }
 }
