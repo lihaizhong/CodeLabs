@@ -1,5 +1,5 @@
 <canvas type="2d" id="palette" class="svga-palette"></canvas>
-<canvas type="2d" id="secondary" class="svga-palette svga-secondary"></canvas>
+<!-- <canvas type="2d" id="secondary" class="svga-palette svga-secondary"></canvas> -->
 <view wx:if="{{ message }}" class="svga-error-popup">{{ message }}</view>
 <view class="svga-settings">
   <button class="svga-setting" bindtap="handlePlay">播放</button>

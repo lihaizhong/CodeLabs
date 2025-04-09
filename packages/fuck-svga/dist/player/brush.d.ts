@@ -84,7 +84,7 @@ export declare class Brush {
      * @param end
      */
     draw(videoEntity: Video, currentFrame: number, start: number, end: number): void;
-    stick: () => void;
+    stick(): void;
     /**
      * 销毁画笔
      */

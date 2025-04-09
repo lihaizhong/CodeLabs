@@ -87,7 +87,7 @@ export default definePlugin<"image">({
       }
 
       // FIXME: 支付宝小程序IDE保存临时文件会失败;抖音最大用户文件大小为10M
-      if (env === "tt" || (env === "alipay" && (br as any).isIDE)) {
+      if (env === "tt" || env === "alipay") {
         return decode.toDataURL(data);
       }
 
