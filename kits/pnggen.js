@@ -11,19 +11,19 @@ function createChunk(type, data) {
   // 长度（4字节，大端序）
   const length = Buffer.alloc(4);
   length.writeUInt32BE(data.length, 0);
-  
+
   // 块类型（4字节 ASCII）
   const chunkType = Buffer.from(type, 'ascii');
-  
+
   // 数据内容
   const chunkData = data;
-  
+
   console.log('chunkData', chunkData, 'chunk type', chunkType);
   // 计算 CRC32 校验（类型+数据）
   const crcValue = crc32(Buffer.concat([chunkType, chunkData]));
   const crc = Buffer.alloc(4);
   crc.writeUInt32BE(crcValue >>> 0, 0); // 确保无符号
-  
+
   return Buffer.concat([length, chunkType, chunkData, crc]);
 }
 
@@ -33,7 +33,7 @@ function createChunk(type, data) {
 function generatePNG(width, height, pixelDataRGBA) {
   // 1. 文件头（固定 8 字节）
   const pngSignature = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
-  
+
   // 2. 构建 IHDR 块
   const ihdrData = Buffer.alloc(13);
   ihdrData.writeUInt32BE(width, 0);   // 宽度
@@ -51,12 +51,12 @@ function generatePNG(width, height, pixelDataRGBA) {
   for (let y = 0; y < height; y++) {
     // 每行前添加过滤类型（0=无过滤）
     const filterType = Buffer.from([0x00]);
-    
+
     // 当前行像素的起始位置
     const rowStart = y * width * bytesPerPixel;
     const rowEnd = rowStart + width * bytesPerPixel;
     const rowData = pixelDataRGBA.slice(rowStart, rowEnd);
-    
+
     filteredData = Buffer.concat([filteredData, filterType, rowData]);
   }
 
@@ -101,6 +101,11 @@ function main() {
 
   const pngData = generatePNG(width, height, pixels);
   fs.writeFileSync('output.png', pngData);
+
+  for (let i = 0; i < pngData.length; i += 20) {
+    console.log('pngData chunk', pngData.subarray(i, i + 20));
+  }
+
   console.log('PNG 文件已生成: output.png');
 }
 

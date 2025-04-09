@@ -1,9 +1,8 @@
-import { fileSystemManager, selectorQuery, mbtoa } from "../polyfill";
+import { fileSystemManager, selectorQuery } from "../polyfill";
 
 const bridge = {
   createSelectorQuery: selectorQuery,
-  arrayBufferToBase64: (buff: ArrayBuffer) =>
-    mbtoa(String.fromCharCode(...new Uint8Array(buff))),
+  arrayBufferToBase64: jest.fn((_: ArrayBuffer) => "mocked base64 data"),
   request: (_options: any) => {
     return new Promise((resolve, _reject) => {
       setTimeout(() => {
