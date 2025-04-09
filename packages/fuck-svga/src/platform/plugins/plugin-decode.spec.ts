@@ -87,6 +87,7 @@ describe("pluginDecode 插件", () => {
       expect(typeof decode).toBe("object");
       expect(typeof decode.toBuffer).toBe("function");
       expect(typeof decode.toDataURL).toBe("function");
+      expect(decode.toBitmap).toBeUndefined();
       expect(typeof decode.utf8).toBe("function");
     });
 
