@@ -1,12 +1,12 @@
 import { initialPlatformGlobal } from "../../__tests__/initial";
 import pluginFsm from "./plugin-fsm";
 
-describe("pluginFsm defined", () => {
-  it("should be defined", () => {
+describe("pluginFsm 定义", () => {
+  it("fsm 是否被定义", () => {
     expect(pluginFsm).toBeDefined();
   });
 
-  it("should be a object", () => {
+  it("fsm 定义是否正确", () => {
     expect(typeof pluginFsm).toBe("object");
     expect(typeof pluginFsm.name).toBe("string");
     expect(typeof pluginFsm.install).toBe("function");
@@ -14,26 +14,34 @@ describe("pluginFsm defined", () => {
   });
 });
 
-describe("pluginFsm defined with h5", () => {
-  let platform: Record<"global", FuckSvga.PlatformGlobal>;
-
+describe("pluginFsm 插件", () => {
   beforeEach(() => {
-    platform = { global: initialPlatformGlobal.h5 };
+    jest.resetAllMocks();
   });
 
-  it("plugin install", () => {
-    expect(pluginFsm.install.call(platform)).toBeNull();
-  });
-});
+  describe("H5 环境", () => {
+    const platform = { global: initialPlatformGlobal.h5 };
 
-describe("pluginFsm defined with weapp, alipay, tt", () => {
-  let platform: Record<"global", FuckSvga.PlatformGlobal>;
-
-  beforeEach(() => {
-    platform = { global: initialPlatformGlobal.weapp };
+    it("检查插件是否正常安装", () => {
+      expect(pluginFsm.install.call(platform)).toBeNull();
+    });
   });
 
-  it("plugin install", () => {
-    expect(typeof pluginFsm.install.call(platform)).toBe("object");
+  describe("小程序(weapp, alipay, tt) 环境", () => {
+    const platform = { global: initialPlatformGlobal.weapp };
+
+    it("检查插件是否正常安装", () => {
+      const fsm = pluginFsm.install.call(platform);
+      expect(typeof fsm).toBe("object");
+      expect(typeof fsm.write).toBe("function");
+      expect(typeof fsm.read).toBe("function");
+      expect(typeof fsm.remove).toBe("function");
+    });
+
+    it("write 调用成功", async () => {});
+
+    it("read 调用成功", async () => {});
+
+    it("remove 调用成功", async () => {});
   });
 });

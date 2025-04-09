@@ -104,6 +104,14 @@ describe("pluginDownload 插件", () => {
         "https://www.test.com/test/frame01.svga"
       );
 
+      expect(platform.global.br.request).toHaveBeenCalledWith({
+        url: "https://www.test.com/test/frame01.svga",
+        dataType: "arraybuffer",
+        responseType: "arraybuffer",
+        enableCache: true,
+        success: expect.any(Function),
+        fail: expect.any(Function),
+      });
       expect(result).toBeInstanceOf(ArrayBuffer);
     });
 
@@ -120,6 +128,14 @@ describe("pluginDownload 插件", () => {
         "https://www.test.com/test/frame01.svga"
       );
 
+      expect(platform.global.br.request).toHaveBeenCalledWith({
+        url: "https://www.test.com/test/frame01.svga",
+        dataType: "arraybuffer",
+        responseType: "arraybuffer",
+        enableCache: true,
+        success: expect.any(Function),
+        fail: expect.any(Function),
+      });
       expect(downloadAwait).rejects.toStrictEqual({
         statusCode: 404,
         errMsg: "Not Found",
