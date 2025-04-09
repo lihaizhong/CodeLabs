@@ -202,19 +202,19 @@ CREATE: 重新创建 OffscreenCanvas 实例。
 | 浏览器         | RESIZE | RESIZE          |
 | Firefox 浏览器 | RESIZE | CREATE          |
 
-## 画布交换方案
+<!-- ## 画布交换方案 -->
 
-DRAW: 使用 `drawImage` 实现双缓存之间的数据交换。
-PUT: 使用 `putImageData` 实现双缓存之间的数据交换。
+<!-- DRAW: 使用 `drawImage` 实现双缓存之间的数据交换。 -->
+<!-- PUT: 使用 `putImageData` 实现双缓存之间的数据交换。 -->
 
-|              | Canvas        | OffscreenCanvas |
-| ------------ | ------------- | --------------- |
-| 微信小程序   | DRAW          | PUT             |
-| 支付宝小程序 | PUT(iOS)/DRAW | DRAW            |
-| 抖音小程序   | PUT           | DRAW            |
-| 浏览器       | DRAW          | DRAW            |
+<!-- |              | Canvas        | OffscreenCanvas | -->
+<!-- | ------------ | ------------- | --------------- | -->
+<!-- | 微信小程序   | DRAW          | PUT             | -->
+<!-- | 支付宝小程序 | PUT(iOS)/DRAW | DRAW            | -->
+<!-- | 抖音小程序   | PUT           | DRAW            | -->
+<!-- | 浏览器       | DRAW          | DRAW            | -->
 
-PS: **选择哪种数据交换方案是出于对当前平台支持的能力以及性能考量做出的决定。**
+<!-- PS: **选择哪种数据交换方案是出于对当前平台支持的能力以及性能考量做出的决定。** -->
 
 ## LICENSE
 

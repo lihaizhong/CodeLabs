@@ -1,5 +1,30 @@
 import { platform } from ".";
 
+jest.mock("./plugins/plugin-canvas", () => ({
+  name: "getCanvas",
+  install: () => {},
+}));
+jest.mock("./plugins/plugin-decode", () => ({
+  name: "decode",
+  install: () => {},
+}));
+jest.mock("./plugins/plugin-download", () => ({
+  name: "remote",
+  install: () => {},
+}));
+jest.mock("./plugins/plugin-fsm", () => ({ name: "fsm", install: () => {} }));
+jest.mock("./plugins/plugin-image", () => ({
+  name: "image",
+  install: () => {},
+}));
+jest.mock("./plugins/plugin-now", () => ({ name: "now", install: () => {} }));
+jest.mock("./plugins/plugin-ofs-canvas", () => ({
+  name: "getOfsCanvas",
+  install: () => {},
+}));
+jest.mock("./plugins/plugin-path", () => ({ name: "path", install: () => {} }));
+jest.mock("./plugins/plugin-raf", () => ({ name: "rAF", install: () => {} }));
+
 describe("platform defined", () => {
   it("should be defined", () => {
     expect(platform).toBeDefined();

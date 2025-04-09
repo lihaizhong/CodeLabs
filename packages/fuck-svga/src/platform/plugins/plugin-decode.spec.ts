@@ -1,6 +1,8 @@
 import { initialPlatformGlobal } from "../../__tests__/initial";
 import pluginDecode from "./plugin-decode";
 
+jest.mock("../../extensions/protobuf", () => ({  utf8: jest.fn() }));
+
 describe("pluginDecode defined", () => {
   it("should be defined", () => {
     expect(pluginDecode).toBeDefined();
@@ -15,11 +17,7 @@ describe("pluginDecode defined", () => {
 });
 
 describe("pluginDecode defined with h5", () => {
-  let platform: Record<"global", FuckSvga.PlatformGlobal>;
-
-  beforeEach(() => {
-    platform = { global: initialPlatformGlobal.h5 };
-  });
+  const platform = { global: initialPlatformGlobal.h5 };
 
   it("plugin install", () => {
     expect(typeof pluginDecode.install.call(platform)).toBe("object");
@@ -27,11 +25,7 @@ describe("pluginDecode defined with h5", () => {
 });
 
 describe("pluginDecode defined with weapp, alipay, tt", () => {
-  let platform: Record<"global", FuckSvga.PlatformGlobal>;
-
-  beforeEach(() => {
-    platform = { global: initialPlatformGlobal.weapp };
-  });
+  const platform = { global: initialPlatformGlobal.weapp };
 
   it("plugin install", () => {
     expect(typeof pluginDecode.install.call(platform)).toBe("object");

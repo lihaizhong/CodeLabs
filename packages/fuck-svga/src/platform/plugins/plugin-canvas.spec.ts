@@ -82,6 +82,11 @@ describe("getCanvas 插件", () => {
       width: 300,
       height: 300,
     };
+    const mockExceedResult = {
+      node: mockNode,
+      width: 1000,
+      height: 1000,
+    }
 
     it("检查插件安装是否正常安装", () => {
       const getCanvas = pluginCanvas.install.call(platform);
@@ -151,6 +156,25 @@ describe("getCanvas 插件", () => {
 
       expect(canvas.width).toBe(600);
       expect(canvas.height).toBe(600);
+    });
+
+    it("微信小程序 canvas 尺寸超出", async () => {
+      // @ts-ignore
+      platform.global.br.createSelectorQuery.mockImplementation(() => ({
+        in: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        fields: jest.fn((_, callback) => {
+          callback(mockExceedResult);
+
+          return { exec: jest.fn() };
+        }),
+        exec: jest.fn(),
+      }));
+
+      const { canvas } = await getCanvas("#container");
+
+      expect(canvas.width).toBe(1365);
+      expect(canvas.height).toBe(1365);
     });
   });
 });
