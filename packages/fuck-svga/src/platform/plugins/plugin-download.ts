@@ -36,6 +36,7 @@ export default definePlugin<"remote">({
             dataType: "arraybuffer",
             responseType: "arraybuffer",
             enableCache: true,
+            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
             success: (res: any) => resolve(res.data as ArrayBuffer),
             fail: reject,
           });

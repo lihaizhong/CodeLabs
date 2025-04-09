@@ -3,15 +3,7 @@ import { fileSystemManager, selectorQuery } from "../polyfill";
 const bridge = {
   createSelectorQuery: selectorQuery,
   arrayBufferToBase64: jest.fn((_: ArrayBuffer) => "mocked base64 data"),
-  request: (_options: any) => {
-    return new Promise((resolve, _reject) => {
-      setTimeout(() => {
-        resolve({
-          data: new ArrayBuffer(1024),
-        });
-      }, 1000);
-    });
-  },
+  request: jest.fn(() => Promise.resolve()),
   getFileSystemManager: fileSystemManager,
   getPerformance: jest.fn(),
 };

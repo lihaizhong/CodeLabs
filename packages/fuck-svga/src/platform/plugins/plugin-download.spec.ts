@@ -1,12 +1,12 @@
 import { initialPlatformGlobal } from "../../__tests__/initial";
 import pluginDownload from "./plugin-download";
 
-describe("pluginDownload defined", () => {
-  it("should be defined", () => {
+describe("pluginDownload 定义", () => {
+  it("remote 是否被定义", () => {
     expect(pluginDownload).toBeDefined();
   });
 
-  it("should be a object", () => {
+  it("remote 定义是否正确", () => {
     expect(typeof pluginDownload).toBe("object");
     expect(typeof pluginDownload.name).toBe("string");
     expect(typeof pluginDownload.install).toBe("function");
@@ -14,26 +14,116 @@ describe("pluginDownload defined", () => {
   });
 });
 
-describe("pluginDownload defined with h5", () => {
-  let platform: Record<"global", FuckSvga.PlatformGlobal>;
-
+describe("pluginDownload 插件", () => {
   beforeEach(() => {
-    platform = { global: initialPlatformGlobal.h5 };
+    jest.resetAllMocks();
   });
 
-  it("plugin install", () => {
-    expect(typeof pluginDownload.install.call(platform)).toBe("object");
+  describe("H5 环境", () => {
+    const platform = { global: initialPlatformGlobal.h5 };
+
+    it("检查插件是否正常安装", () => {
+      const download = pluginDownload.install.call(platform);
+
+      expect(typeof download).toBe("object");
+      expect(typeof download.is).toBe("function");
+      expect(typeof download.fetch).toBe("function");
+    });
+
+    it("is 调用成功", async () => {
+      const download = pluginDownload.install.call(platform);
+
+      expect(download.is("https://www.test.com/test/frame01.svga")).toBe(true);
+      expect(download.is("http://www.test.com/test/frame01.svga")).toBe(true);
+      expect(download.is("file:///test/frame01.svga")).toBe(false);
+    });
+
+    it("fetch 调用成功", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(1024)),
+      });
+
+      const download = pluginDownload.install.call(platform);
+      const result = await download.fetch(
+        "https://www.test.com/test/frame01.svga"
+      );
+
+      expect(result).toBeInstanceOf(ArrayBuffer);
+    });
+
+    it("fetch 调用失败", () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+      });
+
+      const download = pluginDownload.install.call(platform);
+      const downloadAwait = download.fetch(
+        "https://www.test.com/test/frame01.svga"
+      );
+
+      expect(downloadAwait).rejects.toThrow(
+        "HTTP error, status=404, statusText=Not Found"
+      );
+    });
   });
-});
 
-describe("pluginDownload defined with weapp, alipay, tt", () => {
-  let platform: Record<"global", FuckSvga.PlatformGlobal>;
+  describe("小程序(weapp, alipay, tt) 环境", () => {
+    const platform = { global: initialPlatformGlobal.weapp };
 
-  beforeEach(() => {
-    platform = { global: initialPlatformGlobal.weapp };
-  });
+    it("检查插件是否正常安装", () => {
+      const download = pluginDownload.install.call(platform);
 
-  it("plugin install", () => {
-    expect(typeof pluginDownload.install.call(platform)).toBe("object");
+      expect(typeof download).toBe("object");
+      expect(typeof download.is).toBe("function");
+      expect(typeof download.fetch).toBe("function");
+    });
+
+    it("is 调用成功", async () => {
+      const download = pluginDownload.install.call(platform);
+
+      expect(download.is("https://www.test.com/test/frame01.svga")).toBe(true);
+      expect(download.is("http://www.test.com/test/frame01.svga")).toBe(true);
+      expect(download.is("file:///test/frame01.svga")).toBe(false);
+    });
+
+    it("fetch 调用成功", async () => {
+      platform.global.br.request = jest.fn().mockImplementation((options) => {
+        options.success({
+          statusCode: 200,
+          data: new ArrayBuffer(1024),
+        });
+      });
+
+      const download = pluginDownload.install.call(platform);
+      const result = await download.fetch(
+        "https://www.test.com/test/frame01.svga"
+      );
+
+      expect(result).toBeInstanceOf(ArrayBuffer);
+    });
+
+    it("fetch 调用失败", () => {
+      platform.global.br.request = jest.fn().mockImplementation((options) => {
+        options.fail({
+          statusCode: 404,
+          errMsg: "Not Found",
+        });
+      });
+
+      const download = pluginDownload.install.call(platform);
+      const downloadAwait = download.fetch(
+        "https://www.test.com/test/frame01.svga"
+      );
+
+      expect(downloadAwait).rejects.toStrictEqual({
+        statusCode: 404,
+        errMsg: "Not Found",
+      });
+    });
   });
 });
