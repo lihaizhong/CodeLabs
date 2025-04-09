@@ -1,32 +1,6 @@
 import { definePlugin } from "../definePlugin";
 
 /**
- * 获取并重置Canvas
- * @param canvas
- * @param width
- * @param height
- * @param dpr
- * @returns
- */
-function initCanvas(
-  canvas: PlatformCanvas | null,
-  width: number,
-  height: number,
-  dpr: number
-) {
-  if (!canvas) {
-    throw new Error("canvas not found.");
-  }
-
-  const context = canvas!.getContext("2d");
-  canvas!.width = width * dpr;
-  canvas!.height = height * dpr;
-  // context.scale(dpr, dpr);
-
-  return { canvas, context };
-}
-
-/**
  * 用于获取canvas
  * @returns
  */
@@ -35,12 +9,43 @@ export default definePlugin<"getCanvas">({
   install() {
     const { env, br, dpr } = this.global;
 
+    function initCanvas(
+      canvas: PlatformCanvas | null,
+      width: number,
+      height: number
+    ) {
+      if (!canvas) {
+        throw new Error("canvas not found.");
+      }
+
+      const MAX_SIZE = 1365
+      const context = canvas!.getContext("2d");
+      let virtualWidth = width * dpr
+      let virtualHeight = height * dpr
+
+      // 微信小程序限制canvas最大尺寸为 1365 * 1365
+      if (env === 'weapp' && (virtualWidth > MAX_SIZE || virtualHeight > MAX_SIZE)) {
+        if (virtualWidth > virtualHeight) {
+          virtualHeight = (virtualHeight / virtualWidth) * MAX_SIZE
+          virtualWidth = MAX_SIZE
+        } else {
+          virtualWidth = (virtualWidth / virtualHeight) * MAX_SIZE
+          virtualHeight = MAX_SIZE
+        }
+      }
+
+      canvas!.width = virtualWidth
+      canvas!.height = virtualHeight
+
+      return { canvas, context };
+    }
+
     if (env === "h5") {
       return (selector: string) => new Promise((resolve) => {
         const canvas = document.querySelector(selector) as HTMLCanvasElement;
         const { clientWidth, clientHeight } = canvas || {};
 
-        resolve(initCanvas(canvas, clientWidth, clientHeight, dpr));
+        resolve(initCanvas(canvas, clientWidth, clientHeight));
       });
     }
 
@@ -60,7 +65,7 @@ export default definePlugin<"getCanvas">({
           .fields({ node: true, size: true }, (res) => {
             const { node, width, height } = res || {};
 
-            resolve(initCanvas(node, width, height, dpr));
+            resolve(initCanvas(node, width, height));
           })
           .exec();
       });

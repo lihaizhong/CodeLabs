@@ -108,6 +108,7 @@ export class Animator {
     }
 
     benchmark.time('update partial', () => this.onUpdate(TP));
+    benchmark.log('Percentage of speed time', TP);
     if (!this.isRunning && ended) {
       this.onEnd();
     }
