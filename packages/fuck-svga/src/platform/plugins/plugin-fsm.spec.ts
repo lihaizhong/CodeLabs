@@ -43,9 +43,11 @@ describe("pluginFsm 插件", () => {
       platform.global.fsm.access = jest.fn().mockImplementation((options) => {
         options.success();
       });
-      platform.global.fsm.writeFile = jest.fn().mockImplementation((options) => {
-        options.success();
-      })
+      platform.global.fsm.writeFile = jest
+        .fn()
+        .mockImplementation((options) => {
+          options.success();
+        });
 
       const fsm = pluginFsm.install.call(platform);
 
@@ -59,12 +61,21 @@ describe("pluginFsm 插件", () => {
     it("access 调用成功 read 调用成功", async () => {
       platform.global.fsm.access = jest.fn().mockImplementation((options) => {
         options.success();
-      })
+      });
       platform.global.fsm.readFile = jest.fn().mockImplementation((options) => {
         options.success({ data: new ArrayBuffer(10) });
-      })
+      });
     });
 
-    it("access 调用成功 remove 调用成功", async () => {});
+    it("access 调用成功 remove 调用成功", async () => {
+      platform.global.fsm.access = jest.fn().mockImplementation((options) => {
+        options.success();
+      });
+      platform.global.fsm.removeFile = jest
+        .fn()
+        .mockImplementation((options) => {
+          options.success();
+        });
+    });
   });
 });
