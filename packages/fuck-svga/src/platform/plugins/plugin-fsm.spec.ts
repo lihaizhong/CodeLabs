@@ -39,10 +39,7 @@ describe("pluginFsm 插件", () => {
       expect(typeof fsm.remove).toBe("function");
     });
 
-    it("access 调用成功 write 调用成功", async () => {
-      platform.global.fsm.access = jest.fn().mockImplementation((options) => {
-        options.success();
-      });
+    it("write 调用成功", async () => {
       platform.global.fsm.writeFile = jest
         .fn()
         .mockImplementation((options) => {
@@ -50,32 +47,77 @@ describe("pluginFsm 插件", () => {
         });
 
       const fsm = pluginFsm.install.call(platform);
+      const data = new ArrayBuffer(10);
+      const filePath = "test/test.txt";
+      const result = await fsm.write(data, filePath);
 
+      expect(platform.global.fsm.writeFile).toHaveBeenCalledTimes(1);
+      expect(result).toBe(filePath);
+    });
+
+    it("write 调用失败", async () => {
+      platform.global.fsm.writeFile = jest
+        .fn()
+        .mockImplementation((options) => {
+          options.fail("write fail");
+        });
+
+      const fsm = pluginFsm.install.call(platform);
       const data = new ArrayBuffer(10);
       const filePath = "test/test.txt";
 
-      await fsm!.write(data, filePath);
-      expect(platform.global.fsm!.writeFile).toHaveBeenCalledTimes(1);
+      expect(fsm.write(data, filePath)).rejects.toBe("write fail");
+      expect(platform.global.fsm.writeFile).toHaveBeenCalledTimes(1);
     });
 
-    it("access 调用成功 read 调用成功", async () => {
-      platform.global.fsm.access = jest.fn().mockImplementation((options) => {
-        options.success();
-      });
+    it("read 调用成功", async () => {
       platform.global.fsm.readFile = jest.fn().mockImplementation((options) => {
         options.success({ data: new ArrayBuffer(10) });
       });
+
+      const fsm = pluginFsm.install.call(platform);
+      const filePath = "test/test.txt";
+      const result = await fsm.read(filePath);
+
+      expect(platform.global.fsm.readFile).toHaveBeenCalledTimes(1);
+      expect(result).toBeInstanceOf(ArrayBuffer);
     });
 
-    it("access 调用成功 remove 调用成功", async () => {
-      platform.global.fsm.access = jest.fn().mockImplementation((options) => {
+    it("read 调用失败", async () => {
+      platform.global.fsm.readFile = jest.fn().mockImplementation((options) => {
+        options.fail("read fail");
+      });
+
+      const fsm = pluginFsm.install.call(platform);
+      const filePath = "test/test.txt";
+
+      expect(fsm.read(filePath)).rejects.toBe("read fail");
+      expect(platform.global.fsm.readFile).toHaveBeenCalledTimes(1);
+    });
+
+    it("remove 调用成功", async () => {
+      platform.global.fsm.unlink = jest.fn().mockImplementation((options) => {
         options.success();
       });
-      platform.global.fsm.removeFile = jest
-        .fn()
-        .mockImplementation((options) => {
-          options.success();
-        });
+
+      const fsm = pluginFsm.install.call(platform);
+      const filePath = "test/test.txt";
+      const result = await fsm.remove(filePath);
+
+      expect(platform.global.fsm.unlink).toHaveBeenCalledTimes(1);
+      expect(result).toBe(filePath);
+    });
+
+    it("remove 调用失败", async () => {
+      platform.global.fsm.unlink = jest.fn().mockImplementation((options) => {
+        options.fail("remove fail");
+      });
+
+      const fsm = pluginFsm.install.call(platform);
+      const filePath = "test/test.txt";
+
+      expect(fsm.remove(filePath)).resolves.toBe(filePath);
+      expect(platform.global.fsm.unlink).toHaveBeenCalledTimes(1);
     });
   });
 });

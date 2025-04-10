@@ -1,12 +1,12 @@
 import { initialPlatformGlobal } from "../../__tests__/initial";
 import pluginImage from "./plugin-image";
 
-describe("pluginImage defined", () => {
-  it("should be defined", () => {
+describe("pluginImage 定义", () => {
+  it("image 是否被定义", () => {
     expect(pluginImage).toBeDefined();
   });
 
-  it("should be a object", () => {
+  it("image 定义是否正确", () => {
     expect(typeof pluginImage).toBe("object");
     expect(typeof pluginImage.name).toBe("string");
     expect(typeof pluginImage.install).toBe("function");
@@ -14,26 +14,20 @@ describe("pluginImage defined", () => {
   });
 });
 
-describe("pluginImage defined with h5", () => {
-  let platform: Record<"global", FuckSvga.PlatformGlobal>;
-
-  beforeEach(() => {
-    platform = { global: initialPlatformGlobal.h5 };
+describe("pluginImage 插件", () => {
+  describe("H5 环境", () => {
+    const platform = { global: initialPlatformGlobal.h5 };
+  
+    it("检查插件是否正常安装", () => {
+      expect(typeof pluginImage.install.call(platform)).toBe("object");
+    });
   });
-
-  it("plugin install", () => {
-    expect(typeof pluginImage.install.call(platform)).toBe("object");
-  });
-});
-
-describe("pluginImage defined with weapp, alipay, tt", () => {
-  let platform: Record<"global", FuckSvga.PlatformGlobal>;
-
-  beforeEach(() => {
-    platform = { global: initialPlatformGlobal.weapp };
-  });
-
-  it("plugin install", () => {
-    expect(typeof pluginImage.install.call(platform)).toBe("object");
-  });
-});
+  
+  describe("小程序(weapp, alipay, tt) 环境", () => {
+    const platform = { global: initialPlatformGlobal.weapp };
+  
+    it("检查插件是否正常安装", () => {
+      expect(typeof pluginImage.install.call(platform)).toBe("object");
+    });
+  });  
+})
