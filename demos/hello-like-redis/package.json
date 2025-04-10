@@ -1,0 +1,11 @@
+{
+  "name": "hello-like-redis",
+  "version": "1.0.0",
+  "description": "## 参考资料",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LiHZSky",
+  "license": "ISC"
+}
