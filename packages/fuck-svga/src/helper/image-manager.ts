@@ -50,6 +50,7 @@ export class ImageManager {
           (img) => {
             this.materials.set(key, img);
 
+            // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
             if (env !== "alipay") {
               if (isImage(img)) {
                 imageIns.push(img as PlatformImage);
