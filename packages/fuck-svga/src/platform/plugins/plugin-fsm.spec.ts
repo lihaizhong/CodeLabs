@@ -32,16 +32,39 @@ describe("pluginFsm 插件", () => {
 
     it("检查插件是否正常安装", () => {
       const fsm = pluginFsm.install.call(platform);
+
       expect(typeof fsm).toBe("object");
       expect(typeof fsm.write).toBe("function");
       expect(typeof fsm.read).toBe("function");
       expect(typeof fsm.remove).toBe("function");
     });
 
-    it("write 调用成功", async () => {});
+    it("access 调用成功 write 调用成功", async () => {
+      platform.global.fsm.access = jest.fn().mockImplementation((options) => {
+        options.success();
+      });
+      platform.global.fsm.writeFile = jest.fn().mockImplementation((options) => {
+        options.success();
+      })
 
-    it("read 调用成功", async () => {});
+      const fsm = pluginFsm.install.call(platform);
 
-    it("remove 调用成功", async () => {});
+      const data = new ArrayBuffer(10);
+      const filePath = "test/test.txt";
+
+      await fsm!.write(data, filePath);
+      expect(platform.global.fsm!.writeFile).toHaveBeenCalledTimes(1);
+    });
+
+    it("access 调用成功 read 调用成功", async () => {
+      platform.global.fsm.access = jest.fn().mockImplementation((options) => {
+        options.success();
+      })
+      platform.global.fsm.readFile = jest.fn().mockImplementation((options) => {
+        options.success({ data: new ArrayBuffer(10) });
+      })
+    });
+
+    it("access 调用成功 remove 调用成功", async () => {});
   });
 });
