@@ -278,7 +278,7 @@ export class Player {
         while (tail < spriteCount) {
           // 根据当前块大小计算nextTail
           chunk = Math.min(dynamicChunkSize, spriteCount - tail);
-          nextTail = tail + chunk;
+          nextTail = (tail + chunk) | 0;
           brush.draw(entity!, currentFrame, tail, nextTail);
           tail = nextTail;
           // 动态调整块大小
@@ -302,10 +302,10 @@ export class Player {
           // 1.15 和 2 均为阔值，保证渲染尽快完成
           nextTail = hasRemained
             ? Math.min(
-                spriteCount * partialDrawPercent * TAIL_THRESHOLD_FACTOR +
-                  TAIL_OFFSET,
+                (spriteCount * partialDrawPercent * TAIL_THRESHOLD_FACTOR +
+                  TAIL_OFFSET) | 0,
                 spriteCount
-              ) | 0
+              )
             : spriteCount;
 
           if (nextTail > tail) {

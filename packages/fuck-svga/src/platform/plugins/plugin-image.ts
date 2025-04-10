@@ -10,7 +10,7 @@ export default definePlugin<"image">({
   name: "image",
   install() {
     const { local, path, decode, noop } = this;
-    const { env, br } = this.global;
+    const { env } = this.global;
     const cachedImages: Set<string> = new Set();
 
     /**
@@ -75,8 +75,8 @@ export default definePlugin<"image">({
       };
     }
 
-    const createImage = (brush: FuckSvga.PlatformCreateImageInstance) =>
-      brush.createImage();
+    const createImage = (canvas: FuckSvga.PlatformCreateImageInstance) =>
+      canvas.createImage();
     const genImageSource = async (
       data: Uint8Array | string,
       filename: string,
@@ -116,7 +116,7 @@ export default definePlugin<"image">({
       isImageBitmap: (_data: unknown) => false,
       create: createImage,
       load: async (
-        brush: FuckSvga.PlatformCreateImageInstance,
+        canvas: FuckSvga.PlatformCreateImageInstance,
         data: ImageBitmap | Uint8Array | string,
         filename: string,
         prefix?: string
@@ -126,9 +126,8 @@ export default definePlugin<"image">({
           filename,
           prefix
         );
-        const img = createImage(brush);
 
-        return loadImage(img, src);
+        return loadImage(createImage(canvas), src);
       },
     };
   },

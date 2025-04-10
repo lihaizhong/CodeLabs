@@ -34,6 +34,7 @@ export class ImageManager {
     brush: Brush,
     filename: string
   ): Promise<void> {
+    const { env } = platform.global;
     const { load, isImage, isImageBitmap } = platform.image;
     const imageAwaits: Promise<PlatformImage | ImageBitmap>[] = [];
     const imageIns: PlatformImage[] = []
@@ -49,10 +50,12 @@ export class ImageManager {
           (img) => {
             this.materials.set(key, img);
 
-            if (isImage(img)) {
-              imageIns.push(img as PlatformImage);
-            } else if (isImageBitmap(img)) {
-              imageBitmapIns.push(img as ImageBitmap);
+            if (env !== "alipay") {
+              if (isImage(img)) {
+                imageIns.push(img as PlatformImage);
+              } else if (isImageBitmap(img)) {
+                imageBitmapIns.push(img as ImageBitmap);
+              }
             }
 
             return img;
