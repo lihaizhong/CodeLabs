@@ -25,7 +25,7 @@
     }
   </style>
   <script type="module">
-    import { createQRCodeToPNG } from "fuck-svga";
+    import { generateImageFromCode } from "fuck-svga";
     import { createQrCodeImg } from "../../utils/qrcode";
 
     function insertContainer(title, source, size, type = 'img') {
@@ -78,9 +78,12 @@
       // --- insertQrCodeToPNG
 
       insertQrCodeToPNG(size) {
-        console.time('createQRCodeToPNG');
-        const img = createQRCodeToPNG("i generate a png");
-        console.timeEnd('createQRCodeToPNG');
+        console.time('generateImageFromCode');
+        const img = generateImageFromCode({
+          code: "i generate a png",
+          size: 500,
+        });
+        console.timeEnd('generateImageFromCode');
 
         insertContainer('png', img, size);
       },

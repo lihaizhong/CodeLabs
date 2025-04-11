@@ -1,7 +1,7 @@
-import { createQRCodeToPNG } from "./qrcode-helper";
+import { generateImageFromCode } from "./qrcode-helper";
 
 describe("qrcode-helper", () => {
   it("should be defined", () => {
-    expect(createQRCodeToPNG).toBeDefined();
+    expect(generateImageFromCode).toBeDefined();
   });
 });
