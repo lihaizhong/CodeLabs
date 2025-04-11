@@ -1,11 +1,26 @@
-/**
- * Promise实现
- * 英文原版网址：https://promisesaplus.com/
- * 中文翻译网址：https://www.ituring.com.cn/article/66566
- */
+// Copyright 2025 lihaizhong
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     https://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// 
+// Promise实现(浏览器版本)
+// 
+// 参考资料：
+// 英文原版网址：https://promisesaplus.com/
+// 中文翻译网址：https://www.ituring.com.cn/article/66566
+// 
 
 /**
- * 状态枚举
+ * Promise 状态枚举
  */
 const PROMISE_STATUS = {
 	/**
@@ -40,7 +55,7 @@ function isThenable(val) {
 }
 
 /**
- * 异步任务
+ * Promise 异步任务执行器
  * @param {function} fn
  */
 function executor(fn) {
@@ -48,6 +63,7 @@ function executor(fn) {
 	const observer = new MutationObserver(fn);
 	// 创建文本节点，节约资源
 	const textNode = document.createTextNode('0');
+
 	observer.observe(textNode, {
 		// 当文本改变时触发回调
 		characterData: true
@@ -56,6 +72,9 @@ function executor(fn) {
 	textNode.data = '1';
 }
 
+/**
+ * Promise 任务队列
+ */
 export class SchedulerQueue {
 	constructor() {
 		this.queue = [];
@@ -80,23 +99,23 @@ export class SchedulerQueue {
 /**
  * Promise实现
  */
-export default class IPromise {
+export default class Promise {
 	static all(promises) {
 		return promises.reduce(
 			(acc, promise) =>
 				acc.then((values) => {
-					if (promise instanceof IPromise) {
+					if (promise instanceof Promise) {
 						return promise.then((value) => values.concat([value]));
 					}
 
-					return IPromise.resolve(promise);
+					return Promise.resolve(promise);
 				}),
-			IPromise.resolve([]),
+			Promise.resolve([]),
 		);
 	}
 
 	static race(promises) {
-		return new IPromise((resolve, reject) => {
+		return new Promise((resolve, reject) => {
 			for (const promise of promises) {
 				promise.then(resolve, reject);
 			}
@@ -110,7 +129,7 @@ export default class IPromise {
 	 */
 	static resolve(value) {
 		if (isThenable(value)) return value;
-		return new IPromise((resolve) => resolve(value));
+		return new Promise((resolve) => resolve(value));
 	}
 
 	/**
@@ -120,8 +139,16 @@ export default class IPromise {
 	 */
 	static reject(error) {
 		if (isThenable(error)) return error;
-		return new IPromise((_resolve, reject) => reject(error));
+		return new Promise((_, reject) => reject(error));
 	}
+
+	#status;
+
+	#value;
+
+	#fulfilledQueues;
+
+	#rejectedQueues;
 
 	/**
 	 * 构造函数
@@ -132,16 +159,16 @@ export default class IPromise {
 			throw new TypeError("Promise resolver undefined is not a function");
 		}
 
-		this._status = PROMISE_STATUS.PENDING;
-		this._value = null;
-		this._fulfilledQueues = new SchedulerQueue();
-		this._rejectedQueues = new SchedulerQueue();
+		this.#status = PROMISE_STATUS.PENDING;
+		this.#value = null;
+		this.#fulfilledQueues = new SchedulerQueue();
+		this.#rejectedQueues = new SchedulerQueue();
 
 		try {
 			// 处理回调函数
-			resolver(this._resolve.bind(this), this._reject.bind(this));
+			resolver(this.#resolve.bind(this), this.#reject.bind(this));
 		} catch (ex) {
-			this._reject(ex);
+			this.#reject(ex);
 		}
 	}
 
@@ -149,29 +176,29 @@ export default class IPromise {
 	 * 成功操作
 	 * @param {Function | Thenable} val
 	 */
-	_resolve(val) {
-		if (this._status !== PROMISE_STATUS.PENDING) return;
+	#resolve(val) {
+		if (this.#status !== PROMISE_STATUS.PENDING) return;
 
 		const run = () => {
 			const onFulfilled = (value) => this._fulfilledQueues.flush(value);
-			const onRejected = (error) => this._rejectedQueues.flush(error);
+			const onRejected = (error) => this.#rejectedQueues.flush(error);
 
 			if (isThenable(val)) {
 				val.then(
 					(value) => {
-						this._status = PROMISE_STATUS.FULFILLED;
-						this._value = value;
+						this.#status = PROMISE_STATUS.FULFILLED;
+						this.this.#value = value;
 						onFulfilled(value);
 					},
 					(error) => {
-						this._status = PROMISE_STATUS.REJECTED;
-						this._value = error;
+						this.#status = PROMISE_STATUS.REJECTED;
+						this.this.#value = error;
 						onRejected(error);
 					},
 				);
 			} else {
-				this._status = PROMISE_STATUS.FULFILLED;
-				this._value = val;
+				this.#status = PROMISE_STATUS.FULFILLED;
+				this.this.#value = val;
 				onFulfilled(val);
 			}
 		};
@@ -183,19 +210,19 @@ export default class IPromise {
 	 * 失败操作
 	 * @param {any} error
 	 */
-	_reject(error) {
-		if (this._status !== PROMISE_STATUS.PENDING) return;
+	#reject(error) {
+		if (this.#status !== PROMISE_STATUS.PENDING) return;
 
 		const run = () => {
-			this._status = PROMISE_STATUS.REJECTED;
+			this.#status = PROMISE_STATUS.REJECTED;
 
-			this._value = error;
+			this.this.#value = error;
 
-			let cb = this._rejectedQueues.shift();
+			let cb = this.#rejectedQueues.shift();
 
 			while (cb) {
 				cb(error);
-				cb = this._rejectedQueues.shift();
+				cb = this.#rejectedQueues.shift();
 			}
 		};
 
@@ -209,8 +236,6 @@ export default class IPromise {
 	 * @return {Promise}
 	 */
 	then(onFulfilled, onRejected) {
-		const { _value, _status } = this;
-
 		return new this.constructor((resolveNext, rejectedNext) => {
 			const fulfilled = (value) => {
 				try {
@@ -250,16 +275,16 @@ export default class IPromise {
 				}
 			};
 
-			switch (_status) {
+			switch (this.#status) {
 				case PROMISE_STATUS.PENDING:
 					this._fulfilledQueues.push(onFulfilled);
-					this._rejectedQueues.push(onRejected);
+					this.#rejectedQueues.push(onRejected);
 					break;
 				case PROMISE_STATUS.FULFILLED:
-					fulfilled(_value);
+					fulfilled(this.#value);
 					break;
 				case PROMISE_STATUS.REJECTED:
-					rejected(_value);
+					rejected(this.#value);
 					break;
 			}
 		});

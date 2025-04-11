@@ -1,0 +1,19 @@
+{
+    "sync": {
+        "miniprogram-weapp": {
+            "dependencies": {
+                "fuck-svga": "./utils/fuck-svga"
+            }
+        },
+        "miniprogram-alipay": {
+            "dependencies": {
+                "fuck-svga": "./utils/fuck-svga"
+            }
+        },
+        "miniprogram-tt": {
+            "dependencies": {
+                "fuck-svga": "./utils/fuck-svga"
+            }
+        }
+    }
+}

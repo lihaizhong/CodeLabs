@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "description": "代码片段整理",
   "private": true,
+  "type": "module",
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
     "dev": "rm -rf dist .parcel-cache && parcel serve",
     "build": "parcel build",
     "preview": "serve -p 3001 ./dist/",
     "static": "serve -p 5151 public",
+    "sync": "zx .scripts/sync.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "targets": {
@@ -38,7 +40,8 @@
     "benchmark": "^2.1.4",
     "parcel": "^2.14.4",
     "parcel-reporter-static-files-copy": "^1.5.3",
-    "serve": "^14.2.4"
+    "serve": "^14.2.4",
+    "zx": "^8.5.2"
   },
   "dependencies": {
     "crc-32": "^1.2.2",

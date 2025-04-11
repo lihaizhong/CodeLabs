@@ -35,5 +35,6 @@
     "tabIndent": "insertSpaces",
     "tabSize": 2
   },
-  "srcMiniprogramRoot": ""
+  "srcMiniprogramRoot": "",
+  "projectname": "CodeSnippet"
 }
