@@ -3,12 +3,12 @@ import pluginRaf from "./plugin-raf";
 
 jest.useFakeTimers();
 
-describe("pluginRaf defined", () => {
-  it("should be defined", () => {
+describe("pluginRaf 定义", () => {
+  it("rAF 是否被定义", () => {
     expect(pluginRaf).toBeDefined();
   });
 
-  it("should be a object", () => {
+  it("rAF 定义是否正确", () => {
     expect(typeof pluginRaf).toBe("object");
     expect(typeof pluginRaf.name).toBe("string");
     expect(typeof pluginRaf.install).toBe("function");
@@ -16,26 +16,20 @@ describe("pluginRaf defined", () => {
   });
 });
 
-describe("pluginRaf defined with h5", () => {
-  let platform: Record<"global", FuckSvga.PlatformGlobal>;
+describe("pluginRaf 插件", () => {
+  describe("H5 环境", () => {
+    const platform = { global: initialPlatformGlobal.h5 };
 
-  beforeEach(() => {
-    platform = { global: initialPlatformGlobal.h5 };
+    it("检查插件是否正常安装", () => {
+      expect(typeof pluginRaf.install.call(platform)).toBe("function");
+    })
   });
 
-  it("plugin install", () => {
-    expect(typeof pluginRaf.install.call(platform)).toBe("function");
-  });
-});
+  describe("小程序(weapp, alipay, tt) 环境", () => {
+    const platform = { global: initialPlatformGlobal.weapp };
 
-describe("pluginRaf defined with weapp, alipay, tt", () => {
-  let platform: Record<"global", FuckSvga.PlatformGlobal>;
-
-  beforeEach(() => {
-    platform = { global: initialPlatformGlobal.weapp };
-  });
-
-  it("plugin install", () => {
-    expect(typeof pluginRaf.install.call(platform)).toBe("function");
-  });
+    it("检查插件是否正常安装", () => {
+      expect(typeof pluginRaf.install.call(platform)).toBe("function");
+    })
+  })
 });

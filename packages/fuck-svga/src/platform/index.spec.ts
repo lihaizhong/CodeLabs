@@ -25,12 +25,12 @@ jest.mock("./plugins/plugin-ofs-canvas", () => ({
 jest.mock("./plugins/plugin-path", () => ({ name: "path", install: () => {} }));
 jest.mock("./plugins/plugin-raf", () => ({ name: "rAF", install: () => {} }));
 
-describe("platform defined", () => {
-  it("should be defined", () => {
+describe("platform 定义", () => {
+  it("platform 是否被定义", () => {
     expect(platform).toBeDefined();
   });
 
-  it("should be a object", () => {
+  it("platform 定义是否正确", () => {
     expect(typeof platform).toBe("object");
     expect(typeof platform.global).toBe("object");
     expect(typeof platform.noop).toBe("function");
@@ -45,7 +45,7 @@ describe("platform defined", () => {
     expect(typeof platform.switch).toBe("function");
   });
 
-  it("return a object with global properties", () => {
+  it("检查 global 属性是否正确", () => {
     const { global } = platform;
 
     expect(typeof global.env).toBe("string");
@@ -57,10 +57,12 @@ describe("platform defined", () => {
   });
 });
 
-describe("platform defined with weapp", () => {});
+describe("platform 整体测试", () => {
+  describe("H5 环境", () => {});
 
-describe("platform defined with h5", () => {});
+  describe("小程序(weapp) 环境", () => {});
 
-describe("platform defined with alipay", () => {});
+  describe("小程序(alipay) 环境", () => {});
 
-describe("platform defined with tt", () => {});
+  describe("小程序(tt) 环境", () => {});
+})

@@ -1,12 +1,12 @@
 import { initialPlatformGlobal } from "../../__tests__/initial";
 import pluginPath from "./plugin-path";
 
-describe("pluginPath defined", () => {
-  it("should be defined", () => {
+describe("pluginPath 定义", () => {
+  it("path 是否被定义", () => {
     expect(pluginPath).toBeDefined();
   });
 
-  it("should be a object", () => {
+  it("path 定义是否正确", () => {
     expect(typeof pluginPath).toBe("object");
     expect(typeof pluginPath.name).toBe("string");
     expect(typeof pluginPath.install).toBe("function");
@@ -14,38 +14,28 @@ describe("pluginPath defined", () => {
   });
 });
 
-describe("pluginPath defined with h5", () => {
-  let platform: Record<"global", FuckSvga.PlatformGlobal>;
+describe("pluginPath 插件", () => {
+  describe("H5 环境", () => {
+    const platform = { global: initialPlatformGlobal.h5 };
 
-  beforeEach(() => {
-    platform = { global: initialPlatformGlobal.h5 };
+    it("检查插件是否正常安装", () => {
+      expect(typeof pluginPath.install.call(platform)).toBe("object");
+    });
+  });
+
+  describe("小程序(weapp, alipay) 环境", () => {
+    const platform = { global: initialPlatformGlobal.weapp };
+
+    it("检查插件是否正常安装", () => {
+      expect(typeof pluginPath.install.call(platform)).toBe("object");
+    });
   })
 
-  it("plugin install", () => {
-    expect(typeof pluginPath.install.call(platform)).toBe("object");
-  })
-});
+  describe("小程序(tt) 环境", () => {
+    const platform = { global: initialPlatformGlobal.tt };
 
-describe("pluginPath defined with weapp, alipay, tt", () => {
-  let platform: Record<"global", FuckSvga.PlatformGlobal>;
-
-  beforeEach(() => {
-    platform = { global: initialPlatformGlobal.weapp };
-  });
-
-  it("plugin install", () => {
-    expect(typeof pluginPath.install.call(platform)).toBe("object");
-  });
-});
-
-describe("pluginPath defined with tt", () => {
-  let platform: Record<"global", FuckSvga.PlatformGlobal>;
-
-  beforeEach(() => {
-    platform = { global: initialPlatformGlobal.tt };
-  });
-
-  it("plugin install", () => {
-    expect(typeof pluginPath.install.call(platform)).toBe("object");
+    it("检查插件是否正常安装", () => {
+      expect(typeof pluginPath.install.call(platform)).toBe("object");
+    });
   });
 });
