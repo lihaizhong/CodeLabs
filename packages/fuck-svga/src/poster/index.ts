@@ -74,7 +74,9 @@ export class Poster {
     const { images, filename } = videoEntity;
 
     this.brush.clearContainer();
-    this.brush.clearDynamicElements(this.entity!.dynamicElements);
+    if (this.entity) {
+      this.brush.clearDynamicElements(this.entity.dynamicElements);
+    }
     this.brush.clearMaterials();
     this.entity = videoEntity;
 
@@ -117,7 +119,9 @@ export class Poster {
    * 销毁海报
    */
   public destroy(): void {
-    this.brush.clearDynamicElements(this.entity!.dynamicElements);
+    if (this.entity) {
+      this.brush.clearDynamicElements(this.entity.dynamicElements);
+    }
     this.brush.destroy();
     this.entity = undefined;
   }
