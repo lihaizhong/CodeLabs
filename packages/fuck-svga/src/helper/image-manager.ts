@@ -45,6 +45,14 @@ export class ImageManager {
   }
 
   /**
+   * 获取动态图片素材
+   * @returns 
+   */
+  public getDynamicMaterials() {
+    return this.dynamicMaterials;
+  }
+
+  /**
    * 加载图片集
    * @param images 图片数据
    * @param filename 文件名称

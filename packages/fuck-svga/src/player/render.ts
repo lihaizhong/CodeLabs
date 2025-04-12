@@ -29,19 +29,20 @@ const VALID_METHODS = "MLHVCSQZmlhvcsqz";
 function render(
   context: PlatformRenderingContext2D,
   materials: Map<string, Bitmap>,
+  dynamicMaterials: Map<string, Bitmap>,
   videoEntity: Video,
   currentFrame: number,
   head: number,
   tail: number,
   globalTransform?: Transform
 ): void {
-  const { sprites, dynamicElements } = videoEntity;
+  const { sprites } = videoEntity;
 
   for (let i = head; i < tail; i++) {
     const sprite = sprites[i];
     const { imageKey } = sprite;
     const bitmap = materials.get(imageKey);
-    const dynamicElement = dynamicElements[imageKey];
+    const dynamicElement = dynamicMaterials.get(imageKey);
 
     drawSprite(
       context,

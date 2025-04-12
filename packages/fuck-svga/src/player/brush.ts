@@ -317,6 +317,7 @@ export class Brush {
     render(
       this.YC!,
       this.IM.getMaterials(),
+      this.IM.getDynamicMaterials(),
       videoEntity,
       currentFrame,
       start,

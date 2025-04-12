@@ -48,7 +48,7 @@ export class VideoEditor {
    */
   async setCanvas(
     key: string,
-    context: CanvasRenderingContext2D,
+    context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
     options?: VideoEditorOptions
   ) {
     if (this.entity.locked) return;
