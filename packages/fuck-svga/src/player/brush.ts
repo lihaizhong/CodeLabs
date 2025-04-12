@@ -8,8 +8,6 @@ interface IBrushModel {
   type: "C" | "O";
   // clear or resize or create
   clear: "CL" | "RE" | "CR";
-  // put or draw
-  // render: "PU" | "DR";
 }
 
 type TBrushMode = "poster" | "animation";
@@ -81,21 +79,9 @@ export class Brush {
       model.clear = "RE";
     }
 
-    // set render
-    // if (
-    //   (type === "C" &&
-    //     (env === "tt" || (sys === "IOS" && env === "alipay"))) ||
-    //   (type === "O" && env === "weapp") 
-    // ) {
-    //   model.render = "PU";
-    // } else {
-    //   model.render = "DR";
-    // }
-
     benchmark.line(4);
     benchmark.log("brush type", model.type);
     benchmark.log("brush clear", model.clear);
-    // benchmark.log("brush render", model.render);
     benchmark.line(4);
   }
 
@@ -208,28 +194,6 @@ export class Brush {
           };
       }
       // #endregion clear secondary screen implement
-
-      // #region stick implement
-      // -------- 生成渲染函数 ---------
-      // switch (model.render) {
-      //   case "DR":
-      //     this.stick = () => {
-      //       const { W, H } = this;
-      //       // FIXME:【微信小程序】 drawImage 无法绘制 OffscreenCanvas；【抖音小程序】 drawImage 无法绘制 Canvas
-      //       this.XC!.drawImage(this.YC!.canvas as CanvasImageSource, 0, 0, W, H);
-      //     };
-      //     break;
-      //   case "PU":
-      //     this.stick = () => {
-      //       const { W, H } = this;
-      //       // FIXME:【所有小程序】 imageData 获取到的数据都是 0，可以当场使用，但不要妄图缓存它
-      //       const imageData = this.YC!.getImageData(0, 0, W, H);
-      //       this.XC!.putImageData(imageData, 0, 0, 0, 0, W, H);
-      //     };
-      //     break;
-      //   default:
-      // }
-      // #endregion stick implement
     }
   }
 
@@ -354,9 +318,11 @@ export class Brush {
   }
 
   public stick() {
-    const { W, H } = this;
+    const { W, H, mode } = this;
 
-    this.XC!.drawImage(this.YC!.canvas || this.Y as CanvasImageSource, 0, 0, W, H);
+    if (mode !== "poster") {
+      this.XC!.drawImage(this.YC!.canvas || this.Y as CanvasImageSource, 0, 0, W, H);
+    }
   };
 
   /**
