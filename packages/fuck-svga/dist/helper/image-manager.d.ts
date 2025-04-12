@@ -4,10 +4,16 @@ export declare class ImageManager {
      * 待复用的 img 标签
      */
     private images;
+    private dynamicMaterials;
     /**
      * 素材
      */
     private materials;
+    /**
+     * 释放图片标签
+     * @param image
+     */
+    private appendCleanedImage;
     /**
      * 获取图片素材
      * @returns
@@ -25,11 +31,7 @@ export declare class ImageManager {
      * @returns
      */
     createImage(canvas: FuckSvga.PlatformCreateImageInstance): PlatformImage;
-    /**
-     * 释放图片标签
-     * @param image
-     */
-    appendCleanedImage(image: Bitmap | PlatformCanvas): void;
+    updateDynamicMaterials(images: PlatformImages): void;
     /**
      * 清理重复的图片标签
      */

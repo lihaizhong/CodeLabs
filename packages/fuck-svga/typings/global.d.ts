@@ -4,11 +4,13 @@ type PlatformOffscreenCanvas =
   | WechatMiniprogram.OffscreenCanvas
   | OffscreenCanvas;
 
-type PlatformRenderingContext2D = OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D
+type PlatformRenderingContext2D =
+  | OffscreenCanvasRenderingContext2D
+  | CanvasRenderingContext2D;
 
 type PlatformImage = HTMLImageElement | WechatMiniprogram.Image;
 
-type Bitmap = PlatformImage | PlatformOffscreenCanvas | ImageBitmap;
+type Bitmap = PlatformImage | ImageBitmap | HTMLCanvasElement | OffscreenCanvas;
 
 type RawImage = string | Uint8Array;
 
@@ -18,6 +20,11 @@ interface RawImages {
 
 interface PlatformImages {
   [key: string]: Bitmap;
+}
+
+interface VideoSize {
+  width: number;
+  height: number;
 }
 
 interface Rect {
@@ -70,21 +77,9 @@ const enum SHAPE_TYPE_CODE {
 }
 
 const enum SHAPE_TYPE {
-  SHAPE = 'shape',
-  RECT = 'rect',
-  ELLIPSE = 'ellipse',
-}
-
-interface MovieStyles {
-  fill: RGBA_CODE | null;
-  stroke: RGBA_CODE | null;
-  strokeWidth: number | null;
-  lineCap: LINE_CAP_CODE | null;
-  lineJoin: LINE_JOIN_CODE | null;
-  miterLimit: number | null;
-  lineDashI: number | null;
-  lineDashII: number | null;
-  lineDashIII: number | null;
+  SHAPE = "shape",
+  RECT = "rect",
+  ELLIPSE = "ellipse",
 }
 
 interface VideoStyles {
@@ -116,15 +111,6 @@ interface EllipsePath {
   radiusY: number;
 }
 
-interface MovieShape {
-  type: SHAPE_TYPE_CODE | null;
-  shape: ShapePath | null;
-  rect: RectPath | null;
-  ellipse: EllipsePath | null;
-  styles: MovieStyles | null;
-  transform: Transform | null;
-}
-
 interface VideoShapeShape {
   type: SHAPE_TYPE.SHAPE;
   path: ShapePath;
@@ -152,21 +138,7 @@ interface MaskPath {
   styles: VideoStyles;
 }
 
-interface MovieFrame {
-  alpha: number;
-  transform: Transform | null;
-  nx: number;
-  ny: number;
-  layout: Rect;
-  clipPath: string;
-  maskPath: MaskPath | null;
-  shapes: MovieShape[];
-}
-
-type VideoFrameShape =
-  | VideoShapeShape
-  | VideoShapeRect
-  | VideoShapeEllipse;
+type VideoFrameShape = VideoShapeShape | VideoShapeRect | VideoShapeEllipse;
 
 type VideoFrameShapes = VideoFrameShape[];
 
@@ -181,52 +153,20 @@ interface IVideoFrame {
   shapes: VideoFrameShapes;
 }
 
-interface MovieSprite {
-  imageKey: string;
-  frames: MovieFrame[];
-}
-
 interface VideoSprite {
   imageKey: string;
   frames: IVideoFrame[];
 }
 
-type DynamicElement =
-  | PlatformImage
-  | ImageBitmap
-  | PlatformCanvas
-  | PlatformOffscreenCanvas;
-
-interface DynamicElements {
-  [key: string]: DynamicElement;
-}
-
-interface Movie {
-  version: string;
-  images: {
-    [key: string]: Uint8Array;
-  };
-  params: {
-    fps: number;
-    frames: number;
-    viewBoxHeight: number;
-    viewBoxWidth: number;
-  };
-  sprites: MovieSprite[];
-}
-
 interface Video {
   version: string;
   filename: string;
-  size: {
-    width: number;
-    height: number;
-  };
+  size: VideoSize;
   fps: number;
+  locked: boolean;
   frames: number;
   images: RawImages;
-  locked: boolean;
-  dynamicElements: DynamicElements;
+  dynamicElements: PlatformImages;
   sprites: VideoSprite[];
 }
 
@@ -234,45 +174,45 @@ const enum PLAYER_FILL_MODE {
   /**
    * 播放完成后停在首帧
    */
-  FORWARDS = 'forwards',
+  FORWARDS = "forwards",
   /**
    * 播放完成后停在尾帧
    */
-  BACKWARDS = 'backwards',
+  BACKWARDS = "backwards",
   /**
    * 播放完成后清空画布
    */
-  NONE = 'none',
+  NONE = "none",
 }
 
 const enum PLAYER_PLAY_MODE {
   /**
    * 顺序播放
    */
-  FORWARDS = 'forwards',
+  FORWARDS = "forwards",
   /**
    * 倒序播放
    */
-  FALLBACKS = 'fallbacks',
+  FALLBACKS = "fallbacks",
 }
 
 const enum PLAYER_CONTENT_MODE {
   /**
    * 缩放图片填满 Canvas，图片可能出现变形
    */
-  FILL = 'fill',
+  FILL = "fill",
   /**
    * 等比例缩放至整张图片填满 Canvas，不足部分留白
    */
-  ASPECT_FIT = 'aspect-fit',
+  ASPECT_FIT = "aspect-fit",
   /**
    * 等比例缩放至图片填满 Canvas，超出部分不展示
    */
-  ASPECT_FILL = 'aspect-fill',
+  ASPECT_FILL = "aspect-fill",
   /**
    * 图片对齐 Canvas 中心，超出部分不展示
    */
-  CENTER = 'center'
+  CENTER = "center",
 }
 
 type PlayerEventCallback = () => void;
@@ -341,18 +281,4 @@ interface PosterConfig {
    * 绘制成海报的帧，默认是0。
    */
   frame?: number;
-}
-
-interface ViewportRect {
-  width: number;
-  height: number;
-}
-
-interface GlobalTransform {
-  a: number;
-  b: number;
-  c: number;
-  d: number;
-  tx: number;
-  ty: number;
 }

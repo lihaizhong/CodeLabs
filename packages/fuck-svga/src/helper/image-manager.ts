@@ -8,10 +8,30 @@ export class ImageManager {
   // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
   private images: PlatformImage[] = [];
 
+  private dynamicMaterials: Map<string, Bitmap> = new Map();
+
   /**
    * 素材
    */
   private materials: Map<string, Bitmap> = new Map();
+
+  /**
+   * 释放图片标签
+   * @param image
+   */
+  private appendCleanedImage(image: Bitmap | PlatformCanvas) {
+    const { isImage, isImageBitmap } = platform.image;
+
+    if (isImage(image)) {
+      (image as unknown as PlatformImage).onload = null;
+      (image as unknown as PlatformImage).onerror = null;
+      (image as unknown as PlatformImage).src = "";
+
+      this.images.push(image as PlatformImage);
+    } else if (isImageBitmap(image)) {
+      (image as unknown as ImageBitmap).close();
+    }
+  }
 
   /**
    * 获取图片素材
@@ -62,22 +82,8 @@ export class ImageManager {
     return this.images.shift() || platform.image.create(canvas);
   }
 
-  /**
-   * 释放图片标签
-   * @param image
-   */
-  public appendCleanedImage(image: Bitmap | PlatformCanvas) {
-    const { isImage, isImageBitmap } = platform.image;
-
-    if (isImage(image)) {
-      (image as unknown as PlatformImage).onload = null;
-      (image as unknown as PlatformImage).onerror = null;
-      (image as unknown as PlatformImage).src = "";
-
-      this.images.push(image as PlatformImage);
-    } else if (isImageBitmap(image)) {
-      (image as unknown as ImageBitmap).close();
-    }
+  public updateDynamicMaterials(images: PlatformImages) {
+    this.dynamicMaterials = new Map(Object.entries(images))
   }
 
   /**
@@ -98,6 +104,10 @@ export class ImageManager {
       this.materials.forEach((value) => {
         this.appendCleanedImage(value);
       });
+
+      this.dynamicMaterials.forEach((value) => {
+        this.appendCleanedImage(value);
+      })
     }
 
     this.materials.clear();

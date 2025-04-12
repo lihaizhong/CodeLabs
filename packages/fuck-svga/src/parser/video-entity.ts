@@ -23,6 +23,10 @@ export class VideoEntity implements Video {
    */
   public fps: number = 20;
   /**
+   * 是否可以编辑svga文件
+   */
+  public locked = false;
+  /**
    * svga 帧数
    */
   public frames: number = 0;
@@ -31,13 +35,9 @@ export class VideoEntity implements Video {
    */
   public images: RawImages = {};
   /**
-   * 是否可以编辑svga文件
-   */
-  public locked = false;
-  /**
    * svga 动态元素
    */
-  public dynamicElements: DynamicElements = {};
+  public dynamicElements: PlatformImages = {};
   /**
    * svga 关键帧信息
    */

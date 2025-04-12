@@ -33,7 +33,7 @@ function render(
   currentFrame: number,
   head: number,
   tail: number,
-  globalTransform?: GlobalTransform
+  globalTransform?: Transform
 ): void {
   const { sprites, dynamicElements } = videoEntity;
 
@@ -59,8 +59,8 @@ function drawSprite(
   sprite: VideoSprite,
   currentFrame: number,
   bitmap?: Bitmap,
-  dynamicElement?: DynamicElement,
-  globalTransform?: GlobalTransform
+  dynamicElement?: Bitmap,
+  globalTransform?: Transform
 ): void {
   const frame = sprite.frames[currentFrame];
 

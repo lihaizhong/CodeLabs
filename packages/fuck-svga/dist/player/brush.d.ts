@@ -28,7 +28,7 @@ export declare class Brush {
      */
     private model;
     private IM;
-    globalTransform?: GlobalTransform;
+    globalTransform?: Transform;
     /**
      *
      * @param mode
@@ -48,6 +48,11 @@ export declare class Brush {
      */
     register(selector: string, ofsSelector?: string, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
     /**
+     * 更新动态图片集
+     * @param images
+     */
+    updateDynamicImages(images: PlatformImages): void;
+    /**
      * 加载图片集
      * @param images 图片数据
      * @param filename 文件名称
@@ -64,7 +69,7 @@ export declare class Brush {
      * @returns
      */
     getImageData(): ImageData;
-    resize(contentMode: PLAYER_CONTENT_MODE, videoSize: ViewportRect): void;
+    resize(contentMode: PLAYER_CONTENT_MODE, videoSize: VideoSize): void;
     /**
      * 注册刷新屏幕的回调函数
      * @param cb
@@ -72,7 +77,6 @@ export declare class Brush {
     flush(cb: () => void): void;
     clearContainer: () => void;
     clearSecondary: () => void;
-    clearDynamicElements(images: DynamicElements): void;
     /**
      * 清理素材库
      */

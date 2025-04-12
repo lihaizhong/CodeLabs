@@ -45,7 +45,7 @@ export class Brush {
 
   private IM = new ImageManager();
 
-  public globalTransform?: GlobalTransform;
+  public globalTransform?: Transform;
 
   /**
    * 
@@ -198,6 +198,14 @@ export class Brush {
   }
 
   /**
+   * 更新动态图片集
+   * @param images 
+   */
+  public updateDynamicImages(images: PlatformImages) {
+    this.IM.updateDynamicMaterials(images);
+  }
+
+  /**
    * 加载图片集
    * @param images 图片数据
    * @param filename 文件名称
@@ -225,7 +233,7 @@ export class Brush {
 
   public resize(
     contentMode: PLAYER_CONTENT_MODE,
-    videoSize: ViewportRect
+    videoSize: VideoSize
   ): void {
     const { Y } = this;
     let scaleX = 1.0;
@@ -285,14 +293,6 @@ export class Brush {
   public clearContainer: () => void = noop;
 
   public clearSecondary: () => void = noop;
-
-  public clearDynamicElements(images: DynamicElements) {
-    Object.keys(images).forEach((key) => {
-      this.IM.appendCleanedImage(images[key])
-    });
-
-    this.IM.tidyUp();
-  }
 
   /**
    * 清理素材库
