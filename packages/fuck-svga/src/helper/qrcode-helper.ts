@@ -57,7 +57,7 @@ const calcCellSizeAndPadding = (moduleCount: number, size: number) => {
   };
 };
 
-export function generateImageFromCode(options: IQrCodeImgOptions) {
+export function generateImageBufferFromCode(options: IQrCodeImgOptions) {
   const { code, typeNumber, correctLevel, size, codeColor, backgroundColor } =
     parseOptions(options);
   let qr: QRCode;
@@ -104,5 +104,11 @@ export function generateImageFromCode(options: IQrCodeImgOptions) {
 
   png.flush();
 
-  return platform.decode.toDataURL(png.toBuffer());
+  return png.toBuffer();
+}
+
+export function generateImageFromCode(options: IQrCodeImgOptions) {
+  const buff = generateImageBufferFromCode(options);
+
+  return platform.decode.toDataURL(buff);
 }

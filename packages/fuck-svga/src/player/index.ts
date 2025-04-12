@@ -19,14 +19,14 @@ export class Player {
   private readonly config = new Config();
 
   /**
-   * 刷头实例
-   */
-  private brush = new Brush();
-
-  /**
    * 动画实例
    */
   private animator: Animator | null = null;
+
+  /**
+   * 刷头实例
+   */
+  public readonly brush = new Brush();
 
   // private isBeIntersection = true;
   // private intersectionObserver: IntersectionObserver | null = null
@@ -345,7 +345,11 @@ export class Player {
       tail = 0;
       this.onProcess?.(~~(percent * 100) / 100, latestFrame);
     };
+    animator!.onStart = () => {
+      entity!.locked = true;
+    };
     animator!.onEnd = () => {
+      entity!.locked = false;
       // 如果不保留最后一帧渲染，则清空画布
       if (fillMode === PLAYER_FILL_MODE.NONE) {
         brush.clearContainer();

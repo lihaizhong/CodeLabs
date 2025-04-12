@@ -1,3 +1,4 @@
+import { Brush } from "./brush";
 /**
  * SVGA 播放器
  */
@@ -12,13 +13,13 @@ export declare class Player {
      */
     private readonly config;
     /**
-     * 刷头实例
-     */
-    private brush;
-    /**
      * 动画实例
      */
     private animator;
+    /**
+     * 刷头实例
+     */
+    readonly brush: Brush;
     /**
      * 设置配置项
      * @param options 可配置项

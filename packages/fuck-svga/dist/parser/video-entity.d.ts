@@ -28,9 +28,9 @@ export declare class VideoEntity implements Video {
      */
     images: RawImages;
     /**
-     * svga 替代元素
+     * 是否可以编辑svga文件
      */
-    replaceElements: ReplaceElements;
+    locked: boolean;
     /**
      * svga 动态元素
      */

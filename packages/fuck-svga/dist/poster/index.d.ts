@@ -1,3 +1,4 @@
+import { Brush } from "../player/brush";
 export declare class Poster {
     /**
      * SVGA 元数据
@@ -15,7 +16,7 @@ export declare class Poster {
     /**
      * 刷头实例
      */
-    private brush;
+    readonly brush: Brush;
     constructor(width: number, height: number);
     /**
      * 设置配置项
@@ -38,34 +39,6 @@ export declare class Poster {
      * 结束绘画事件回调
      */
     onEnd?: PosterEventCallback;
-    /**
-     * 替换元素
-     * @param key
-     * @param element
-     * @returns
-     */
-    setReplaceElement(key: string, element: ReplaceElement): void;
-    /**
-     * 通过url替换元素
-     * @param key
-     * @param url
-     * @returns
-     */
-    setReplaceElementByUrl(key: string, url: string): Promise<void>;
-    /**
-     * 设置动态元素
-     * @param key
-     * @param element
-     * @returns
-     */
-    setDynamicElement(key: string, element: DynamicElement): void;
-    /**
-     * 通过url设置动态元素
-     * @param key
-     * @param url
-     * @returns
-     */
-    setDynamicElementByUrl(key: string, url: string): Promise<void>;
     /**
      * 绘制海报
      */

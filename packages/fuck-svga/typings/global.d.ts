@@ -191,17 +191,11 @@ interface VideoSprite {
   frames: IVideoFrame[];
 }
 
-type ReplaceElement =
+type DynamicElement =
   | PlatformImage
   | ImageBitmap
   | PlatformCanvas
   | PlatformOffscreenCanvas;
-
-interface ReplaceElements {
-  [key: string]: ReplaceElement;
-}
-
-type DynamicElement = ReplaceElement;
 
 interface DynamicElements {
   [key: string]: DynamicElement;
@@ -231,7 +225,7 @@ interface Video {
   fps: number;
   frames: number;
   images: RawImages;
-  replaceElements: ReplaceElements;
+  locked: boolean;
   dynamicElements: DynamicElements;
   sprites: VideoSprite[];
 }

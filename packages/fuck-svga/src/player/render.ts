@@ -35,13 +35,12 @@ function render(
   tail: number,
   globalTransform?: GlobalTransform
 ): void {
-  const { sprites, replaceElements, dynamicElements } = videoEntity;
+  const { sprites, dynamicElements } = videoEntity;
 
   for (let i = head; i < tail; i++) {
     const sprite = sprites[i];
     const { imageKey } = sprite;
     const bitmap = materials.get(imageKey);
-    const replaceElement = replaceElements[imageKey];
     const dynamicElement = dynamicElements[imageKey];
 
     drawSprite(
@@ -49,7 +48,6 @@ function render(
       sprite,
       currentFrame,
       bitmap,
-      replaceElement,
       dynamicElement,
       globalTransform
     );
@@ -61,7 +59,6 @@ function drawSprite(
   sprite: VideoSprite,
   currentFrame: number,
   bitmap?: Bitmap,
-  replaceElement?: ReplaceElement,
   dynamicElement?: DynamicElement,
   globalTransform?: GlobalTransform
 ): void {
@@ -103,7 +100,7 @@ function drawSprite(
       context.clip();
     }
     context.drawImage(
-      (replaceElement || bitmap) as unknown as CanvasImageSource,
+      bitmap as unknown as CanvasImageSource,
       0,
       0,
       frame.layout.width,

@@ -67,9 +67,9 @@ export class ImageManager {
       }
     });
 
-    await Promise.all<PlatformImage | ImageBitmap>(imageAwaits);
     this.images = imageIns;
     this.bitmaps = imageBitmapIns;
+    await Promise.all<PlatformImage | ImageBitmap>(imageAwaits);
   }
 
   /**

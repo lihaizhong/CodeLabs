@@ -28,4 +28,5 @@ export interface IQrCodeImgOptions {
      */
     backgroundColor?: string;
 }
-export declare function generateImageFromCode(options: IQrCodeImgOptions): any;
+export declare function generateImageBufferFromCode(options: IQrCodeImgOptions): any;
+export declare function generateImageFromCode(options: IQrCodeImgOptions): string;

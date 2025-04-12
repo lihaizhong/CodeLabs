@@ -1,4 +1,3 @@
-import { platform } from "../platform";
 import { getDataURLFromImageData } from "../helper";
 import { Brush } from "../player/brush";
 
@@ -22,7 +21,7 @@ export class Poster {
   /**
    * 刷头实例
    */
-  private brush: Brush;
+  public readonly brush: Brush;
 
   constructor(width: number, height: number) {
     this.brush = new Brush("poster", width, height);
@@ -50,6 +49,8 @@ export class Poster {
 
     if (typeof config.frame === 'number') {
       this.frame = config.frame;
+    } else {
+      this.frame = 0
     }
 
     return this.brush.register(config.container, '', component);
@@ -87,54 +88,6 @@ export class Poster {
    * 结束绘画事件回调
    */
   public onEnd?: PosterEventCallback;
-
-  /**
-   * 替换元素
-   * @param key
-   * @param element
-   * @returns 
-   */
-  public setReplaceElement(key: string, element: ReplaceElement): void {
-    if (!this.entity) return;
-
-    this.entity!.replaceElements[key] = element;
-  }
-
-  /**
-   * 通过url替换元素
-   * @param key
-   * @param url
-   * @returns 
-   */
-  public async setReplaceElementByUrl(key: string, url: string): Promise<void> {
-    if (!this.entity) return;
-
-    this.entity!.replaceElements[key] = await platform.image.load(this.brush, url, url);
-  }
-
-  /**
-   * 设置动态元素
-   * @param key
-   * @param element
-   * @returns 
-   */
-  public setDynamicElement(key: string, element: DynamicElement) {
-    if (!this.entity) return;
-
-    this.entity!.dynamicElements[key] = element;
-  }
-
-  /**
-   * 通过url设置动态元素
-   * @param key
-   * @param url
-   * @returns 
-   */
-  public async setDynamicElementByUrl(key: string, url: string): Promise<void> {
-    if (!this.entity) return;
-
-    this.entity!.dynamicElements[key] = await platform.image.load(this.brush, url, url);
-  }
 
   /**
    * 绘制海报
