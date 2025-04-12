@@ -71,7 +71,8 @@
     import { svgaSources, svgaLargeFiles, getOneAtRandom } from "../../utils/constants";
 
     const files = svgaLargeFiles
-    let parser, player
+    const parser = new Parser();
+    const player = new Player();
 
     Page({
       data: {
@@ -82,7 +83,7 @@
       bindEvents: {
         "#prevbtn:click": "handleSwitchPrev",
         "#nextbtn:click": "handleSwitchNext",
-        "#randbtn:click": "handleSwitchAtRandom"
+        // "#randbtn:click": "handleSwitchAtRandom"
       },
 
       observers: {
@@ -108,6 +109,8 @@
           prev = files.length - 1;
         }
 
+        player.setItem("playMode", "fallbacks");
+        player.setItem("fillMode", "forwards");
         this.setData({
           url: files[prev],
           current: prev,
@@ -122,6 +125,8 @@
           next = 0;
         }
 
+        player.setItem("playMode", "forwards");
+        player.setItem("fillMode", "backwards");
         this.setData({
           url: files[next],
           current: next,
@@ -136,7 +141,7 @@
 
           console.log(this.data.url, videoItem);
           await player.mount(videoItem);
-          showPopup("资源装载成功")
+          showPopup("资源装载成功");
           player.start();
           showPopup("");
         } catch (ex) {
@@ -146,8 +151,6 @@
       },
 
       async onLoad() {
-        parser = new Parser();
-        player = new Player();
         await player.setConfig({
           container: "#palette",
           loop: 1,
@@ -196,7 +199,7 @@
       <button id="prevbtn" class="foot-btn weui-btn weui-btn_primary">上一张</button>
     </div>
     <div class="weui-grid">
-      <button id="randbtn" class="foot-btn weui-btn weui-btn_primary">试一试</button>
+      <!-- <button id="randbtn" class="foot-btn weui-btn weui-btn_primary">试一试</button> -->
     </div>
     <div class="weui-grid">
       <button id="nextbtn" class="foot-btn weui-btn weui-btn_primary">下一张</button>

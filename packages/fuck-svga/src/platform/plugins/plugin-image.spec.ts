@@ -17,7 +17,7 @@ describe("pluginImage 定义", () => {
 describe("pluginImage 插件", () => {
   describe("H5 环境", () => {
     const platform = { global: initialPlatformGlobal.h5 };
-  
+
     it("检查插件是否正常安装", () => {
       const image = pluginImage.install.call(platform);
 
@@ -29,25 +29,27 @@ describe("pluginImage 插件", () => {
     });
 
     it("检查 isImage 是否正常工作", () => {
-      
-    })
+      const image = pluginImage.install.call(platform);
+
+      expect(image.isImage(new Image())).toBeTruthy();
+      expect(image.isImage({ src: "", width: 0, height: 0 })).toBeFalsy();
+    });
 
     it("检查 isImageBitmap 是否正常工作", () => {
-      
-    })
+      const image = pluginImage.install.call(platform);
 
-    it("检查 create 是否正常工作", () => {
-      
-    })
+      expect(image.isImageBitmap()).toBeTruthy();
+      expect(image.isImage(new Image())).toBeFalsy();
+    });
 
-    it("检查 load 是否正常工作", () => {
-      
-    })
+    it("检查 create 是否正常工作", () => {});
+
+    it("检查 load 是否正常工作", () => {});
   });
-  
+
   describe("小程序(weapp, alipay, tt) 环境", () => {
     const platform = { global: initialPlatformGlobal.weapp };
-  
+
     it("检查插件是否正常安装", () => {
       const image = pluginImage.install.call(platform);
 
@@ -58,20 +60,12 @@ describe("pluginImage 插件", () => {
       expect(typeof image.load).toBe("function");
     });
 
-    it("检查 isImage 是否正常工作", () => {
-      
-    })
+    it("检查 isImage 是否正常工作", () => {});
 
-    it("检查 isImageBitmap 是否正常工作", () => {
-      
-    })
+    it("检查 isImageBitmap 是否正常工作", () => {});
 
-    it("检查 create 是否正常工作", () => {
-      
-    })
+    it("检查 create 是否正常工作", () => {});
 
-    it("检查 load 是否正常工作", () => {
-      
-    })
-  });  
-})
+    it("检查 load 是否正常工作", () => {});
+  });
+});

@@ -1,7 +1,6 @@
 declare const _default: {
-    count: number;
     label(label: string): void;
-    time(label: string, callback: () => unknown): Promise<unknown>;
+    time<T extends unknown>(label: string, callback: () => Promise<T> | T): Promise<T>;
     line(size?: number): void;
     log(...message: unknown[]): void;
 };

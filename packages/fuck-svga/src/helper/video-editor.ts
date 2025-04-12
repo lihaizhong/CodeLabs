@@ -23,7 +23,7 @@ export class VideoEditor {
         this.brush,
         value,
         this.entity.filename,
-        key
+        `dynamic.${key}`
       );
     } else {
       this.entity.images[key] = value;

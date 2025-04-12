@@ -40,7 +40,7 @@ export class Config {
 
     if (
       config.fillMode &&
-      [PLAYER_FILL_MODE.FORWARDS, PLAYER_FILL_MODE.BACKWARDS].includes(
+      [PLAYER_FILL_MODE.FORWARDS, PLAYER_FILL_MODE.BACKWARDS, PLAYER_FILL_MODE.NONE].includes(
         config.fillMode
       )
     ) {

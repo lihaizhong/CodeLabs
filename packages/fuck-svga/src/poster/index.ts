@@ -66,7 +66,7 @@ export class Poster {
    * @param currFrame
    * @returns
    */
-  public mount(videoEntity: Video): Promise<void | void[]> {
+  public mount(videoEntity: Video): Promise<void[]> {
     if (!videoEntity) {
       throw new Error("videoEntity undefined");
     }

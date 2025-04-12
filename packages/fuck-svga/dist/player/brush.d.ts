@@ -58,7 +58,7 @@ export declare class Brush {
      * @param filename 文件名称
      * @returns
      */
-    loadImages(images: RawImages, filename: string): Promise<void>;
+    loadImages(images: RawImages, filename: string): Promise<void[]>;
     /**
      * 创建图片标签
      * @returns

@@ -1,24 +1,84 @@
-const stopwatch = {
-  time(label: string): void {
-    console.time?.(label);
-  },
-  timeEnd(label: string): void {
-    console.timeEnd?.(label);
+const badge = "【benchmark】";
+
+let env: string;
+if (typeof window !== "undefined") {
+  env = "h5";
+} else if (typeof tt !== "undefined") {
+  env = "tt";
+} else if (typeof my !== "undefined") {
+  env = "alipay";
+} else if (typeof wx !== "undefined") {
+  env = "weapp";
+} else {
+  env = "unknown";
+}
+
+let sys: string;
+if (env === "alipay") {
+  sys = (my.getDeviceBaseInfo().platform as string).toLocaleLowerCase();
+} else if (env === "tt") {
+  sys = (tt.getDeviceInfoSync().platform as string).toLocaleLowerCase();
+} else if (env === "weapp") {
+  // @ts-ignore
+  sys = (wx.getDeviceInfo().platform as string).toLocaleLowerCase();
+} else {
+  sys = "unknown";
+}
+
+let now: () => number;
+if (env === "h5") {
+  now = () => performance.now() / 1000;
+} else if (env === "weapp") {
+  const perf = wx.getPerformance();
+
+  // @ts-ignore
+  now = () => perf.now() / 1000;
+} else if (env === "alipay") {
+  const perf = my.getPerformance();
+
+  now = () => perf.now() / 1000;
+} else {
+  now = () => Date.now();
+}
+
+class Stopwatch {
+  private label: string = '';
+
+  private startTime: number = 0;
+
+  private readonly isRealMachine = ['ios', 'android', 'openharmony'].includes(sys);
+
+  start(label: string) {
+    if (this.isRealMachine) {
+      this.label = label;
+      this.startTime = now();
+    } else {
+      console.time(label);
+    }
   }
-};
+
+  stop(label: string) {
+    if (this.isRealMachine) {
+      console.log(`${this.label}: ${now() - this.startTime}`);
+    } else {
+      console.timeEnd(label);
+    }
+  }
+}
 
 export default {
-  count: 20,
   label(label: string) {
-    console.log(label);
+    console.log(badge, label);
   },
-  async time(
+  async time<T extends any>(
     label: string,
-    callback: () => unknown
-  ): Promise<unknown> {
-    stopwatch.time(label);
+    callback: () => Promise<T> | T
+  ): Promise<T> {
+    const stopwatch = new Stopwatch();
+
+    stopwatch.start(label);
     const result = await callback();
-    stopwatch.timeEnd(label);
+    stopwatch.stop(label);
 
     return result;
   },
@@ -26,6 +86,6 @@ export default {
     console.log("-".repeat(size));
   },
   log(...message: unknown[]) {
-    console.log("【benchmark】", ...message);
+    console.log(badge, ...message);
   },
 };

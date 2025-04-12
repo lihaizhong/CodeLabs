@@ -44,7 +44,7 @@ export declare class Player {
      * @param videoEntity SVGA 数据源
      * @returns Promise<void>
      */
-    mount(videoEntity: Video): Promise<void | void[]>;
+    mount(videoEntity: Video): Promise<void[]>;
     /**
      * 开始播放事件回调
      * @param frame

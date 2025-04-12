@@ -1,3 +1,4 @@
+import benchmark from "../benchmark";
 import { platform } from "../platform";
 import { Brush } from "../player/brush";
 
@@ -58,29 +59,31 @@ export class ImageManager {
    * @param filename 文件名称
    * @returns
    */
-  public async loadImages(
+  public loadImages(
     images: RawImages | PlatformImages,
     brush: Brush,
     filename: string
-  ): Promise<void> {
-    const { load, isImage } = platform.image;
-    const imageAwaits: Promise<any>[] = [];
+  ): Promise<void[]> {
+    return benchmark.time<void[]>("loadImages", () => {
+      const { load, isImage } = platform.image;
+      const imageAwaits: Promise<void>[] = [];
 
-    Object.keys(images).forEach((key: string) => {
-      const image = images[key];
-
-      if (isImage(image)) {
-        this.materials.set(key, image as unknown as PlatformImage);
-      } else {
-        const p = load(brush, image as RawImage, filename, key).then((img) =>
-          this.materials.set(key, img)
-        );
-
-        imageAwaits.push(p);
-      }
+      Object.keys(images).forEach((key: string) => {
+        const image = images[key];
+  
+        if (isImage(image)) {
+          this.materials.set(key, image as unknown as PlatformImage);
+        } else {
+          const p = load(brush, image as RawImage, filename, key).then((img) => {
+            this.materials.set(key, img)
+          });
+  
+          imageAwaits.push(p);
+        }
+      });
+  
+      return Promise.all<void>(imageAwaits);
     });
-
-    await Promise.all<PlatformImage | ImageBitmap>(imageAwaits);
   }
 
   /**

@@ -22,16 +22,12 @@ export default definePlugin<"image">({
     function loadImage(img: PlatformImage, src: string) {
       return new Promise<PlatformImage>((resolve, reject) => {
         img.onload = () => {
+          resolve(img);
           if (cachedImages.has(src)) {
             local!
               .remove(src)
               .catch(noop)
-              .then(() => {
-                cachedImages.delete(src);
-                resolve(img);
-              });
-          } else {
-            resolve(img);
+              .then(() => cachedImages.delete(src));
           }
         };
         img.onerror = () =>
@@ -113,7 +109,7 @@ export default definePlugin<"image">({
           (data as WechatMiniprogram.Image).width !== undefined &&
           (data as WechatMiniprogram.Image).height !== undefined
         ),
-      isImageBitmap: (_data: unknown) => false,
+      isImageBitmap: (_: unknown) => false,
       create: createImage,
       load: async (
         canvas: FuckSvga.PlatformCreateImageInstance,

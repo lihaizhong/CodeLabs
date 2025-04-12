@@ -211,7 +211,7 @@ export class Brush {
    * @param filename 文件名称
    * @returns
    */
-  public loadImages(images: RawImages, filename: string): Promise<void> {
+  public loadImages(images: RawImages, filename: string): Promise<void[]> {
     return this.IM.loadImages(images, this, filename);
   }
 

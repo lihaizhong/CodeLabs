@@ -19,12 +19,12 @@ export default definePlugin<"local">({
         data: ArrayBuffer,
         filePath: string
       ) => {
-        benchmark.log(`write file: ${filePath}`);
         return new Promise<string>((resolve, reject) => {
           fsm!.writeFile({
             filePath,
             data,
             success() {
+              benchmark.log(`write success: ${filePath}`);
               resolve(filePath);
             },
             fail(err: unknown) {
@@ -38,8 +38,14 @@ export default definePlugin<"local">({
         return new Promise((resolve, reject) => {
           fsm!.readFile({
             filePath,
-            success: (res: any) => resolve(res.data as ArrayBuffer),
-            fail: reject,
+            success: (res: any) => {
+              benchmark.log(`read success: ${filePath}`);
+              resolve(res.data as ArrayBuffer);
+            },
+            fail: (err: unknown) => {
+              benchmark.log(`read fail: ${filePath}`, err);
+              reject(err);
+            },
           });
         });
       },
@@ -47,7 +53,10 @@ export default definePlugin<"local">({
         return new Promise((resolve) => {
           fsm!.unlink({
             filePath,
-            success: () => resolve(filePath),
+            success: () => {
+              benchmark.log(`remove success: ${filePath}`);
+              resolve(filePath);
+            },
             fail(err: unknown) {
               benchmark.log(`remove fail: ${filePath}`, err);
               resolve(filePath);

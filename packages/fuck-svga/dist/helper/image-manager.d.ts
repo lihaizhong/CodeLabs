@@ -33,7 +33,7 @@ export declare class ImageManager {
      * @param filename 文件名称
      * @returns
      */
-    loadImages(images: RawImages | PlatformImages, brush: Brush, filename: string): Promise<void>;
+    loadImages(images: RawImages | PlatformImages, brush: Brush, filename: string): Promise<void[]>;
     /**
      * 创建图片标签
      * @returns

@@ -30,7 +30,7 @@ export declare class Poster {
      * @param currFrame
      * @returns
      */
-    mount(videoEntity: Video): Promise<void | void[]>;
+    mount(videoEntity: Video): Promise<void[]>;
     /**
      * 开始绘画事件回调
      */
