@@ -286,6 +286,14 @@ export class Brush {
 
   public clearSecondary: () => void = noop;
 
+  public clearDynamicElements(images: DynamicElements) {
+    Object.keys(images).forEach((key) => {
+      this.IM.appendCleanedImage(images[key])
+    });
+
+    this.IM.tidyUp();
+  }
+
   /**
    * 清理素材库
    */

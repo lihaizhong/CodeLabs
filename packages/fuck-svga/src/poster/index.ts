@@ -73,8 +73,10 @@ export class Poster {
 
     const { images, filename } = videoEntity;
 
-    this.entity = videoEntity;
+    this.brush.clearContainer();
+    this.brush.clearDynamicElements(this.entity!.dynamicElements);
     this.brush.clearMaterials();
+    this.entity = videoEntity;
 
     return this.brush.loadImages(images, filename);
   }
@@ -98,7 +100,6 @@ export class Poster {
     const { brush, entity, contentMode, frame, onStart, onEnd } = this;
 
     onStart?.();
-    brush.clearContainer();
     brush.resize(contentMode, entity!.size);
     brush.draw(entity!, frame, 0, entity!.sprites.length);
     onEnd?.();
@@ -113,17 +114,10 @@ export class Poster {
   }
 
   /**
-   * 清理海报
-   */
-  public clear(): void {
-    this.brush.clearContainer();
-    this.brush.clearMaterials();
-  }
-
-  /**
    * 销毁海报
    */
   public destroy(): void {
+    this.brush.clearDynamicElements(this.entity!.dynamicElements);
     this.brush.destroy();
     this.entity = undefined;
   }

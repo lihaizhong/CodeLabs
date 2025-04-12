@@ -2,13 +2,11 @@ import { platform } from "../platform";
 import { Brush } from "../player/brush";
 
 export class ImageManager {
+  /**
+   * 待复用的 img 标签
+   */
   // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
   private images: PlatformImage[] = [];
-
-  /**
-   * 图片bitmap
-   */
-  private bitmaps: ImageBitmap[] = [];
 
   /**
    * 素材
@@ -34,41 +32,23 @@ export class ImageManager {
     brush: Brush,
     filename: string
   ): Promise<void> {
-    const { env } = platform.global;
-    const { load, isImage, isImageBitmap } = platform.image;
-    const imageAwaits: Promise<PlatformImage | ImageBitmap>[] = [];
-    const imageIns: PlatformImage[] = []
-    const imageBitmapIns: ImageBitmap[] = []
+    const { load, isImage } = platform.image;
+    const imageAwaits: Promise<any>[] = [];
 
     Object.keys(images).forEach((key: string) => {
       const image = images[key];
 
       if (isImage(image)) {
-        imageIns.push(image as PlatformImage);
+        this.materials.set(key, image as unknown as PlatformImage);
       } else {
-        const p = load(brush, image as RawImage, filename, key).then(
-          (img) => {
-            this.materials.set(key, img);
-
-            // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
-            if (env !== "alipay") {
-              if (isImage(img)) {
-                imageIns.push(img as PlatformImage);
-              } else if (isImageBitmap(img)) {
-                imageBitmapIns.push(img as ImageBitmap);
-              }
-            }
-
-            return img;
-          }
+        const p = load(brush, image as RawImage, filename, key).then((img) =>
+          this.materials.set(key, img)
         );
 
         imageAwaits.push(p);
       }
     });
 
-    this.images = imageIns;
-    this.bitmaps = imageBitmapIns;
     await Promise.all<PlatformImage | ImageBitmap>(imageAwaits);
   }
 
@@ -76,28 +56,51 @@ export class ImageManager {
    * 创建图片标签
    * @returns
    */
-  public createImage(canvas: FuckSvga.PlatformCreateImageInstance): PlatformImage {
+  public createImage(
+    canvas: FuckSvga.PlatformCreateImageInstance
+  ): PlatformImage {
     return this.images.shift() || platform.image.create(canvas);
+  }
+
+  /**
+   * 释放图片标签
+   * @param image
+   */
+  public appendCleanedImage(image: Bitmap | PlatformCanvas) {
+    const { isImage, isImageBitmap } = platform.image;
+
+    if (isImage(image)) {
+      (image as unknown as PlatformImage).onload = null;
+      (image as unknown as PlatformImage).onerror = null;
+      (image as unknown as PlatformImage).src = "";
+
+      this.images.push(image as PlatformImage);
+    } else if (isImageBitmap(image)) {
+      (image as unknown as ImageBitmap).close();
+    }
+  }
+
+  /**
+   * 清理重复的图片标签
+   */
+  public tidyUp() {
+    this.images = Array.from(new Set(this.images));
   }
 
   /**
    * 清理素材
    */
   public clear() {
+    const { env } = platform.global;
+
+    // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
+    if (env !== "alipay") {
+      this.materials.forEach((value) => {
+        this.appendCleanedImage(value);
+      });
+    }
+
     this.materials.clear();
-
-    for (let i = 0; i < this.images.length; i++) {
-      const img = this.images[i];
-
-      img.onload = null;
-      img.onerror = null;
-      img.src = "";
-    }
-
-    for (let i = 0; i < this.bitmaps.length; i++) {
-      this.bitmaps[i].close();
-    }
-
-    this.bitmaps = [];
+    this.tidyUp();
   }
 }

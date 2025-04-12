@@ -103,9 +103,10 @@ export class Player {
     const { images, filename } = videoEntity;
 
     this.animator!.stop();
-    this.entity = videoEntity;
+    this.brush.clearDynamicElements(this.entity!.dynamicElements);
     this.brush.clearSecondary();
     this.brush.clearMaterials();
+    this.entity = videoEntity;
 
     return this.brush.loadImages(images, filename);
   }
@@ -182,6 +183,7 @@ export class Player {
    */
   public destroy(): void {
     this.animator!.stop();
+    this.brush.clearDynamicElements(this.entity!.dynamicElements);
     this.brush.destroy();
     this.animator = null;
     this.entity = undefined;
