@@ -4,6 +4,9 @@ export declare class ImageManager {
      * 待复用的 img 标签
      */
     private images;
+    /**
+     * 动态素材
+     */
     private dynamicMaterials;
     /**
      * 素材
@@ -20,6 +23,11 @@ export declare class ImageManager {
      */
     getMaterials(): Map<string, Bitmap>;
     /**
+     * 获取动态图片素材
+     * @returns
+     */
+    getDynamicMaterials(): Map<string, Bitmap>;
+    /**
      * 加载图片集
      * @param images 图片数据
      * @param filename 文件名称
@@ -31,6 +39,10 @@ export declare class ImageManager {
      * @returns
      */
     createImage(canvas: FuckSvga.PlatformCreateImageInstance): PlatformImage;
+    /**
+     * 更新动态素材
+     * @param images
+     */
     updateDynamicMaterials(images: PlatformImages): void;
     /**
      * 清理重复的图片标签
