@@ -8,6 +8,9 @@ export class ImageManager {
   // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
   private images: PlatformImage[] = [];
 
+  /**
+   * 动态素材
+   */
   private dynamicMaterials: Map<string, Bitmap> = new Map();
 
   /**
@@ -82,6 +85,10 @@ export class ImageManager {
     return this.images.shift() || platform.image.create(canvas);
   }
 
+  /**
+   * 更新动态素材
+   * @param images 
+   */
   public updateDynamicMaterials(images: PlatformImages) {
     this.dynamicMaterials = new Map(Object.entries(images))
   }
