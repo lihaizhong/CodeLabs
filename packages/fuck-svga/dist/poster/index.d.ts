@@ -49,10 +49,6 @@ export declare class Poster {
      */
     toDataURL(): string;
     /**
-     * 清理海报
-     */
-    clear(): void;
-    /**
      * 销毁海报
      */
     destroy(): void;

@@ -72,6 +72,7 @@ export declare class Brush {
     flush(cb: () => void): void;
     clearContainer: () => void;
     clearSecondary: () => void;
+    clearDynamicElements(images: DynamicElements): void;
     /**
      * 清理素材库
      */

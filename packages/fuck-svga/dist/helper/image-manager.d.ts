@@ -1,10 +1,9 @@
 import { Brush } from "../player/brush";
 export declare class ImageManager {
-    private images;
     /**
-     * 图片bitmap
+     * 待复用的 img 标签
      */
-    private bitmaps;
+    private images;
     /**
      * 素材
      */
@@ -26,6 +25,15 @@ export declare class ImageManager {
      * @returns
      */
     createImage(canvas: FuckSvga.PlatformCreateImageInstance): PlatformImage;
+    /**
+     * 释放图片标签
+     * @param image
+     */
+    appendCleanedImage(image: Bitmap | PlatformCanvas): void;
+    /**
+     * 清理重复的图片标签
+     */
+    tidyUp(): void;
     /**
      * 清理素材
      */
