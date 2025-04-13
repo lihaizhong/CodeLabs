@@ -16,9 +16,7 @@
     "es"
   ],
   "scripts": {
-    "build": "rm -rf ./lib ./types ./es && tsc --build tsconfig.es.json && tsc --build tsconfig.lib.json",
-    "test": "jest",
-    "coverage": "jest --coverage"
+    "build": "rm -rf ./lib ./types ./es && tsc --build tsconfig.es.json && tsc --build tsconfig.lib.json"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",

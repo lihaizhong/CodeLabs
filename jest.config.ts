@@ -9,11 +9,6 @@ export default async (): Promise<Config> => {
 
     // Indicates which provider should be used to instrument code for coverage
     coverageProvider: "v8",
-
-    // A map from regular expressions to paths to transformers
-    transform: {
-      "^.+\\.ts$": "ts-jest",
-    },
     
     // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
     testPathIgnorePatterns: [
@@ -40,7 +35,6 @@ export default async (): Promise<Config> => {
 
         // A list of paths to directories that Jest should use to search for files in
         roots: [
-          "<rootDir>/src/extensions/png-encoder",
           "<rootDir>/src/helper",
           "<rootDir>/src/parser",
           "<rootDir>/src/platform",
@@ -49,10 +43,20 @@ export default async (): Promise<Config> => {
         ],
 
         // The paths to modules that run some code to configure or set up the testing environment before each test
-        setupFiles: ["<rootDir>/src/__tests__/setup.ts"],
+        setupFiles: ["<rootDir>/__tests__/setup.ts"],
 
         // A list of paths to modules that run some code to configure or set up the testing framework before each test
-        setupFilesAfterEnv: ["<rootDir>/src/__tests__/setupAfterEnv.ts"],
+        setupFilesAfterEnv: ["<rootDir>/__tests__/setupAfterEnv.ts"],
+
+        // A map from regular expressions to paths to transformers
+        transform: {
+          "^.+\\.ts$": [
+            "ts-jest",
+            {
+              tsconfig: "<rootDir>/tsconfig.json",
+            }
+          ],
+        },
 
         // The glob patterns Jest uses to detect test files
         testMatch: [

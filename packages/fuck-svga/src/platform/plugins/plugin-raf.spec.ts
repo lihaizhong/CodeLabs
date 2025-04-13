@@ -1,4 +1,4 @@
-import { initialPlatformGlobal } from "../../__tests__/initial";
+import { initialPlatformGlobal } from "../../../__tests__/initial";
 import pluginRaf from "./plugin-raf";
 
 jest.useFakeTimers();

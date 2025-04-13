@@ -8,8 +8,7 @@
   "scripts": {
     "build": "rimraf -rf dist && rollup -c",
     "compiler": "pbjs -t static-module -w es6 -o protos/svga.js protos/svga.proto",
-    "test": "jest",
-    "coverage": "jest --coverage"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "lihzsky",
   "license": "ISC",

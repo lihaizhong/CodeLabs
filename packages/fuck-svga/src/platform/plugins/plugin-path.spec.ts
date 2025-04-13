@@ -1,4 +1,4 @@
-import { initialPlatformGlobal } from "../../__tests__/initial";
+import { initialPlatformGlobal } from "../../../__tests__/initial";
 import pluginPath from "./plugin-path";
 
 describe("pluginPath 定义", () => {

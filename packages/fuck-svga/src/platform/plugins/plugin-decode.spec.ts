@@ -1,7 +1,9 @@
-import { initialPlatformGlobal } from "../../__tests__/initial";
+import { initialPlatformGlobal } from "../../../__tests__/initial";
 import pluginDecode from "./plugin-decode";
 
-jest.mock("../../extensions/protobuf", () => ({ utf8: jest.fn(() => "mocked utf8 data") }));
+jest.mock("../../extensions/protobuf", () => ({
+  utf8: jest.fn(() => "mocked utf8 data")
+}));
 
 describe("pluginDecode 定义", () => {
   it("decode 是否被定义", () => {

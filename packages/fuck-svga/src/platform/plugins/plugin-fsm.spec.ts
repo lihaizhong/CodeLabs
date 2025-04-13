@@ -1,4 +1,4 @@
-import { initialPlatformGlobal } from "../../__tests__/initial";
+import { initialPlatformGlobal } from "../../../__tests__/initial";
 import pluginFsm from "./plugin-fsm";
 
 describe("pluginFsm 定义", () => {

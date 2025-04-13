@@ -1,4 +1,4 @@
-import { initialPlatformGlobal } from "../../__tests__/initial";
+import { initialPlatformGlobal } from "../../../__tests__/initial";
 import pluginOfsCanvas from "./plugin-ofs-canvas";
 
 describe("pluginOfsCanvas 定义", () => {

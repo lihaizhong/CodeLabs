@@ -1,5 +1,5 @@
 // 过滤 benchmark 模块
-jest.mock('../benchmark', () => {
+jest.mock('../src/benchmark', () => {
   const noop = () => {};
 
   return {
