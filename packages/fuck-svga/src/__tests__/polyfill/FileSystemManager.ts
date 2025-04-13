@@ -1,6 +1,6 @@
 export const fileSystemManager = jest.fn(() => ({
-  access: jest.fn((options) => {}),
-  writeFile: jest.fn((options) => {}),
-  readFile: jest.fn((options) => {}),
-  removeFile: jest.fn((options) => {}),
+  access: jest.fn(() => {}),
+  writeFile: jest.fn(() => {}),
+  readFile: jest.fn(() => {}),
+  removeFile: jest.fn(() => {}),
 }));

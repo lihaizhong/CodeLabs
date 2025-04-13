@@ -1,5 +1,6 @@
 const badge = "【benchmark】";
 
+// 检查环境
 let env: string;
 if (typeof window !== "undefined") {
   env = "h5";
@@ -13,6 +14,7 @@ if (typeof window !== "undefined") {
   env = "unknown";
 }
 
+// 检查系统
 let sys: string;
 if (env === "alipay") {
   sys = (my.getDeviceBaseInfo().platform as string).toLocaleLowerCase();
@@ -25,6 +27,7 @@ if (env === "alipay") {
   sys = "unknown";
 }
 
+// 检查时间工具
 let now: () => number;
 if (env === "h5") {
   now = () => performance.now() / 1000;
