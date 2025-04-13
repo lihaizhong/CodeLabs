@@ -60,9 +60,18 @@ describe("pluginImage 插件", () => {
       expect(typeof image.load).toBe("function");
     });
 
-    it("检查 isImage 是否正常工作", () => {});
+    it("检查 isImage 是否正常工作", () => {
+      const image = pluginImage.install.call(platform);
 
-    it("检查 isImageBitmap 是否正常工作", () => {});
+      expect(image.isImage("")).toBeFalsy();
+      expect(image.isImage({ src: "", width: 0, height: 0 })).toBeTruthy();
+    });
+
+    it("检查 isImageBitmap 是否正常工作", () => {
+      const image = pluginImage.install.call(platform);
+
+      expect(image.isImageBitmap(new Image())).toBeFalsy();
+    });
 
     it("检查 create 是否正常工作", () => {});
 
