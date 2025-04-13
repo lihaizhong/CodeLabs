@@ -1,4 +1,4 @@
-import { initialPlatformGlobal } from "../../../__tests__/initial";
+import { initialPlatformGlobal } from "../../../__tests__/mocks";
 import pluginRaf from "./plugin-raf";
 
 jest.useFakeTimers();
@@ -18,7 +18,7 @@ describe("pluginRaf 定义", () => {
 
 describe("pluginRaf 插件", () => {
   describe("H5 环境", () => {
-    const platform = { global: initialPlatformGlobal.h5 };
+    const platform = { global: initialPlatformGlobal("h5") };
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginRaf.install.call(platform)).toBe("function");
@@ -26,7 +26,7 @@ describe("pluginRaf 插件", () => {
   });
 
   describe("小程序(weapp, alipay, tt) 环境", () => {
-    const platform = { global: initialPlatformGlobal.weapp };
+    const platform = { global: initialPlatformGlobal("weapp") };
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginRaf.install.call(platform)).toBe("function");

@@ -1,4 +1,4 @@
-import { initialPlatformGlobal } from "../../../__tests__/initial";
+import { initialPlatformGlobal } from "../../../__tests__/mocks";
 import pluginPath from "./plugin-path";
 
 describe("pluginPath 定义", () => {
@@ -16,7 +16,7 @@ describe("pluginPath 定义", () => {
 
 describe("pluginPath 插件", () => {
   describe("H5 环境", () => {
-    const platform = { global: initialPlatformGlobal.h5 };
+    const platform = { global: initialPlatformGlobal("h5") };
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginPath.install.call(platform)).toBe("object");
@@ -24,7 +24,7 @@ describe("pluginPath 插件", () => {
   });
 
   describe("小程序(weapp, alipay) 环境", () => {
-    const platform = { global: initialPlatformGlobal.weapp };
+    const platform = { global: initialPlatformGlobal("weapp") };
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginPath.install.call(platform)).toBe("object");
@@ -32,7 +32,7 @@ describe("pluginPath 插件", () => {
   })
 
   describe("小程序(tt) 环境", () => {
-    const platform = { global: initialPlatformGlobal.tt };
+    const platform = { global: initialPlatformGlobal("tt") };
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginPath.install.call(platform)).toBe("object");

@@ -1,4 +1,4 @@
-import { initialPlatformGlobal } from "../../../__tests__/initial";
+import { initialPlatformGlobal } from "../../../__tests__/mocks";
 import pluginFsm from "./plugin-fsm";
 
 describe("pluginFsm 定义", () => {
@@ -20,7 +20,7 @@ describe("pluginFsm 插件", () => {
   });
 
   describe("H5 环境", () => {
-    const platform = { global: initialPlatformGlobal.h5 };
+    const platform = { global: initialPlatformGlobal("h5") };
 
     it("检查插件是否正常安装", () => {
       expect(pluginFsm.install.call(platform)).toBeNull();
@@ -28,7 +28,7 @@ describe("pluginFsm 插件", () => {
   });
 
   describe("小程序(weapp, alipay, tt) 环境", () => {
-    const platform = { global: initialPlatformGlobal.weapp };
+    const platform = { global: initialPlatformGlobal("weapp") };
 
     it("检查插件是否正常安装", () => {
       const fsm = pluginFsm.install.call(platform);

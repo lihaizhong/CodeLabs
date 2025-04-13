@@ -1,4 +1,4 @@
-import { initialPlatformGlobal } from "../../../__tests__/initial";
+import { initialPlatformGlobal } from "../../../__tests__/mocks";
 import pluginCanvas from "./plugin-canvas";
 
 describe("pluginCanvas 定义", () => {
@@ -40,10 +40,10 @@ describe("pluginCanvas 插件", () => {
     });
 
     it("检查插件是否正常安装", () => {
-      const platform = { global: initialPlatformGlobal.h5 };
+      const platform = { global: initialPlatformGlobal("h5") };
       const getCanvas = pluginCanvas.install.call(platform);
       const getCanvasForWeapp = pluginCanvas.install.call({
-        global: initialPlatformGlobal.weapp,
+        global: initialPlatformGlobal("weapp"),
       });
 
       expect(typeof getCanvas).toBe("function");
@@ -51,7 +51,7 @@ describe("pluginCanvas 插件", () => {
     });
 
     it("getCanvas 调用成功", () => {
-      const platform = { global: initialPlatformGlobal.h5 };
+      const platform = { global: initialPlatformGlobal("h5") };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -63,7 +63,7 @@ describe("pluginCanvas 插件", () => {
     });
 
     it("getCanvas 调用失败", () => {
-      const platform = { global: initialPlatformGlobal.h5 };
+      const platform = { global: initialPlatformGlobal("h5") };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -72,7 +72,7 @@ describe("pluginCanvas 插件", () => {
     });
 
     it("canvas 尺寸", async () => {
-      const platform = { global: initialPlatformGlobal.h5 };
+      const platform = { global: initialPlatformGlobal("h5") };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -85,7 +85,7 @@ describe("pluginCanvas 插件", () => {
     });
 
     it("canvas 尺寸超出限制：常规", async () => {
-      const platform = { global: initialPlatformGlobal.h5 };
+      const platform = { global: initialPlatformGlobal("h5") };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -119,16 +119,16 @@ describe("pluginCanvas 插件", () => {
     }
 
     it("检查插件安装是否正常安装", () => {
-      const platform = { global: initialPlatformGlobal.weapp };
+      const platform = { global: initialPlatformGlobal("weapp") };
       const getCanvas = pluginCanvas.install.call(platform);
       const getCanvasForH5 = pluginCanvas.install.call({
-        global: initialPlatformGlobal.h5,
+        global: initialPlatformGlobal("h5"),
       });
       const getCanvasForAlipay = pluginCanvas.install.call({
-        global: initialPlatformGlobal.alipay,
+        global: initialPlatformGlobal("alipay"),
       });
       const getCanvasForTT = pluginCanvas.install.call({
-        global: initialPlatformGlobal.tt,
+        global: initialPlatformGlobal("tt"),
       });
 
       expect(typeof getCanvas).toBe("function");
@@ -138,7 +138,7 @@ describe("pluginCanvas 插件", () => {
     });
 
     it("getCanvas 调用成功", () => {
-      const platform = { global: initialPlatformGlobal.weapp };
+      const platform = { global: initialPlatformGlobal("weapp") };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -159,7 +159,7 @@ describe("pluginCanvas 插件", () => {
     });
 
     it("getCanvas 调用失败", () => {
-      const platform = { global: initialPlatformGlobal.weapp };
+      const platform = { global: initialPlatformGlobal("weapp") };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -177,7 +177,7 @@ describe("pluginCanvas 插件", () => {
     });
 
     it("canvas 尺寸", async () => {
-      const platform = { global: initialPlatformGlobal.weapp };
+      const platform = { global: initialPlatformGlobal("weapp") };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -200,7 +200,7 @@ describe("pluginCanvas 插件", () => {
 
     describe("小程序 canvas 尺寸超出: 微信下程序最大不能超过 1365 * 1365", () => {
       it("微信小程序 canvas 尺寸超出: 宽度 > 高度", async () => {
-        const platform = { global: initialPlatformGlobal.weapp };
+        const platform = { global: initialPlatformGlobal("weapp") };
         const getCanvas = pluginCanvas.install.call(platform);
         const MAX_SIZE = 1365;
   
@@ -223,7 +223,7 @@ describe("pluginCanvas 插件", () => {
       });
 
       it("微信小程序 canvas 尺寸超出: 高度 > 宽度", async () => {
-        const platform = { global: initialPlatformGlobal.weapp };
+        const platform = { global: initialPlatformGlobal("weapp") };
         const getCanvas = pluginCanvas.install.call(platform);
         const MAX_SIZE = 1365;
   
@@ -246,7 +246,7 @@ describe("pluginCanvas 插件", () => {
       });
   
       it("支付宝小程序 canvas 尺寸超出：常规", async () => {
-        const platform = { global: initialPlatformGlobal.alipay };
+        const platform = { global: initialPlatformGlobal("alipay") };
         const getCanvas = pluginCanvas.install.call(platform);
   
         // @ts-ignore
@@ -268,7 +268,7 @@ describe("pluginCanvas 插件", () => {
       });
   
       it("抖音小程序 canvas 尺寸超出：常规", async () => {
-        const platform = { global: initialPlatformGlobal.tt };
+        const platform = { global: initialPlatformGlobal("tt") };
         const getCanvas = pluginCanvas.install.call(platform);
   
         // @ts-ignore

@@ -1,4 +1,4 @@
-import { initialPlatformGlobal } from "../../../__tests__/initial";
+import { initialPlatformGlobal } from "../../../__tests__/mocks";
 import pluginImage from "./plugin-image";
 
 jest.mock("./plugin-decode", () => ({
@@ -8,7 +8,6 @@ jest.mock("./plugin-decode", () => ({
 
 describe("pluginImage 定义", () => {
   beforeAll(() => {
-    global.ImageBitmap = jest.fn();
     // @ts-ignore
     global.ImageBitmap.mockImplementation(() => ({
       width: 0,
@@ -32,7 +31,7 @@ describe("pluginImage 定义", () => {
 
 describe("pluginImage 插件", () => {
   describe("H5 环境", () => {
-    const platform = { global: initialPlatformGlobal.h5 };
+    const platform = { global: initialPlatformGlobal("h5") };
 
     it("检查插件是否正常安装", () => {
       const image = pluginImage.install.call(platform);
@@ -85,7 +84,7 @@ describe("pluginImage 插件", () => {
   });
 
   describe("小程序(weapp, alipay, tt) 环境", () => {
-    const platform = { global: initialPlatformGlobal.weapp };
+    const platform = { global: initialPlatformGlobal("weapp") };
 
     it("检查插件是否正常安装", () => {
       const image = pluginImage.install.call(platform);
