@@ -15,13 +15,17 @@ describe("pluginNow 定义", () => {
 });
 
 describe("pluginNow 插件", () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
+  const nowDate = new Date();
+  const nowTimestamp = nowDate.getTime();
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: nowDate });
+    jest.setSystemTime(nowDate);
   });
 
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  beforeEach(() => {
+    jest.clearAllTimers();
+  })
 
   describe("H5 环境", () => {
     const platform = { global: initialPlatformGlobal("h5") };
@@ -37,6 +41,7 @@ describe("pluginNow 插件", () => {
       expect(now()).toBe(0);
 
       jest.advanceTimersByTime(1000);
+
       expect(now()).toBe(1000);
     });
   });
@@ -52,10 +57,10 @@ describe("pluginNow 插件", () => {
       const now = pluginNow.install.call(platform);
 
       expect(typeof now).toBe("function");
-      expect(now()).toBe(0);
+      expect(now()).toBe(nowTimestamp);
 
       jest.advanceTimersByTime(1000);
-      expect(now()).toBe(1000);
+      expect(now()).toBe(nowTimestamp + 1000);
     })
   });
 
@@ -70,10 +75,11 @@ describe("pluginNow 插件", () => {
       const now = pluginNow.install.call(platform);
 
       expect(typeof now).toBe("function");
-      expect(now()).toBe(0);
+      expect(now()).toBe(nowTimestamp);
 
       jest.advanceTimersByTime(1000);
-      expect(now()).toBe(1000);
+
+      expect(now()).toBe(nowTimestamp + 1000);
     })
   });
 });

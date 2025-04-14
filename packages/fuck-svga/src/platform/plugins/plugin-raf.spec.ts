@@ -15,20 +15,38 @@ describe("pluginRaf 定义", () => {
 });
 
 describe("pluginRaf 插件", () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-  })
+  const nowDate = new Date();
+  const nowTimestamp = nowDate.getTime();
 
-  afterAll(() => {
-    jest.useRealTimers();
-  })
+  beforeEach(() => {
+    jest.useFakeTimers({ now: nowDate });
+    jest.setSystemTime(nowTimestamp);
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
 
   describe("H5 环境", () => {
     const platform = { global: initialPlatformGlobal("h5") };
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginRaf.install.call(platform)).toBe("function");
-    })
+    });
+
+    it("检查 rAF 函数是否正常", () => {
+      const rAF = pluginRaf.install.call(platform);
+
+      const callback = jest.fn();
+      const mockCanvas = {};
+      const handle = rAF(mockCanvas, callback);
+      expect(typeof handle).toBe("number");
+      expect(callback).not.toHaveBeenCalled();
+
+      jest.runAllTimers();
+
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("小程序(weapp, alipay, tt) 环境", () => {
@@ -36,6 +54,24 @@ describe("pluginRaf 插件", () => {
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginRaf.install.call(platform)).toBe("function");
-    })
-  })
+    });
+
+    it("检查 rAF 函数是否正常", () => {
+      const rAF = pluginRaf.install.call(platform);
+
+      const callback = jest.fn();
+      const mockCanvas = {
+        requestAnimationFrame(callback: FrameRequestCallback) {
+          return globalThis.requestAnimationFrame(callback);
+        }
+      };
+      const handle = rAF(mockCanvas, callback);
+      expect(typeof handle).toBe("number");
+      expect(callback).not.toHaveBeenCalled();
+
+      jest.runAllTimers();
+
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+  });
 });
