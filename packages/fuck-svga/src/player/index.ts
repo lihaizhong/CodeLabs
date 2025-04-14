@@ -224,7 +224,7 @@ export class Player {
    */
   private startAnimation(): void {
     const { entity, config, animator, brush } = this;
-    const { global, now } = platform;
+    const { now } = platform;
     const { fillMode, playMode, contentMode } = config;
     const {
       currFrame,
@@ -251,7 +251,7 @@ export class Player {
     // 当前已完成的百分比
     let percent: number;
     // 当前需要绘制的百分比
-    let partialDrawPercent: number;
+    // let partialDrawPercent: number;
     // 是否还有剩余时间
     let hasRemained: boolean;
 
@@ -260,62 +260,62 @@ export class Player {
     brush.resize(contentMode, entity!.size);
 
     // 分段渲染函数
-    let patchDraw: (before: () => void) => void;
-    if (global.isPerf) {
-      const MAX_DRAW_TIME_PER_FRAME = 8;
-      const MAX_ACCELERATE_DRAW_TIME_PER_FRAME = 3;
-      const MAX_DYNAMIC_CHUNK_SIZE = 65;
-      const MIN_DYNAMIC_CHUNK_SIZE = 1;
-      // 动态调整每次绘制的块大小
-      let dynamicChunkSize = 4; // 初始块大小
-      let startTime: number;
-      let chunk: number;
-      let elapsed: number;
-      // 使用`指数退避算法`平衡渲染速度和流畅度
-      patchDraw = (before: () => void) => {
-        startTime = now();
-        before();
+    // let patchDraw: (before: () => void) => void;
+    // if (global.isPerf) {
+    const MAX_DRAW_TIME_PER_FRAME = 8;
+    const MAX_ACCELERATE_DRAW_TIME_PER_FRAME = 3;
+    const MAX_DYNAMIC_CHUNK_SIZE = 65;
+    const MIN_DYNAMIC_CHUNK_SIZE = 1;
+    // 动态调整每次绘制的块大小
+    let dynamicChunkSize = 4; // 初始块大小
+    let startTime: number;
+    let chunk: number;
+    let elapsed: number;
+    // 使用`指数退避算法`平衡渲染速度和流畅度
+    const patchDraw = (before: () => void) => {
+      startTime = now();
+      before();
 
-        while (tail < spriteCount) {
-          // 根据当前块大小计算nextTail
-          chunk = Math.min(dynamicChunkSize, spriteCount - tail);
-          nextTail = (tail + chunk) | 0;
-          brush.draw(entity!, currentFrame, tail, nextTail);
-          tail = nextTail;
-          // 动态调整块大小
-          elapsed = now() - startTime;
+      while (tail < spriteCount) {
+        // 根据当前块大小计算nextTail
+        chunk = Math.min(dynamicChunkSize, spriteCount - tail);
+        nextTail = (tail + chunk) | 0;
+        brush.draw(entity!, currentFrame, tail, nextTail);
+        tail = nextTail;
+        // 动态调整块大小
+        elapsed = now() - startTime;
 
-          if (elapsed < MAX_ACCELERATE_DRAW_TIME_PER_FRAME) {
-            dynamicChunkSize = Math.min(dynamicChunkSize * 2, MAX_DYNAMIC_CHUNK_SIZE); // 加快绘制
-          } else if (elapsed > MAX_DRAW_TIME_PER_FRAME) {
-            dynamicChunkSize = Math.max(dynamicChunkSize / 2, MIN_DYNAMIC_CHUNK_SIZE); // 减慢绘制
-            break;
-          }
+        if (elapsed < MAX_ACCELERATE_DRAW_TIME_PER_FRAME) {
+          dynamicChunkSize = Math.min(dynamicChunkSize * 2, MAX_DYNAMIC_CHUNK_SIZE); // 加快绘制
+        } else if (elapsed > MAX_DRAW_TIME_PER_FRAME) {
+          dynamicChunkSize = Math.max(dynamicChunkSize / 2, MIN_DYNAMIC_CHUNK_SIZE); // 减慢绘制
+          break;
         }
-      };
-    } else {
-      const TAIL_THRESHOLD_FACTOR = 1.05;
-      const TAIL_OFFSET = 2;
-      // 普通模式
-      patchDraw = (before: () => void) => {
-        before();
-        if (tail < spriteCount) {
-          // 1.15 和 2 均为阔值，保证渲染尽快完成
-          nextTail = hasRemained
-            ? Math.min(
-                (spriteCount * partialDrawPercent * TAIL_THRESHOLD_FACTOR +
-                  TAIL_OFFSET) | 0,
-                spriteCount
-              )
-            : spriteCount;
+      }
+    };
+    // } else {
+    //   const TAIL_THRESHOLD_FACTOR = 1.05;
+    //   const TAIL_OFFSET = 2;
+    //   // 普通模式
+    //   patchDraw = (before: () => void) => {
+    //     before();
+    //     if (tail < spriteCount) {
+    //       // 1.15 和 2 均为阔值，保证渲染尽快完成
+    //       nextTail = hasRemained
+    //         ? Math.min(
+    //             (spriteCount * partialDrawPercent * TAIL_THRESHOLD_FACTOR +
+    //               TAIL_OFFSET) | 0,
+    //             spriteCount
+    //           )
+    //         : spriteCount;
 
-          if (nextTail > tail) {
-            brush.draw(entity!, currentFrame, tail, nextTail);
-            tail = nextTail;
-          }
-        }
-      };
-    }
+    //       if (nextTail > tail) {
+    //         brush.draw(entity!, currentFrame, tail, nextTail);
+    //         tail = nextTail;
+    //       }
+    //     }
+    //   };
+    // }
 
     // 动画绘制过程
     animator!.onUpdate = (timePercent: number) => {
@@ -325,12 +325,12 @@ export class Player {
 
         if (isReverseMode) {
           nextFrame = (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
-          partialDrawPercent = Math.abs(1 - exactFrame + currentFrame);
+          // partialDrawPercent = Math.abs(1 - exactFrame + currentFrame);
           // FIXME: 倒序会有一帧的偏差，需要校准当前帧
           percent = currentFrame / totalFrame;
         } else {
           nextFrame = timePercent === 1 ? startFrame : Math.floor(exactFrame);
-          partialDrawPercent = Math.abs(exactFrame - currentFrame);
+          // partialDrawPercent = Math.abs(exactFrame - currentFrame);
         }
 
         hasRemained = currentFrame === nextFrame;

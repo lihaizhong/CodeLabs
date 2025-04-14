@@ -1,8 +1,6 @@
 import { initialPlatformGlobal } from "../../../__tests__/mocks";
 import pluginRaf from "./plugin-raf";
 
-jest.useFakeTimers();
-
 describe("pluginRaf 定义", () => {
   it("rAF 是否被定义", () => {
     expect(pluginRaf).toBeDefined();
@@ -17,6 +15,14 @@ describe("pluginRaf 定义", () => {
 });
 
 describe("pluginRaf 插件", () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  })
+
+  afterAll(() => {
+    jest.useRealTimers();
+  })
+
   describe("H5 环境", () => {
     const platform = { global: initialPlatformGlobal("h5") };
 

@@ -6,7 +6,6 @@ export interface MockBasicBridge {
   request: jest.Mock;
   getFileSystemManager: jest.Mock;
   getPerformance: jest.Mock;
-  createOffscreenCanvas: jest.Mock;
 }
 
 export interface MockWeappBridge extends MockBasicBridge {
@@ -15,6 +14,7 @@ export interface MockWeappBridge extends MockBasicBridge {
   };
   getWindowInfo: jest.Mock;
   getDeviceInfo: jest.Mock;
+  createOffscreenCanvas: jest.Mock;
 }
 
 export interface MockAlipayBridge extends MockBasicBridge {
@@ -24,15 +24,14 @@ export interface MockAlipayBridge extends MockBasicBridge {
   isIDE: boolean;
   getWindowInfo: jest.Mock;
   getDeviceBaseInfo: jest.Mock;
+  createOffscreenCanvas: jest.Mock;
 }
 
 export interface MockTtBridge extends MockBasicBridge {
-  env: {
-    USER_DATA_PATH: string;
-  };
   getSystemInfoSync: jest.Mock;
   getDeviceInfoSync: jest.Mock;
   getEnvInfoSync: jest.Mock;
+  createOffscreenCanvas: jest.Mock;
 }
 
 export interface MockBasicPlatformGlobal {
@@ -63,7 +62,13 @@ function initialPlatformGlobal(env: "weapp"): MockWeappPlatformGlobal;
 function initialPlatformGlobal(env: "alipay"): MockAlipayPlatformGlobal;
 function initialPlatformGlobal(env: "tt"): MockTtPlatformGlobal;
 function initialPlatformGlobal(env: "h5"): MockH5PlatformGlobal;
-function initialPlatformGlobal(env: MockPlatformEnv): MockWeappPlatformGlobal | MockAlipayPlatformGlobal | MockTtPlatformGlobal | MockH5PlatformGlobal {
+function initialPlatformGlobal(
+  env: MockPlatformEnv
+):
+  | MockWeappPlatformGlobal
+  | MockAlipayPlatformGlobal
+  | MockTtPlatformGlobal
+  | MockH5PlatformGlobal {
   const fileSystemManager = jest.fn(() => ({
     access: jest.fn(() => {}),
     writeFile: jest.fn(() => {}),
@@ -79,18 +84,13 @@ function initialPlatformGlobal(env: MockPlatformEnv): MockWeappPlatformGlobal | 
   const getWindowInfo = jest.fn(() => ({
     pixelRatio: 2,
   }));
-  const getDeviceInfo = jest.fn(() => ({ platform: "ios" }));;
+  const getDeviceInfo = jest.fn(() => ({ platform: "ios" }));
   const bridge: MockBasicBridge = {
     createSelectorQuery: selectorQuery,
     arrayBufferToBase64: jest.fn((_: ArrayBuffer) => "mocked base64 data"),
     request: jest.fn(() => Promise.resolve()),
     getFileSystemManager: fileSystemManager,
     getPerformance: jest.fn(),
-    createOffscreenCanvas: jest.fn(() => ({
-      width: 0,
-      height: 0,
-      getContext: jest.fn(),
-    }))
   };
 
   if (env === "weapp") {
@@ -99,10 +99,14 @@ function initialPlatformGlobal(env: MockPlatformEnv): MockWeappPlatformGlobal | 
       br: {
         ...bridge,
         env: {
-          USER_DATA_PATH: "/data/user/0",
+          USER_DATA_PATH: "https://user/data/0",
         },
         getWindowInfo,
         getDeviceInfo,
+        createOffscreenCanvas: jest.fn(
+          (options: { width: number; height: number }) =>
+            new OffscreenCanvas(options.width, options.height)
+        ),
       },
       fsm: fileSystemManager,
       dpr: 2,
@@ -118,10 +122,14 @@ function initialPlatformGlobal(env: MockPlatformEnv): MockWeappPlatformGlobal | 
         ...bridge,
         isIDE: false,
         env: {
-          USER_DATA_PATH: "/data/user/0",
+          USER_DATA_PATH: "https://user/data/0",
         },
         getWindowInfo,
         getDeviceBaseInfo: getDeviceInfo,
+        createOffscreenCanvas: jest.fn(
+          (options: { width: number; height: number }) =>
+            new OffscreenCanvas(options.width, options.height)
+        ),
       },
       fsm: fileSystemManager,
       dpr: 2,
@@ -135,14 +143,11 @@ function initialPlatformGlobal(env: MockPlatformEnv): MockWeappPlatformGlobal | 
       env: "tt",
       br: {
         ...bridge,
-        env: {
-          USER_DATA_PATH: "/data/user/0",
-        },
         getSystemInfoSync: getWindowInfo,
         getDeviceInfoSync: getDeviceInfo,
         getEnvInfoSync: jest.fn(() => ({
           common: {
-            USER_DATA_PATH: "/data/user/0",
+            USER_DATA_PATH: "https://user/data/0",
           },
         })),
         getPerformance: jest.fn(
@@ -157,6 +162,7 @@ function initialPlatformGlobal(env: MockPlatformEnv): MockWeappPlatformGlobal | 
               },
             })
         ),
+        createOffscreenCanvas: jest.fn(() => new OffscreenCanvas(100, 100)),
       },
       fsm: fileSystemManager,
       dpr: 2,

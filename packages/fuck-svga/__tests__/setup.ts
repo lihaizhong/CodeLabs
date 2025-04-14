@@ -1,5 +1,10 @@
 import { TextEncoder, TextDecoder } from "util";
-import { ImageBitmapMock, initialPlatformGlobal } from "./mocks";
+import {
+  ImageBitmapMock,
+  initialPlatformGlobal,
+  OffscreenCanvasMock,
+  OffscreenCanvasRenderingContext2DMock,
+} from "./mocks";
 
 // 向全局模块引入 TextEncoder 和 TextDecoder
 Object.assign(global, {
@@ -14,7 +19,8 @@ Object.assign(global, {
     )
   ),
   ImageBitmap: ImageBitmapMock,
-  OffscreenCanvas: jest.fn(),
+  OffscreenCanvas: OffscreenCanvasMock,
+  OffscreenCanvasRenderingContext2D: OffscreenCanvasRenderingContext2DMock,
   requestAnimationFrame: jest.fn(),
   wx: initialPlatformGlobal("weapp").br,
   tt: initialPlatformGlobal("tt").br,

@@ -13,26 +13,23 @@ export default definePlugin<"getOfsCanvas">({
     if (env === "h5") {
       createOffscreenCanvas = (
         options: WechatMiniprogram.CreateOffscreenCanvasOption
-      ) => {
-        return new OffscreenCanvas(
-          options.width as number,
-          options.height as number
-        );
-      };
+      ) => new OffscreenCanvas(
+        options.width as number,
+        options.height as number
+      );
     } else if (env === "alipay") {
       createOffscreenCanvas = (
         options: WechatMiniprogram.CreateOffscreenCanvasOption
-      ) => {
-        return my.createOffscreenCanvas({
-          width: options.width,
-          height: options.height,
-        });
-      };
+      ) => my.createOffscreenCanvas({
+        width: options.width,
+        height: options.height,
+      });
     } else if (env === "tt") {
       createOffscreenCanvas = (
         options: WechatMiniprogram.CreateOffscreenCanvasOption
       ) => {
         const canvas = tt.createOffscreenCanvas();
+
         canvas.width = options.width;
         canvas.height = options.height;
 
@@ -41,12 +38,10 @@ export default definePlugin<"getOfsCanvas">({
     } else {
       createOffscreenCanvas = (
         options: WechatMiniprogram.CreateOffscreenCanvasOption
-      ) => {
-        return wx.createOffscreenCanvas({
-          ...options,
-          type: "2d",
-        });
-      };
+      ) => wx.createOffscreenCanvas({
+        ...options,
+        type: "2d",
+      });
     }
 
     return (options: WechatMiniprogram.CreateOffscreenCanvasOption) => {

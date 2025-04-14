@@ -8,13 +8,14 @@ export default definePlugin<"now">({
     const perf = env === "h5" ? globalThis.performance : env === "tt" ? br.performance : br.getPerformance();
 
     if(typeof perf?.now === "function") {
-      this.global.isPerf = true;
-
-      // 数值接近，说明perf.now()获得的是高精度的时间戳
+      // 数值差别大，说明perf.now()获得的是高精度的时间戳
       if (perf.now() - Date.now() > 0) {
+        // this.global.isPerf = true;
+        // 微信小程序和支付宝小程序的performance.now()获取的是当前时间戳，单位是微秒。
         return () => perf.now() / 1000;
       }
 
+      // H5环境下，performance.now()获取的不是当前时间戳，而是从页面加载开始的时间戳，单位是毫秒。
       return () => perf.now();
     }
 

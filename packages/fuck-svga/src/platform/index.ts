@@ -31,7 +31,7 @@ class Platform implements FuckSvga.Platform {
     br: null,
     fsm: null,
     dpr: 1,
-    isPerf: false,
+    // isPerf: false,
     sys: "UNKNOWN",
   };
 

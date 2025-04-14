@@ -52,7 +52,6 @@ describe("platform 定义", () => {
     expect(typeof global.br).toBe("object");
     expect(typeof global.dpr).toBe("number");
     expect(typeof global.fsm).toBe("object");
-    expect(typeof global.isPerf).toBe("boolean");
     expect(typeof global.sys).toBe("string");
   });
 });

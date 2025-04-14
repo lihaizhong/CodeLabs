@@ -21,6 +21,26 @@ describe("pluginOfsCanvas 插件", () => {
     it("检查插件是否正常安装", () => {
       expect(typeof pluginOfsCanvas.install.call(platform)).toBe("function");
     });
+
+    it("检查 getOfsCanvas 方法是否正常", () => {
+      const getOfsCanvas = pluginOfsCanvas.install.call(platform);
+      const mockOfsCanvasOptions = { width: 300, height: 300 };
+
+      expect(typeof getOfsCanvas).toBe("function");
+      expect(typeof getOfsCanvas(mockOfsCanvasOptions)).toBe("object");
+      expect(getOfsCanvas(mockOfsCanvasOptions).canvas).toBeInstanceOf(
+        OffscreenCanvas
+      );
+      expect(getOfsCanvas(mockOfsCanvasOptions).context).toBeInstanceOf(
+        OffscreenCanvasRenderingContext2D
+      );
+      expect(getOfsCanvas(mockOfsCanvasOptions).canvas.width).toBe(
+        mockOfsCanvasOptions.width
+      );
+      expect(getOfsCanvas(mockOfsCanvasOptions).canvas.height).toBe(
+        mockOfsCanvasOptions.height
+      );
+    });
   });
 
   describe("小程序(weapp) 环境", () => {
@@ -29,6 +49,26 @@ describe("pluginOfsCanvas 插件", () => {
     it("检查插件是否正常安装", () => {
       expect(typeof pluginOfsCanvas.install.call(platform)).toBe("function");
     });
+
+    it("检查 getOfsCanvas 方法是否正常", () => {
+      const getOfsCanvas = pluginOfsCanvas.install.call(platform);
+      const mockOfsCanvasOptions = { width: 300, height: 300 };
+
+      expect(typeof getOfsCanvas).toBe("function");
+      expect(typeof getOfsCanvas(mockOfsCanvasOptions)).toBe("object");
+      expect(getOfsCanvas(mockOfsCanvasOptions).canvas).toBeInstanceOf(
+        OffscreenCanvas
+      );
+      expect(getOfsCanvas(mockOfsCanvasOptions).context).toBeInstanceOf(
+        OffscreenCanvasRenderingContext2D
+      );
+      expect(getOfsCanvas(mockOfsCanvasOptions).canvas.width).toBe(
+        mockOfsCanvasOptions.width
+      );
+      expect(getOfsCanvas(mockOfsCanvasOptions).canvas.height).toBe(
+        mockOfsCanvasOptions.height
+      );
+    });
   });
 
   describe("小程序(alipay) 环境", () => {
@@ -36,7 +76,27 @@ describe("pluginOfsCanvas 插件", () => {
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginOfsCanvas.install.call(platform)).toBe("function");
-    })
+    });
+
+    it("检查 getOfsCanvas 方法是否正常", () => {
+      const getOfsCanvas = pluginOfsCanvas.install.call(platform);
+      const mockOfsCanvasOptions = { width: 300, height: 300 };
+
+      expect(typeof getOfsCanvas).toBe("function");
+      expect(typeof getOfsCanvas(mockOfsCanvasOptions)).toBe("object");
+      expect(getOfsCanvas(mockOfsCanvasOptions).canvas).toBeInstanceOf(
+        OffscreenCanvas
+      );
+      expect(getOfsCanvas(mockOfsCanvasOptions).context).toBeInstanceOf(
+        OffscreenCanvasRenderingContext2D
+      );
+      expect(getOfsCanvas(mockOfsCanvasOptions).canvas.width).toBe(
+        mockOfsCanvasOptions.width
+      );
+      expect(getOfsCanvas(mockOfsCanvasOptions).canvas.height).toBe(
+        mockOfsCanvasOptions.height
+      );
+    });
   });
 
   describe("小程序(tt) 环境", () => {
@@ -44,6 +104,26 @@ describe("pluginOfsCanvas 插件", () => {
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginOfsCanvas.install.call(platform)).toBe("function");
-    })
+    });
+
+    it("检查 getOfsCanvas 方法是否正常", () => {
+      const getOfsCanvas = pluginOfsCanvas.install.call(platform);
+      const mockOfsCanvasOptions = { width: 300, height: 300 };
+
+      expect(typeof getOfsCanvas).toBe("function");
+      expect(typeof getOfsCanvas(mockOfsCanvasOptions)).toBe("object");
+      expect(getOfsCanvas(mockOfsCanvasOptions).canvas).toBeInstanceOf(
+        OffscreenCanvas
+      );
+      expect(getOfsCanvas(mockOfsCanvasOptions).context).toBeInstanceOf(
+        OffscreenCanvasRenderingContext2D
+      );
+      expect(getOfsCanvas(mockOfsCanvasOptions).canvas.width).toBe(
+        mockOfsCanvasOptions.width
+      );
+      expect(getOfsCanvas(mockOfsCanvasOptions).canvas.height).toBe(
+        mockOfsCanvasOptions.height
+      );
+    });
   });
 });

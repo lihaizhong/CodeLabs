@@ -6,7 +6,7 @@ declare namespace FuckSvga {
     br: any;
     fsm: any;
     dpr: number;
-    isPerf: boolean;
+    // isPerf: boolean;
     sys: string;
   }
 
