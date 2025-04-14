@@ -5,7 +5,6 @@ export interface MockBasicBridge {
     request: jest.Mock;
     getFileSystemManager: jest.Mock;
     getPerformance: jest.Mock;
-    createOffscreenCanvas: jest.Mock;
 }
 export interface MockWeappBridge extends MockBasicBridge {
     env: {
@@ -13,6 +12,7 @@ export interface MockWeappBridge extends MockBasicBridge {
     };
     getWindowInfo: jest.Mock;
     getDeviceInfo: jest.Mock;
+    createOffscreenCanvas: jest.Mock;
 }
 export interface MockAlipayBridge extends MockBasicBridge {
     env: {
@@ -21,20 +21,18 @@ export interface MockAlipayBridge extends MockBasicBridge {
     isIDE: boolean;
     getWindowInfo: jest.Mock;
     getDeviceBaseInfo: jest.Mock;
+    createOffscreenCanvas: jest.Mock;
 }
 export interface MockTtBridge extends MockBasicBridge {
-    env: {
-        USER_DATA_PATH: string;
-    };
     getSystemInfoSync: jest.Mock;
     getDeviceInfoSync: jest.Mock;
     getEnvInfoSync: jest.Mock;
+    createOffscreenCanvas: jest.Mock;
 }
 export interface MockBasicPlatformGlobal {
     env: MockPlatformEnv;
     fsm: any;
     dpr: number;
-    isPerf: boolean;
     sys: string;
 }
 export interface MockWeappPlatformGlobal extends MockBasicPlatformGlobal {
