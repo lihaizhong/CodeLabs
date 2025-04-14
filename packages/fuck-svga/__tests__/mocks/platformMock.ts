@@ -38,7 +38,6 @@ export interface MockBasicPlatformGlobal {
   env: MockPlatformEnv;
   fsm: any;
   dpr: number;
-  isPerf: boolean;
   sys: string;
 }
 
@@ -110,7 +109,6 @@ function initialPlatformGlobal(
       },
       fsm: fileSystemManager,
       dpr: 2,
-      isPerf: true,
       sys: "ios",
     };
   }
@@ -133,7 +131,6 @@ function initialPlatformGlobal(
       },
       fsm: fileSystemManager,
       dpr: 2,
-      isPerf: true,
       sys: "ios",
     };
   }
@@ -166,7 +163,6 @@ function initialPlatformGlobal(
       },
       fsm: fileSystemManager,
       dpr: 2,
-      isPerf: false,
       sys: "ios",
     };
   }
@@ -177,7 +173,6 @@ function initialPlatformGlobal(
       br: window,
       fsm: null,
       dpr: 2,
-      isPerf: true,
       sys: "ios",
     };
   }
