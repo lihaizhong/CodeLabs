@@ -1,7 +1,7 @@
 import { VideoManager } from "./video-manager";
 
 describe("VideoManager", () => {
-  it("should be defined", () => {
+  it("VideoManager 定义", () => {
     expect(VideoManager).toBeDefined();
   });
 });

@@ -6,6 +6,7 @@ export interface MockBasicBridge {
   request: jest.Mock;
   getFileSystemManager: jest.Mock;
   getPerformance: jest.Mock;
+  createOffscreenCanvas: jest.Mock;
 }
 
 export interface MockWeappBridge extends MockBasicBridge {
@@ -75,17 +76,22 @@ function initialPlatformGlobal(env: MockPlatformEnv): MockWeappPlatformGlobal | 
     fields: jest.fn().mockReturnThis(),
     exec: jest.fn(),
   }));
+  const getWindowInfo = jest.fn(() => ({
+    pixelRatio: 2,
+  }));
+  const getDeviceInfo = jest.fn(() => ({ platform: "ios" }));;
   const bridge: MockBasicBridge = {
     createSelectorQuery: selectorQuery,
     arrayBufferToBase64: jest.fn((_: ArrayBuffer) => "mocked base64 data"),
     request: jest.fn(() => Promise.resolve()),
     getFileSystemManager: fileSystemManager,
     getPerformance: jest.fn(),
+    createOffscreenCanvas: jest.fn(() => ({
+      width: 0,
+      height: 0,
+      getContext: jest.fn(),
+    }))
   };
-  const getWindowInfo = jest.fn(() => ({
-    pixelRatio: 2,
-  }));
-  const getDeviceInfo = jest.fn(() => ({ platform: "ios" }));
 
   if (env === "weapp") {
     return {
