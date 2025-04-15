@@ -67,25 +67,24 @@ function initialPlatformGlobal(
   | MockAlipayPlatformGlobal
   | MockTtPlatformGlobal
   | MockH5PlatformGlobal {
-  const selectorQuery = jest.fn(() => ({
-    in: jest.fn().mockReturnThis(),
-    select: jest.fn().mockReturnThis(),
-    fields: jest.fn().mockReturnThis(),
-    exec: jest.fn(),
-  }));
   const getWindowInfo = jest.fn(() => ({
     pixelRatio: 2,
   }));
   const getDeviceInfo = jest.fn(() => ({ platform: "ios" }));
   const bridge: MockBasicBridge = {
-    createSelectorQuery: selectorQuery,
+    createSelectorQuery: jest.fn(() => ({
+      in: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      fields: jest.fn().mockReturnThis(),
+      exec: jest.fn(),
+    })),
     arrayBufferToBase64: jest.fn((_: ArrayBuffer) => "mocked base64 data"),
     request: jest.fn(() => Promise.resolve()),
-    getFileSystemManager: jest.fn().mockReturnValue({
+    getFileSystemManager: jest.fn(() => ({
       writeFile: jest.fn(),
       readFile: jest.fn(),
       removeFile: jest.fn(),
-    }),
+    })),
     getPerformance: jest.fn(),
   };
 

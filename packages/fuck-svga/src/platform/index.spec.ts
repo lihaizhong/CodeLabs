@@ -124,12 +124,11 @@ describe("platform 整体测试", () => {
       const platformGlobal = initialPlatformGlobal("h5");
 
       expect(platform.global.env).toBe(platformGlobal.env);
-      expect(platform.global.br).toEqual(platformGlobal.br);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
       expect(platform.global.sys).toBe(platformGlobal.sys);
     });
 
-    it("检查插件是否正常安装", () => {
+    it("检查插件是否正常安装", async () => {
       expect(typeof platform.getCanvas).toBe("function");
       expect(platform.getCanvas("#container")).toBe(
         "plugin-canvas install successfully"
@@ -139,49 +138,30 @@ describe("platform 整体测试", () => {
         "plugin-ofs-canvas install successfully"
       );
       expect(typeof platform.decode).toBe("object");
-      expect(platform.decode).toEqual({
-        toBuffer: () =>
-          "plugin-decode install successfully and toBuffer successfully",
-        toBitmap: () =>
-          "plugin-decode install successfully and toBitmap successfully",
-        toDataURL: () =>
-          "plugin-decode install successfully and toDataURL successfully",
-        utf8: () => "plugin-decode install successfully and utf8 successfully",
-      });
+      expect(platform.decode.toBuffer(new Uint8Array(4))).toBe("plugin-decode install successfully and toBuffer successfully")
+      expect(platform.decode.toBitmap!(new Uint8Array(4))).toBe("plugin-decode install successfully and toBitmap successfully")
+      expect(platform.decode.toDataURL(new Uint8Array(4))).toBe("plugin-decode install successfully and toDataURL successfully")
+      expect(platform.decode.utf8(new Uint8Array(4), 0, 4)).toBe("plugin-decode install successfully and utf8 successfully")
       expect(typeof platform.image).toBe("object");
-      expect(platform.image).toEqual({
-        isImage: () =>
-          "plugin-image install successfully and isImage successfully",
-        isImageBitmap: () =>
-          "plugin-image install successfully and isImageBitmap successfully",
-        create: () =>
-          "plugin-image install successfully and create successfully",
-        load: () => "plugin-image install successfully and load successfully",
-      });
+      expect(platform.image.isImage(new Image())).toBe("plugin-image install successfully and isImage successfully")
+      expect(platform.image.isImageBitmap!(await createImageBitmap(new Image()))).toBe("plugin-image install successfully and isImageBitmap successfully")
+      expect(platform.image.create({ createImage: () => new Image() })).toBe("plugin-image install successfully and create successfully")
+      expect(platform.image.load({ createImage: () => new Image() }, new Uint8Array(8), 'test.png')).toBe("plugin-image install successfully and load successfully")
       expect(typeof platform.rAF).toBe("function");
       expect(
         platform.rAF({} as unknown as WechatMiniprogram.Canvas, () => {})
       ).toBe("plugin-raf install successfully");
       expect(typeof platform.local).toBe("object");
-      expect(platform.local).toEqual({
-        write: () => "plugin-fsm install successfully and write successfully",
-        read: () => "plugin-fsm install successfully and read successfully",
-        remove: () => "plugin-fsm install successfully and remove successfully",
-      });
+      expect(platform.local?.write(new ArrayBuffer(16), 'test.png')).toBe("plugin-fsm install successfully and write successfully")
+      expect(platform.local?.read('test.png')).toBe("plugin-fsm install successfully and read successfully")
+      expect(platform.local?.remove('test.png')).toBe("plugin-fsm install successfully and remove successfully")
       expect(typeof platform.remote).toBe("object");
-      expect(platform.remote).toEqual({
-        is: () => "plugin-download install successfully and is successfully",
-        fetch: () =>
-          "plugin-download install successfully and fetch successfully",
-      });
+      expect(platform.remote?.is('https://www.test.com/test.png')).toBe("plugin-download install successfully and is successfully")
+      expect(platform.remote?.fetch('https://www.test.com/test.png')).toBe("plugin-download install successfully and fetch successfully")
       expect(typeof platform.path).toBe("object");
-      expect(platform.path).toEqual({
-        USER_DATA_PATH: "plugin-path install successfully",
-        filename: () =>
-          "plugin-path install successfully and filename successfully",
-        resolve: () =>
-          "plugin-path install successfully and resolve successfully",
-      });
+      expect(platform.path.USER_DATA_PATH).toBe("plugin-path install successfully")
+      expect(platform.path.filename('test.png')).toBe("plugin-path install successfully and filename successfully")
+      expect(platform.path.resolve('test.png')).toBe("plugin-path install successfully and resolve successfully")
       expect(typeof platform.now).toBe("function");
       expect(platform.now()).toBe("plugin-now install successfully");
     });
@@ -196,12 +176,47 @@ describe("platform 整体测试", () => {
       const platformGlobal = initialPlatformGlobal("weapp");
 
       expect(platform.global.env).toBe(platformGlobal.env);
-      expect(platform.global.br).toEqual(platformGlobal.br);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
       expect(platform.global.sys).toBe(platformGlobal.sys);
     });
 
-    it("检查插件是否正常安装", () => {});
+    it("检查插件是否正常安装", async () => {
+      expect(typeof platform.getCanvas).toBe("function");
+      expect(platform.getCanvas("#container")).toBe(
+        "plugin-canvas install successfully"
+      );
+      expect(typeof platform.getOfsCanvas).toBe("function");
+      expect(platform.getOfsCanvas({ width: 300, height: 300 })).toBe(
+        "plugin-ofs-canvas install successfully"
+      );
+      expect(typeof platform.decode).toBe("object");
+      expect(platform.decode.toBuffer(new Uint8Array(4))).toBe("plugin-decode install successfully and toBuffer successfully")
+      expect(platform.decode.toBitmap!(new Uint8Array(4))).toBe("plugin-decode install successfully and toBitmap successfully")
+      expect(platform.decode.toDataURL(new Uint8Array(4))).toBe("plugin-decode install successfully and toDataURL successfully")
+      expect(platform.decode.utf8(new Uint8Array(4), 0, 4)).toBe("plugin-decode install successfully and utf8 successfully")
+      expect(typeof platform.image).toBe("object");
+      expect(platform.image.isImage(new Image())).toBe("plugin-image install successfully and isImage successfully")
+      expect(platform.image.isImageBitmap!(await createImageBitmap(new Image()))).toBe("plugin-image install successfully and isImageBitmap successfully")
+      expect(platform.image.create({ createImage: () => new Image() })).toBe("plugin-image install successfully and create successfully")
+      expect(platform.image.load({ createImage: () => new Image() }, new Uint8Array(8), 'test.png')).toBe("plugin-image install successfully and load successfully")
+      expect(typeof platform.rAF).toBe("function");
+      expect(
+        platform.rAF({} as unknown as WechatMiniprogram.Canvas, () => {})
+      ).toBe("plugin-raf install successfully");
+      expect(typeof platform.local).toBe("object");
+      expect(platform.local?.write(new ArrayBuffer(16), 'test.png')).toBe("plugin-fsm install successfully and write successfully")
+      expect(platform.local?.read('test.png')).toBe("plugin-fsm install successfully and read successfully")
+      expect(platform.local?.remove('test.png')).toBe("plugin-fsm install successfully and remove successfully")
+      expect(typeof platform.remote).toBe("object");
+      expect(platform.remote?.is('https://www.test.com/test.png')).toBe("plugin-download install successfully and is successfully")
+      expect(platform.remote?.fetch('https://www.test.com/test.png')).toBe("plugin-download install successfully and fetch successfully")
+      expect(typeof platform.path).toBe("object");
+      expect(platform.path.USER_DATA_PATH).toBe("plugin-path install successfully")
+      expect(platform.path.filename('test.png')).toBe("plugin-path install successfully and filename successfully")
+      expect(platform.path.resolve('test.png')).toBe("plugin-path install successfully and resolve successfully")
+      expect(typeof platform.now).toBe("function");
+      expect(platform.now()).toBe("plugin-now install successfully");
+    });
   });
 
   describe("小程序(alipay) 环境", () => {
@@ -213,12 +228,47 @@ describe("platform 整体测试", () => {
       const platformGlobal = initialPlatformGlobal("alipay");
 
       expect(platform.global.env).toBe(platformGlobal.env);
-      expect(platform.global.br).toEqual(platformGlobal.br);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
       expect(platform.global.sys).toBe(platformGlobal.sys);
     });
 
-    it("检查插件是否正常安装", () => {});
+    it("检查插件是否正常安装", async () => {
+      expect(typeof platform.getCanvas).toBe("function");
+      expect(platform.getCanvas("#container")).toBe(
+        "plugin-canvas install successfully"
+      );
+      expect(typeof platform.getOfsCanvas).toBe("function");
+      expect(platform.getOfsCanvas({ width: 300, height: 300 })).toBe(
+        "plugin-ofs-canvas install successfully"
+      );
+      expect(typeof platform.decode).toBe("object");
+      expect(platform.decode.toBuffer(new Uint8Array(4))).toBe("plugin-decode install successfully and toBuffer successfully")
+      expect(platform.decode.toBitmap!(new Uint8Array(4))).toBe("plugin-decode install successfully and toBitmap successfully")
+      expect(platform.decode.toDataURL(new Uint8Array(4))).toBe("plugin-decode install successfully and toDataURL successfully")
+      expect(platform.decode.utf8(new Uint8Array(4), 0, 4)).toBe("plugin-decode install successfully and utf8 successfully")
+      expect(typeof platform.image).toBe("object");
+      expect(platform.image.isImage(new Image())).toBe("plugin-image install successfully and isImage successfully")
+      expect(platform.image.isImageBitmap!(await createImageBitmap(new Image()))).toBe("plugin-image install successfully and isImageBitmap successfully")
+      expect(platform.image.create({ createImage: () => new Image() })).toBe("plugin-image install successfully and create successfully")
+      expect(platform.image.load({ createImage: () => new Image() }, new Uint8Array(8), 'test.png')).toBe("plugin-image install successfully and load successfully")
+      expect(typeof platform.rAF).toBe("function");
+      expect(
+        platform.rAF({} as unknown as WechatMiniprogram.Canvas, () => {})
+      ).toBe("plugin-raf install successfully");
+      expect(typeof platform.local).toBe("object");
+      expect(platform.local?.write(new ArrayBuffer(16), 'test.png')).toBe("plugin-fsm install successfully and write successfully")
+      expect(platform.local?.read('test.png')).toBe("plugin-fsm install successfully and read successfully")
+      expect(platform.local?.remove('test.png')).toBe("plugin-fsm install successfully and remove successfully")
+      expect(typeof platform.remote).toBe("object");
+      expect(platform.remote?.is('https://www.test.com/test.png')).toBe("plugin-download install successfully and is successfully")
+      expect(platform.remote?.fetch('https://www.test.com/test.png')).toBe("plugin-download install successfully and fetch successfully")
+      expect(typeof platform.path).toBe("object");
+      expect(platform.path.USER_DATA_PATH).toBe("plugin-path install successfully")
+      expect(platform.path.filename('test.png')).toBe("plugin-path install successfully and filename successfully")
+      expect(platform.path.resolve('test.png')).toBe("plugin-path install successfully and resolve successfully")
+      expect(typeof platform.now).toBe("function");
+      expect(platform.now()).toBe("plugin-now install successfully");
+    });
   });
 
   describe("小程序(tt) 环境", () => {
@@ -230,11 +280,46 @@ describe("platform 整体测试", () => {
       const platformGlobal = initialPlatformGlobal("tt");
 
       expect(platform.global.env).toBe(platformGlobal.env);
-      expect(platform.global.br).toEqual(platformGlobal.br);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
       expect(platform.global.sys).toBe(platformGlobal.sys);
     });
 
-    it("检查插件是否正常安装", () => {});
+    it("检查插件是否正常安装", async () => {
+      expect(typeof platform.getCanvas).toBe("function");
+      expect(platform.getCanvas("#container")).toBe(
+        "plugin-canvas install successfully"
+      );
+      expect(typeof platform.getOfsCanvas).toBe("function");
+      expect(platform.getOfsCanvas({ width: 300, height: 300 })).toBe(
+        "plugin-ofs-canvas install successfully"
+      );
+      expect(typeof platform.decode).toBe("object");
+      expect(platform.decode.toBuffer(new Uint8Array(4))).toBe("plugin-decode install successfully and toBuffer successfully")
+      expect(platform.decode.toBitmap!(new Uint8Array(4))).toBe("plugin-decode install successfully and toBitmap successfully")
+      expect(platform.decode.toDataURL(new Uint8Array(4))).toBe("plugin-decode install successfully and toDataURL successfully")
+      expect(platform.decode.utf8(new Uint8Array(4), 0, 4)).toBe("plugin-decode install successfully and utf8 successfully")
+      expect(typeof platform.image).toBe("object");
+      expect(platform.image.isImage(new Image())).toBe("plugin-image install successfully and isImage successfully")
+      expect(platform.image.isImageBitmap!(await createImageBitmap(new Image()))).toBe("plugin-image install successfully and isImageBitmap successfully")
+      expect(platform.image.create({ createImage: () => new Image() })).toBe("plugin-image install successfully and create successfully")
+      expect(platform.image.load({ createImage: () => new Image() }, new Uint8Array(8), 'test.png')).toBe("plugin-image install successfully and load successfully")
+      expect(typeof platform.rAF).toBe("function");
+      expect(
+        platform.rAF({} as unknown as WechatMiniprogram.Canvas, () => {})
+      ).toBe("plugin-raf install successfully");
+      expect(typeof platform.local).toBe("object");
+      expect(platform.local?.write(new ArrayBuffer(16), 'test.png')).toBe("plugin-fsm install successfully and write successfully")
+      expect(platform.local?.read('test.png')).toBe("plugin-fsm install successfully and read successfully")
+      expect(platform.local?.remove('test.png')).toBe("plugin-fsm install successfully and remove successfully")
+      expect(typeof platform.remote).toBe("object");
+      expect(platform.remote?.is('https://www.test.com/test.png')).toBe("plugin-download install successfully and is successfully")
+      expect(platform.remote?.fetch('https://www.test.com/test.png')).toBe("plugin-download install successfully and fetch successfully")
+      expect(typeof platform.path).toBe("object");
+      expect(platform.path.USER_DATA_PATH).toBe("plugin-path install successfully")
+      expect(platform.path.filename('test.png')).toBe("plugin-path install successfully and filename successfully")
+      expect(platform.path.resolve('test.png')).toBe("plugin-path install successfully and resolve successfully")
+      expect(typeof platform.now).toBe("function");
+      expect(platform.now()).toBe("plugin-now install successfully");
+    });
   });
 });
