@@ -4,7 +4,6 @@ declare namespace FuckSvga {
   export interface PlatformGlobal {
     env: SupportedPlatform;
     br: any;
-    fsm: any;
     dpr: number;
     // isPerf: boolean;
     sys: string;

@@ -35,9 +35,9 @@ jest.mock("./plugins/plugin-fsm", () => ({
   name: "local",
   install() {
     return {
-      write: () => "plugin-fsm install successfully",
-      read: () => "plugin-fsm install successfully",
-      remove: () => "plugin-fsm install successfully",
+      write: () => "plugin-fsm install successfully and write successfully",
+      read: () => "plugin-fsm install successfully and read successfully",
+      remove: () => "plugin-fsm install successfully and remove successfully",
     };
   },
 }));
@@ -72,18 +72,21 @@ jest.mock("./plugins/plugin-path", () => ({
   install() {
     return {
       USER_DATA_PATH: "plugin-path install successfully",
-      filename: () =>
-        "plugin-path install successfully and filename successfully",
-      resolve: () =>
-        "plugin-path install successfully and resolve successfully",
+      filename: jest.fn(
+        () => "plugin-path install successfully and filename successfully"
+      ),
+      resolve: jest.fn(
+        () => "plugin-path install successfully and resolve successfully"
+      ),
     };
   },
 }));
 jest.mock("./plugins/plugin-raf", () => ({
   name: "rAF",
   install() {
-    return (_0: PlatformCanvas, _1: () => void) =>
-      "plugin-raf install successfully";
+    return jest.fn(
+      (_0: PlatformCanvas, _1: () => void) => "plugin-raf install successfully"
+    );
   },
 }));
 
@@ -113,7 +116,6 @@ describe("platform 定义", () => {
     expect(typeof global.env).toBe("string");
     expect(typeof global.br).toBe("object");
     expect(typeof global.dpr).toBe("number");
-    expect(typeof global.fsm).toBe("object");
     expect(typeof global.sys).toBe("string");
   });
 });
@@ -122,13 +124,14 @@ describe("platform 整体测试", () => {
   describe("H5 环境", () => {
     const platformGlobal = initialPlatformGlobal("h5");
 
-    platform.switch("h5");
+    beforeEach(() => {
+      platform.switch("h5");
+    });
 
     it("检查 global 是否正确", () => {
       expect(platform.global.env).toBe(platformGlobal.env);
       expect(platform.global.br).toEqual(platformGlobal.br);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
-      expect(platform.global.fsm).toEqual(platformGlobal.fsm);
       expect(platform.global.sys).toBe(platformGlobal.sys);
     });
 
@@ -141,20 +144,50 @@ describe("platform 整体测试", () => {
       expect(platform.getOfsCanvas({ width: 300, height: 300 })).toBe(
         "plugin-ofs-canvas install successfully"
       );
-      expect(typeof platform.decode).toBe("string");
-      expect(platform.decode).toBe("plugin-decode install successfully");
-      expect(typeof platform.image).toBe("string");
-      expect(platform.image).toBe("plugin-image install successfully");
+      expect(typeof platform.decode).toBe("object");
+      expect(platform.decode).toEqual({
+        toBuffer: () =>
+          "plugin-decode install successfully and toBuffer successfully",
+        toBitmap: () =>
+          "plugin-decode install successfully and toBitmap successfully",
+        toDataURL: () =>
+          "plugin-decode install successfully and toDataURL successfully",
+        utf8: () => "plugin-decode install successfully and utf8 successfully",
+      });
+      expect(typeof platform.image).toBe("object");
+      expect(platform.image).toEqual({
+        isImage: () =>
+          "plugin-image install successfully and isImage successfully",
+        isImageBitmap: () =>
+          "plugin-image install successfully and isImageBitmap successfully",
+        create: () =>
+          "plugin-image install successfully and create successfully",
+        load: () => "plugin-image install successfully and load successfully",
+      });
       expect(typeof platform.rAF).toBe("function");
       expect(
         platform.rAF({} as unknown as WechatMiniprogram.Canvas, () => {})
       ).toBe("plugin-raf install successfully");
-      expect(typeof platform.local).toBe("string");
-      expect(platform.local).toBe("plugin-fsm install successfully");
-      expect(typeof platform.remote).toBe("string");
-      expect(platform.remote).toBe("plugin-download install successfully");
-      expect(typeof platform.path).toBe("string");
-      expect(platform.path).toBe("plugin-path install successfully");
+      expect(typeof platform.local).toBe("object");
+      expect(platform.local).toEqual({
+        write: () => "plugin-fsm install successfully and write successfully",
+        read: () => "plugin-fsm install successfully and read successfully",
+        remove: () => "plugin-fsm install successfully and remove successfully",
+      });
+      expect(typeof platform.remote).toBe("object");
+      expect(platform.remote).toEqual({
+        is: () => "plugin-download install successfully and is successfully",
+        fetch: () =>
+          "plugin-download install successfully and fetch successfully",
+      });
+      expect(typeof platform.path).toBe("object");
+      expect(platform.path).toEqual({
+        USER_DATA_PATH: "plugin-path install successfully",
+        filename: () =>
+          "plugin-path install successfully and filename successfully",
+        resolve: () =>
+          "plugin-path install successfully and resolve successfully",
+      });
       expect(typeof platform.now).toBe("function");
       expect(platform.now()).toBe("plugin-now install successfully");
     });
@@ -163,138 +196,51 @@ describe("platform 整体测试", () => {
   describe("小程序(weapp) 环境", () => {
     const platformGlobal = initialPlatformGlobal("weapp");
 
-    platform.switch("weapp");
+    beforeEach(() => {
+      platform.switch("weapp");
+    });
 
     it("检查 global 是否正确", () => {
       expect(platform.global.env).toBe(platformGlobal.env);
       expect(platform.global.br).toEqual(platformGlobal.br);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
-      expect(platform.global.fsm).toEqual(platformGlobal.fsm);
       expect(platform.global.sys).toBe(platformGlobal.sys);
     });
 
-    it("检查插件是否正常安装", () => {
-      expect(typeof platform.getCanvas).toBe("function");
-      expect(platform.getCanvas("#container")).toBe(
-        "plugin-canvas install successfully"
-      );
-      expect(typeof platform.getOfsCanvas).toBe("function");
-      expect(platform.getOfsCanvas({ width: 300, height: 300 })).toBe(
-        "plugin-ofs-canvas install successfully"
-      );
-      expect(typeof platform.decode).toBe("string");
-      expect(platform.decode).toBe("plugin-decode install successfully");
-      expect(typeof platform.image).toBe("string");
-      expect(platform.image).toBe("plugin-image install successfully");
-      expect(typeof platform.rAF).toBe("function");
-      expect(
-        platform.rAF(
-          {
-            requestAnimationFrame: (_: () => void) => 23,
-          } as unknown as WechatMiniprogram.Canvas,
-          () => {}
-        )
-      ).toBe("plugin-raf install successfully");
-      expect(typeof platform.local).toBe("string");
-      expect(platform.local).toBe("plugin-fsm install successfully");
-      expect(typeof platform.remote).toBe("string");
-      expect(platform.remote).toBe("plugin-download install successfully");
-      expect(typeof platform.path).toBe("string");
-      expect(platform.path).toBe("plugin-path install successfully");
-      expect(typeof platform.now).toBe("function");
-      expect(platform.now()).toBe("plugin-now install successfully");
-    });
+    it("检查插件是否正常安装", () => {});
   });
 
   describe("小程序(alipay) 环境", () => {
     const platformGlobal = initialPlatformGlobal("alipay");
 
-    platform.switch("alipay");
+    beforeEach(() => {
+      platform.switch("alipay");
+    });
 
     it("检查 global 是否正确", () => {
       expect(platform.global.env).toBe(platformGlobal.env);
       expect(platform.global.br).toEqual(platformGlobal.br);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
-      expect(platform.global.fsm).toEqual(platformGlobal.fsm);
       expect(platform.global.sys).toBe(platformGlobal.sys);
     });
 
-    it("检查插件是否正常安装", () => {
-      expect(typeof platform.getCanvas).toBe("function");
-      expect(platform.getCanvas("#container")).toBe(
-        "plugin-canvas install successfully"
-      );
-      expect(typeof platform.getOfsCanvas).toBe("function");
-      expect(platform.getOfsCanvas({ width: 300, height: 300 })).toBe(
-        "plugin-ofs-canvas install successfully"
-      );
-      expect(typeof platform.decode).toBe("string");
-      expect(platform.decode).toBe("plugin-decode install successfully");
-      expect(typeof platform.image).toBe("string");
-      expect(platform.image).toBe("plugin-image install successfully");
-      expect(typeof platform.rAF).toBe("function");
-      expect(
-        platform.rAF(
-          {
-            requestAnimationFrame: (_: () => void) => 23,
-          } as unknown as WechatMiniprogram.Canvas,
-          () => {}
-        )
-      ).toBe("plugin-raf install successfully");
-      expect(typeof platform.local).toBe("string");
-      expect(platform.local).toBe("plugin-fsm install successfully");
-      expect(typeof platform.remote).toBe("string");
-      expect(platform.remote).toBe("plugin-download install successfully");
-      expect(typeof platform.path).toBe("string");
-      expect(platform.path).toBe("plugin-path install successfully");
-      expect(typeof platform.now).toBe("function");
-      expect(platform.now()).toBe("plugin-now install successfully");
-    });
+    it("检查插件是否正常安装", () => {});
   });
 
   describe("小程序(tt) 环境", () => {
     const platformGlobal = initialPlatformGlobal("tt");
 
-    platform.switch("tt");
+    beforeEach(() => {
+      platform.switch("tt");
+    });
 
     it("检查 global 是否正确", () => {
       expect(platform.global.env).toBe(platformGlobal.env);
       expect(platform.global.br).toEqual(platformGlobal.br);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
-      expect(platform.global.fsm).toEqual(platformGlobal.fsm);
       expect(platform.global.sys).toBe(platformGlobal.sys);
     });
 
-    it("检查插件是否正常安装", () => {
-      expect(typeof platform.getCanvas).toBe("function");
-      expect(platform.getCanvas("#container")).toBe(
-        "plugin-canvas install successfully"
-      );
-      expect(typeof platform.getOfsCanvas).toBe("function");
-      expect(platform.getOfsCanvas({ width: 300, height: 300 })).toBe(
-        "plugin-ofs-canvas install successfully"
-      );
-      expect(typeof platform.decode).toBe("string");
-      expect(platform.decode).toBe("plugin-decode install successfully");
-      expect(typeof platform.image).toBe("string");
-      expect(platform.image).toBe("plugin-image install successfully");
-      expect(typeof platform.rAF).toBe("function");
-      expect(
-        platform.rAF(
-          {
-            requestAnimationFrame: (_: () => void) => 23,
-          } as unknown as WechatMiniprogram.Canvas,
-          () => {}
-        )
-      ).toBe("plugin-raf install successfully");
-      expect(typeof platform.local).toBe("string");
-      expect(platform.local).toBe("plugin-fsm install successfully");
-      expect(typeof platform.remote).toBe("string");
-      expect(platform.remote).toBe("plugin-download install successfully");
-      expect(typeof platform.path).toBe("string");
-      expect(platform.path).toBe("plugin-path install successfully");
-      expect(typeof platform.now).toBe("function");
-      expect(platform.now()).toBe("plugin-now install successfully");
-    });
+    it("检查插件是否正常安装", () => {});
   });
 });

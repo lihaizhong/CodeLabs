@@ -8,6 +8,8 @@ export interface Bucket {
   local: string;
   // 实例
   entity: Video | ArrayBuffer | null;
+  // 文件大小（单位：字节）
+  // filesize: number;
   // 下载实例中
   promise: Promise<Video | null> | null;
 }
@@ -212,6 +214,7 @@ export class VideoManager {
           origin: url,
           local: "",
           entity: null,
+          // filesize: 0,
           promise: null,
         };
 
@@ -234,6 +237,7 @@ export class VideoManager {
           if (buff) {
             await local!.write(buff, filePath);
             bucket.local = filePath;
+            // bucket.filesize = buff.byteLength / 8;
             if (this.remainStart <= index && index < this.remainEnd) {
               return Parser.parseVideo(buff, url);
             }

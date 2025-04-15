@@ -8,11 +8,13 @@ import { definePlugin } from "../definePlugin";
 export default definePlugin<"local">({
   name: "local",
   install() {
-    const { env, fsm } = this.global;
+    const { env, br } = this.global;
 
     if (env === "h5") {
       return null;
     }
+
+    const fsm = (br as WechatMiniprogram.Wx).getFileSystemManager();
 
     return {
       write: (

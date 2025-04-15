@@ -29,7 +29,6 @@ class Platform implements FuckSvga.Platform {
   public global: FuckSvga.PlatformGlobal = {
     env: "unknown",
     br: null,
-    fsm: null,
     dpr: 1,
     // isPerf: false,
     sys: "UNKNOWN",
@@ -63,7 +62,6 @@ class Platform implements FuckSvga.Platform {
   private init() {
     this.global.br = this.useBridge();
     this.global.dpr = this.usePixelRatio();
-    this.global.fsm = this.useFileSystemManager();
     this.global.sys = this.useSystem().toLocaleLowerCase();
     this.usePlugins();
   }
@@ -121,16 +119,6 @@ class Platform implements FuckSvga.Platform {
     }
 
     return 1;
-  }
-
-  private useFileSystemManager() {
-    const { br } = this.global;
-
-    if ("getFileSystemManager" in br) {
-      return (br as WechatMiniprogram.Wx).getFileSystemManager();
-    }
-
-    return null;
   }
 
   private useSystem() {

@@ -40,7 +40,7 @@ describe("pluginFsm 插件", () => {
     });
 
     it("write 调用成功", async () => {
-      platform.global.fsm.writeFile = jest
+      platform.global.br.getFileSystemManager().writeFile = jest
         .fn()
         .mockImplementation((options) => {
           options.success();
@@ -51,12 +51,12 @@ describe("pluginFsm 插件", () => {
       const filePath = "test/test.txt";
       const result = await fsm.write(data, filePath);
 
-      expect(platform.global.fsm.writeFile).toHaveBeenCalledTimes(1);
+      expect(fsm.writeFile).toHaveBeenCalledTimes(1);
       expect(result).toBe(filePath);
     });
 
     it("write 调用失败", async () => {
-      platform.global.fsm.writeFile = jest
+      platform.global.br.getFileSystemManager().writeFile = jest
         .fn()
         .mockImplementation((options) => {
           options.fail("write fail");
@@ -67,11 +67,11 @@ describe("pluginFsm 插件", () => {
       const filePath = "test/test.txt";
 
       expect(fsm.write(data, filePath)).rejects.toBe("write fail");
-      expect(platform.global.fsm.writeFile).toHaveBeenCalledTimes(1);
+      expect(fsm.writeFile).toHaveBeenCalledTimes(1);
     });
 
     it("read 调用成功", async () => {
-      platform.global.fsm.readFile = jest.fn().mockImplementation((options) => {
+      platform.global.br.getFileSystemManager().readFile = jest.fn().mockImplementation((options) => {
         options.success({ data: new ArrayBuffer(10) });
       });
 
@@ -79,12 +79,12 @@ describe("pluginFsm 插件", () => {
       const filePath = "test/test.txt";
       const result = await fsm.read(filePath);
 
-      expect(platform.global.fsm.readFile).toHaveBeenCalledTimes(1);
+      expect(fsm.readFile).toHaveBeenCalledTimes(1);
       expect(result).toBeInstanceOf(ArrayBuffer);
     });
 
     it("read 调用失败", async () => {
-      platform.global.fsm.readFile = jest.fn().mockImplementation((options) => {
+      platform.global.br.getFileSystemManager().readFile = jest.fn().mockImplementation((options) => {
         options.fail("read fail");
       });
 
@@ -92,11 +92,11 @@ describe("pluginFsm 插件", () => {
       const filePath = "test/test.txt";
 
       expect(fsm.read(filePath)).rejects.toBe("read fail");
-      expect(platform.global.fsm.readFile).toHaveBeenCalledTimes(1);
+      expect(fsm.readFile).toHaveBeenCalledTimes(1);
     });
 
     it("remove 调用成功", async () => {
-      platform.global.fsm.unlink = jest.fn().mockImplementation((options) => {
+      platform.global.br.getFileSystemManager().unlink = jest.fn().mockImplementation((options) => {
         options.success();
       });
 
@@ -104,12 +104,12 @@ describe("pluginFsm 插件", () => {
       const filePath = "test/test.txt";
       const result = await fsm.remove(filePath);
 
-      expect(platform.global.fsm.unlink).toHaveBeenCalledTimes(1);
+      expect(fsm.unlink).toHaveBeenCalledTimes(1);
       expect(result).toBe(filePath);
     });
 
     it("remove 调用失败", async () => {
-      platform.global.fsm.unlink = jest.fn().mockImplementation((options) => {
+      platform.global.br.getFileSystemManager().unlink = jest.fn().mockImplementation((options) => {
         options.fail("remove fail");
       });
 
@@ -117,7 +117,7 @@ describe("pluginFsm 插件", () => {
       const filePath = "test/test.txt";
 
       expect(fsm.remove(filePath)).resolves.toBe(filePath);
-      expect(platform.global.fsm.unlink).toHaveBeenCalledTimes(1);
+      expect(fsm.unlink).toHaveBeenCalledTimes(1);
     });
   });
 });

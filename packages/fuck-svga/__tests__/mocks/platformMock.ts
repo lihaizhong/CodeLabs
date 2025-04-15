@@ -36,7 +36,6 @@ export interface MockTtBridge extends MockBasicBridge {
 
 export interface MockBasicPlatformGlobal {
   env: MockPlatformEnv;
-  fsm: any;
   dpr: number;
   sys: string;
 }
@@ -68,12 +67,6 @@ function initialPlatformGlobal(
   | MockAlipayPlatformGlobal
   | MockTtPlatformGlobal
   | MockH5PlatformGlobal {
-  const fileSystemManager = jest.fn(() => ({
-    access: jest.fn(() => {}),
-    writeFile: jest.fn(() => {}),
-    readFile: jest.fn(() => {}),
-    removeFile: jest.fn(() => {}),
-  }));
   const selectorQuery = jest.fn(() => ({
     in: jest.fn().mockReturnThis(),
     select: jest.fn().mockReturnThis(),
@@ -88,7 +81,12 @@ function initialPlatformGlobal(
     createSelectorQuery: selectorQuery,
     arrayBufferToBase64: jest.fn((_: ArrayBuffer) => "mocked base64 data"),
     request: jest.fn(() => Promise.resolve()),
-    getFileSystemManager: fileSystemManager,
+    getFileSystemManager: jest.fn(() => ({
+      access: jest.fn(() => {}),
+      writeFile: jest.fn(() => {}),
+      readFile: jest.fn(() => {}),
+      removeFile: jest.fn(() => {}),
+    })),
     getPerformance: jest.fn(),
   };
 
@@ -107,7 +105,6 @@ function initialPlatformGlobal(
             new OffscreenCanvas(options.width, options.height)
         ),
       },
-      fsm: fileSystemManager,
       dpr: 2,
       sys: "ios",
     };
@@ -129,7 +126,6 @@ function initialPlatformGlobal(
             new OffscreenCanvas(options.width, options.height)
         ),
       },
-      fsm: fileSystemManager,
       dpr: 2,
       sys: "ios",
     };
@@ -161,7 +157,6 @@ function initialPlatformGlobal(
         ),
         createOffscreenCanvas: jest.fn(() => new OffscreenCanvas(100, 100)),
       },
-      fsm: fileSystemManager,
       dpr: 2,
       sys: "ios",
     };
@@ -171,7 +166,6 @@ function initialPlatformGlobal(
     return {
       env: "h5",
       br: window,
-      fsm: null,
       dpr: 2,
       sys: "ios",
     };
