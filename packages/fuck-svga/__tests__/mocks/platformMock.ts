@@ -82,10 +82,9 @@ function initialPlatformGlobal(
     arrayBufferToBase64: jest.fn((_: ArrayBuffer) => "mocked base64 data"),
     request: jest.fn(() => Promise.resolve()),
     getFileSystemManager: jest.fn(() => ({
-      access: jest.fn(() => {}),
-      writeFile: jest.fn(() => {}),
-      readFile: jest.fn(() => {}),
-      removeFile: jest.fn(() => {}),
+      writeFile: jest.fn(),
+      readFile: jest.fn(),
+      removeFile: jest.fn(),
     })),
     getPerformance: jest.fn(),
   };
