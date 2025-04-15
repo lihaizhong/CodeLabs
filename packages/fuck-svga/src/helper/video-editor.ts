@@ -75,6 +75,7 @@ export class VideoEditor {
    * 创建二维码图片
    */
   async setQRCode(
+    key: string,
     code: string,
     options: VideoEditorOptions & Omit<IQrCodeImgOptions, "code">
   ) {
@@ -82,6 +83,6 @@ export class VideoEditor {
 
     const buff = generateImageBufferFromCode({ ...options, code });
 
-    await this.set(code, new Uint8Array(buff), options?.mode);
+    await this.set(key, new Uint8Array(buff), options?.mode);
   }
 }
