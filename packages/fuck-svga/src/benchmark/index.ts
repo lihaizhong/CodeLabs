@@ -1,55 +1,70 @@
 const badge = "【benchmark】";
 
 // 检查环境
-let env: string;
-if (typeof window !== "undefined") {
-  env = "h5";
-} else if (typeof tt !== "undefined") {
-  env = "tt";
-} else if (typeof my !== "undefined") {
-  env = "alipay";
-} else if (typeof wx !== "undefined") {
-  env = "weapp";
-} else {
-  env = "unknown";
-}
+const env: string = (() => {
+  if (typeof window !== "undefined") {
+    return "h5";
+  }
+
+  if (typeof tt !== "undefined") {
+    return "tt";
+  }
+
+  if (typeof my !== "undefined") {
+    return "alipay";
+  }
+
+  if (typeof wx !== "undefined") {
+    return "weapp";
+  }
+
+  return "unknown";
+})();
 
 // 检查系统
-let sys: string;
-if (env === "alipay") {
-  sys = (my.getDeviceBaseInfo().platform as string).toLocaleLowerCase();
-} else if (env === "tt") {
-  sys = (tt.getDeviceInfoSync().platform as string).toLocaleLowerCase();
-} else if (env === "weapp") {
-  // @ts-ignore
-  sys = (wx.getDeviceInfo().platform as string).toLocaleLowerCase();
-} else {
-  sys = "unknown";
-}
+const sys: string = (() => {
+  if (env === "alipay") {
+    return my.getDeviceBaseInfo().platform as string;
+  }
+
+  if (env === "tt") {
+    return tt.getDeviceInfoSync().platform as string;
+  }
+
+  if (env === "weapp") {
+    // @ts-ignore
+    return wx.getDeviceInfo().platform as string;
+  }
+
+  return "unknown";
+})().toLocaleLowerCase();
 
 // 检查时间工具
-let now: () => number;
-if (env === "h5") {
-  now = () => performance.now() / 1000;
-} else if (env === "weapp") {
-  const perf = wx.getPerformance();
+const now: () => number = (() => {
+  if (env === "h5") {
+    return () => performance.now() / 1000;
+  }
 
-  // @ts-ignore
-  now = () => perf.now() / 1000;
-} else if (env === "alipay") {
-  const perf = my.getPerformance();
+  if (env === "weapp") {
+    // @ts-ignore
+    return () => wx.getPerformance().now() / 1000;
+  }
 
-  now = () => perf.now() / 1000;
-} else {
-  now = () => Date.now();
-}
+  if (env === "alipay") {
+    return () => my.getPerformance().now() / 1000;
+  }
+
+  return () => Date.now();
+})();
 
 class Stopwatch {
-  private label: string = '';
+  private label: string = "";
 
   private startTime: number = 0;
 
-  private readonly isRealMachine = ['ios', 'android', 'openharmony'].includes(sys);
+  private readonly isRealMachine = ["ios", "android", "openharmony"].includes(
+    sys
+  );
 
   start(label: string) {
     if (this.isRealMachine) {

@@ -17,7 +17,6 @@ declare class Platform implements FuckSvga.Platform {
     private autoEnv;
     private useBridge;
     private usePixelRatio;
-    private useFileSystemManager;
     private useSystem;
     private usePlugins;
     switch(env: FuckSvga.SupportedPlatform): void;

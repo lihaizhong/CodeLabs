@@ -2,6 +2,7 @@ import { platform } from "../platform";
 import { Brush } from "./brush";
 import { Animator } from "./animator";
 import { Config } from "./config";
+import benchmark from "../benchmark";
 
 /**
  * SVGA 播放器
@@ -286,9 +287,15 @@ export class Player {
         elapsed = now() - startTime;
 
         if (elapsed < MAX_ACCELERATE_DRAW_TIME_PER_FRAME) {
-          dynamicChunkSize = Math.min(dynamicChunkSize * 2, MAX_DYNAMIC_CHUNK_SIZE); // 加快绘制
+          dynamicChunkSize = Math.min(
+            dynamicChunkSize * 2,
+            MAX_DYNAMIC_CHUNK_SIZE
+          ); // 加快绘制
         } else if (elapsed > MAX_DRAW_TIME_PER_FRAME) {
-          dynamicChunkSize = Math.max(dynamicChunkSize / 2, MIN_DYNAMIC_CHUNK_SIZE); // 减慢绘制
+          dynamicChunkSize = Math.max(
+            dynamicChunkSize / 2,
+            MIN_DYNAMIC_CHUNK_SIZE
+          ); // 减慢绘制
           break;
         }
       }
@@ -319,21 +326,24 @@ export class Player {
 
     // 动画绘制过程
     animator!.onUpdate = (timePercent: number) => {
-      patchDraw(() => {
-        percent = isReverseMode ? 1 - timePercent : timePercent;
-        exactFrame = percent * totalFrame;
+      benchmark.time("partial updated", () => {
+        patchDraw(() => {
+          percent = isReverseMode ? 1 - timePercent : timePercent;
+          exactFrame = percent * totalFrame;
 
-        if (isReverseMode) {
-          nextFrame = (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
-          // partialDrawPercent = Math.abs(1 - exactFrame + currentFrame);
-          // FIXME: 倒序会有一帧的偏差，需要校准当前帧
-          percent = currentFrame / totalFrame;
-        } else {
-          nextFrame = timePercent === 1 ? startFrame : Math.floor(exactFrame);
-          // partialDrawPercent = Math.abs(exactFrame - currentFrame);
-        }
+          if (isReverseMode) {
+            nextFrame =
+              (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
+            // partialDrawPercent = Math.abs(1 - exactFrame + currentFrame);
+            // FIXME: 倒序会有一帧的偏差，需要校准当前帧
+            percent = currentFrame / totalFrame;
+          } else {
+            nextFrame = timePercent === 1 ? startFrame : Math.floor(exactFrame);
+            // partialDrawPercent = Math.abs(exactFrame - currentFrame);
+          }
 
-        hasRemained = currentFrame === nextFrame;
+          hasRemained = currentFrame === nextFrame;
+        });
       });
 
       if (hasRemained) return;
@@ -356,7 +366,7 @@ export class Player {
         brush.clearContainer();
       }
 
-      this.onEnd?.()
+      this.onEnd?.();
     };
     animator!.start();
   }

@@ -29,6 +29,6 @@ export declare class VideoEditor {
     /**
      * 创建二维码图片
      */
-    setQRCode(code: string, options: VideoEditorOptions & Omit<IQrCodeImgOptions, "code">): Promise<void>;
+    setQRCode(key: string, code: string, options: VideoEditorOptions & Omit<IQrCodeImgOptions, "code">): Promise<void>;
 }
 export {};

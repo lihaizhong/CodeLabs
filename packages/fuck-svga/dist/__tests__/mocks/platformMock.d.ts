@@ -31,7 +31,6 @@ export interface MockTtBridge extends MockBasicBridge {
 }
 export interface MockBasicPlatformGlobal {
     env: MockPlatformEnv;
-    fsm: any;
     dpr: number;
     sys: string;
 }

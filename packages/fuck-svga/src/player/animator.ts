@@ -1,5 +1,4 @@
 import { platform } from "../platform";
-import benchmark from "../benchmark";
 import type { Brush } from "./brush";
 
 const { noop } = platform;
@@ -107,8 +106,7 @@ export class Animator {
       TP = ((DT + LS) % D) / D;
     }
 
-    benchmark.time('update partial', () => this.onUpdate(TP));
-    benchmark.log('Percentage of speed time', TP);
+    this.onUpdate(TP)
     if (!this.isRunning && ended) {
       this.onEnd();
     }
