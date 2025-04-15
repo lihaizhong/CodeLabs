@@ -3,39 +3,88 @@ import { initialPlatformGlobal } from "../../__tests__/mocks";
 
 jest.mock("./plugins/plugin-canvas", () => ({
   name: "getCanvas",
-  install: () => (_: PlatformCanvas) => "plugin-canvas install successfully",
+  install() {
+    return (_: PlatformCanvas) => "plugin-canvas install successfully";
+  },
 }));
 jest.mock("./plugins/plugin-decode", () => ({
   name: "decode",
-  install: () => "plugin-decode install successfully",
+  install() {
+    return {
+      toBuffer: () =>
+        "plugin-decode install successfully and toBuffer successfully",
+      toBitmap: () =>
+        "plugin-decode install successfully and toBitmap successfully",
+      toDataURL: () =>
+        "plugin-decode install successfully and toDataURL successfully",
+      utf8: () => "plugin-decode install successfully and utf8 successfully",
+    };
+  },
 }));
 jest.mock("./plugins/plugin-download", () => ({
   name: "remote",
-  install: () => "plugin-download install successfully",
+  install() {
+    return {
+      is: () => "plugin-download install successfully and is successfully",
+      fetch: () =>
+        "plugin-download install successfully and fetch successfully",
+    };
+  },
 }));
 jest.mock("./plugins/plugin-fsm", () => ({
   name: "local",
-  install: () => "plugin-fsm install successfully",
+  install() {
+    return {
+      write: () => "plugin-fsm install successfully",
+      read: () => "plugin-fsm install successfully",
+      remove: () => "plugin-fsm install successfully",
+    };
+  },
 }));
 jest.mock("./plugins/plugin-image", () => ({
   name: "image",
-  install: () => "plugin-image install successfully",
+  install() {
+    return {
+      isImage: () =>
+        "plugin-image install successfully and isImage successfully",
+      isImageBitmap: () =>
+        "plugin-image install successfully and isImageBitmap successfully",
+      create: () => "plugin-image install successfully and create successfully",
+      load: () => "plugin-image install successfully and load successfully",
+    };
+  },
 }));
 jest.mock("./plugins/plugin-now", () => ({
   name: "now",
-  install: () => () => "plugin-now install successfully",
+  install() {
+    return () => "plugin-now install successfully";
+  },
 }));
 jest.mock("./plugins/plugin-ofs-canvas", () => ({
   name: "getOfsCanvas",
-  install: () => (_: WechatMiniprogram.CreateOffscreenCanvasOption) => "plugin-ofs-canvas install successfully",
+  install() {
+    return (_: WechatMiniprogram.CreateOffscreenCanvasOption) =>
+      "plugin-ofs-canvas install successfully";
+  },
 }));
 jest.mock("./plugins/plugin-path", () => ({
   name: "path",
-  install: () => "plugin-path install successfully",
+  install() {
+    return {
+      USER_DATA_PATH: "plugin-path install successfully",
+      filename: () =>
+        "plugin-path install successfully and filename successfully",
+      resolve: () =>
+        "plugin-path install successfully and resolve successfully",
+    };
+  },
 }));
 jest.mock("./plugins/plugin-raf", () => ({
   name: "rAF",
-  install: () => (_0: PlatformCanvas,_1: () => void) =>"plugin-raf install successfully",
+  install() {
+    return (_0: PlatformCanvas, _1: () => void) =>
+      "plugin-raf install successfully";
+  },
 }));
 
 describe("platform 定义", () => {
@@ -98,10 +147,7 @@ describe("platform 整体测试", () => {
       expect(platform.image).toBe("plugin-image install successfully");
       expect(typeof platform.rAF).toBe("function");
       expect(
-        platform.rAF(
-          {} as unknown as WechatMiniprogram.Canvas,
-          () => {}
-        )
+        platform.rAF({} as unknown as WechatMiniprogram.Canvas, () => {})
       ).toBe("plugin-raf install successfully");
       expect(typeof platform.local).toBe("string");
       expect(platform.local).toBe("plugin-fsm install successfully");
@@ -207,7 +253,7 @@ describe("platform 整体测试", () => {
   });
 
   describe("小程序(tt) 环境", () => {
-    const platformGlobal = initialPlatformGlobal("tt")
+    const platformGlobal = initialPlatformGlobal("tt");
 
     platform.switch("tt");
 
