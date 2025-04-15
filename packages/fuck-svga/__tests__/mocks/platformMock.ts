@@ -81,11 +81,11 @@ function initialPlatformGlobal(
     createSelectorQuery: selectorQuery,
     arrayBufferToBase64: jest.fn((_: ArrayBuffer) => "mocked base64 data"),
     request: jest.fn(() => Promise.resolve()),
-    getFileSystemManager: jest.fn(() => ({
+    getFileSystemManager: jest.fn().mockReturnValue({
       writeFile: jest.fn(),
       readFile: jest.fn(),
       removeFile: jest.fn(),
-    })),
+    }),
     getPerformance: jest.fn(),
   };
 
@@ -165,7 +165,7 @@ function initialPlatformGlobal(
     return {
       env: "h5",
       br: window,
-      dpr: 2,
+      dpr: globalThis.devicePixelRatio,
       sys: "ios",
     };
   }

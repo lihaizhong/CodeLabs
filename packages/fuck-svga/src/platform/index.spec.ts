@@ -72,21 +72,15 @@ jest.mock("./plugins/plugin-path", () => ({
   install() {
     return {
       USER_DATA_PATH: "plugin-path install successfully",
-      filename: jest.fn(
-        () => "plugin-path install successfully and filename successfully"
-      ),
-      resolve: jest.fn(
-        () => "plugin-path install successfully and resolve successfully"
-      ),
+      filename: () => "plugin-path install successfully and filename successfully",
+      resolve: () => "plugin-path install successfully and resolve successfully",
     };
   },
 }));
 jest.mock("./plugins/plugin-raf", () => ({
   name: "rAF",
   install() {
-    return jest.fn(
-      (_0: PlatformCanvas, _1: () => void) => "plugin-raf install successfully"
-    );
+    return (_0: PlatformCanvas, _1: () => void) => "plugin-raf install successfully";
   },
 }));
 
@@ -122,13 +116,13 @@ describe("platform 定义", () => {
 
 describe("platform 整体测试", () => {
   describe("H5 环境", () => {
-    const platformGlobal = initialPlatformGlobal("h5");
-
     beforeEach(() => {
       platform.switch("h5");
     });
 
     it("检查 global 是否正确", () => {
+      const platformGlobal = initialPlatformGlobal("h5");
+
       expect(platform.global.env).toBe(platformGlobal.env);
       expect(platform.global.br).toEqual(platformGlobal.br);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
@@ -194,13 +188,13 @@ describe("platform 整体测试", () => {
   });
 
   describe("小程序(weapp) 环境", () => {
-    const platformGlobal = initialPlatformGlobal("weapp");
-
     beforeEach(() => {
       platform.switch("weapp");
     });
 
     it("检查 global 是否正确", () => {
+      const platformGlobal = initialPlatformGlobal("weapp");
+
       expect(platform.global.env).toBe(platformGlobal.env);
       expect(platform.global.br).toEqual(platformGlobal.br);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
@@ -211,13 +205,13 @@ describe("platform 整体测试", () => {
   });
 
   describe("小程序(alipay) 环境", () => {
-    const platformGlobal = initialPlatformGlobal("alipay");
-
     beforeEach(() => {
       platform.switch("alipay");
     });
 
     it("检查 global 是否正确", () => {
+      const platformGlobal = initialPlatformGlobal("alipay");
+
       expect(platform.global.env).toBe(platformGlobal.env);
       expect(platform.global.br).toEqual(platformGlobal.br);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
@@ -228,13 +222,13 @@ describe("platform 整体测试", () => {
   });
 
   describe("小程序(tt) 环境", () => {
-    const platformGlobal = initialPlatformGlobal("tt");
-
     beforeEach(() => {
       platform.switch("tt");
     });
 
     it("检查 global 是否正确", () => {
+      const platformGlobal = initialPlatformGlobal("tt");
+
       expect(platform.global.env).toBe(platformGlobal.env);
       expect(platform.global.br).toEqual(platformGlobal.br);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);

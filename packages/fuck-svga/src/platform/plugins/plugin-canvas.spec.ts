@@ -80,8 +80,8 @@ describe("pluginCanvas 插件", () => {
 
       const { canvas } = await getCanvas("#container");
 
-      expect(canvas.width).toBe(600);
-      expect(canvas.height).toBe(600);
+      expect(canvas.width).toBe(platform.global.dpr * mockCanvas.clientWidth);
+      expect(canvas.height).toBe(platform.global.dpr * mockCanvas.clientHeight);
     });
 
     it("canvas 尺寸超出限制：常规", async () => {
@@ -90,7 +90,9 @@ describe("pluginCanvas 插件", () => {
 
       // @ts-ignore
       document.querySelector.mockReturnValue(mockExceedCanvas);
+
       const { canvas } = await getCanvas("#container");
+
       expect(canvas.width).toBe(platform.global.dpr * mockExceedCanvas.clientWidth);
       expect(canvas.height).toBe(platform.global.dpr * mockExceedCanvas.clientHeight);
     })
