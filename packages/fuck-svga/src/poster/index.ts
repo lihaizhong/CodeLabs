@@ -1,5 +1,5 @@
 import { getDataURLFromImageData } from "../helper";
-import { Brush } from "../player/brush";
+import { Painter } from "../painter";
 
 export class Poster {
   /**
@@ -21,10 +21,10 @@ export class Poster {
   /**
    * 刷头实例
    */
-  public readonly brush: Brush;
+  public readonly painter: Painter;
 
   constructor(width: number, height: number) {
-    this.brush = new Brush("poster", width, height);
+    this.painter = new Painter("poster", width, height);
   }
 
   /**
@@ -35,29 +35,31 @@ export class Poster {
     options: string | PosterConfig,
     component?: WechatMiniprogram.Component.TrivialInstance | null
   ): Promise<void> {
-    let config: PosterConfig;
-
-    if (typeof options === "string") {
-      config = { container: options };
-    } else {
-      config = options;
-    }
+    const config: PosterConfig = typeof options === "string" ? { container: options } : options;
 
     if (config.contentMode) {
       this.contentMode = config.contentMode;
     }
 
-    if (typeof config.frame === 'number') {
-      this.frame = config.frame;
-    } else {
-      this.frame = 0
-    }
+    this.frame = typeof config.frame === 'number' ? config.frame : 0;
 
-    return this.brush.register(config.container, '', component);
+    return this.painter.register(config.container, '', component);
   }
 
+  /**
+   * 修改内容模式
+   * @param contentMode 
+   */
   public setContentMode(contentMode: PLAYER_CONTENT_MODE): void {
     this.contentMode = contentMode;
+  }
+
+  /**
+   * 设置当前帧
+   * @param frame
+   */
+  public setFrame(frame: number): void {
+    this.frame = frame;
   }
 
   /**
@@ -73,12 +75,12 @@ export class Poster {
 
     const { images, filename } = videoEntity;
 
-    this.brush.clearContainer();
-    this.brush.clearMaterials();
-    this.brush.updateDynamicImages(videoEntity.dynamicElements);
+    this.painter.clearContainer();
+    this.painter.clearMaterials();
+    this.painter.updateDynamicImages(videoEntity.dynamicElements);
     this.entity = videoEntity;
 
-    return this.brush.loadImages(images, filename);
+    return this.painter.loadImages(images, filename);
   }
 
   /**
@@ -97,11 +99,11 @@ export class Poster {
   public draw(): void {
     if (!this.entity) return;
 
-    const { brush, entity, contentMode, frame, onStart, onEnd } = this;
+    const { painter, entity, contentMode, frame, onStart, onEnd } = this;
 
     onStart?.();
-    brush.resize(contentMode, entity!.size);
-    brush.draw(entity!, frame, 0, entity!.sprites.length);
+    painter.resize(contentMode, entity!.size);
+    painter.draw(entity!, frame, 0, entity!.sprites.length);
     onEnd?.();
   }
 
@@ -110,14 +112,14 @@ export class Poster {
    * @returns 
    */
   public toDataURL(): string {
-    return getDataURLFromImageData(this.brush.getImageData());
+    return getDataURLFromImageData(this.painter.getImageData());
   }
 
   /**
    * 销毁海报
    */
   public destroy(): void {
-    this.brush.destroy();
+    this.painter.destroy();
     this.entity = undefined;
   }
 }

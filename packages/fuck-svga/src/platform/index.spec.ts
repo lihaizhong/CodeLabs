@@ -110,7 +110,6 @@ describe("platform 定义", () => {
     expect(typeof global.env).toBe("string");
     expect(typeof global.br).toBe("object");
     expect(typeof global.dpr).toBe("number");
-    expect(typeof global.sys).toBe("string");
   });
 });
 
@@ -125,7 +124,6 @@ describe("platform 整体测试", () => {
 
       expect(platform.global.env).toBe(platformGlobal.env);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
-      expect(platform.global.sys).toBe(platformGlobal.sys);
     });
 
     it("检查插件是否正常安装", async () => {
@@ -177,7 +175,6 @@ describe("platform 整体测试", () => {
 
       expect(platform.global.env).toBe(platformGlobal.env);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
-      expect(platform.global.sys).toBe(platformGlobal.sys);
     });
 
     it("检查插件是否正常安装", async () => {
@@ -229,7 +226,6 @@ describe("platform 整体测试", () => {
 
       expect(platform.global.env).toBe(platformGlobal.env);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
-      expect(platform.global.sys).toBe(platformGlobal.sys);
     });
 
     it("检查插件是否正常安装", async () => {
@@ -281,7 +277,6 @@ describe("platform 整体测试", () => {
 
       expect(platform.global.env).toBe(platformGlobal.env);
       expect(platform.global.dpr).toBe(platformGlobal.dpr);
-      expect(platform.global.sys).toBe(platformGlobal.sys);
     });
 
     it("检查插件是否正常安装", async () => {

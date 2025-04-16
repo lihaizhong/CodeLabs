@@ -11,10 +11,7 @@ export declare class VideoEntity implements Video {
     /**
      * svga 尺寸
      */
-    size: {
-        width: number;
-        height: number;
-    };
+    size: VideoSize;
     /**
      * svga 帧率
      */

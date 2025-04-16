@@ -1,5 +1,5 @@
 import { platform } from "../platform";
-import { Brush } from "./brush";
+import { Painter } from "../painter";
 import { Animator } from "./animator";
 import { Config } from "./config";
 import benchmark from "../benchmark";
@@ -27,7 +27,7 @@ export class Player {
   /**
    * 刷头实例
    */
-  public readonly brush = new Brush();
+  public readonly painter = new Painter();
 
   // private isBeIntersection = true;
   // private intersectionObserver: IntersectionObserver | null = null
@@ -48,19 +48,13 @@ export class Player {
     options: string | PlayerConfigOptions,
     component?: WechatMiniprogram.Component.TrivialInstance | null
   ): Promise<void> {
-    let config: PlayerConfigOptions;
-
-    if (typeof options === "string") {
-      config = { container: options };
-    } else {
-      config = options;
-    }
+    const config: PlayerConfigOptions = typeof options === "string" ? { container: options } : options;
 
     this.config.register(config);
-    await this.brush.register(config.container, config.secondary, component);
+    await this.painter.register(config.container, config.secondary, component);
     // 监听容器是否处于浏览器视窗内
     // this.setIntersectionObserver()
-    this.animator = new Animator(this.brush);
+    this.animator = new Animator(this.painter);
   }
 
   /**
@@ -97,19 +91,17 @@ export class Player {
    * @returns Promise<void>
    */
   public mount(videoEntity: Video): Promise<void[]> {
-    if (!videoEntity) {
-      throw new Error("videoEntity undefined");
-    }
+    if (!videoEntity) throw new Error("videoEntity undefined");
 
     const { images, filename } = videoEntity;
 
     this.animator!.stop();
-    this.brush.clearSecondary();
-    this.brush.clearMaterials();
-    this.brush.updateDynamicImages(videoEntity.dynamicElements);
+    this.painter.clearSecondary();
+    this.painter.clearMaterials();
+    this.painter.updateDynamicImages(videoEntity.dynamicElements);
     this.entity = videoEntity;
 
-    return this.brush.loadImages(images, filename);
+    return this.painter.loadImages(images, filename);
   }
 
   /**
@@ -174,8 +166,8 @@ export class Player {
    */
   public stop(): void {
     this.animator!.stop();
-    this.brush.clearContainer();
-    this.brush.clearSecondary();
+    this.painter.clearContainer();
+    this.painter.clearSecondary();
     this.onStop?.();
   }
 
@@ -184,7 +176,7 @@ export class Player {
    */
   public destroy(): void {
     this.animator!.stop();
-    this.brush.destroy();
+    this.painter.destroy();
     this.animator = null;
     this.entity = undefined;
   }
@@ -224,7 +216,7 @@ export class Player {
    * 开始绘制动画
    */
   private startAnimation(): void {
-    const { entity, config, animator, brush } = this;
+    const { entity, config, animator, painter } = this;
     const { now } = platform;
     const { fillMode, playMode, contentMode } = config;
     const {
@@ -258,14 +250,12 @@ export class Player {
 
     // 更新动画基础信息
     animator!.setConfig(duration, loopStart, loop, fillValue);
-    brush.resize(contentMode, entity!.size);
+    painter.resize(contentMode, entity!.size);
 
     // 分段渲染函数
-    // let patchDraw: (before: () => void) => void;
-    // if (global.isPerf) {
     const MAX_DRAW_TIME_PER_FRAME = 8;
     const MAX_ACCELERATE_DRAW_TIME_PER_FRAME = 3;
-    const MAX_DYNAMIC_CHUNK_SIZE = 65;
+    const MAX_DYNAMIC_CHUNK_SIZE = 34;
     const MIN_DYNAMIC_CHUNK_SIZE = 1;
     // 动态调整每次绘制的块大小
     let dynamicChunkSize = 4; // 初始块大小
@@ -281,7 +271,7 @@ export class Player {
         // 根据当前块大小计算nextTail
         chunk = Math.min(dynamicChunkSize, spriteCount - tail);
         nextTail = (tail + chunk) | 0;
-        brush.draw(entity!, currentFrame, tail, nextTail);
+        painter.draw(entity!, currentFrame, tail, nextTail);
         tail = nextTail;
         // 动态调整块大小
         elapsed = now() - startTime;
@@ -300,29 +290,29 @@ export class Player {
         }
       }
     };
-    // } else {
-    //   const TAIL_THRESHOLD_FACTOR = 1.05;
-    //   const TAIL_OFFSET = 2;
-    //   // 普通模式
-    //   patchDraw = (before: () => void) => {
-    //     before();
-    //     if (tail < spriteCount) {
-    //       // 1.15 和 2 均为阔值，保证渲染尽快完成
-    //       nextTail = hasRemained
-    //         ? Math.min(
-    //             (spriteCount * partialDrawPercent * TAIL_THRESHOLD_FACTOR +
-    //               TAIL_OFFSET) | 0,
-    //             spriteCount
-    //           )
-    //         : spriteCount;
 
-    //       if (nextTail > tail) {
-    //         brush.draw(entity!, currentFrame, tail, nextTail);
-    //         tail = nextTail;
-    //       }
+    // const TAIL_THRESHOLD_FACTOR = 1.05;
+    // const TAIL_OFFSET = 2;
+    // let partialDrawPercent = 0;
+    // // 普通模式
+    // const patchDraw = (before: () => void) => {
+    //   before();
+    //   if (tail < spriteCount) {
+    //     // 1.15 和 2 均为阔值，保证渲染尽快完成
+    //     nextTail = hasRemained
+    //       ? Math.min(
+    //           (spriteCount * partialDrawPercent * TAIL_THRESHOLD_FACTOR +
+    //             TAIL_OFFSET) | 0,
+    //           spriteCount
+    //         )
+    //       : spriteCount;
+
+    //     if (nextTail > tail) {
+    //       painter.draw(entity!, currentFrame, tail, nextTail);
+    //       tail = nextTail;
     //     }
-    //   };
-    // }
+    //   }
+    // };
 
     // 动画绘制过程
     animator!.onUpdate = (timePercent: number) => {
@@ -348,9 +338,9 @@ export class Player {
 
       if (hasRemained) return;
 
-      brush.clearContainer();
-      brush.stick();
-      brush.clearSecondary();
+      painter.clearContainer();
+      painter.stick();
+      painter.clearSecondary();
       latestFrame = currentFrame;
       currentFrame = nextFrame;
       tail = 0;
@@ -363,7 +353,7 @@ export class Player {
       entity!.locked = false;
       // 如果不保留最后一帧渲染，则清空画布
       if (fillMode === PLAYER_FILL_MODE.NONE) {
-        brush.clearContainer();
+        painter.clearContainer();
       }
 
       this.onEnd?.();

@@ -1,9 +1,9 @@
-import type { Brush } from "./brush";
+import type { Painter } from "../painter";
 /**
  * 动画控制器
  */
 export declare class Animator {
-    private readonly brush;
+    private readonly painter;
     /**
      * 动画是否执行
      */
@@ -27,7 +27,7 @@ export declare class Animator {
     onStart: () => void;
     onUpdate: (timePercent: number) => void;
     onEnd: () => void;
-    constructor(brush: Brush);
+    constructor(painter: Painter);
     /**
      * 设置动画的必要参数
      * @param duration

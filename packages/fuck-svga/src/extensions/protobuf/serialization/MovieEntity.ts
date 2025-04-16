@@ -3,7 +3,6 @@ import Reader from "../io/Reader";
 // import Writer from "../serialization/Writer";
 import SpriteEntity from "./SpriteEntity";
 import MovieParams from "./MovieParams";
-import { emptyObject } from "../utils";
 
 /**
  * Properties of a MovieEntity.
@@ -22,6 +21,8 @@ export interface MovieEntityProps {
 }
 
 export default class MovieEntity {
+  static EMPTY_OBJECT = Object.freeze({});
+
   /**
    * Decodes a MovieEntity message from the specified reader or buffer.
    * @function decode
@@ -51,7 +52,7 @@ export default class MovieEntity {
           break;
         }
         case 3: {
-          if (message.images == emptyObject) {
+          if (message.images == MovieEntity.EMPTY_OBJECT) {
             message.images = {};
           }
           const end2 = reader.uint32() + reader.pos;
@@ -320,7 +321,7 @@ export default class MovieEntity {
    * @memberof com.opensource.svga.MovieEntity
    * @instance
    */
-  images: Record<string, Uint8Array> = emptyObject;
+  images: Record<string, Uint8Array> = MovieEntity.EMPTY_OBJECT;
   /**
    * MovieEntity sprites.
    * @member {Array.<com.opensource.svga.ISpriteEntity>} sprites

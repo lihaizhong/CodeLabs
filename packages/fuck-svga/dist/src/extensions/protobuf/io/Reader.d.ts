@@ -1,4 +1,5 @@
 export default class Reader {
+    private static EMPTY_UINT8ARRAY;
     /**
      * Creates a new reader using the specified buffer.
      * @function

@@ -1,41 +1,39 @@
 import { zlibSync } from "fflate";
-import { crc32 } from "./crc";
+import { CRC32 } from "./crc";
 
 export class PNGEncoder {
   private readonly view: DataView;
 
   private pngData: Uint8Array = new Uint8Array(0);
 
-  constructor(private readonly width: number, private readonly height: number) {
-    const buff = new ArrayBuffer(4 * width * height);
+  private crc32 = new CRC32();
 
-    this.view = new DataView(buff);
+  constructor(private readonly width: number, private readonly height: number) {
+    this.view = new DataView(new ArrayBuffer(4 * width * height));
   }
 
   private createChunk(type: string, data: Uint8Array): Uint8Array {
     // 长度（4字节，大端序）
     const length = new Uint8Array(4);
-    const lengthView = new DataView(length.buffer);
-
-    lengthView.setUint32(0, data.length, false);
+    new DataView(length.buffer).setUint32(0, data.length, false);
 
     // 块类型（4字节， ASCII）
-    const chunkType = new Uint8Array([
-      type.charCodeAt(0),
-      type.charCodeAt(1),
-      type.charCodeAt(2),
-      type.charCodeAt(3),
-    ]);
+    const chunkType = Uint8Array.from(type, c => c.charCodeAt(0));
 
-    const partialChunk = new Uint8Array([...chunkType,...data]);
     // 计算 CRC32 校验（类型 + 数据）
-    const crcValue = crc32(partialChunk);
+    const partialChunk = new Uint8Array(chunkType.length + data.length);
+    partialChunk.set(chunkType);
+    partialChunk.set(data, chunkType.length);
+    
     const crc = new Uint8Array(4);
-    const crcView = new DataView(crc.buffer);
+    new DataView(crc.buffer).setUint32(0, this.crc32.calculate(partialChunk) >>> 0, false);
 
-    crcView.setUint32(0, crcValue >>> 0, false);
+    const result = new Uint8Array(length.length + partialChunk.length + crc.length);
+    result.set(length);
+    result.set(partialChunk, length.length);
+    result.set(crc, length.length + partialChunk.length);
 
-    return new Uint8Array([...length, ...partialChunk, ...crc]);
+    return result;
   }
 
   private createIHDRChunk(): Uint8Array {
@@ -94,12 +92,11 @@ export class PNGEncoder {
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const index = (y * width + x) * 4;
-        const pixel = (
-          (pixels[index] << 24) |
-          (pixels[index + 1] << 16) |
-          (pixels[index + 2] << 8) |
-          pixels[index + 3]
-        ) >>> 0;
+        const r = pixels[index];
+        const g = pixels[index + 1];
+        const b = pixels[index + 2];
+        const a = pixels[index + 3];
+        const pixel = ((r << 24) | (g << 16) | (b << 8) | a) >>> 0;
 
         this.setPixel(x, y, pixel);
       }
@@ -109,24 +106,30 @@ export class PNGEncoder {
   public flush(): void {
     // 1. 文件头（固定 8 字节）
     const pngSignature = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
-    const chunks: Uint8Array[] = [
-      // 2. IHDR 块（包含图像的宽度、高度、位深度、颜色类型等信息）
-      this.createIHDRChunk(),
-      // 3. IDAT 块（包含图像数据）
-      this.createIDATChunk(),
-      // 4. IEND 块（文件结束标记）
-      this.createIENDChunk(),
-    ];
-    const totalSize = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-    let offset = 8;
+    
+    // 预先创建所有块
+    const ihdrChunk = this.createIHDRChunk();
+    const idatChunk = this.createIDATChunk();
+    const iendChunk = this.createIENDChunk();
+    
+    // 直接计算总大小
+    const totalSize = 8 + ihdrChunk.length + idatChunk.length + iendChunk.length;
+    
+    // 一次性分配内存
+    this.pngData = new Uint8Array(totalSize);
+    let offset = 0;
+    
+    // 按顺序写入数据
+    this.pngData.set(pngSignature, offset);
+    offset += pngSignature.length;
+    this.pngData.set(ihdrChunk, offset);
+    offset += ihdrChunk.length;
+    this.pngData.set(idatChunk, offset);
+    offset += idatChunk.length;
+    this.pngData.set(iendChunk, offset);
 
-    this.pngData = new Uint8Array(offset + totalSize);
-    this.pngData.set(pngSignature, 0);
-
-    for (const chunk of chunks) {
-      this.pngData.set(chunk, offset);
-      offset += chunk.length;
-    }
+    // 清空缓存
+    this.crc32.clear();
   }
 
   public toBuffer(): Uint8Array {

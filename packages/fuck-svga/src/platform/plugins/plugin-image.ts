@@ -52,7 +52,7 @@ export default definePlugin<"image">({
         isImageBitmap: (data: unknown) => data instanceof ImageBitmap,
         create: createImage,
         load: (
-          brush: FuckSvga.PlatformCreateImageInstance,
+          canvas: FuckSvga.PlatformCreateImageInstance,
           data: ImageBitmap | Uint8Array | string,
           _filename: string,
           _prefix?: string
@@ -66,7 +66,7 @@ export default definePlugin<"image">({
             return Promise.resolve(data);
           }
 
-          return loadImage(createImage(brush), genImageSource(data));
+          return loadImage(createImage(canvas), genImageSource(data));
         },
       };
     }

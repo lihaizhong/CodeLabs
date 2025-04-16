@@ -37,7 +37,6 @@ export interface MockTtBridge extends MockBasicBridge {
 export interface MockBasicPlatformGlobal {
   env: MockPlatformEnv;
   dpr: number;
-  sys: string;
 }
 
 export interface MockWeappPlatformGlobal extends MockBasicPlatformGlobal {
@@ -104,7 +103,6 @@ function initialPlatformGlobal(
         ),
       },
       dpr: 2,
-      sys: "ios",
     };
   }
 
@@ -125,7 +123,6 @@ function initialPlatformGlobal(
         ),
       },
       dpr: 2,
-      sys: "ios",
     };
   }
 
@@ -156,7 +153,6 @@ function initialPlatformGlobal(
         createOffscreenCanvas: jest.fn(() => new OffscreenCanvas(100, 100)),
       },
       dpr: 2,
-      sys: "ios",
     };
   }
 
@@ -165,7 +161,6 @@ function initialPlatformGlobal(
       env: "h5",
       br: window,
       dpr: globalThis.devicePixelRatio,
-      sys: "ios",
     };
   }
 

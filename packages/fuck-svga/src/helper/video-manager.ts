@@ -286,22 +286,6 @@ export class VideoManager {
   }
 
   /**
-   * 获取前一个bucket
-   * @returns
-   */
-  prev(): Promise<Bucket> {
-    return this.getBucket(this.point - 1);
-  }
-
-  /**
-   * 获取后一个bucket
-   * @returns
-   */
-  next(): Promise<Bucket> {
-    return this.getBucket(this.point + 1);
-  }
-
-  /**
    * 获取指定位置的bucket
    * @param pos
    * @returns

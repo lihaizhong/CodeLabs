@@ -1,5 +1,5 @@
 import { platform } from "../platform";
-import type { Brush } from "./brush";
+import type { Painter } from "../painter";
 
 const { noop } = platform;
 /**
@@ -32,7 +32,7 @@ export class Animator {
   public onUpdate: (timePercent: number) => void = noop;
   public onEnd: () => void = noop;
 
-  constructor(private readonly brush: Brush) {}
+  constructor(private readonly painter: Painter) {}
 
   /**
    * 设置动画的必要参数
@@ -80,7 +80,7 @@ export class Animator {
     if (this.isRunning) {
       this.doDeltaTime(platform.now() - this.startTime);
       if (this.isRunning) {
-        this.brush.flush(() => this.doFrame());
+        this.painter.flush(() => this.doFrame());
       }
     }
   }

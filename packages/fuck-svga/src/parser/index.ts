@@ -44,6 +44,9 @@ export class Parser {
   public download(url: string): Promise<ArrayBuffer | null> {
     const { remote, local, global } = platform;
 
+    benchmark.label(url);
+    benchmark.line();
+
     // 读取远程文件
     if (remote.is(url)) {
       return remote.fetch(url);
@@ -63,10 +66,6 @@ export class Parser {
    * @returns Promise<SVGA 数据源
    */
   public async load(url: string): Promise<Video> {
-    const data = await this.download(url);
-
-    benchmark.label(url);
-    benchmark.line();
-    return Parser.parseVideo(data!, url);
+    return Parser.parseVideo((await this.download(url))!, url);
   }
 }

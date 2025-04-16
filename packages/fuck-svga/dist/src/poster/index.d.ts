@@ -1,4 +1,4 @@
-import { Brush } from "../player/brush";
+import { Painter } from "../painter";
 export declare class Poster {
     /**
      * SVGA 元数据
@@ -16,14 +16,23 @@ export declare class Poster {
     /**
      * 刷头实例
      */
-    readonly brush: Brush;
+    readonly painter: Painter;
     constructor(width: number, height: number);
     /**
      * 设置配置项
      * @param options 可配置项
      */
     setConfig(options: string | PosterConfig, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
+    /**
+     * 修改内容模式
+     * @param contentMode
+     */
     setContentMode(contentMode: PLAYER_CONTENT_MODE): void;
+    /**
+     * 设置当前帧
+     * @param frame
+     */
+    setFrame(frame: number): void;
     /**
      * 装载 SVGA 数据元
      * @param videoEntity SVGA 数据源
