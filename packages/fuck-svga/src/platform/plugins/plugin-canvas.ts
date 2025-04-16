@@ -41,8 +41,11 @@ export default definePlugin<"getCanvas">({
     }
 
     if (env === "h5") {
+      const querySelector = (selector: string) => document.querySelector(selector);
+
       return (selector: string) => new Promise((resolve) => {
-        const canvas = document.querySelector(selector) as HTMLCanvasElement;
+        // FIXME: Taro 对 canvas 做了特殊处理，canvas 元素的 id 会被加上 canvas-id 的前缀
+        const canvas = (querySelector(`canvas[canvas-id=${selector.slice(1)}]`) || querySelector(selector)) as HTMLCanvasElement;
         const { clientWidth, clientHeight } = canvas || {};
 
         resolve(initCanvas(canvas, clientWidth, clientHeight));
