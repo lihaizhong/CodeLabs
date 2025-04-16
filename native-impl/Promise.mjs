@@ -20,7 +20,7 @@
 // 
 
 /**
- * Promise 状态枚举
+ * IPromise 状态枚举
  */
 const PROMISE_STATUS = {
 	/**
@@ -55,7 +55,7 @@ function isThenable(val) {
 }
 
 /**
- * Promise 异步任务执行器
+ * IPromise 异步任务执行器
  * @param {function} fn
  */
 function executor(fn) {
@@ -73,7 +73,7 @@ function executor(fn) {
 }
 
 /**
- * Promise 任务队列
+ * IPromise 任务队列
  */
 export class SchedulerQueue {
 	constructor() {
@@ -99,23 +99,23 @@ export class SchedulerQueue {
 /**
  * Promise实现
  */
-export default class Promise {
+export default class IPromise {
 	static all(promises) {
 		return promises.reduce(
 			(acc, promise) =>
 				acc.then((values) => {
-					if (promise instanceof Promise) {
+					if (promise instanceof IPromise) {
 						return promise.then((value) => values.concat([value]));
 					}
 
-					return Promise.resolve(promise);
+					return IPromise.resolve(promise);
 				}),
-			Promise.resolve([]),
+			IPromise.resolve([]),
 		);
 	}
 
 	static race(promises) {
-		return new Promise((resolve, reject) => {
+		return new IPromise((resolve, reject) => {
 			for (const promise of promises) {
 				promise.then(resolve, reject);
 			}
@@ -125,21 +125,21 @@ export default class Promise {
 	/**
 	 * 静态成功操作
 	 * @param {Function | isThenable} value
-	 * @return {Promise}
+	 * @return {IPromise}
 	 */
 	static resolve(value) {
 		if (isThenable(value)) return value;
-		return new Promise((resolve) => resolve(value));
+		return new IPromise((resolve) => resolve(value));
 	}
 
 	/**
 	 * 静态失败操作
 	 * @param {any} error
-	 * @return {Promise}
+	 * @return {IPromise}
 	 */
 	static reject(error) {
 		if (isThenable(error)) return error;
-		return new Promise((_, reject) => reject(error));
+		return new IPromise((_, reject) => reject(error));
 	}
 
 	#status;
@@ -156,7 +156,7 @@ export default class Promise {
 	 */
 	constructor(resolver) {
 		if (typeof resolver !== "function") {
-			throw new TypeError("Promise resolver undefined is not a function");
+			throw new TypeError("IPromise resolver undefined is not a function");
 		}
 
 		this.#status = PROMISE_STATUS.PENDING;
@@ -230,10 +230,10 @@ export default class Promise {
 	}
 
 	/**
-	 * Promise then 方法
+	 * IPromise then 方法
 	 * @param {function} onFulfilled optional
 	 * @param {function} onRejected optional
-	 * @return {Promise}
+	 * @return {IPromise}
 	 */
 	then(onFulfilled, onRejected) {
 		return new this.constructor((resolveNext, rejectedNext) => {
@@ -291,9 +291,9 @@ export default class Promise {
 	}
 
 	/**
-	 * Promise catch 方法（then的语法糖）
+	 * IPromise catch 方法（then的语法糖）
 	 * @param {function} onRejected
-	 * @return {Promise}
+	 * @return {IPromise}
 	 */
 	catch(onRejected) {
 		return this.then(null, onRejected);
@@ -302,7 +302,7 @@ export default class Promise {
 	/**
 	 * 成功或者失败都会执行的操作
 	 * @param {Function} cb
-	 * @return {Promise}
+	 * @return {IPromise}
 	 */
 	finally(cb) {
 		return this.then(
