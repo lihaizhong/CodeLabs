@@ -7,7 +7,8 @@ import { getBufferFromImageData } from "./png-helper";
 import type { Brush } from "../player/brush";
 
 interface VideoEditorOptions {
-  mode: "replace" | "append";
+  // 模式: R 替换, A 追加
+  mode: "R" | "A";
 }
 
 export class VideoEditor {
@@ -16,9 +17,9 @@ export class VideoEditor {
   private async set(
     key: string,
     value: Uint8Array,
-    mode: "replace" | "append" = "replace"
+    mode: VideoEditorOptions["mode"] = "R"
   ) {
-    if (mode === "append") {
+    if (mode === "A") {
       this.entity.dynamicElements[key] = await platform.image.load(
         this.brush,
         value,
