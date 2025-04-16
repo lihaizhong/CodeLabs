@@ -235,8 +235,13 @@ export class VideoManager {
         const downloadAwait = parser.download(bucket.origin);
         const parseVideoAwait = async (buff: ArrayBuffer | null) => {
           if (buff) {
-            await local!.write(buff, filePath);
-            bucket.local = filePath;
+            try {
+              await local!.write(buff, filePath);
+              bucket.local = filePath;
+            } catch (ex) {
+              console.error(ex);
+            }
+
             // bucket.filesize = buff.byteLength / 8;
             if (this.remainStart <= index && index < this.remainEnd) {
               return Parser.parseVideo(buff, url);

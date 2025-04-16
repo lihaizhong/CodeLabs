@@ -10,7 +10,7 @@
     "build": "rm -rf dist .parcel-cache && parcel build",
     "static": "serve -p 5151 public",
     "test": "jest",
-    "cs:sync": "zx .scripts/sync.mjs"
+    "zx:sync": "zx .scripts/sync.mjs"
   },
   "targets": {
     "frontend": {
