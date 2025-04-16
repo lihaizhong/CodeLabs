@@ -1,7 +1,7 @@
 import { IQrCodeImgOptions } from "../helper/qrcode-helper";
 import type { Brush } from "../player/brush";
 interface VideoEditorOptions {
-    mode: "replace" | "append";
+    mode: "R" | "A";
 }
 export declare class VideoEditor {
     private readonly entity;
