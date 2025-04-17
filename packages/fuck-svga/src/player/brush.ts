@@ -1,16 +1,23 @@
 import { platform } from "../platform";
 import benchmark from "../benchmark";
 import render from "./render";
-import { ImageManager } from "../helper";
+import { ImagePool } from "./image-pool";
 
-interface IBrushModel {
+interface BrushModel {
   // canvas or offscreen
   type: "C" | "O";
   // clear or resize or create
   clear: "CL" | "RE" | "CR";
 }
 
-type TBrushMode = "poster" | "animation";
+type BrushMode = "poster" | "animation";
+
+interface TransformScale {
+  scaleX: number;
+  scaleY: number;
+  translateX: number;
+  translateY: number;
+}
 
 const { noop } = platform;
 
@@ -41,22 +48,29 @@ export class Brush {
   /**
    * 粉刷模式
    */
-  private model: IBrushModel = {} as IBrushModel;
+  private model: BrushModel = {} as BrushModel;
 
-  private IM = new ImageManager();
+  private IM = new ImagePool();
+
+  private lastResizeKey = "";
+  private lastTransform?: Transform;
 
   public globalTransform?: Transform;
 
   /**
-   * 
-   * @param mode 
+   *
+   * @param mode
    *  - poster: 海报模式
    *  - animation: 动画模式
    *  - 默认为 animation
    * @param W 海报模式必须传入
    * @param H 海报模式必须传入
    */
-  constructor(private readonly mode: TBrushMode = "animation", private W = 0, private H = 0) {}
+  constructor(
+    private readonly mode: BrushMode = "animation",
+    private W = 0,
+    private H = 0
+  ) {}
 
   private setModel(type: "C" | "O"): void {
     const { model } = this;
@@ -199,10 +213,10 @@ export class Brush {
 
   /**
    * 更新动态图片集
-   * @param images 
+   * @param images
    */
   public updateDynamicImages(images: PlatformImages) {
-    this.IM.updateDynamicMaterials(images);
+    this.IM.appendAll(images);
   }
 
   /**
@@ -212,7 +226,7 @@ export class Brush {
    * @returns
    */
   public loadImages(images: RawImages, filename: string): Promise<void[]> {
-    return this.IM.loadImages(images, this, filename);
+    return this.IM.loadAll(images, this, filename);
   }
 
   /**
@@ -231,55 +245,84 @@ export class Brush {
     return this.XC!.getImageData(0, 0, this.W, this.H);
   }
 
-  public resize(
+  /**
+   * 计算缩放比例
+   * @param contentMode 
+   * @param videoSize 
+   * @returns 
+   */
+  private calculateScale(
     contentMode: PLAYER_CONTENT_MODE,
     videoSize: VideoSize
-  ): void {
+  ): TransformScale {
     const { Y } = this;
-    let scaleX = 1.0;
-    let scaleY = 1.0;
-    let translateX = 0.0;
-    let translateY = 0.0;
+    const imageRatio = videoSize.width / videoSize.height;
+    const viewRatio = Y!.width / Y!.height;
+    const isAspectFit = contentMode === PLAYER_CONTENT_MODE.ASPECT_FIT;
+    const shouldUseWidth =
+      (imageRatio >= viewRatio && isAspectFit) ||
+      (imageRatio <= viewRatio && !isAspectFit);
 
-    if (contentMode === PLAYER_CONTENT_MODE.FILL) {
-      scaleX = Y!.width / videoSize.width;
-      scaleY = Y!.height / videoSize.height;
-    } else if (
-      [
-        PLAYER_CONTENT_MODE.ASPECT_FILL,
-        PLAYER_CONTENT_MODE.ASPECT_FIT,
-      ].includes(contentMode)
-    ) {
-      const imageRatio = videoSize.width / videoSize.height;
-      const viewRatio = Y!.width / Y!.height;
+    if (shouldUseWidth) {
+      const scale = Y!.width / videoSize.width;
 
-      if (
-        (imageRatio >= viewRatio &&
-          contentMode === PLAYER_CONTENT_MODE.ASPECT_FIT) ||
-        (imageRatio <= viewRatio &&
-          contentMode === PLAYER_CONTENT_MODE.ASPECT_FILL)
-      ) {
-        scaleX = scaleY = Y!.width / videoSize.width;
-        translateY = (Y!.height - videoSize.height * scaleY) / 2.0;
-      } else if (
-        (imageRatio < viewRatio &&
-          contentMode === PLAYER_CONTENT_MODE.ASPECT_FIT) ||
-        (imageRatio > viewRatio &&
-          contentMode === PLAYER_CONTENT_MODE.ASPECT_FILL)
-      ) {
-        scaleX = scaleY = Y!.height / videoSize.height;
-        translateX = (Y!.width - videoSize.width * scaleX) / 2.0;
-      }
+      return {
+        scaleX: scale,
+        scaleY: scale,
+        translateX: 0,
+        translateY: (Y!.height - videoSize.height * scale) / 2,
+      };
     }
 
-    this.globalTransform = {
-      a: scaleX,
+    const scale = Y!.height / videoSize.height;
+
+    return {
+      scaleX: scale,
+      scaleY: scale,
+      translateX: (Y!.width - videoSize.width * scale) / 2,
+      translateY: 0,
+    };
+  }
+
+  /**
+   * 调整画布尺寸
+   * @param contentMode 
+   * @param videoSize 
+   * @returns 
+   */
+  public resize(contentMode: PLAYER_CONTENT_MODE, videoSize: VideoSize): void {
+    const resizeKey = `${contentMode}-${videoSize.width}-${videoSize.height}-${
+      this.Y!.width
+    }-${this.Y!.height}`;
+
+    if (this.lastResizeKey === resizeKey && this.lastTransform) {
+      this.globalTransform = this.lastTransform;
+      return;
+    }
+
+    let scale: TransformScale = {
+      scaleX: 1,
+      scaleY: 1,
+      translateX: 0,
+      translateY: 0,
+    };
+
+    if (contentMode === PLAYER_CONTENT_MODE.FILL) {
+      scale.scaleX = this.Y!.width / videoSize.width;
+      scale.scaleY = this.Y!.height / videoSize.height;
+    } else {
+      scale = this.calculateScale(contentMode, videoSize);
+    }
+
+    this.lastResizeKey = resizeKey;
+    this.globalTransform = this.lastTransform = {
+      a: scale.scaleX,
       b: 0.0,
       c: 0.0,
-      d: scaleY,
-      tx: translateX,
-      ty: translateY,
-    };
+      d: scale.scaleY,
+      tx: scale.translateX,
+      ty: scale.translateY,
+    };;
   }
 
   /**
@@ -298,7 +341,7 @@ export class Brush {
    * 清理素材库
    */
   public clearMaterials() {
-    this.IM.clear();
+    this.IM.release();
   }
 
   /**
@@ -314,10 +357,12 @@ export class Brush {
     start: number,
     end: number
   ) {
+    const { materials, dynamicMaterials } = this.IM
+
     render(
       this.YC!,
-      this.IM.getMaterials(),
-      this.IM.getDynamicMaterials(),
+      materials,
+      dynamicMaterials,
       videoEntity,
       currentFrame,
       start,
@@ -330,9 +375,15 @@ export class Brush {
     const { W, H, mode } = this;
 
     if (mode !== "poster") {
-      this.XC!.drawImage(this.YC!.canvas || this.Y as CanvasImageSource, 0, 0, W, H);
+      this.XC!.drawImage(
+        this.YC!.canvas || (this.Y as CanvasImageSource),
+        0,
+        0,
+        W,
+        H
+      );
     }
-  };
+  }
 
   /**
    * 销毁画笔

@@ -1,4 +1,4 @@
-type TBrushMode = "poster" | "animation";
+type BrushMode = "poster" | "animation";
 export declare class Brush {
     private readonly mode;
     private W;
@@ -28,6 +28,8 @@ export declare class Brush {
      */
     private model;
     private IM;
+    private lastResizeKey;
+    private lastTransform?;
     globalTransform?: Transform;
     /**
      *
@@ -38,7 +40,7 @@ export declare class Brush {
      * @param W 海报模式必须传入
      * @param H 海报模式必须传入
      */
-    constructor(mode?: TBrushMode, W?: number, H?: number);
+    constructor(mode?: BrushMode, W?: number, H?: number);
     private setModel;
     /**
      * 注册画笔，根据环境判断生成最优的绘制方式
@@ -69,6 +71,19 @@ export declare class Brush {
      * @returns
      */
     getImageData(): ImageData;
+    /**
+     * 计算缩放比例
+     * @param contentMode
+     * @param videoSize
+     * @returns
+     */
+    private calculateScale;
+    /**
+     * 调整尺寸
+     * @param contentMode
+     * @param videoSize
+     * @returns
+     */
     resize(contentMode: PLAYER_CONTENT_MODE, videoSize: VideoSize): void;
     /**
      * 注册刷新屏幕的回调函数

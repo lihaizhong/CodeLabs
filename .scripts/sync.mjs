@@ -26,6 +26,9 @@ function copyToTarget(dependencies, targetDir) {
         const targetPath = path.resolve(targetDir, filepath);
 
         fs.copySync(sourcePath, targetPath);
+        console.log(
+          chalk.green(`copy ${dependenceName} to ${targetPath} success`)
+        );
         break;
       }
     }

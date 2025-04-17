@@ -1,11 +1,4 @@
-interface CurrentPoint {
-  x: number;
-  y: number;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-}
+import { PointPool, CurrentPoint } from './point-pool';
 
 /**
  * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Tutorial/Paths
@@ -206,37 +199,32 @@ function drawBezier(
       transform.ty
     );
   }
-  const currentPoint: CurrentPoint = { x: 0, y: 0, x1: 0, y1: 0, x2: 0, y2: 0 };
+  const pointPool = PointPool.getInstance();
+  const currentPoint = pointPool.acquire();
   context.beginPath();
   if (d) {
-    const segments = d
-      .replace(/([a-zA-Z])/g, "|||$1 ")
-      .replace(/,/g, " ")
-      .split("|||");
+    // 优化字符串处理逻辑，减少正则表达式使用
+    const commands = d.match(/[a-zA-Z][^a-zA-Z]*/g) || [];
 
-    for (let i = 0; i < segments.length; i++) {
-      const segment = segments[i];
-      if (segment.length === 0) {
-        continue;
-      }
+    for (const command of commands) {
+      const firstLetter = command[0];
 
-      const firstLetter = segment.substring(0, 1);
       if (VALID_METHODS.includes(firstLetter)) {
-        drawBezierElement(
-          context,
-          currentPoint,
-          firstLetter,
-          segment.substring(1).trim().split(" ")
-        );
+        const args = command.substring(1).trim().split(/[\s,]+/).filter(Boolean);
+
+        drawBezierElement(context, currentPoint, firstLetter, args);
       }
     }
   }
+
   if (styles.fill) {
     context.fill();
   }
+
   if (styles.stroke) {
     context.stroke();
   }
+  pointPool.release(currentPoint);
   context.restore();
 }
 
