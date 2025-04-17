@@ -1,4 +1,4 @@
-import { Brush } from "../brush";
+import { Painter } from "../painter";
 /**
  * SVGA 播放器
  */
@@ -19,7 +19,7 @@ export declare class Player {
     /**
      * 刷头实例
      */
-    readonly brush: Brush;
+    readonly painter: Painter;
     /**
      * 设置配置项
      * @param options 可配置项

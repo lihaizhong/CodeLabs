@@ -1,5 +1,5 @@
 import { getDataURLFromImageData } from "../helper";
-import { Brush } from "../brush";
+import { Painter } from "../painter";
 
 export class Poster {
   /**
@@ -21,10 +21,10 @@ export class Poster {
   /**
    * 刷头实例
    */
-  public readonly brush: Brush;
+  public readonly painter: Painter;
 
   constructor(width: number, height: number) {
-    this.brush = new Brush("poster", width, height);
+    this.painter = new Painter("poster", width, height);
   }
 
   /**
@@ -53,7 +53,7 @@ export class Poster {
       this.frame = 0
     }
 
-    return this.brush.register(config.container, '', component);
+    return this.painter.register(config.container, '', component);
   }
 
   public setContentMode(contentMode: PLAYER_CONTENT_MODE): void {
@@ -73,12 +73,12 @@ export class Poster {
 
     const { images, filename } = videoEntity;
 
-    this.brush.clearContainer();
-    this.brush.clearMaterials();
-    this.brush.updateDynamicImages(videoEntity.dynamicElements);
+    this.painter.clearContainer();
+    this.painter.clearMaterials();
+    this.painter.updateDynamicImages(videoEntity.dynamicElements);
     this.entity = videoEntity;
 
-    return this.brush.loadImages(images, filename);
+    return this.painter.loadImages(images, filename);
   }
 
   /**
@@ -97,11 +97,11 @@ export class Poster {
   public draw(): void {
     if (!this.entity) return;
 
-    const { brush, entity, contentMode, frame, onStart, onEnd } = this;
+    const { painter, entity, contentMode, frame, onStart, onEnd } = this;
 
     onStart?.();
-    brush.resize(contentMode, entity!.size);
-    brush.draw(entity!, frame, 0, entity!.sprites.length);
+    painter.resize(contentMode, entity!.size);
+    painter.draw(entity!, frame, 0, entity!.sprites.length);
     onEnd?.();
   }
 
@@ -110,14 +110,14 @@ export class Poster {
    * @returns 
    */
   public toDataURL(): string {
-    return getDataURLFromImageData(this.brush.getImageData());
+    return getDataURLFromImageData(this.painter.getImageData());
   }
 
   /**
    * 销毁海报
    */
   public destroy(): void {
-    this.brush.destroy();
+    this.painter.destroy();
     this.entity = undefined;
   }
 }

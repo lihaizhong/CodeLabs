@@ -3,14 +3,14 @@ import benchmark from "../benchmark";
 import render from "./render";
 import { ImagePool } from "./image-pool";
 
-interface BrushModel {
+interface PaintModel {
   // canvas or offscreen
   type: "C" | "O";
   // clear or resize or create
   clear: "CL" | "RE" | "CR";
 }
 
-type BrushMode = "poster" | "animation";
+type PaintMode = "poster" | "animation";
 
 interface TransformScale {
   scaleX: number;
@@ -21,7 +21,7 @@ interface TransformScale {
 
 const { noop } = platform;
 
-export class Brush {
+export class Painter {
   /**
    * 主屏的 Canvas 元素
    * Main Screen
@@ -48,7 +48,7 @@ export class Brush {
   /**
    * 粉刷模式
    */
-  private model: BrushModel = {} as BrushModel;
+  private model: PaintModel = {} as PaintModel;
 
   private IM = new ImagePool();
 
@@ -67,7 +67,7 @@ export class Brush {
    * @param H 海报模式必须传入
    */
   constructor(
-    private readonly mode: BrushMode = "animation",
+    private readonly mode: PaintMode = "animation",
     private W = 0,
     private H = 0
   ) {}

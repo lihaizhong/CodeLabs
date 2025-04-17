@@ -1,5 +1,5 @@
 import { platform } from "../platform";
-import { Brush } from "../brush";
+import { Painter } from "../painter";
 import { Animator } from "./animator";
 import { Config } from "./config";
 import benchmark from "../benchmark";
@@ -27,7 +27,7 @@ export class Player {
   /**
    * 刷头实例
    */
-  public readonly brush = new Brush();
+  public readonly painter = new Painter();
 
   // private isBeIntersection = true;
   // private intersectionObserver: IntersectionObserver | null = null
@@ -57,10 +57,10 @@ export class Player {
     }
 
     this.config.register(config);
-    await this.brush.register(config.container, config.secondary, component);
+    await this.painter.register(config.container, config.secondary, component);
     // 监听容器是否处于浏览器视窗内
     // this.setIntersectionObserver()
-    this.animator = new Animator(this.brush);
+    this.animator = new Animator(this.painter);
   }
 
   /**
@@ -104,12 +104,12 @@ export class Player {
     const { images, filename } = videoEntity;
 
     this.animator!.stop();
-    this.brush.clearSecondary();
-    this.brush.clearMaterials();
-    this.brush.updateDynamicImages(videoEntity.dynamicElements);
+    this.painter.clearSecondary();
+    this.painter.clearMaterials();
+    this.painter.updateDynamicImages(videoEntity.dynamicElements);
     this.entity = videoEntity;
 
-    return this.brush.loadImages(images, filename);
+    return this.painter.loadImages(images, filename);
   }
 
   /**
@@ -174,8 +174,8 @@ export class Player {
    */
   public stop(): void {
     this.animator!.stop();
-    this.brush.clearContainer();
-    this.brush.clearSecondary();
+    this.painter.clearContainer();
+    this.painter.clearSecondary();
     this.onStop?.();
   }
 
@@ -184,7 +184,7 @@ export class Player {
    */
   public destroy(): void {
     this.animator!.stop();
-    this.brush.destroy();
+    this.painter.destroy();
     this.animator = null;
     this.entity = undefined;
   }
@@ -224,7 +224,7 @@ export class Player {
    * 开始绘制动画
    */
   private startAnimation(): void {
-    const { entity, config, animator, brush } = this;
+    const { entity, config, animator, painter } = this;
     const { now } = platform;
     const { fillMode, playMode, contentMode } = config;
     const {
@@ -258,7 +258,7 @@ export class Player {
 
     // 更新动画基础信息
     animator!.setConfig(duration, loopStart, loop, fillValue);
-    brush.resize(contentMode, entity!.size);
+    painter.resize(contentMode, entity!.size);
 
     // 分段渲染函数
     // let patchDraw: (before: () => void) => void;
@@ -281,7 +281,7 @@ export class Player {
         // 根据当前块大小计算nextTail
         chunk = Math.min(dynamicChunkSize, spriteCount - tail);
         nextTail = (tail + chunk) | 0;
-        brush.draw(entity!, currentFrame, tail, nextTail);
+        painter.draw(entity!, currentFrame, tail, nextTail);
         tail = nextTail;
         // 动态调整块大小
         elapsed = now() - startTime;
@@ -317,7 +317,7 @@ export class Player {
     //         : spriteCount;
 
     //       if (nextTail > tail) {
-    //         brush.draw(entity!, currentFrame, tail, nextTail);
+    //         painter.draw(entity!, currentFrame, tail, nextTail);
     //         tail = nextTail;
     //       }
     //     }
@@ -348,9 +348,9 @@ export class Player {
 
       if (hasRemained) return;
 
-      brush.clearContainer();
-      brush.stick();
-      brush.clearSecondary();
+      painter.clearContainer();
+      painter.stick();
+      painter.clearSecondary();
       latestFrame = currentFrame;
       currentFrame = nextFrame;
       tail = 0;
@@ -363,7 +363,7 @@ export class Player {
       entity!.locked = false;
       // 如果不保留最后一帧渲染，则清空画布
       if (fillMode === PLAYER_FILL_MODE.NONE) {
-        brush.clearContainer();
+        painter.clearContainer();
       }
 
       this.onEnd?.();

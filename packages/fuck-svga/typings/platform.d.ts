@@ -64,9 +64,9 @@ declare namespace FuckSvga {
     image: {
       isImage: (data: unknown) => boolean;
       isImageBitmap: (data: unknown) => boolean;
-      create: (brush: PlatformCreateImageInstance) => PlatformImage;
+      create: (canvas: PlatformCreateImageInstance) => PlatformImage;
       load: (
-        brush: PlatformCreateImageInstance,
+        canvas: PlatformCreateImageInstance,
         data: ImageBitmap | Uint8Array | string,
         filename: string,
         prefix?: string

@@ -4,7 +4,7 @@ import {
   IQrCodeImgOptions,
 } from "../helper/qrcode-helper";
 import { getBufferFromImageData } from "./png-helper";
-import type { Brush } from "../brush";
+import type { Painter } from "../painter";
 
 interface VideoEditorOptions {
   // 模式: R 替换, A 追加
@@ -12,7 +12,7 @@ interface VideoEditorOptions {
 }
 
 export class VideoEditor {
-  constructor(private readonly entity: Video, private readonly brush: Brush) {}
+  constructor(private readonly entity: Video, private readonly painter: Painter) {}
 
   private async set(
     key: string,
@@ -21,7 +21,7 @@ export class VideoEditor {
   ) {
     if (mode === "A") {
       this.entity.dynamicElements[key] = await platform.image.load(
-        this.brush,
+        this.painter,
         value,
         this.entity.filename,
         `dynamic.${key}`

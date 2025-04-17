@@ -1,4 +1,4 @@
-import { Brush } from "../brush";
+import { Painter } from "../painter";
 export declare class Poster {
     /**
      * SVGA 元数据
@@ -16,7 +16,7 @@ export declare class Poster {
     /**
      * 刷头实例
      */
-    readonly brush: Brush;
+    readonly painter: Painter;
     constructor(width: number, height: number);
     /**
      * 设置配置项

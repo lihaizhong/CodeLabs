@@ -1,6 +1,6 @@
 import benchmark from "../benchmark";
 import { platform } from "../platform";
-import { Brush } from ".";
+import type { Painter } from ".";
 
 export class ImagePool {
   /**
@@ -37,7 +37,7 @@ export class ImagePool {
    */
   public loadAll(
     images: RawImages | PlatformImages,
-    brush: Brush,
+    painter: Painter,
     filename: string
   ): Promise<void[]> {
     return benchmark.time<void[]>("loadAll", () => {
@@ -50,7 +50,7 @@ export class ImagePool {
         if (isImage(image)) {
           this.materials.set(key, image as unknown as PlatformImage);
         } else {
-          const p = load(brush, image as RawImage, filename, key).then((img) => {
+          const p = load(painter, image as RawImage, filename, key).then((img) => {
             this.materials.set(key, img)
           });
   

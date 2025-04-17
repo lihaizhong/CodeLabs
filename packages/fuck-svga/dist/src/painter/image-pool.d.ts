@@ -1,4 +1,4 @@
-import { Brush } from ".";
+import type { Painter } from ".";
 export declare class ImagePool {
     /**
      * 待复用的 img 标签
@@ -23,7 +23,7 @@ export declare class ImagePool {
      * @param filename 文件名称
      * @returns
      */
-    loadAll(images: RawImages | PlatformImages, brush: Brush, filename: string): Promise<void[]>;
+    loadAll(images: RawImages | PlatformImages, painter: Painter, filename: string): Promise<void[]>;
     /**
      * 更新动态素材
      * @param images

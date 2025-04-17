@@ -106,7 +106,7 @@ describe("pluginImage 插件", () => {
 
     it("检查 load 是否正常工作", async () => {
       const image = pluginImage.install.call(platform);
-      const brush = jest.fn(() => ({ createImage: () => new Image() }));
+      const painter = jest.fn(() => ({ createImage: () => new Image() }));
       const u8a = new Uint8Array([
         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
         0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02,
@@ -120,12 +120,12 @@ describe("pluginImage 插件", () => {
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mP4z8DwH4QZYAwAR8oH+Rq28akAAAAASUVORK5CYII=";
       const bitmap = await globalThis.createImageBitmap(new Blob([u8a]));
 
-      expect(image.load(brush, u8a)).toBeInstanceOf(Promise);
-      expect(image.load(brush, u8a)).resolves.toBeInstanceOf(ImageBitmap);
-      expect(image.load(brush, b64)).toBeInstanceOf(Promise);
-      expect(image.load(brush, b64)).resolves.toBeInstanceOf(Image);
-      expect(image.load(brush, bitmap)).toBeInstanceOf(Promise);
-      expect(image.load(brush, bitmap)).resolves.toBeInstanceOf(ImageBitmap);
+      expect(image.load(painter, u8a)).toBeInstanceOf(Promise);
+      expect(image.load(painter, u8a)).resolves.toBeInstanceOf(ImageBitmap);
+      expect(image.load(painter, b64)).toBeInstanceOf(Promise);
+      expect(image.load(painter, b64)).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, bitmap)).toBeInstanceOf(Promise);
+      expect(image.load(painter, bitmap)).resolves.toBeInstanceOf(ImageBitmap);
 
       // @ts-ignore
       globalThis = jest.mocked(new Proxy(global, {
@@ -138,10 +138,10 @@ describe("pluginImage 插件", () => {
         }
       }))
 
-      expect(image.load(brush, u8a)).toBeInstanceOf(Promise);
-      expect(image.load(brush, u8a)).resolves.toBeInstanceOf(Image);
-      expect(image.load(brush, b64)).toBeInstanceOf(Promise);
-      expect(image.load(brush, b64)).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, u8a)).toBeInstanceOf(Promise);
+      expect(image.load(painter, u8a)).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, b64)).toBeInstanceOf(Promise);
+      expect(image.load(painter, b64)).resolves.toBeInstanceOf(Image);
     });
   });
 
@@ -202,7 +202,7 @@ describe("pluginImage 插件", () => {
 
     it("检查 load 是否正常工作", async () => {
       const image = pluginImage.install.call(platform);
-      const brush = jest.mocked({ createImage: () => new Image() });
+      const painter = jest.mocked({ createImage: () => new Image() });
       const u8a = new Uint8Array([
         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
         0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02,
@@ -216,12 +216,12 @@ describe("pluginImage 插件", () => {
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mP4z8DwH4QZYAwAR8oH+Rq28akAAAAASUVORK5CYII=";
       const bitmap = await globalThis.createImageBitmap(new Blob([u8a]));
 
-      expect(image.load(brush, b64)).toBeInstanceOf(Promise);
-      expect(image.load(brush, b64)).resolves.toBeInstanceOf(Image);
-      expect(image.load(brush, u8a)).toBeInstanceOf(Promise);
-      expect(image.load(brush, u8a)).resolves.toBeInstanceOf(Image);
-      expect(image.load(brush, bitmap)).toBeInstanceOf(Promise);
-      expect(image.load(brush, bitmap)).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, b64)).toBeInstanceOf(Promise);
+      expect(image.load(painter, b64)).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, u8a)).toBeInstanceOf(Promise);
+      expect(image.load(painter, u8a)).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, bitmap)).toBeInstanceOf(Promise);
+      expect(image.load(painter, bitmap)).resolves.toBeInstanceOf(Image);
     });
   });
 
@@ -240,7 +240,7 @@ describe("pluginImage 插件", () => {
 
     it("检查 load 是否正常工作", async () => {
       const image = pluginImage.install.call(platform);
-      const brush = jest.mocked({ createImage: () => new Image() });
+      const painter = jest.mocked({ createImage: () => new Image() });
       const u8a = new Uint8Array([
         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
         0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02,
@@ -254,12 +254,12 @@ describe("pluginImage 插件", () => {
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mP4z8DwH4QZYAwAR8oH+Rq28akAAAAASUVORK5CYII=";
       const bitmap = await globalThis.createImageBitmap(new Blob([u8a]));
 
-      expect(image.load(brush, b64)).toBeInstanceOf(Promise);
-      expect(image.load(brush, b64)).resolves.toBeInstanceOf(Image);
-      expect(image.load(brush, u8a)).toBeInstanceOf(Promise);
-      expect(image.load(brush, u8a)).resolves.toBeInstanceOf(Image);
-      expect(image.load(brush, bitmap)).toBeInstanceOf(Promise);
-      expect(image.load(brush, bitmap)).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, b64)).toBeInstanceOf(Promise);
+      expect(image.load(painter, b64)).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, u8a)).toBeInstanceOf(Promise);
+      expect(image.load(painter, u8a)).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, bitmap)).toBeInstanceOf(Promise);
+      expect(image.load(painter, bitmap)).resolves.toBeInstanceOf(Image);
     });
   });
 });

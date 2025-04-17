@@ -1,5 +1,5 @@
-type BrushMode = "poster" | "animation";
-export declare class Brush {
+type PaintMode = "poster" | "animation";
+export declare class Painter {
     private readonly mode;
     private W;
     private H;
@@ -40,7 +40,7 @@ export declare class Brush {
      * @param W 海报模式必须传入
      * @param H 海报模式必须传入
      */
-    constructor(mode?: BrushMode, W?: number, H?: number);
+    constructor(mode?: PaintMode, W?: number, H?: number);
     private setModel;
     /**
      * 注册画笔，根据环境判断生成最优的绘制方式
