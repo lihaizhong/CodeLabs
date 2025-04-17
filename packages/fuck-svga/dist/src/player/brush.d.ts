@@ -79,7 +79,7 @@ export declare class Brush {
      */
     private calculateScale;
     /**
-     * 调整尺寸
+     * 调整画布尺寸
      * @param contentMode
      * @param videoSize
      * @returns

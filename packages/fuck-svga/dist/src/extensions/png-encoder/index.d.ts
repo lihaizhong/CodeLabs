@@ -3,6 +3,7 @@ export declare class PNGEncoder {
     private readonly height;
     private readonly view;
     private pngData;
+    private crc32;
     constructor(width: number, height: number);
     private createChunk;
     private createIHDRChunk;
