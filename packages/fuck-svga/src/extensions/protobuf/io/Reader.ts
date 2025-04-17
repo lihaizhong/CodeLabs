@@ -1,8 +1,12 @@
-import { utf8 } from "./utf8"
+// import { utf8 } from "./utf8"
+import { platform } from "../../../platform"
 import float from "./float";
 // import { LongBits } from "../dts";
 
 export default class Reader {
+  // 添加静态缓存，用于常用的空数组
+  private static EMPTY_UINT8ARRAY = new Uint8Array(0);
+
   /**
    * Creates a new reader using the specified buffer.
    * @function
@@ -55,7 +59,7 @@ export default class Reader {
   }
 
   private indexOutOfRange(reader: Reader, writeLength?: number) {
-    return RangeError(
+    return new RangeError(
       "index out of range: " +
         reader.pos +
         " + " +
@@ -331,15 +335,15 @@ export default class Reader {
   bytes() {
     const length = this.uint32();
     const start = this.pos;
-    const end = this.pos + length;
+    const end = start + length;
 
     if (end > this.len) {
       throw this.indexOutOfRange(this, length);
     }
 
     this.pos += length;
-    if (start == end) {
-      return new Uint8Array(0);
+    if (length === 0) {
+      return Reader.EMPTY_UINT8ARRAY;
     }
 
     return this.slice(this.buf, start, end);
@@ -352,7 +356,7 @@ export default class Reader {
   string() {
     const bytes = this.bytes();
 
-    return utf8(bytes, 0, bytes.length);
+    return platform.decode.utf8(bytes, 0, bytes.length);
   }
 
   /**
@@ -368,12 +372,19 @@ export default class Reader {
       }
       this.pos += length;
     } else {
-      do {
-        /* istanbul ignore if */
-        if (this.pos >= this.len) {
-          throw this.indexOutOfRange(this);
+      // 优化变长整数跳过逻辑
+      const startPos = this.pos;
+
+      while (this.pos < this.len) {
+        if (this.buf[this.pos++] < 128) {
+          return this;
         }
-      } while (this.buf[this.pos++] & 128);
+        // 防止无限循环，最多读取10个字节
+        if (this.pos - startPos >= 10) {
+          throw Error("invalid varint encoding");
+        }
+      }
+      throw this.indexOutOfRange(this);
     }
     return this;
   }

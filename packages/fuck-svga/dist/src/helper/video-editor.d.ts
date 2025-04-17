@@ -24,10 +24,18 @@ export declare class VideoEditor {
     setCanvas(key: string, context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, options?: VideoEditorOptions): Promise<void>;
     /**
      * 创建二进制图片
+     * @param key
+     * @param buff
+     * @param options
+     * @returns
      */
     setImage(key: string, url: string, options?: VideoEditorOptions): Promise<void>;
     /**
      * 创建二维码图片
+     * @param key
+     * @param code
+     * @param options
+     * @returns
      */
     setQRCode(key: string, code: string, options: VideoEditorOptions & Omit<IQrCodeImgOptions, "code">): Promise<void>;
 }

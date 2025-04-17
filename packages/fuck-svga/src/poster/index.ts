@@ -35,29 +35,31 @@ export class Poster {
     options: string | PosterConfig,
     component?: WechatMiniprogram.Component.TrivialInstance | null
   ): Promise<void> {
-    let config: PosterConfig;
-
-    if (typeof options === "string") {
-      config = { container: options };
-    } else {
-      config = options;
-    }
+    const config: PosterConfig = typeof options === "string" ? { container: options } : options;
 
     if (config.contentMode) {
       this.contentMode = config.contentMode;
     }
 
-    if (typeof config.frame === 'number') {
-      this.frame = config.frame;
-    } else {
-      this.frame = 0
-    }
+    this.frame = typeof config.frame === 'number' ? config.frame : 0;
 
     return this.painter.register(config.container, '', component);
   }
 
+  /**
+   * 修改内容模式
+   * @param contentMode 
+   */
   public setContentMode(contentMode: PLAYER_CONTENT_MODE): void {
     this.contentMode = contentMode;
+  }
+
+  /**
+   * 设置当前帧
+   * @param frame
+   */
+  public setFrame(frame: number): void {
+    this.frame = frame;
   }
 
   /**

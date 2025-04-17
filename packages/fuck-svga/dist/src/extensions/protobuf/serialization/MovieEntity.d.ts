@@ -17,6 +17,7 @@ export interface MovieEntityProps {
     sprites: SpriteEntity[] | null;
 }
 export default class MovieEntity {
+    static EMPTY_OBJECT: Readonly<{}>;
     /**
      * Decodes a MovieEntity message from the specified reader or buffer.
      * @function decode

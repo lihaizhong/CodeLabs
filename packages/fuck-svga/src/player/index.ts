@@ -48,13 +48,7 @@ export class Player {
     options: string | PlayerConfigOptions,
     component?: WechatMiniprogram.Component.TrivialInstance | null
   ): Promise<void> {
-    let config: PlayerConfigOptions;
-
-    if (typeof options === "string") {
-      config = { container: options };
-    } else {
-      config = options;
-    }
+    const config: PlayerConfigOptions = typeof options === "string" ? { container: options } : options;
 
     this.config.register(config);
     await this.painter.register(config.container, config.secondary, component);
@@ -97,9 +91,7 @@ export class Player {
    * @returns Promise<void>
    */
   public mount(videoEntity: Video): Promise<void[]> {
-    if (!videoEntity) {
-      throw new Error("videoEntity undefined");
-    }
+    if (!videoEntity) throw new Error("videoEntity undefined");
 
     const { images, filename } = videoEntity;
 
@@ -261,11 +253,9 @@ export class Player {
     painter.resize(contentMode, entity!.size);
 
     // 分段渲染函数
-    // let patchDraw: (before: () => void) => void;
-    // if (global.isPerf) {
     const MAX_DRAW_TIME_PER_FRAME = 8;
     const MAX_ACCELERATE_DRAW_TIME_PER_FRAME = 3;
-    const MAX_DYNAMIC_CHUNK_SIZE = 65;
+    const MAX_DYNAMIC_CHUNK_SIZE = 34;
     const MIN_DYNAMIC_CHUNK_SIZE = 1;
     // 动态调整每次绘制的块大小
     let dynamicChunkSize = 4; // 初始块大小
@@ -300,29 +290,29 @@ export class Player {
         }
       }
     };
-    // } else {
-    //   const TAIL_THRESHOLD_FACTOR = 1.05;
-    //   const TAIL_OFFSET = 2;
-    //   // 普通模式
-    //   patchDraw = (before: () => void) => {
-    //     before();
-    //     if (tail < spriteCount) {
-    //       // 1.15 和 2 均为阔值，保证渲染尽快完成
-    //       nextTail = hasRemained
-    //         ? Math.min(
-    //             (spriteCount * partialDrawPercent * TAIL_THRESHOLD_FACTOR +
-    //               TAIL_OFFSET) | 0,
-    //             spriteCount
-    //           )
-    //         : spriteCount;
 
-    //       if (nextTail > tail) {
-    //         painter.draw(entity!, currentFrame, tail, nextTail);
-    //         tail = nextTail;
-    //       }
+    // const TAIL_THRESHOLD_FACTOR = 1.05;
+    // const TAIL_OFFSET = 2;
+    // let partialDrawPercent = 0;
+    // // 普通模式
+    // const patchDraw = (before: () => void) => {
+    //   before();
+    //   if (tail < spriteCount) {
+    //     // 1.15 和 2 均为阔值，保证渲染尽快完成
+    //     nextTail = hasRemained
+    //       ? Math.min(
+    //           (spriteCount * partialDrawPercent * TAIL_THRESHOLD_FACTOR +
+    //             TAIL_OFFSET) | 0,
+    //           spriteCount
+    //         )
+    //       : spriteCount;
+
+    //     if (nextTail > tail) {
+    //       painter.draw(entity!, currentFrame, tail, nextTail);
+    //       tail = nextTail;
     //     }
-    //   };
-    // }
+    //   }
+    // };
 
     // 动画绘制过程
     animator!.onUpdate = (timePercent: number) => {
