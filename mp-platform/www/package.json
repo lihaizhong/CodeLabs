@@ -8,7 +8,9 @@
   "license": "ISC",
   "dependencies": {
     "@ungap/url-search-params": "^0.2.2",
+    "excelsior-channel": "workspace:^",
     "fuck-svga": "workspace:^",
+    "jsqr": "^1.4.0",
     "weui": "^2.6.21"
   }
 }

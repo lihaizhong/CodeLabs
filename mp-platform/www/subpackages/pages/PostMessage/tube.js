@@ -1,4 +1,4 @@
-import { NodePoint, Journal } from "@lihzsky/excelsior-channel";
+import { NodePoint, Journal } from "excelsior-channel";
 
 const journal = new Journal();
 const pointer = new NodePoint();

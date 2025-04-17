@@ -16,7 +16,8 @@
     "frontend": {
       "source": [
         "./mp-platform/www/pages/index.html",
-        "./mp-platform/www/pages/**/*.html"
+        "./mp-platform/www/pages/**/*.html",
+        "./mp-platform/www/subpackages/**/*.html"
       ]
     }
   },
@@ -36,6 +37,9 @@
     "@changesets/cli": "^2.28.1",
     "@jest/globals": "^29.7.0",
     "@parcel/config-default": "^2.14.4",
+    "@parcel/packager-raw-url": "2.14.4",
+    "@parcel/transformer-webmanifest": "2.14.4",
+    "@tailwindcss/postcss": "^4.1.4",
     "@types/benchmark": "^2.1.5",
     "@types/jest": "^29.5.14",
     "benchmark": "^2.1.4",
@@ -43,7 +47,9 @@
     "jest-environment-jsdom": "^29.7.0",
     "parcel": "^2.14.4",
     "parcel-reporter-static-files-copy": "^1.5.3",
+    "postcss": "^8.2.1",
     "serve": "^14.2.4",
+    "tailwindcss": "^4.1.4",
     "ts-jest": "^29.3.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",

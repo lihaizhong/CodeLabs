@@ -1,4 +1,4 @@
-import { MainPoint, Journal } from "@lihzsky/excelsior-channel";
+import { MainPoint, Journal } from "excelsior-channel";
 
 const frame = document.body.getElementsByTagName('iframe')[0];
 const journal = new Journal();
