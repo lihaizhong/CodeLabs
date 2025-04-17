@@ -112,9 +112,10 @@ export class Brush {
   ) {
     const { model, mode } = this;
     const { getCanvas, getOfsCanvas } = platform;
+    const { env } = platform.global
     // #region set main screen implement
     // -------- 创建主屏 ---------
-    if (mode === "poster") {
+    if (mode === "poster" && (env !== 'h5' || 'OffscreenCanvas' in globalThis)) {
       const { W, H } = this;
 
       if (!(W > 0 && H > 0)) {

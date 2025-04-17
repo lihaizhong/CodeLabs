@@ -6,7 +6,7 @@ declare namespace FuckSvga {
     br: any;
     dpr: number;
     // isPerf: boolean;
-    sys: string;
+    // sys: string;
   }
 
   export type PlatformProperties =
@@ -32,6 +32,8 @@ declare namespace FuckSvga {
     global: PlatformGlobal;
 
     noop: () => any;
+
+    retry: <T>(fn: () => T, intervals: number[] = [], times: number = 0) => Promise<T>;
 
     now: () => number;
 

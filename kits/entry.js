@@ -1,6 +1,6 @@
-async function entry(fn, options) {
+function entry(fn, options) {
 	try {
-		return await fn();
+		return fn();
 	} catch (ex) {
 		options?.eachError?.(ex);
 		return entry(fn, options);

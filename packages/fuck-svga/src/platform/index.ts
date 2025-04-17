@@ -8,8 +8,28 @@ import pluginImage from "./plugins/plugin-image";
 import pluginRaf from "./plugins/plugin-raf";
 import pluginFsm from "./plugins/plugin-fsm";
 
-
 export const noop: () => any = () => {};
+
+export async function retry<T>(
+  fn: () => T,
+  intervals: number[] = [],
+  times: number = 0
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    if (times >= intervals.length) {
+      throw err;
+    }
+
+    return new Promise((resolve) => {
+      setTimeout(
+        () => resolve(retry(fn, intervals, times + 1)),
+        intervals[times]
+      );
+    });
+  }
+}
 
 class Platform implements FuckSvga.Platform {
   private plugins: FuckSvga.PlatformPlugin<FuckSvga.PlatformProperties>[] = [
@@ -23,7 +43,7 @@ class Platform implements FuckSvga.Platform {
     pluginOfsCanvas,
 
     // 带依赖的插件，需要放在最后
-    pluginImage
+    pluginImage,
   ];
 
   public global: FuckSvga.PlatformGlobal = {
@@ -31,10 +51,12 @@ class Platform implements FuckSvga.Platform {
     br: null,
     dpr: 1,
     // isPerf: false,
-    sys: "UNKNOWN",
+    // sys: "UNKNOWN",
   };
 
   public noop = noop;
+
+  public retry = retry;
 
   public now = noop as FuckSvga.Platform["now"];
 
@@ -62,7 +84,6 @@ class Platform implements FuckSvga.Platform {
   private init() {
     this.global.br = this.useBridge();
     this.global.dpr = this.usePixelRatio();
-    this.global.sys = this.useSystem().toLocaleLowerCase();
     this.usePlugins();
   }
 
@@ -121,39 +142,39 @@ class Platform implements FuckSvga.Platform {
     return 1;
   }
 
-  private useSystem() {
-    const { env, br } = this.global;
+  // private useSystem() {
+  //   const { env, br } = this.global;
 
-    if (env === "h5") {
-      const UA = navigator.userAgent;
+  //   if (env === "h5") {
+  //     const UA = navigator.userAgent;
 
-      if (/(Android)/i.test(UA)) {
-        return "Android";
-      }
+  //     if (/(Android)/i.test(UA)) {
+  //       return "Android";
+  //     }
 
-      if (/(iPhone|iPad|iPod|iOS)/i.test(UA)) {
-        return "iOS";
-      }
+  //     if (/(iPhone|iPad|iPod|iOS)/i.test(UA)) {
+  //       return "iOS";
+  //     }
 
-      if (/(OpenHarmony|ArkWeb)/i.test(UA)) {
-        return "OpenHarmony";
-      }
-    } else {
-      if (env === "alipay") {
-        return (br as any).getDeviceBaseInfo().platform as string;
-      }
+  //     if (/(OpenHarmony|ArkWeb)/i.test(UA)) {
+  //       return "OpenHarmony";
+  //     }
+  //   } else {
+  //     if (env === "alipay") {
+  //       return (br as any).getDeviceBaseInfo().platform as string;
+  //     }
 
-      if (env === "tt") {
-        return (br as any).getDeviceInfoSync().platform as string;
-      }
+  //     if (env === "tt") {
+  //       return (br as any).getDeviceInfoSync().platform as string;
+  //     }
 
-      if (env === "weapp") {
-        return (br as any).getDeviceInfo().platform as string;
-      }
-    }
+  //     if (env === "weapp") {
+  //       return (br as any).getDeviceInfo().platform as string;
+  //     }
+  //   }
 
-    return "UNKNOWN";
-  }
+  //   return "UNKNOWN";
+  // }
 
   private usePlugins() {
     this.plugins.forEach((plugin) => {
