@@ -1,8 +1,10 @@
 export declare const noop: () => any;
+export declare function retry<T>(fn: () => T, intervals?: number[], times?: number): Promise<T>;
 declare class Platform implements FuckSvga.Platform {
     private plugins;
     global: FuckSvga.PlatformGlobal;
     noop: () => any;
+    retry: typeof retry;
     now: FuckSvga.Platform["now"];
     path: FuckSvga.Platform["path"];
     local: FuckSvga.Platform["local"];
@@ -17,7 +19,6 @@ declare class Platform implements FuckSvga.Platform {
     private autoEnv;
     private useBridge;
     private usePixelRatio;
-    private useSystem;
     private usePlugins;
     switch(env: FuckSvga.SupportedPlatform): void;
 }
