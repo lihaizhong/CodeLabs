@@ -1,4 +1,4 @@
-import type { Brush } from "./brush";
+import type { Brush } from "../brush";
 /**
  * 动画控制器
  */

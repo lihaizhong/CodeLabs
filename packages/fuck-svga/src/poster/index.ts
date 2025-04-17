@@ -1,5 +1,5 @@
 import { getDataURLFromImageData } from "../helper";
-import { Brush } from "../player/brush";
+import { Brush } from "../brush";
 
 export class Poster {
   /**

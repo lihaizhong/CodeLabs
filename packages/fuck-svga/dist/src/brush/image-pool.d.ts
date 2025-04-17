@@ -1,4 +1,4 @@
-import { Brush } from "./brush";
+import { Brush } from ".";
 export declare class ImagePool {
     /**
      * 待复用的 img 标签

@@ -4,7 +4,7 @@ import {
   IQrCodeImgOptions,
 } from "../helper/qrcode-helper";
 import { getBufferFromImageData } from "./png-helper";
-import type { Brush } from "../player/brush";
+import type { Brush } from "../brush";
 
 interface VideoEditorOptions {
   // 模式: R 替换, A 追加

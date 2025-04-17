@@ -1,6 +1,6 @@
 import benchmark from "../benchmark";
 import { platform } from "../platform";
-import { Brush } from "./brush";
+import { Brush } from ".";
 
 export class ImagePool {
   /**

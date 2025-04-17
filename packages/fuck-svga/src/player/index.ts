@@ -1,5 +1,5 @@
 import { platform } from "../platform";
-import { Brush } from "./brush";
+import { Brush } from "../brush";
 import { Animator } from "./animator";
 import { Config } from "./config";
 import benchmark from "../benchmark";

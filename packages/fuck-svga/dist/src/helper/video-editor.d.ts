@@ -1,5 +1,5 @@
 import { IQrCodeImgOptions } from "../helper/qrcode-helper";
-import type { Brush } from "../player/brush";
+import type { Brush } from "../brush";
 interface VideoEditorOptions {
     mode: "R" | "A";
 }

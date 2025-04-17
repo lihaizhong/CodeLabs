@@ -1,4 +1,4 @@
-import { Brush } from "./brush";
+import { Brush } from ".";
 
 describe("Brush 定义", () => {
   it("Brush 是否被定义", () => {

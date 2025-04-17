@@ -1,4 +1,4 @@
-import { Brush } from "../player/brush";
+import { Brush } from "../brush";
 export declare class Poster {
     /**
      * SVGA 元数据

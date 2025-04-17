@@ -1,4 +1,4 @@
-import { Brush } from "./brush";
+import { Brush } from "../brush";
 /**
  * SVGA 播放器
  */

@@ -1,5 +1,5 @@
 import { platform } from "../platform";
-import type { Brush } from "./brush";
+import type { Brush } from "../brush";
 
 const { noop } = platform;
 /**
