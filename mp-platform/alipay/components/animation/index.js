@@ -4,6 +4,7 @@ import ReadyGo from "../../utils/ReadyGo";
 let player;
 let parser;
 const readyGo = new ReadyGo();
+const cache = new Map();
 
 Component({
   options: {
@@ -51,7 +52,7 @@ Component({
     },
     detached() {
       readyGo.reset();
-      this.stop();
+      player?.destroy();
       player = null;
       parser = null;
     },
@@ -64,26 +65,40 @@ Component({
   methods: {
     async initialize() {
       try {
-        this.setData({ message: "准备下载资源" });
-        // my.showLoading();
-        const videoItem = await parser.load(this.props.url);
-        this.setData({ message: "下载资源成功" });
+        let videoItem
+
+        if (cache.has(this.props.url)) {
+          this.setData({ message: "匹配到缓存" })
+          videoItem = cache.get(this.props.url);
+        } else {
+          this.setData({ message: "准备下载资源" });
+          videoItem = await parser.load(this.props.url);
+          cache.set(this.props.url, videoItem);
+          this.setData({ message: "下载资源成功" });
+        }
 
         console.log(this.props.url, videoItem);
         await player.mount(videoItem);
         this.setData({ message: "资源装载成功" });
+        // player.stepToPercentage(0.3);
         player.start();
         this.setData({ message: "" });
       } catch (ex) {
-        // my.hideLoading();
         console.error("svga初始化失败！", ex);
         this.setData({ message: ex.message + "\n" + ex.stack });
       }
     },
-    stop() {
-      if (player) {
-        player.stop();
-      }
+    handlePlay() {
+      player?.start()
     },
+    handleResume() {
+      player?.resume()
+    },
+    handlePause() {
+      player?.pause()
+    },
+    handleStop() {
+      player?.stop()
+    }
   },
 });
