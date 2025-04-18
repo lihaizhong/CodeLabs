@@ -56,7 +56,7 @@ declare namespace FuckPlatformPlugin {
   export interface image {
     isImage: (data: unknown) => boolean;
     isImageBitmap: (data: unknown) => boolean;
-    create: (canvas: PlatformCreateImageInstance) => PlatformImage;
+    create: (canvas?: PlatformCreateImageInstance) => PlatformImage;
     load: (
       canvas: PlatformCreateImageInstance,
       data: ImageBitmap | Uint8Array | string,

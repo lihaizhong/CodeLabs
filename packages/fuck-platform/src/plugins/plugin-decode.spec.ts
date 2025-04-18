@@ -66,7 +66,7 @@ describe("pluginDecode 插件", () => {
       const decode = pluginDecode.install.call(platform);
       const u8a = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
       const { buffer, byteOffset, byteLength } = u8a;
-      const result = await decode.toBitmap(u8a);
+      const result = await decode.toBitmap!(u8a);
 
       expect(global.createImageBitmap).toHaveBeenCalledWith(new Blob([buffer.slice(byteOffset, byteOffset + byteLength)]));
       expect(result).toBe("mocked image bitmap");

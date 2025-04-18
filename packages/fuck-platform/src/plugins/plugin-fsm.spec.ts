@@ -35,9 +35,9 @@ describe("pluginFsm 插件", () => {
       const fsm = pluginFsm.install.call(platform);
 
       expect(typeof fsm).toBe("object");
-      expect(typeof fsm.write).toBe("function");
-      expect(typeof fsm.read).toBe("function");
-      expect(typeof fsm.remove).toBe("function");
+      expect(typeof fsm!.write).toBe("function");
+      expect(typeof fsm!.read).toBe("function");
+      expect(typeof fsm!.remove).toBe("function");
     });
 
     it("write 调用成功", async () => {
@@ -50,7 +50,7 @@ describe("pluginFsm 插件", () => {
       const fsm = pluginFsm.install.call(platform);
       const data = new ArrayBuffer(10);
       const filePath = "test/test.txt";
-      const result = await fsm.write(data, filePath);
+      const result = await fsm!.write(data, filePath);
 
       expect(result).toBe(filePath);
     });
@@ -66,7 +66,7 @@ describe("pluginFsm 插件", () => {
       const data = new ArrayBuffer(10);
       const filePath = "test/test.txt";
 
-      expect(fsm.write(data, filePath)).rejects.toBe("write fail");
+      expect(fsm!.write(data, filePath)).rejects.toBe("write fail");
     });
 
     it("read 调用成功", async () => {
@@ -78,7 +78,7 @@ describe("pluginFsm 插件", () => {
 
       const fsm = pluginFsm.install.call(platform);
       const filePath = "test/test.txt";
-      const result = await fsm.read(filePath);
+      const result = await fsm!.read(filePath);
 
       expect(result).toBeInstanceOf(ArrayBuffer);
     });
@@ -93,7 +93,7 @@ describe("pluginFsm 插件", () => {
       const fsm = pluginFsm.install.call(platform);
       const filePath = "test/test.txt";
 
-      expect(fsm.read(filePath)).rejects.toBe("read fail");
+      expect(fsm!.read(filePath)).rejects.toBe("read fail");
     });
 
     it("remove 调用成功", async () => {
@@ -105,7 +105,7 @@ describe("pluginFsm 插件", () => {
 
       const fsm = pluginFsm.install.call(platform);
       const filePath = "test/test.txt";
-      const result = await fsm.remove(filePath);
+      const result = await fsm!.remove(filePath);
 
       expect(result).toBe(filePath);
     });
@@ -120,7 +120,7 @@ describe("pluginFsm 插件", () => {
       const fsm = pluginFsm.install.call(platform);
       const filePath = "test/test.txt";
 
-      expect(fsm.remove(filePath)).resolves.toBe(filePath);
+      expect(fsm!.remove(filePath)).resolves.toBe(filePath);
     });
   });
 });

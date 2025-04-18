@@ -38,7 +38,7 @@ describe("pluginRaf 插件", () => {
       const rAF = pluginRaf.install.call(platform);
 
       const callback = jest.fn();
-      const mockCanvas = {};
+      const mockCanvas = {} as WechatMiniprogram.Canvas;
       const handle = rAF(mockCanvas, callback);
       expect(typeof handle).toBe("number");
       expect(callback).not.toHaveBeenCalled();
@@ -64,7 +64,7 @@ describe("pluginRaf 插件", () => {
         requestAnimationFrame(callback: FrameRequestCallback) {
           return globalThis.requestAnimationFrame(callback);
         }
-      };
+      } as WechatMiniprogram.Canvas;
       const handle = rAF(mockCanvas, callback);
       expect(typeof handle).toBe("number");
       expect(callback).not.toHaveBeenCalled();

@@ -37,7 +37,7 @@ export default definePlugin<"image", FuckPlatformPlugin.image>({
     }
 
     if (env === "h5") {
-      const createImage = (_: FuckPlatformPlugin.CreateImageInstance) =>
+      const createImage = (_?: FuckPlatformPlugin.CreateImageInstance) =>
         new Image();
       const genImageSource = (data: Uint8Array | string) => {
         if (typeof data === "string") {

@@ -50,9 +50,9 @@ describe("pluginImage 插件", () => {
     const platform = {
       global: initialPlatformGlobal("h5"),
       noop: () => {},
-      decode: {} as FuckPlatform.Platform["decode"],
-      local: {} as FuckPlatform.Platform["local"],
-      path: {} as FuckPlatform.Platform["path"],
+      decode: {} as FuckPlatformPlugin.decode,
+      local: {} as FuckPlatformPlugin.local | null,
+      path: {} as FuckPlatformPlugin.path,
     };
 
     platform.decode = pluginDecode.install.call(platform);
@@ -120,12 +120,12 @@ describe("pluginImage 插件", () => {
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mP4z8DwH4QZYAwAR8oH+Rq28akAAAAASUVORK5CYII=";
       const bitmap = await globalThis.createImageBitmap(new Blob([u8a]));
 
-      expect(image.load(painter, u8a)).toBeInstanceOf(Promise);
-      expect(image.load(painter, u8a)).resolves.toBeInstanceOf(ImageBitmap);
-      expect(image.load(painter, b64)).toBeInstanceOf(Promise);
-      expect(image.load(painter, b64)).resolves.toBeInstanceOf(Image);
-      expect(image.load(painter, bitmap)).toBeInstanceOf(Promise);
-      expect(image.load(painter, bitmap)).resolves.toBeInstanceOf(ImageBitmap);
+      expect(image.load(painter, u8a, "")).toBeInstanceOf(Promise);
+      expect(image.load(painter, u8a, "")).resolves.toBeInstanceOf(ImageBitmap);
+      expect(image.load(painter, b64, "")).toBeInstanceOf(Promise);
+      expect(image.load(painter, b64, "")).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, bitmap, "")).toBeInstanceOf(Promise);
+      expect(image.load(painter, bitmap, "")).resolves.toBeInstanceOf(ImageBitmap);
 
       // @ts-ignore
       globalThis = jest.mocked(new Proxy(global, {
@@ -138,10 +138,10 @@ describe("pluginImage 插件", () => {
         }
       }))
 
-      expect(image.load(painter, u8a)).toBeInstanceOf(Promise);
-      expect(image.load(painter, u8a)).resolves.toBeInstanceOf(Image);
-      expect(image.load(painter, b64)).toBeInstanceOf(Promise);
-      expect(image.load(painter, b64)).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, u8a, "")).toBeInstanceOf(Promise);
+      expect(image.load(painter, u8a, "")).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, b64, "")).toBeInstanceOf(Promise);
+      expect(image.load(painter, b64, "")).resolves.toBeInstanceOf(Image);
     });
   });
 
@@ -149,9 +149,9 @@ describe("pluginImage 插件", () => {
     const platform = {
       global: initialPlatformGlobal("weapp"),
       noop: () => {},
-      decode: {} as FuckPlatform.Platform["decode"],
-      local: {} as FuckPlatform.Platform["local"],
-      path: {} as FuckPlatform.Platform["path"],
+      decode: {} as FuckPlatformPlugin.decode,
+      local: {} as FuckPlatformPlugin.local | null,
+      path: {} as FuckPlatformPlugin.path,
     };
 
     platform.decode = pluginDecode.install.call(platform);
@@ -216,12 +216,12 @@ describe("pluginImage 插件", () => {
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mP4z8DwH4QZYAwAR8oH+Rq28akAAAAASUVORK5CYII=";
       const bitmap = await globalThis.createImageBitmap(new Blob([u8a]));
 
-      expect(image.load(painter, b64)).toBeInstanceOf(Promise);
-      expect(image.load(painter, b64)).resolves.toBeInstanceOf(Image);
-      expect(image.load(painter, u8a)).toBeInstanceOf(Promise);
-      expect(image.load(painter, u8a)).resolves.toBeInstanceOf(Image);
-      expect(image.load(painter, bitmap)).toBeInstanceOf(Promise);
-      expect(image.load(painter, bitmap)).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, b64, "https://www.test.com/test/test.png")).toBeInstanceOf(Promise);
+      expect(image.load(painter, b64, "https://www.test.com/test/test.png")).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, u8a, "https://www.test.com/test/test.png")).toBeInstanceOf(Promise);
+      expect(image.load(painter, u8a, "https://www.test.com/test/test.png")).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, bitmap, "https://www.test.com/test/test.png")).toBeInstanceOf(Promise);
+      expect(image.load(painter, bitmap, "https://www.test.com/test/test.png")).resolves.toBeInstanceOf(Image);
     });
   });
 
@@ -229,9 +229,9 @@ describe("pluginImage 插件", () => {
     const platform = {
       global: initialPlatformGlobal("alipay"),
       noop: () => {},
-      decode: {} as FuckPlatform.Platform["decode"],
-      local: {} as FuckPlatform.Platform["local"],
-      path: {} as FuckPlatform.Platform["path"],
+      decode: {} as FuckPlatformPlugin.decode,
+      local: {} as FuckPlatformPlugin.local | null,
+      path: {} as FuckPlatformPlugin.path,
     };
 
     platform.decode = pluginDecode.install.call(platform);
@@ -254,12 +254,12 @@ describe("pluginImage 插件", () => {
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mP4z8DwH4QZYAwAR8oH+Rq28akAAAAASUVORK5CYII=";
       const bitmap = await globalThis.createImageBitmap(new Blob([u8a]));
 
-      expect(image.load(painter, b64)).toBeInstanceOf(Promise);
-      expect(image.load(painter, b64)).resolves.toBeInstanceOf(Image);
-      expect(image.load(painter, u8a)).toBeInstanceOf(Promise);
-      expect(image.load(painter, u8a)).resolves.toBeInstanceOf(Image);
-      expect(image.load(painter, bitmap)).toBeInstanceOf(Promise);
-      expect(image.load(painter, bitmap)).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, b64, "https://www.test.com/test/test.png")).toBeInstanceOf(Promise);
+      expect(image.load(painter, b64, "https://www.test.com/test/test.png")).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, u8a, "https://www.test.com/test/test.png")).toBeInstanceOf(Promise);
+      expect(image.load(painter, u8a, "https://www.test.com/test/test.png")).resolves.toBeInstanceOf(Image);
+      expect(image.load(painter, bitmap, "https://www.test.com/test/test.png")).toBeInstanceOf(Promise);
+      expect(image.load(painter, bitmap, "https://www.test.com/test/test.png")).resolves.toBeInstanceOf(Image);
     });
   });
 });
