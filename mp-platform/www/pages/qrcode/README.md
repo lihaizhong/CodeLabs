@@ -26,3 +26,4 @@
 - [二维码的生成细节和原理](https://coolshell.cn/articles/10590.html#%E6%8E%A9%E7%A0%81%E5%9B%BE%E6%A1%88)
 - [深度探索二维码原理及其应用](https://www.jianshu.com/p/38c4781c1f5d)
 - [二维码生成原理及解析代码](https://cloud.tencent.com/developer/article/1010480)
+- [QRCode二维码的实现原理](https://www.cnblogs.com/leestar54/p/15782929.html)

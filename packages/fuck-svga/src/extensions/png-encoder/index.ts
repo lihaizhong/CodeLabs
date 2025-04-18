@@ -9,9 +9,7 @@ export class PNGEncoder {
   private crc32 = new CRC32();
 
   constructor(private readonly width: number, private readonly height: number) {
-    const buff = new ArrayBuffer(4 * width * height);
-
-    this.view = new DataView(buff);
+    this.view = new DataView(new ArrayBuffer(4 * width * height));
   }
 
   private createChunk(type: string, data: Uint8Array): Uint8Array {
