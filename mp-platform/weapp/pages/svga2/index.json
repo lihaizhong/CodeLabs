@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "SVGA动画库 官方版",
+  "usingComponents": {
+    "fuck-animation": "/components/animation2/index"
+  }
+}

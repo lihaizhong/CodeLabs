@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "SVGA动画",
+  "navigationBarTitleText": "SVGA动画库 自研版",
   "usingComponents": {
     "fuck-animation": "/components/animation/index"
   }

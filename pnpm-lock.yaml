@@ -60,9 +60,6 @@ importers:
       parcel:
         specifier: ^2.14.4
         version: 2.14.4(@swc/helpers@0.5.15)(postcss@8.5.3)(terser@5.39.0)(typescript@5.8.3)
-      parcel-reporter-static-files-copy:
-        specifier: ^1.5.3
-        version: 1.5.3(@parcel/core@2.14.4(@swc/helpers@0.5.15))
       postcss:
         specifier: ^8.2.1
         version: 8.5.3
@@ -3154,10 +3151,6 @@ packages:
 
   pako@2.1.0:
     resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
-
-  parcel-reporter-static-files-copy@1.5.3:
-    resolution: {integrity: sha512-Ukq2SyJYn3GFIPCLamXuQ+2t+0j54llujjOUoRjtmVvfsuGnJDEpMznADeIoKuQDvy0jpxtWzWkQvxqI/j+U4A==}
-    engines: {parcel: ^2.0.0-beta.1}
 
   parcel@2.14.4:
     resolution: {integrity: sha512-XmnIurC4CPdQm9OFJMbjgvto5Jz2szZ5/p6EY4pAljU/SLPhtBzJ3+J6OyljGFdbVxEXx4dp+7Cvf7eaDZsEEg==}
@@ -7218,13 +7211,6 @@ snapshots:
       quansync: 0.2.10
 
   pako@2.1.0: {}
-
-  parcel-reporter-static-files-copy@1.5.3(@parcel/core@2.14.4(@swc/helpers@0.5.15)):
-    dependencies:
-      '@parcel/plugin': 2.14.4(@parcel/core@2.14.4(@swc/helpers@0.5.15))
-    transitivePeerDependencies:
-      - '@parcel/core'
-      - napi-wasm
 
   parcel@2.14.4(@swc/helpers@0.5.15)(postcss@8.5.3)(terser@5.39.0)(typescript@5.8.3):
     dependencies:

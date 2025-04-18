@@ -2,8 +2,12 @@ Page({
   data: {
     btnList: [
       {
-        text: "跳转SVGA动画",
+        text: "跳转SVGA动画库 自研版",
         path: "/pages/svga/index",
+      },
+      {
+        text: "跳转SVGA动画库 官方版",
+        path: "/pages/svga2/index",
       },
       {
         text: "跳转海报",
@@ -12,10 +16,6 @@ Page({
       {
         text: "跳转Webview",
         path: "/pages/webview/index",
-      },
-      {
-        text: "跳转SVGA分析",
-        path: "/pages/svga-analyze/index",
       },
       {
         text: "跳转APNG动画",

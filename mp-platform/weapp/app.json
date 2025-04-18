@@ -2,9 +2,9 @@
   "pages": [
     "pages/index/index",
     "pages/svga/index",
+    "pages/svga2/index",
     "pages/poster/index",
     "pages/webview/index",
-    "pages/svga-analyze/index",
     "pages/apng/index"
   ],
   "window": {

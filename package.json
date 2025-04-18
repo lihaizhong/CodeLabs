@@ -21,10 +21,6 @@
       ]
     }
   },
-  "staticFiles": {
-    "staticPath": "public",
-    "staticOutPath": "public"
-  },
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "keywords": [
     "snippet",
@@ -46,7 +42,6 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "parcel": "^2.14.4",
-    "parcel-reporter-static-files-copy": "^1.5.3",
     "postcss": "^8.2.1",
     "serve": "^14.2.4",
     "tailwindcss": "^4.1.4",
