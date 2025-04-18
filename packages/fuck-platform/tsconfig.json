@@ -67,5 +67,5 @@
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
     "resolveJsonModule": true
   },
-  "include": ["src", "typings", "__tests__"]
+  "include": ["src", "typings", "__tests__", "__mocks__"]
 }

@@ -53,7 +53,7 @@ export default async (): Promise<Config> => {
           "^.+\\.ts$": [
             "ts-jest",
             {
-              tsconfig: "<rootDir>/tsconfig.json",
+              tsconfig: "<rootDir>/tsconfig.test.json",
             }
           ],
         },

@@ -1,5 +1,5 @@
-import { Platform } from "./platform";
-import { initialPlatformGlobal } from "../__tests__/mocks";
+import { Platform } from "../src/index";
+import { initialPlatformGlobal } from "../__mocks__";
 
 describe("Platform 定义", () => {
   it("Platform 是否被定义", () => {

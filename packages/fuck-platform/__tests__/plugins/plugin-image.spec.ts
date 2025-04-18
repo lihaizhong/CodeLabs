@@ -1,8 +1,8 @@
-import { initialPlatformGlobal } from "../../__tests__/mocks";
-import pluginDecode from "./plugin-decode";
-import pluginFsm from "./plugin-fsm";
-import pluginPath from "./plugin-path";
-import pluginImage from "./plugin-image";
+import { initialPlatformGlobal } from "../../__mocks__";
+import pluginDecode from "../../src/plugins/plugin-decode";
+import pluginFsm from "../../src/plugins/plugin-fsm";
+import pluginPath from "../../src/plugins/plugin-path";
+import pluginImage from "../../src/plugins/plugin-image";
 
 jest.mock("./plugin-decode", () => ({
   name: "decode",

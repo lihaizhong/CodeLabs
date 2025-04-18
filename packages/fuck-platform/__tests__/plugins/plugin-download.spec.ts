@@ -1,5 +1,5 @@
-import { initialPlatformGlobal } from "../../__tests__/mocks";
-import pluginDownload from "./plugin-download";
+import { initialPlatformGlobal } from "../../__mocks__";
+import pluginDownload from "../../src/plugins/plugin-download";
 
 describe("pluginDownload 定义", () => {
   it("remote 是否被定义", () => {

@@ -1,6 +1,5 @@
-import { writeFile } from "fs";
-import { initialPlatformGlobal } from "../../__tests__/mocks";
-import pluginFsm from "./plugin-fsm";
+import { initialPlatformGlobal } from "../../__mocks__";
+import pluginFsm from "../../src/plugins/plugin-fsm";
 
 describe("pluginFsm 定义", () => {
   it("fsm 是否被定义", () => {

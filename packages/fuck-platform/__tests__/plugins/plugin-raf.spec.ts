@@ -1,5 +1,5 @@
-import { initialPlatformGlobal } from "../../__tests__/mocks";
-import pluginRaf from "./plugin-raf";
+import { initialPlatformGlobal } from "../../__mocks__";
+import pluginRaf from "../../src/plugins/plugin-raf";
 
 describe("pluginRaf 定义", () => {
   it("rAF 是否被定义", () => {

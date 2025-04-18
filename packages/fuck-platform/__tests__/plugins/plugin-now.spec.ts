@@ -1,5 +1,5 @@
-import { initialPlatformGlobal } from "../../__tests__/mocks";
-import pluginNow from "./plugin-now";
+import { initialPlatformGlobal } from "../../__mocks__";
+import pluginNow from "../../src/plugins/plugin-now";
 
 describe("pluginNow 定义", () => {
   it("now 是否被定义", () => {

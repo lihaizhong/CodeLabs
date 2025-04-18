@@ -1,5 +1,5 @@
-import { initialPlatformGlobal } from "../../__tests__/mocks";
-import pluginPath from "./plugin-path";
+import { initialPlatformGlobal } from "../../__mocks__";
+import pluginPath from "../../src/plugins/plugin-path";
 
 describe("pluginPath 定义", () => {
   it("path 是否被定义", () => {

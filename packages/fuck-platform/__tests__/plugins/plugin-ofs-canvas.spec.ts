@@ -1,5 +1,5 @@
-import { initialPlatformGlobal } from "../../__tests__/mocks";
-import pluginOfsCanvas from "./plugin-ofs-canvas";
+import { initialPlatformGlobal } from "../../__mocks__";
+import pluginOfsCanvas from "../../src/plugins/plugin-ofs-canvas";
 
 describe("pluginOfsCanvas 定义", () => {
   it("getOfsCanvas 是否被定义", () => {

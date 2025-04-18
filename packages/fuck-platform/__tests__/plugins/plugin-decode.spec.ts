@@ -1,5 +1,5 @@
-import { initialPlatformGlobal } from "../../__tests__/mocks";
-import pluginDecode from "./plugin-decode";
+import { initialPlatformGlobal } from "../../__mocks__";
+import pluginDecode from "../../src/plugins/plugin-decode";
 
 jest.mock("../../extensions/protobuf", () => ({
   utf8: jest.fn(() => "mocked utf8 data")
