@@ -276,6 +276,9 @@ importers:
       fflate:
         specifier: ^0.8.2
         version: 0.8.2
+      fuck-platform:
+        specifier: workspace:^
+        version: link:../fuck-platform
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^28.0.3

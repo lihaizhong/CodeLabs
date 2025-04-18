@@ -1,7 +1,10 @@
 import { noop, retry } from "./extensions";
+import { version } from "../package.json";
 
 export class Platform<P extends string, O> implements FuckPlatform.Platform<P, O> {
   private plugins: FuckPlatform.PlatformPlugin<P, O>[] = [];
+
+  public version = version;
 
   public global: FuckPlatform.PlatformGlobal = {
     env: "unknown",

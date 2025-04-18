@@ -1,1 +1,1 @@
-export const noop: FuckPlatform.Platform<string>["noop"] = () => {};
+export const noop: () => any = () => {};

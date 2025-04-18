@@ -1,5 +1,3 @@
-import { definePlugin } from "../src/platform/definePlugin";
-
 // 过滤 benchmark 模块
 jest.mock("../src/benchmark", () => {
   const noop = () => {};

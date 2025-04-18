@@ -4,7 +4,7 @@
   "type": "module",
   "description": "平台兼容性磨平",
   "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "typings": "dist/src/index.d.ts",
   "scripts": {
     "build": "rimraf -rf dist && rollup -c",
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -4,7 +4,7 @@
   "description": "高性能SVGA播放器",
   "type": "module",
   "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "typings": "dist/src/index.d.ts",
   "scripts": {
     "build": "rimraf -rf dist && rollup -c",
     "compiler": "pbjs -t static-module -w es6 -o protos/svga.js protos/svga.proto",
@@ -26,6 +26,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "fflate": "^0.8.2"
+    "fflate": "^0.8.2",
+    "fuck-platform": "workspace:^"
   }
 }
