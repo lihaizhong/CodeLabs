@@ -100,13 +100,16 @@ export default definePlugin<"decode">({
 
       decode.toBitmap = (data: Uint8Array) =>
         globalThis.createImageBitmap(new Blob([decode.toBuffer(data)]));
+
       decode.toDataURL = (data: Uint8Array) =>
         b64Wrap(globalThis.btoa(String.fromCharCode(...data)));
+
       decode.utf8 = (data: Uint8Array, start: number, end: number) =>
         textDecoder.decode(data.subarray(start, end));
     } else {
       decode.toDataURL = (data: Uint8Array) =>
         b64Wrap((br as any).arrayBufferToBase64(decode.toBuffer(data)));
+
       decode.utf8 = utf8;
     }
 
