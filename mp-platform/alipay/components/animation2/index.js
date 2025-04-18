@@ -6,7 +6,6 @@ const { Parser, Player } = dfireSvga;
 let player;
 let parser;
 const readyGo = new ReadyGo();
-const cache = new Map();
 
 Component({
   options: {
@@ -66,17 +65,9 @@ Component({
   methods: {
     async initialize() {
       try {
-        let videoItem
-
-        if (cache.has(this.props.url)) {
-          this.setData({ message: "匹配到缓存" })
-          videoItem = cache.get(this.props.url);
-        } else {
-          this.setData({ message: "准备下载资源" });
-          videoItem = await parser.load(this.props.url);
-          cache.set(this.props.url, videoItem);
-          this.setData({ message: "下载资源成功" });
-        }
+        this.setData({ message: "准备下载资源" });
+        const videoItem = await parser.load(this.props.url);
+        this.setData({ message: "下载资源成功" });
 
         console.log(this.props.url, videoItem);
         await player.setVideoItem(videoItem);
