@@ -1,9 +1,10 @@
 packages:
-  - packages/**
+  - experiments/**
   - mp-platform/**
-
+  - packages/**
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - '@swc/core'
   - lmdb
   - msgpackr-extract
+  - re2
