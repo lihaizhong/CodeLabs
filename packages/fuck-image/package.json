@@ -2,7 +2,7 @@
   "name": "fuck-image",
   "version": "0.0.1",
   "type": "module",
-  "description": "",
+  "description": "图片生成器",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
