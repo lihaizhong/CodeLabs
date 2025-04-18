@@ -2,7 +2,7 @@
   "pages": [
     "pages/index/index",
     "pages/svga/index",
-    "pages/svga-analyze/index",
+    "pages/svga2/index",
     "pages/form/index"
   ],
   "window": {

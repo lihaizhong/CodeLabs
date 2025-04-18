@@ -1,0 +1,6 @@
+{
+  "defaultTitle": "SVGA动画",
+  "usingComponents": {
+    "fuck-animation": "/components/animation2/index"
+  }
+}
