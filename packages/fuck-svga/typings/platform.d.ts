@@ -23,7 +23,7 @@ declare namespace FuckSvga {
 
   export interface PlatformPlugin<T> {
     name: T;
-    install(this: IPlatform): IPlatform[T] | void;
+    install(this: Platform): Platform[T] | void;
   }
 
   export type PlatformCreateImageInstance = { createImage: () => PlatformImage };
