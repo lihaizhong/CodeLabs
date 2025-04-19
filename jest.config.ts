@@ -22,7 +22,7 @@ export default async (): Promise<Config> => {
     ],
     projects: [
       {
-        displayName: "fuck-svga",
+        displayName: "fuck-platform",
 
         // The directory where Jest should output its coverage files
         coverageDirectory: "<rootDir>/coverage",
@@ -31,15 +31,12 @@ export default async (): Promise<Config> => {
         testEnvironment: "jsdom",
 
         // The root directory that Jest should scan for tests and modules within
-        rootDir: "./packages/fuck-svga",
+        rootDir: "./packages/fuck-platform",
 
         // A list of paths to directories that Jest should use to search for files in
         roots: [
-          "<rootDir>/src/helper",
-          "<rootDir>/src/parser",
-          "<rootDir>/src/platform",
-          "<rootDir>/src/player",
-          "<rootDir>/src/parser",
+          "<rootDir>/__mocks",
+          "<rootDir>/__tests__",
         ],
 
         // The paths to modules that run some code to configure or set up the testing environment before each test
@@ -53,7 +50,7 @@ export default async (): Promise<Config> => {
           "^.+\\.ts$": [
             "ts-jest",
             {
-              tsconfig: "<rootDir>/tsconfig.test.json",
+              tsconfig: "<rootDir>/tsconfig.json",
             }
           ],
         },

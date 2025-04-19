@@ -10,8 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "lihzsky",
+  "license": "Apache License 2.0",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-json": "^6.1.0",
@@ -22,6 +22,7 @@
     "@types/wechat-miniprogram": "^3.4.8",
     "rimraf": "^6.0.1",
     "rollup": "^4.39.0",
+    "tslib": "^2.8.1",
     "typescript": "^5.8.2"
   }
 }

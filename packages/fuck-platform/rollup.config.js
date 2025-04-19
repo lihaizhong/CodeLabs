@@ -20,7 +20,11 @@ export default {
     }),
     commonjs(),
     // eslint(),
-    typescript(),
+    typescript({
+      tsconfig: "./tsconfig.json",
+      declaration: true,
+      declarationDir: "dist"
+    }),
     terser(),
   ],
 };
