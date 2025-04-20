@@ -1,4 +1,4 @@
-import { PlatformPlugin, PlatformGlobal, SupportedPlatform } from "fuck-platform";
+import { PlatformPlugin, PlatformGlobal, SupportedPlatform } from "octopus-platform";
 import { noop, retry } from "./extensions";
 import { version } from "../package.json";
 

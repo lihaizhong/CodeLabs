@@ -1,4 +1,4 @@
-import { PlatformPlugin, PlatformCanvas } from "fuck-platform";
+import { PlatformPlugin, PlatformCanvas, IGetCanvasResult } from "octopus-platform";
 import { definePlugin } from "../definePlugin";
 
 /**
@@ -15,7 +15,7 @@ export default definePlugin<"getCanvas", PlatformPlugin.getCanvas>({
       canvas: PlatformCanvas | null,
       width: number,
       height: number
-    ): PlatformPlugin.IGetCanvasResult {
+    ): IGetCanvasResult {
       if (!canvas) {
         throw new Error("canvas not found.");
       }
@@ -50,7 +50,7 @@ export default definePlugin<"getCanvas", PlatformPlugin.getCanvas>({
         document.querySelector(selector);
 
       return (selector: string) =>
-        retry(() => {
+        retry<IGetCanvasResult>(() => {
           // FIXME: Taro 对 canvas 做了特殊处理，canvas 元素的 id 会被加上 canvas-id 的前缀
           const canvas = (querySelector(
             `canvas[canvas-id=${selector.slice(1)}]`
@@ -64,9 +64,9 @@ export default definePlugin<"getCanvas", PlatformPlugin.getCanvas>({
       selector: string,
       component?: WechatMiniprogram.Component.TrivialInstance | null
     ) =>
-      retry(
+      retry<IGetCanvasResult>(
         () =>
-          new Promise((resolve, reject) => {
+          new Promise<IGetCanvasResult>((resolve, reject) => {
             let query = (br as WechatMiniprogram.Wx).createSelectorQuery();
 
             if (component) {

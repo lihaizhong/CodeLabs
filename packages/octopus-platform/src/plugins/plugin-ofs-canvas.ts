@@ -1,4 +1,4 @@
-import { PlatformPlugin } from "fuck-platform";
+import { OffscreenCanvasOptions, PlatformPlugin } from "octopus-platform";
 import { definePlugin } from "../definePlugin";
 
 /**
@@ -13,21 +13,21 @@ export default definePlugin<"getOfsCanvas", PlatformPlugin.getOfsCanvas>({
 
     if (env === "h5") {
       createOffscreenCanvas = (
-        options: PlatformPlugin.OffscreenCanvasOptions
+        options: OffscreenCanvasOptions
       ) => new OffscreenCanvas(
         options.width,
         options.height
       );
     } else if (env === "alipay") {
       createOffscreenCanvas = (
-        options: PlatformPlugin.OffscreenCanvasOptions
+        options: OffscreenCanvasOptions
       ) => my.createOffscreenCanvas({
         width: options.width,
         height: options.height,
       });
     } else if (env === "tt") {
       createOffscreenCanvas = (
-        options: PlatformPlugin.OffscreenCanvasOptions
+        options: OffscreenCanvasOptions
       ) => {
         const canvas = tt.createOffscreenCanvas();
 
@@ -38,14 +38,14 @@ export default definePlugin<"getOfsCanvas", PlatformPlugin.getOfsCanvas>({
       };
     } else {
       createOffscreenCanvas = (
-        options: PlatformPlugin.OffscreenCanvasOptions
+        options: OffscreenCanvasOptions
       ) => wx.createOffscreenCanvas({
         ...options,
         type: "2d",
       });
     }
 
-    return (options: PlatformPlugin.OffscreenCanvasOptions) => {
+    return (options: OffscreenCanvasOptions) => {
       const canvas = createOffscreenCanvas(options);
       const context = canvas.getContext("2d");
 

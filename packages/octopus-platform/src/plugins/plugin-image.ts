@@ -1,5 +1,13 @@
-import { PlatformPlugin, PlatformImage } from "fuck-platform";
+import { PlatformPlugin, PlatformImage } from "octopus-platform";
 import { definePlugin } from "../definePlugin";
+
+declare module "octopus-platform" {
+  interface Platform {
+    local: PlatformPlugin.local;
+    path: PlatformPlugin.path;
+    decode: PlatformPlugin.decode;
+  }
+}
 
 /**
  * 图片加载插件

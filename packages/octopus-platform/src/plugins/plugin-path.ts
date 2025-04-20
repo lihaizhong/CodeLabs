@@ -1,4 +1,4 @@
-import { PlatformPlugin } from "fuck-platform";
+import { PlatformPlugin } from "octopus-platform";
 import { definePlugin } from "../definePlugin";
 
 /**

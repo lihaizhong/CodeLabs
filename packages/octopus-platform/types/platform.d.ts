@@ -1,4 +1,4 @@
-declare module "fuck-platform" {
+declare module "octopus-platform" {
   export type SupportedPlatform = "weapp" | "alipay" | "tt" | "h5" | "unknown";
 
   export interface PlatformGlobal {
@@ -18,7 +18,7 @@ declare module "fuck-platform" {
 
     noop: () => any;
 
-    retry: <T>(fn: () => T, intervals: number[] = [], times: number = 0) => Promise<T>;
+    retry: <T>(fn: () => T | Promise<T>, intervals: number[] = [], times: number = 0) => Promise<T>;
 
     switch: (env: SupportedPlatform) => void;
   }

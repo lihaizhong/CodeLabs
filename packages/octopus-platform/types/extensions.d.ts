@@ -1,4 +1,4 @@
-declare module "fuck-platform" {
+declare module "octopus-platform" {
   export type PlatformCanvas = HTMLCanvasElement | WechatMiniprogram.Canvas;
 
   export type PlatformOffscreenCanvas =

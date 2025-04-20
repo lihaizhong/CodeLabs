@@ -1,4 +1,4 @@
-import { PlatformPlugin, PlatformCanvas } from "fuck-platform";
+import { PlatformPlugin, PlatformCanvas } from "octopus-platform";
 import { definePlugin } from "../definePlugin";
 
 /**

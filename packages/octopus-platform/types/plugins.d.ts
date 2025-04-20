@@ -1,4 +1,4 @@
-declare module "fuck-platform" {
+declare module "octopus-platform" {
   export interface IGetCanvasResult {
     canvas: PlatformCanvas;
     context: CanvasRenderingContext2D;
