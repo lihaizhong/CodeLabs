@@ -1,3 +1,4 @@
+import { PlatformPlugin } from "fuck-platform";
 import { definePlugin } from "../definePlugin";
 
 /**
@@ -82,7 +83,7 @@ export function utf8(buffer: Uint8Array, start: number, end: number): string {
  * 用于处理数据解码
  * @returns
  */
-export default definePlugin<"decode", FuckPlatformPlugin.decode>({
+export default definePlugin<"decode", PlatformPlugin.decode>({
   name: "decode",
   install() {
     const { env, br } = this.global;
@@ -93,7 +94,7 @@ export default definePlugin<"decode", FuckPlatformPlugin.decode>({
 
         return buffer.slice(byteOffset, byteOffset + byteLength) as ArrayBuffer;
       },
-    } as FuckPlatformPlugin.decode;
+    } as PlatformPlugin.decode;
 
     if (env === "h5") {
       const textDecoder = new TextDecoder();

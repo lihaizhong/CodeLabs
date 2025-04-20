@@ -1,10 +1,11 @@
+import { PlatformPlugin } from "fuck-platform";
 import { definePlugin } from "../definePlugin";
 
 /**
  * 用于处理文件路径
  * @returns
  */
-export default definePlugin<"path", FuckPlatformPlugin.path>({
+export default definePlugin<"path", PlatformPlugin.path>({
   name: "path",
   install() {
     const { env, br } = this.global;

@@ -1,6 +1,7 @@
+import { PlatformPlugin } from "fuck-platform";
 import { definePlugin } from "../definePlugin";
 
-export default definePlugin<"now", FuckPlatformPlugin.now>({
+export default definePlugin<"now", PlatformPlugin.now>({
   name: "now",
   install() {
     const { env, br } = this.global;

@@ -1,7 +1,4 @@
 import typescript from "@rollup/plugin-typescript";
-// import eslint from '@rollup/plugin-eslint'
-import { nodeResolve } from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
 import terser from "@rollup/plugin-terser";
 
@@ -13,18 +10,16 @@ export default {
     sourcemap: true,
   },
   plugins: [
-    nodeResolve(),
     json({
       include: ["./package.json"],
       compact: true,
     }),
-    commonjs(),
-    // eslint(),
     typescript({
-      tsconfig: "./tsconfig.json",
+      baseUrl: "src",
       declaration: true,
-      declarationDir: "dist"
+      // rootDirs: ["src", "types"],
+      include: ["src/**", "types/**"],
     }),
-    terser(),
+    terser()
   ],
 };

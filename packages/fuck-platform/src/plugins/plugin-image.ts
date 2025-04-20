@@ -1,3 +1,4 @@
+import { PlatformPlugin, PlatformImage } from "fuck-platform";
 import { definePlugin } from "../definePlugin";
 
 /**
@@ -6,7 +7,7 @@ import { definePlugin } from "../definePlugin";
  * @package plugin-path 路径处理能力
  * @package plugin-decode 解码能力
  */
-export default definePlugin<"image", FuckPlatformPlugin.image>({
+export default definePlugin<"image", PlatformPlugin.image>({
   name: "image",
   install() {
     const { local, path, decode, noop } = this;
@@ -37,7 +38,7 @@ export default definePlugin<"image", FuckPlatformPlugin.image>({
     }
 
     if (env === "h5") {
-      const createImage = (_?: FuckPlatformPlugin.CreateImageInstance) =>
+      const createImage = (_?: PlatformPlugin.CreateImageInstance) =>
         new Image();
       const genImageSource = (data: Uint8Array | string) => {
         if (typeof data === "string") {
@@ -52,7 +53,7 @@ export default definePlugin<"image", FuckPlatformPlugin.image>({
         isImageBitmap: (data: unknown) => data instanceof ImageBitmap,
         create: createImage,
         load: (
-          canvas: FuckPlatformPlugin.CreateImageInstance,
+          canvas: PlatformPlugin.CreateImageInstance,
           data: ImageBitmap | Uint8Array | string,
           _filename: string,
           _prefix?: string
@@ -71,7 +72,7 @@ export default definePlugin<"image", FuckPlatformPlugin.image>({
       };
     }
 
-    const createImage = (canvas: FuckPlatformPlugin.CreateImageInstance) =>
+    const createImage = (canvas: PlatformPlugin.CreateImageInstance) =>
       canvas.createImage();
     const genImageSource = async (
       data: Uint8Array | string,
@@ -112,7 +113,7 @@ export default definePlugin<"image", FuckPlatformPlugin.image>({
       isImageBitmap: (_: unknown) => false,
       create: createImage,
       load: async (
-        canvas: FuckPlatformPlugin.CreateImageInstance,
+        canvas: PlatformPlugin.CreateImageInstance,
         data: ImageBitmap | Uint8Array | string,
         filename: string,
         prefix?: string

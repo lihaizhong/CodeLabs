@@ -1,10 +1,11 @@
+import { PlatformPlugin, PlatformCanvas } from "fuck-platform";
 import { definePlugin } from "../definePlugin";
 
 /**
  * 用于获取canvas
  * @returns
  */
-export default definePlugin<"getCanvas", FuckPlatformPlugin.getCanvas>({
+export default definePlugin<"getCanvas", PlatformPlugin.getCanvas>({
   name: "getCanvas",
   install() {
     const { retry } = this;
@@ -14,7 +15,7 @@ export default definePlugin<"getCanvas", FuckPlatformPlugin.getCanvas>({
       canvas: PlatformCanvas | null,
       width: number,
       height: number
-    ): FuckPlatformPlugin.IGetCanvasResult {
+    ): PlatformPlugin.IGetCanvasResult {
       if (!canvas) {
         throw new Error("canvas not found.");
       }

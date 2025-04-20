@@ -1,10 +1,11 @@
+import { PlatformPlugin } from "fuck-platform";
 import { definePlugin } from "../definePlugin";
 
 /**
  * 用于处理本地文件存储
  * @returns
  */
-export default definePlugin<"local", FuckPlatformPlugin.local | null>({
+export default definePlugin<"local", PlatformPlugin.local | null>({
   name: "local",
   install() {
     const { env, br } = this.global;

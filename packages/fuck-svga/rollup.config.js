@@ -21,15 +21,9 @@ export default {
     commonjs(),
     // eslint(),
     typescript({
-      tsconfig: "./tsconfig.json",
-      exclude: [
-        "node_modules",
-        "dist",
-        "src/__tests__/**/*.ts",
-        "src/__mocks__/**/*.ts",
-        "src/**/*.test.ts",
-        "src/**/*.spec.ts",
-      ],
+      declaration: true,
+      sourceMap: true,
+      include: ["src/**", "types/**"],
     }),
     terser(),
   ],

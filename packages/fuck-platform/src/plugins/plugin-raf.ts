@@ -1,10 +1,11 @@
+import { PlatformPlugin, PlatformCanvas } from "fuck-platform";
 import { definePlugin } from "../definePlugin";
 
 /**
  * 用于处理requestAnimationFrame
  * @returns
  */
-export default definePlugin<"rAF", FuckPlatformPlugin.rAF>({
+export default definePlugin<"rAF", PlatformPlugin.rAF>({
   name: "rAF",
   install() {
     const { env } = this.global;

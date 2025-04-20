@@ -1,3 +1,4 @@
+import { PlatformPlugin, PlatformGlobal, SupportedPlatform } from "fuck-platform";
 import { noop, retry } from "./extensions";
 import { version } from "../package.json";
 
@@ -5,12 +6,14 @@ export * from "./definePlugin";
 export * from "./plugins";
 export * from "./extensions";
 
-export class Platform<P extends string, O> implements FuckPlatform.Platform<P, O> {
-  private plugins: FuckPlatform.PlatformPlugin<P, O>[] = [];
+export class Platform<P extends string, O> {
+  private plugins: PlatformPlugin<P, O>[] = [];
 
-  public version = version;
+  public platformVersion: string = version;
 
-  public global: FuckPlatform.PlatformGlobal = {
+  public version: string = "";
+
+  public global: PlatformGlobal = {
     env: "unknown",
     br: null,
     dpr: 1,
@@ -20,7 +23,8 @@ export class Platform<P extends string, O> implements FuckPlatform.Platform<P, O
 
   public retry = retry;
 
-  constructor(plugins: FuckPlatform.PlatformPlugin<P, O>[]) {
+  constructor(plugins: PlatformPlugin<P, O>[], version?: string) {
+    this.version = version || "";
     this.plugins = plugins;
     this.global.env = this.autoEnv();
     this.init();
@@ -32,12 +36,12 @@ export class Platform<P extends string, O> implements FuckPlatform.Platform<P, O
 
     const plugins: Record<
       P,
-      FuckPlatform.PlatformPlugin<P, O>
+      PlatformPlugin<P, O>
     > = this.plugins.reduce((acc, plugin) => {
       acc[plugin.name] = plugin;
 
       return acc;
-    }, {} as Record<P, FuckPlatform.PlatformPlugin<P, O>>);
+    }, {} as Record<P, PlatformPlugin<P, O>>);
     const pluginNames = this.plugins.map((plugin) => plugin.name);
     const usedPlugins: Record<string, boolean> = {};
 
@@ -100,7 +104,7 @@ export class Platform<P extends string, O> implements FuckPlatform.Platform<P, O
   }
 
   private installPlugins(
-    plugins: Record<P, FuckPlatform.PlatformPlugin<P, O>>,
+    plugins: Record<P, PlatformPlugin<P, O>>,
     pluginNames: string[],
     usedPlugins: Record<string, boolean>
   ) {
@@ -115,7 +119,7 @@ export class Platform<P extends string, O> implements FuckPlatform.Platform<P, O
         this.installPlugins(plugins, plugin.dependencies, usedPlugins);
       }
 
-      const value = plugin.install.call<FuckPlatform.Platform<P, O>, [], O>(this);
+      const value = plugin.install.call<Platform<P, O>, [], O>(this);
 
       usedPlugins[plugin.name] = true;
       if (value !== undefined) {
@@ -124,7 +128,7 @@ export class Platform<P extends string, O> implements FuckPlatform.Platform<P, O
     });
   }
 
-  public switch(env: FuckPlatform.SupportedPlatform) {
+  public switch(env: SupportedPlatform) {
     this.global.env = env;
     this.init();
   }

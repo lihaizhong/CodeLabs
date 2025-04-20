@@ -1,3 +1,5 @@
+/// <reference types="fuck-platform" />
+
 type PlatformCanvas = HTMLCanvasElement | WechatMiniprogram.Canvas;
 
 type PlatformOffscreenCanvas =
