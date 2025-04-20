@@ -1,24 +1,24 @@
 declare module "fuck-platform" {
-  export namespace PlatformPlugin {
-    export interface IGetCanvasResult {
-      canvas: PlatformCanvas;
-      context: CanvasRenderingContext2D;
-    }
+  export interface IGetCanvasResult {
+    canvas: PlatformCanvas;
+    context: CanvasRenderingContext2D;
+  }
+
+  export interface OffscreenCanvasOptions {
+    width: number;
+    height: number;
+  }
   
+  export interface IGetOffscreenCanvasResult {
+    canvas: PlatformOffscreenCanvas;
+    context: OffscreenCanvasRenderingContext2D;
+  }
+
+  export namespace PlatformPlugin {
     export type getCanvas = (
       selector: string,
       component?: WechatMiniprogram.Component.TrivialInstance | null
     ) => Promise<IGetCanvasResult>;
-  
-    export interface IGetOffscreenCanvasResult {
-      canvas: PlatformOffscreenCanvas;
-      context: OffscreenCanvasRenderingContext2D;
-    }
-  
-    export interface OffscreenCanvasOptions {
-      width: number;
-      height: number;
-    }
   
     export type getOfsCanvas = (
       options: OffscreenCanvasOptions
