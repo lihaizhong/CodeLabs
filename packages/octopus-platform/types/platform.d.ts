@@ -7,9 +7,11 @@ declare module "fuck-platform" {
     dpr: number;
   }
 
+  export type PlatformPluginInstaller = <R>(this: Platform) => R;
+
   export interface PlatformPlugin<P extends string, R> {
     name: P;
     dependencies?: string[];
-    install(this: Platform): R;
+    install: PlatformPluginInstaller<R>;
   }
 }

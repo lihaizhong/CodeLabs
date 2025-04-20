@@ -1,11 +1,11 @@
 {
-  "name": "fuck-platform",
+  "name": "octopus-platform",
   "version": "0.0.1",
   "type": "module",
   "description": "平台兼容性磨平",
   "main": "dist/index.js",
-  "types": "dist/src/index.d.ts",
   "files": [
+    "index.d.ts",
     "types"
   ],
   "scripts": {
