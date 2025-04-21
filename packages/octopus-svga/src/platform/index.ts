@@ -1,6 +1,8 @@
 import {
   OctopusPlatform,
   PlatformPlugin,
+  PlatformPluginOptions,
+  PlatformPluginValue,
   pluginCanvas,
   pluginDecode,
   pluginDownload,
@@ -12,6 +14,7 @@ import {
   pluginRAF,
 } from "octopus-platform";
 import { version } from "../../package.json";
+import benchmark from "../benchmark";
 
 export type PlatformProperties =
   | "now"
@@ -50,26 +53,27 @@ class EnHancedPlatform extends OctopusPlatform<PlatformProperties> {
       ],
       version
     );
+
+    this.init();
   }
 
-  init() {
-    super.init();
-    // 确保接口中声明的属性在实例上可用
-    // 将原型上的方法赋值给实例属性
-    const props = Object.getPrototypeOf(this);
+  installPlugin(plugin: PlatformPluginOptions<PlatformProperties>) {
+    const value = plugin.install.call<
+      EnHancedPlatform,
+      [],
+      PlatformPluginValue<PlatformProperties>
+    >(this);
 
-    Object.defineProperties(this, {
-      now: { get: () => props.now },
-      path: { get: () => props.path },
-      remote: { get: () => props.remote },
-      local: { get: () => props.local },
-      decode: { get: () => props.decode },
-      image: { get: () => props.image },
-      rAF: { get: () => props.rAF },
-      getCanvas: { get: () => props.getCanvas },
-      getOfsCanvas: { get: () => props.getOfsCanvas },
+    Object.defineProperty(this, plugin.name, {
+      get() {
+        return value;
+      },
+      enumerable: true,
+      configurable: true,
     });
   }
 }
 
 export const platform = new EnHancedPlatform();
+
+benchmark.log('PLATFORM VERSION', platform.platformVersion, 'VERSION', platform.version);

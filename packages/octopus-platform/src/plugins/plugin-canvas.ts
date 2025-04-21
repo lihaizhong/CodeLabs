@@ -9,7 +9,7 @@ export default definePlugin<"getCanvas">({
   name: "getCanvas",
   install() {
     const { retry } = this;
-    const { env, br, dpr } = this.global;
+    const { env, br, dpr } = this.globals;
 
     function initCanvas(
       canvas: PlatformCanvas | null,

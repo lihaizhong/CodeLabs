@@ -74,7 +74,7 @@ export class ImagePool {
    * 清理素材
    */
   public release() {
-    const { env } = platform.global;
+    const { env } = platform.globals;
     const { isImage, isImageBitmap } = platform.image;
 
     // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件

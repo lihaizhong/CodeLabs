@@ -77,7 +77,7 @@ export class Painter {
 
   private setModel(type: "C" | "O"): void {
     const { model } = this;
-    const { env } = platform.global;
+    const { env } = platform.globals;
 
     // set type
     model.type = type;
@@ -115,7 +115,7 @@ export class Painter {
   ) {
     const { model, mode } = this;
     const { getCanvas, getOfsCanvas } = platform;
-    const { env } = platform.global;
+    const { env } = platform.globals;
     // #region set main screen implement
     // -------- 创建主屏 ---------
     if (

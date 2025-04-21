@@ -8,7 +8,7 @@ import { definePlugin } from "../definePlugin";
 export default definePlugin<"getOfsCanvas">({
   name: "getOfsCanvas",
   install() {
-    const { env } = this.global;
+    const { env } = this.globals;
     let createOffscreenCanvas;
 
     if (env === "h5") {

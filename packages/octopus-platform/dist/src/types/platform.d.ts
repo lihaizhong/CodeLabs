@@ -2,7 +2,7 @@ import { PlatformPlugin } from "./plugin";
 
 export type SupportedPlatform = "weapp" | "alipay" | "tt" | "h5" | "unknown";
 
-export interface PlatformGlobal {
+export interface PlatformGlobals {
   env: SupportedPlatform;
   br: any;
   dpr: number;
@@ -20,7 +20,7 @@ export interface PlatformPluginOptions<P extends PlatformPluginProperty> {
 }
 
 interface Platform<_> {
-  global: PlatformGlobal;
+  globals: PlatformGlobals;
 
   noop: () => any;
 

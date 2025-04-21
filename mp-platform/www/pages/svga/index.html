@@ -1,213 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SVGA动画库 自研版</title>
-  <!-- 引入 WeUI CDN 链接 https://weui.io/ -->
-  <!-- <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.3.0/weui.min.css"/> -->
-  <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      background: #111;
-    }
-
-    .ani-container {
-      margin: 0 auto;
-    }
-
-    .svga-palette {
-      width: 100vw;
-      height: 90vh;
-    }
-
-    .svga-secondary {
-      position: fixed;
-      left: -200vw;
-      top: -200vh;
-    }
-
-    .svga-error-popup {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 20;
-      padding: 15px;
-      background: #fff;
-      border-radius: 3px;
-    }
-
-    .footer {
-      position: absolute !important;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 3;
-      display: flex;
-      padding-bottom: constant(safe-area-inset-bottom);
-      /* 兼容 iOS < 11.2 */
-      padding-bottom: env(safe-area-inset-bottom);
-      /* 兼容 iOS >= 11.2 */
-      text-align: center;
-    }
-
-    .foot-btn {
-      min-width: auto !important;
-      width: 100% !important;
-    }
-  </style>
-  <script type="module">
-    import "weui";
-    import { Parser, Player } from "octopus-svga";
-    import Page from "../../utils/Page"
-    import { svgaSources, svgaLargeFiles, getOneAtRandom } from "../../utils/constants";
-
-    const files = svgaLargeFiles
-    const parser = new Parser();
-    const player = new Player();
-
-    Page({
-      data: {
-        url: "",
-        current: 0,
-      },
-
-      bindEvents: {
-        "#prevbtn:click": "handleSwitchPrev",
-        "#nextbtn:click": "handleSwitchNext",
-        // "#randbtn:click": "handleSwitchAtRandom"
-      },
-
-      observers: {
-        url() {
-          this.initialize()
-        }
-      },
-
-      handleSwitchAtRandom() {
-        const { ranIndex, url } = getOneAtRandom(files);
-
-        this.setData({
-          url,
-          current: ranIndex,
-        })
-      },
-
-      handleSwitchPrev() {
-        const { current } = this.data;
-        let prev = current - 1;
-
-        if (prev < 0) {
-          prev = files.length - 1;
-        }
-
-        player.setItem("playMode", "fallbacks");
-        player.setItem("fillMode", "forwards");
-        this.setData({
-          url: files[prev],
-          current: prev,
-        });
-      },
-
-      handleSwitchNext() {
-        const { current } = this.data;
-        let next = current + 1;
-
-        if (next > files.length - 1) {
-          next = 0;
-        }
-
-        player.setItem("playMode", "forwards");
-        player.setItem("fillMode", "backwards");
-        this.setData({
-          url: files[next],
-          current: next,
-        });
-      },
-
-      async initialize() {
-        try {
-          showPopup("准备下载资源")
-          const videoItem = await parser.load(this.data.url);
-          showPopup("下载资源成功")
-
-          console.log(this.data.url, videoItem);
-          await player.mount(videoItem);
-          showPopup("资源装载成功");
-          player.start();
-          showPopup("");
-        } catch (ex) {
-          console.error("svga初始化失败！", ex);
-          showPopup(ex.message + "\n" + ex.stack);
-        }
-      },
-
-      async onLoad() {
-        await player.setConfig({
-          container: "#palette",
-          loop: 1,
-          // playMode: "fallbacks",
-          // fillMode: "forwards",
-          // contentMode: "aspect-fill",
-          // contentMode: "fill",
-          // contentMode: "aspect-fit",
-          contentMode: "center",
-        });
-        player.onProcess = (percent, frame) => {
-          console.log('当前进度', percent, frame)
-          console.log('---- UPDATE ----')
-        };
-        player.onEnd = () => {
-          console.log('---- END ----')
-        };
-        // this.handleSwitchAtRandom();
-        this.setData({
-          current: 0,
-          url: files[0]
-        })
-      },
-    })
-
-    function showPopup(message) {
-      const $popup = document.querySelector('#popup');
-
-      if (message) {
-        $popup.innerText = message;
-        $popup.style.display = "block";
-      } else {
-        $popup.innerText = "";
-        $popup.style.display = "none";
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SVGA动画库 自研版</title>
+    <!-- 引入 WeUI CDN 链接 https://weui.io/ -->
+    <!-- <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.3.0/weui.min.css"/> -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background: #111;
       }
-    }
-  </script>
-</head>
 
-<body>
-  <div class="ani-container">
-    <canvas type="2d" id="palette" class="svga-palette"></canvas>
-  </div>
+      .ani-container {
+        margin: 0 auto;
+      }
 
-  <div id="popup" class="svga-error-popup">{{ message }}</div>
+      .svga-palette {
+        width: 100vw;
+        height: 90vh;
+      }
 
-  <div class="footer weui-grids">
-    <div class="weui-grid">
-      <button id="prevbtn" class="foot-btn weui-btn weui-btn_primary">上一张</button>
+      .svga-secondary {
+        position: fixed;
+        left: -200vw;
+        top: -200vh;
+      }
+
+      .svga-error-popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 20;
+        padding: 15px;
+        background: #fff;
+        border-radius: 3px;
+      }
+
+      .footer {
+        position: absolute !important;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 3;
+        display: flex;
+        padding-bottom: constant(safe-area-inset-bottom);
+        /* 兼容 iOS < 11.2 */
+        padding-bottom: env(safe-area-inset-bottom);
+        /* 兼容 iOS >= 11.2 */
+        text-align: center;
+      }
+
+      .foot-btn {
+        min-width: auto !important;
+        width: 100% !important;
+      }
+    </style>
+    <script type="module">
+      import "weui";
+      import { Parser, Player } from "octopus-svga";
+      import Page from "../../utils/Page";
+      import {
+        svgaSources,
+        svgaLargeFiles,
+        getOneAtRandom,
+      } from "../../utils/constants";
+
+      const files = svgaLargeFiles;
+      const parser = new Parser();
+      const player = new Player();
+      let lastStatus = "next";
+
+      Page({
+        data: {
+          url: "",
+          current: 0,
+        },
+
+        bindEvents: {
+          "#prevbtn:click": "handleSwitchPrev",
+          "#nextbtn:click": "handleSwitchNext",
+          // "#randbtn:click": "handleSwitchAtRandom"
+        },
+
+        observers: {
+          url() {
+            this.initialize();
+          },
+        },
+
+        handleSwitchAtRandom() {
+          const { ranIndex, url } = getOneAtRandom(files);
+
+          this.setData({
+            url,
+            current: ranIndex,
+          });
+        },
+
+        handleSwitchPrev() {
+          const { current } = this.data;
+          let prev;
+
+          if (lastStatus === "next") {
+            prev = current;
+            lastStatus = "prev";
+          } else {
+            prev = current - 1;
+
+            if (prev < 0) {
+              prev = files.length - 1;
+            }
+          }
+
+          player.setItem("playMode", "fallbacks");
+          player.setItem("fillMode", "forwards");
+          this.setData({
+            url: files[prev],
+            current: prev,
+          });
+        },
+
+        handleSwitchNext() {
+          const { current } = this.data;
+          let next;
+
+          if (lastStatus === "prev") {
+            next = current;
+            lastStatus = "next";
+          } else {
+            next = current + 1;
+
+            if (next > files.length - 1) {
+              next = 0;
+            }
+          }
+
+          player.setItem("playMode", "forwards");
+          player.setItem("fillMode", "backwards");
+          this.setData({
+            url: files[next],
+            current: next,
+          });
+        },
+
+        async initialize() {
+          try {
+            showPopup("准备下载资源");
+            const videoItem = await parser.load(this.data.url);
+            showPopup("下载资源成功");
+
+            console.log(this.data.url, videoItem);
+            await player.mount(videoItem);
+            showPopup("资源装载成功");
+            player.start();
+            showPopup("");
+          } catch (ex) {
+            console.error("svga初始化失败！", ex);
+            showPopup(ex.message + "\n" + ex.stack);
+          }
+        },
+
+        async onLoad() {
+          await player.setConfig({
+            container: "#palette",
+            loop: 1,
+            // playMode: "fallbacks",
+            // fillMode: "forwards",
+            // contentMode: "aspect-fill",
+            // contentMode: "fill",
+            // contentMode: "aspect-fit",
+            contentMode: "center",
+          });
+          player.onProcess = (percent, frame) => {
+            console.log("当前进度", percent, frame);
+            console.log("---- UPDATE ----");
+          };
+          player.onEnd = () => {
+            console.log("---- END ----");
+          };
+          // this.handleSwitchAtRandom();
+          this.setData({
+            current: 0,
+            url: files[0],
+          });
+        },
+      });
+
+      function showPopup(message) {
+        const $popup = document.querySelector("#popup");
+
+        if (message) {
+          $popup.innerText = message;
+          $popup.style.display = "block";
+        } else {
+          $popup.innerText = "";
+          $popup.style.display = "none";
+        }
+      }
+    </script>
+  </head>
+
+  <body>
+    <div class="ani-container">
+      <canvas type="2d" id="palette" class="svga-palette"></canvas>
     </div>
-    <div class="weui-grid">
-      <!-- <button id="randbtn" class="foot-btn weui-btn weui-btn_primary">试一试</button> -->
-    </div>
-    <div class="weui-grid">
-      <button id="nextbtn" class="foot-btn weui-btn weui-btn_primary">下一张</button>
-    </div>
-  </div>
-</body>
 
+    <div id="popup" class="svga-error-popup">{{ message }}</div>
+
+    <div class="footer weui-grids">
+      <div class="weui-grid">
+        <button id="prevbtn" class="foot-btn weui-btn weui-btn_primary">
+          上一张
+        </button>
+      </div>
+      <div class="weui-grid">
+        <!-- <button id="randbtn" class="foot-btn weui-btn weui-btn_primary">试一试</button> -->
+      </div>
+      <div class="weui-grid">
+        <button id="nextbtn" class="foot-btn weui-btn weui-btn_primary">
+          下一张
+        </button>
+      </div>
+    </div>
+  </body>
 </html>

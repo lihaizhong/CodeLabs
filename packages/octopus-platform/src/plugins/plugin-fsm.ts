@@ -7,7 +7,7 @@ import { definePlugin } from "../definePlugin";
 export default definePlugin<"local">({
   name: "local",
   install() {
-    const { env, br } = this.global;
+    const { env, br } = this.globals;
 
     if (env === "h5") {
       return null;

@@ -1,4 +1,4 @@
-import { OctopusPlatform, PlatformPlugin } from "octopus-platform";
+import { OctopusPlatform, PlatformPlugin, PlatformPluginOptions } from "octopus-platform";
 export type PlatformProperties = "now" | "path" | "remote" | "local" | "decode" | "image" | "rAF" | "getCanvas" | "getOfsCanvas";
 declare class EnHancedPlatform extends OctopusPlatform<PlatformProperties> {
     now: PlatformPlugin["now"];
@@ -11,7 +11,7 @@ declare class EnHancedPlatform extends OctopusPlatform<PlatformProperties> {
     getCanvas: PlatformPlugin["getCanvas"];
     getOfsCanvas: PlatformPlugin["getOfsCanvas"];
     constructor();
-    init(): void;
+    installPlugin(plugin: PlatformPluginOptions<PlatformProperties>): void;
 }
 export declare const platform: EnHancedPlatform;
 export {};

@@ -17,7 +17,7 @@ export default definePlugin<"image">({
   name: "image",
   install() {
     const { local, path, decode, noop } = this as ExtendedPlatform<"image">;
-    const { env } = this.global;
+    const { env } = this.globals;
     const cachedImages: Set<string> = new Set();
 
     /**

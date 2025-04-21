@@ -7,7 +7,7 @@ import { definePlugin } from "../definePlugin";
 export default definePlugin<"path">({
   name: "path",
   install() {
-    const { env, br } = this.global;
+    const { env, br } = this.globals;
     const filename = (path: string) => path.substring(path.lastIndexOf('/') + 1);
 
     if (env === "h5") {

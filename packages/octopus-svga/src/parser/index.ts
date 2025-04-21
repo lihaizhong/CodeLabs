@@ -42,7 +42,7 @@ export class Parser {
    * @returns
    */
   public download(url: string): Promise<ArrayBuffer | null> {
-    const { remote, local, global } = platform;
+    const { remote, local, globals } = platform;
 
     benchmark.label(url);
     benchmark.line();
@@ -53,7 +53,7 @@ export class Parser {
     }
   
     // 读取本地文件
-    if (global.env !== "h5") {
+    if (globals.env !== "h5") {
       return local!.read(url);
     }
   

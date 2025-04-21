@@ -200,8 +200,8 @@ export class VideoManager {
     maxRemain?: number
   ): Promise<void> {
     const { parser, loadMode } = this;
-    const { global, path, local } = platform;
-    const { env } = global;
+    const { globals, path, local } = platform;
+    const { env } = globals;
 
     this.point =
       typeof point === "number" && point > 0 && point < urls.length ? point : 0;
@@ -307,7 +307,8 @@ export class VideoManager {
    * @returns
    */
   clear(): Promise<string[]> {
-    const { global, local } = platform;
+    const { globals, local } = platform;
+    const { env } = globals;
     const { buckets } = this;
 
     this.buckets = [];
@@ -316,7 +317,7 @@ export class VideoManager {
 
     return Promise.all(
       buckets.map((bucket: Bucket) => {
-        if (global.env !== "h5" && global.env !== "tt") {
+        if (env !== "h5" && env !== "tt") {
           return local!.remove(bucket.local);
         }
 

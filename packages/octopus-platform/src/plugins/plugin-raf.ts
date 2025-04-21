@@ -8,7 +8,7 @@ import { definePlugin } from "../definePlugin";
 export default definePlugin<"rAF">({
   name: "rAF",
   install() {
-    const { env } = this.global;
+    const { env } = this.globals;
 
     if (env === "h5") {
       return (_: PlatformCanvas, callback: () => void) =>

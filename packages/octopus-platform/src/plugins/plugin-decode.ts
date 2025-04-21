@@ -9,7 +9,7 @@ import { utf8 } from "../extensions/utf8";
 export default definePlugin<"decode">({
   name: "decode",
   install() {
-    const { env, br } = this.global;
+    const { env, br } = this.globals;
     const b64Wrap = (b64: string) => `data:image/png;base64,${b64}`;
     const decode = {
       toBuffer(data: Uint8Array): ArrayBuffer {

@@ -1,15 +1,27 @@
-import { PlatformGlobal, SupportedPlatform, PlatformPluginOptions, PlatformPluginProperty, PlatformPluginValue, Platform } from "./types";
+import { PlatformGlobals, SupportedPlatform, PlatformPluginOptions, PlatformPluginProperty, Platform } from "./types";
 import { noop, retry } from "./extensions";
 import { version } from "../package.json";
 
-export class OctopusPlatform<P extends PlatformPluginProperty> implements Platform<P> {
+export abstract class OctopusPlatform<P extends PlatformPluginProperty> implements Platform<P> {
+  /**
+   * 插件列表
+   */
   private plugins: PlatformPluginOptions<P>[] = [];
 
+  /**
+   * 平台版本
+   */
   public platformVersion: string = version;
 
+  /**
+   * 应用版本
+   */
   public version: string = "";
 
-  public global: PlatformGlobal = {
+  /**
+   * 全局变量
+   */
+  public globals: PlatformGlobals = {
     env: "unknown",
     br: null,
     dpr: 1,
@@ -22,13 +34,13 @@ export class OctopusPlatform<P extends PlatformPluginProperty> implements Platfo
   constructor(plugins: PlatformPluginOptions<P>[], version?: string) {
     this.version = version || "";
     this.plugins = plugins;
-    this.global.env = this.autoEnv();
+    this.globals.env = this.autoEnv();
     this.init();
   }
 
   protected init() {
-    this.global.br = this.useBridge();
-    this.global.dpr = this.usePixelRatio();
+    this.globals.br = this.useBridge();
+    this.globals.dpr = this.usePixelRatio();
 
     const plugins: Record<
       P,
@@ -39,9 +51,9 @@ export class OctopusPlatform<P extends PlatformPluginProperty> implements Platfo
       return acc;
     }, {} as Record<P, PlatformPluginOptions<P>>);
     const pluginNames = this.plugins.map((plugin) => plugin.name);
-    const usedPlugins: Record<string, boolean> = {};
+    const installedPlugins: Record<string, boolean> = {};
 
-    this.usePlugins(plugins, pluginNames, usedPlugins);
+    this.usePlugins(plugins, pluginNames, installedPlugins);
   }
 
   private autoEnv() {
@@ -66,7 +78,7 @@ export class OctopusPlatform<P extends PlatformPluginProperty> implements Platfo
   }
 
   private useBridge() {
-    switch (this.global.env) {
+    switch (this.globals.env) {
       case "h5":
         return globalThis;
       case "alipay":
@@ -82,7 +94,7 @@ export class OctopusPlatform<P extends PlatformPluginProperty> implements Platfo
   }
 
   private usePixelRatio() {
-    const { env, br } = this.global;
+    const { env, br } = this.globals;
 
     if (env === "h5") {
       return globalThis.devicePixelRatio;
@@ -102,12 +114,12 @@ export class OctopusPlatform<P extends PlatformPluginProperty> implements Platfo
   private usePlugins(
     plugins: Record<P, PlatformPluginOptions<P>>,
     pluginNames: string[],
-    usedPlugins: Record<string, boolean>
+    installedPlugins: Record<string, boolean>
   ) {
     pluginNames.forEach((pluginName) => {
       const plugin = plugins[pluginName as P];
 
-      if (usedPlugins[pluginName]) {
+      if (installedPlugins[pluginName]) {
         return;
       }
 
@@ -116,20 +128,18 @@ export class OctopusPlatform<P extends PlatformPluginProperty> implements Platfo
       }
 
       if (Array.isArray(plugin.dependencies)) {
-        this.usePlugins(plugins, plugin.dependencies, usedPlugins);
+        this.usePlugins(plugins, plugin.dependencies, installedPlugins);
       }
 
-      const value = plugin.install.call<Platform<P>, [], PlatformPluginValue<P>>(this);
-
-      usedPlugins[plugin.name] = true;
-      if (value !== undefined) {
-        Reflect.set(this.constructor.prototype, plugin.name, value);
-      }
+      this.installPlugin(plugin);
+      installedPlugins[plugin.name] = true;
     });
   }
 
+  abstract installPlugin(plugin: PlatformPluginOptions<P>): void;
+
   public switch(env: SupportedPlatform) {
-    this.global.env = env;
+    this.globals.env = env;
     this.init();
   }
 }
