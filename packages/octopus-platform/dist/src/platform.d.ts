@@ -12,6 +12,6 @@ export declare class OctopusPlatform<P extends PlatformPluginProperty> implement
     private autoEnv;
     private useBridge;
     private usePixelRatio;
-    private installPlugins;
+    private usePlugins;
     switch(env: SupportedPlatform): void;
 }

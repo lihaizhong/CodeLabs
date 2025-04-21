@@ -26,26 +26,34 @@ export type PlatformProperties =
 
 class SvgaPlatform extends OctopusPlatform<PlatformProperties> {
   // 为每个插件属性添加明确的类型声明
-  now!: PlatformPlugin["now"];
-  path!: PlatformPlugin["path"];
-  remote!: PlatformPlugin["remote"];
-  local!: PlatformPlugin["local"];
-  decode!: PlatformPlugin["decode"];
-  image!: PlatformPlugin["image"];
-  rAF!: PlatformPlugin["rAF"];
-  getCanvas!: PlatformPlugin["getCanvas"];
-  getOfsCanvas!: PlatformPlugin["getOfsCanvas"];
+  public now!: PlatformPlugin["now"];
+
+  public path!: PlatformPlugin["path"];
+
+  public remote!: PlatformPlugin["remote"];
+
+  public local!: PlatformPlugin["local"];
+
+  public decode!: PlatformPlugin["decode"];
+
+  public image!: PlatformPlugin["image"];
+
+  public rAF!: PlatformPlugin["rAF"];
+
+  public getCanvas!: PlatformPlugin["getCanvas"];
+
+  public getOfsCanvas!: PlatformPlugin["getOfsCanvas"];
 
   constructor() {
     super(
       [
         pluginCanvas,
+        pluginOfsCanvas,
         pluginDecode,
         pluginDownload,
         pluginFsm,
         pluginImage,
         pluginNow,
-        pluginOfsCanvas,
         pluginPath,
         pluginRAF,
       ],

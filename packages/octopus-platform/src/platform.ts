@@ -41,7 +41,7 @@ export class OctopusPlatform<P extends PlatformPluginProperty> implements Platfo
     const pluginNames = this.plugins.map((plugin) => plugin.name);
     const usedPlugins: Record<string, boolean> = {};
 
-    this.installPlugins(plugins, pluginNames, usedPlugins);
+    this.usePlugins(plugins, pluginNames, usedPlugins);
   }
 
   private autoEnv() {
@@ -99,7 +99,7 @@ export class OctopusPlatform<P extends PlatformPluginProperty> implements Platfo
     return 1;
   }
 
-  private installPlugins(
+  private usePlugins(
     plugins: Record<P, PlatformPluginOptions<P>>,
     pluginNames: string[],
     usedPlugins: Record<string, boolean>
@@ -107,19 +107,24 @@ export class OctopusPlatform<P extends PlatformPluginProperty> implements Platfo
     pluginNames.forEach((pluginName) => {
       const plugin = plugins[pluginName as P];
 
+      if (usedPlugins[pluginName]) {
+        return;
+      }
+
       if (plugin === undefined) {
         throw new Error(`Plugin ${pluginName} not found`);
       }
 
       if (Array.isArray(plugin.dependencies)) {
-        this.installPlugins(plugins, plugin.dependencies, usedPlugins);
+        this.usePlugins(plugins, plugin.dependencies, usedPlugins);
       }
 
       const value = plugin.install.call<Platform<P>, [], PlatformPluginValue<P>>(this);
 
       usedPlugins[plugin.name] = true;
+      console.log(`Plugin ${pluginName} installed`, this, plugin.name, value);
       if (value !== undefined) {
-        Reflect.set(this, plugin.name, value);
+        Reflect.set(this.constructor.prototype, plugin.name, value);
       }
     });
   }

@@ -116,6 +116,7 @@ export class Painter {
     const { model, mode } = this;
     const { getCanvas, getOfsCanvas } = platform;
     const { env } = platform.global;
+    console.log("platform", platform, typeof getCanvas, typeof getOfsCanvas);
     // #region set main screen implement
     // -------- 创建主屏 ---------
     if (
