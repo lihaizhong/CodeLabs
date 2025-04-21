@@ -1,11 +1,11 @@
-import { OffscreenCanvasOptions, PlatformPlugin } from "octopus-platform";
+import { OffscreenCanvasOptions } from "../types";
 import { definePlugin } from "../definePlugin";
 
 /**
  * 用于创建离屏canvas
  * @returns
  */
-export default definePlugin<"getOfsCanvas", PlatformPlugin.getOfsCanvas>({
+export default definePlugin<"getOfsCanvas">({
   name: "getOfsCanvas",
   install() {
     const { env } = this.global;

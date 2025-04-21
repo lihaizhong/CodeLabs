@@ -1,13 +1,13 @@
-import { Platform } from "../src/index";
+import { OctopusPlatform } from "../src/platform";
 import { initialPlatformGlobal } from "../__mocks__";
 
 describe("Platform 定义", () => {
   it("Platform 是否被定义", () => {
-    expect(Platform).toBeDefined();
+    expect(OctopusPlatform).toBeDefined();
   });
 
   it("Platform 定义是否正确", () => {
-    const platform = new Platform([]);
+    const platform = new OctopusPlatform([]);
 
     expect(typeof platform).toBe("object");
     expect(typeof platform.global).toBe("object");
@@ -16,7 +16,7 @@ describe("Platform 定义", () => {
   });
 
   it("检查 global 属性是否正确", () => {
-    const platform = new Platform([]);
+    const platform = new OctopusPlatform([]);
     const { global } = platform;
 
     expect(typeof global.env).toBe("string");
@@ -26,7 +26,7 @@ describe("Platform 定义", () => {
 });
 
 describe("platform 整体测试", () => {
-  const platform = new Platform([]);
+  const platform = new OctopusPlatform([]);
 
   describe("H5 环境", () => {
     beforeEach(() => {

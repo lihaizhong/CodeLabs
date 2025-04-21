@@ -1,5 +1,5 @@
-import { PlatformPluginInstance } from "octopus-platform";
+import { PlatformPluginProperty, PlatformPluginOptions } from "./types";
 
-export const definePlugin = <T extends string, R>(
-  plugin: PlatformPluginInstance<T, R>
+export const definePlugin = <T extends PlatformPluginProperty>(
+  plugin: PlatformPluginOptions<T>
 ) => plugin;

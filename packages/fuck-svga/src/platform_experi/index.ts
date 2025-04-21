@@ -1,5 +1,6 @@
 import {
-  Platform,
+  OctopusPlatform,
+  PlatformPlugin,
   pluginCanvas,
   pluginDecode,
   pluginDownload,
@@ -9,7 +10,7 @@ import {
   pluginOfsCanvas,
   pluginPath,
   pluginRAF,
-} from "fuck-platform";
+} from "octopus-platform";
 import { version } from "../../package.json";
 
 export type PlatformProperties =
@@ -24,14 +25,25 @@ export type PlatformProperties =
   | "getCanvas"
   | "getOfsCanvas";
 
-export const platform = new Platform<PlatformProperties, any>([
-  pluginCanvas,
-  pluginDecode,
-  pluginDownload,
-  pluginFsm,
-  pluginImage,
-  pluginNow,
-  pluginOfsCanvas,
-  pluginPath,
-  pluginRAF,
-], version);
+class SvgaPlatform extends OctopusPlatform<PlatformProperties> {
+  getCanvas: PlatformPlugin["getCanvas"]
+
+  constructor() {
+    super(
+      [
+        pluginCanvas,
+        pluginDecode,
+        pluginDownload,
+        pluginFsm,
+        pluginImage,
+        pluginNow,
+        pluginOfsCanvas,
+        pluginPath,
+        pluginRAF,
+      ],
+      version
+    );
+  }
+}
+
+export const platform = new SvgaPlatform();

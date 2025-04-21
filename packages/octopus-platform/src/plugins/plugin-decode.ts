@@ -1,4 +1,4 @@
-import { PlatformPlugin } from "octopus-platform";
+import { PlatformPlugin } from "../types";
 import { definePlugin } from "../definePlugin";
 import { utf8 } from "../extensions/utf8";
 
@@ -6,7 +6,7 @@ import { utf8 } from "../extensions/utf8";
  * 用于处理数据解码
  * @returns
  */
-export default definePlugin<"decode", PlatformPlugin.decode>({
+export default definePlugin<"decode">({
   name: "decode",
   install() {
     const { env, br } = this.global;
@@ -17,7 +17,7 @@ export default definePlugin<"decode", PlatformPlugin.decode>({
 
         return buffer.slice(byteOffset, byteOffset + byteLength) as ArrayBuffer;
       },
-    } as PlatformPlugin.decode;
+    } as PlatformPlugin["decode"];
 
     if (env === "h5") {
       const textDecoder = new TextDecoder();

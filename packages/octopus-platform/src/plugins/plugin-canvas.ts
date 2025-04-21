@@ -1,11 +1,11 @@
-import { PlatformPlugin, PlatformCanvas, IGetCanvasResult } from "octopus-platform";
+import { PlatformCanvas, IGetCanvasResult } from "../types";
 import { definePlugin } from "../definePlugin";
 
 /**
  * 用于获取canvas
  * @returns
  */
-export default definePlugin<"getCanvas", PlatformPlugin.getCanvas>({
+export default definePlugin<"getCanvas">({
   name: "getCanvas",
   install() {
     const { retry } = this;

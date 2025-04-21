@@ -1,11 +1,11 @@
-import { PlatformPlugin, PlatformCanvas } from "octopus-platform";
+import { PlatformCanvas } from "../types";
 import { definePlugin } from "../definePlugin";
 
 /**
  * 用于处理requestAnimationFrame
  * @returns
  */
-export default definePlugin<"rAF", PlatformPlugin.rAF>({
+export default definePlugin<"rAF">({
   name: "rAF",
   install() {
     const { env } = this.global;

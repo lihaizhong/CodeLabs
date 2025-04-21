@@ -14,12 +14,7 @@ export default {
       include: ["./package.json"],
       compact: true,
     }),
-    typescript({
-      baseUrl: "src",
-      declaration: true,
-      // rootDirs: ["src", "types"],
-      include: ["src/**", "types/**"],
-    }),
-    terser()
+    typescript({ tsconfig: "./tsconfig.build.json" }),
+    terser(),
   ],
 };

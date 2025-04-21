@@ -1,12 +1,10 @@
-import { PlatformPlugin, PlatformImage } from "octopus-platform";
+import { CreateImageInstance, PlatformImage, Platform, PlatformPlugin } from "../types";
 import { definePlugin } from "../definePlugin";
 
-declare module "octopus-platform" {
-  interface Platform {
-    local: PlatformPlugin.local;
-    path: PlatformPlugin.path;
-    decode: PlatformPlugin.decode;
-  }
+type ExtendedPlatform<P> = Platform<P> & {
+  local: PlatformPlugin["local"];
+  path: PlatformPlugin["path"];
+  decode: PlatformPlugin["decode"];
 }
 
 /**
@@ -15,10 +13,10 @@ declare module "octopus-platform" {
  * @package plugin-path 路径处理能力
  * @package plugin-decode 解码能力
  */
-export default definePlugin<"image", PlatformPlugin.image>({
+export default definePlugin<"image">({
   name: "image",
   install() {
-    const { local, path, decode, noop } = this;
+    const { local, path, decode, noop } = this as ExtendedPlatform<"image">;
     const { env } = this.global;
     const cachedImages: Set<string> = new Set();
 
@@ -46,7 +44,7 @@ export default definePlugin<"image", PlatformPlugin.image>({
     }
 
     if (env === "h5") {
-      const createImage = (_?: PlatformPlugin.CreateImageInstance) =>
+      const createImage = (_?: CreateImageInstance) =>
         new Image();
       const genImageSource = (data: Uint8Array | string) => {
         if (typeof data === "string") {
@@ -61,7 +59,7 @@ export default definePlugin<"image", PlatformPlugin.image>({
         isImageBitmap: (data: unknown) => data instanceof ImageBitmap,
         create: createImage,
         load: (
-          canvas: PlatformPlugin.CreateImageInstance,
+          canvas: CreateImageInstance,
           data: ImageBitmap | Uint8Array | string,
           _filename: string,
           _prefix?: string
@@ -80,7 +78,7 @@ export default definePlugin<"image", PlatformPlugin.image>({
       };
     }
 
-    const createImage = (canvas: PlatformPlugin.CreateImageInstance) =>
+    const createImage = (canvas: CreateImageInstance) =>
       canvas.createImage();
     const genImageSource = async (
       data: Uint8Array | string,
@@ -121,7 +119,7 @@ export default definePlugin<"image", PlatformPlugin.image>({
       isImageBitmap: (_: unknown) => false,
       create: createImage,
       load: async (
-        canvas: PlatformPlugin.CreateImageInstance,
+        canvas: CreateImageInstance,
         data: ImageBitmap | Uint8Array | string,
         filename: string,
         prefix?: string

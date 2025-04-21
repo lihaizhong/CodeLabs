@@ -1,5 +1,5 @@
 export async function retry<T>(
-  fn: () => T,
+  fn: () => T | Promise<T>,
   intervals: number[] = [],
   times: number = 0
 ): Promise<T> {

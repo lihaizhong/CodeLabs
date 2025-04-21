@@ -1,11 +1,10 @@
-import { PlatformPlugin } from "octopus-platform";
 import { definePlugin } from "../definePlugin";
 
 /**
  * 用于处理远程文件读取
  * @returns
  */
-export default definePlugin<"remote", PlatformPlugin.remote>({
+export default definePlugin<"remote">({
   name: "remote",
   install() {
     const { env, br } = this.global;

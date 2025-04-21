@@ -1,7 +1,6 @@
-import { PlatformPlugin } from "octopus-platform";
 import { definePlugin } from "../definePlugin";
 
-export default definePlugin<"now", PlatformPlugin.now>({
+export default definePlugin<"now">({
   name: "now",
   install() {
     const { env, br } = this.global;

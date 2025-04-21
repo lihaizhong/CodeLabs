@@ -4,12 +4,9 @@
   "type": "module",
   "description": "平台兼容性磨平",
   "main": "dist/index.js",
-  "files": [
-    "index.d.ts",
-    "types"
-  ],
+  "types": "types/index.d.ts",
   "scripts": {
-    "build": "rimraf -rf dist && rollup -c",
+    "build": "rimraf -rf dist types && rollup -c",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

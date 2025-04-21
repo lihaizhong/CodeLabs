@@ -1,11 +1,10 @@
-import { PlatformPlugin } from "octopus-platform";
 import { definePlugin } from "../definePlugin";
 
 /**
  * 用于处理文件路径
  * @returns
  */
-export default definePlugin<"path", PlatformPlugin.path>({
+export default definePlugin<"path">({
   name: "path",
   install() {
     const { env, br } = this.global;
