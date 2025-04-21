@@ -24,7 +24,7 @@ export type PlatformProperties =
   | "getCanvas"
   | "getOfsCanvas";
 
-class SvgaPlatform extends OctopusPlatform<PlatformProperties> {
+class EnHancedPlatform extends OctopusPlatform<PlatformProperties> {
   now!: PlatformPlugin["now"];
   path!: PlatformPlugin["path"];
   remote!: PlatformPlugin["remote"];
@@ -67,4 +67,4 @@ class SvgaPlatform extends OctopusPlatform<PlatformProperties> {
   }
 }
 
-export const platform = new SvgaPlatform();
+export const platform = new EnHancedPlatform();
