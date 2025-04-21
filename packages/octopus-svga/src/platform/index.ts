@@ -50,19 +50,24 @@ class EnHancedPlatform extends OctopusPlatform<PlatformProperties> {
       ],
       version
     );
+  }
 
+  init() {
+    super.init();
     // 确保接口中声明的属性在实例上可用
     // 将原型上的方法赋值给实例属性
+    const props = Object.getPrototypeOf(this);
+
     Object.defineProperties(this, {
-      now: { get: () => Object.getPrototypeOf(this).now },
-      path: { get: () => Object.getPrototypeOf(this).path },
-      remote: { get: () => Object.getPrototypeOf(this).remote },
-      local: { get: () => Object.getPrototypeOf(this).local },
-      decode: { get: () => Object.getPrototypeOf(this).decode },
-      image: { get: () => Object.getPrototypeOf(this).image },
-      rAF: { get: () => Object.getPrototypeOf(this).rAF },
-      getCanvas: { get: () => Object.getPrototypeOf(this).getCanvas },
-      getOfsCanvas: { get: () => Object.getPrototypeOf(this).getOfsCanvas },
+      now: { get: () => props.now },
+      path: { get: () => props.path },
+      remote: { get: () => props.remote },
+      local: { get: () => props.local },
+      decode: { get: () => props.decode },
+      image: { get: () => props.image },
+      rAF: { get: () => props.rAF },
+      getCanvas: { get: () => props.getCanvas },
+      getOfsCanvas: { get: () => props.getOfsCanvas },
     });
   }
 }

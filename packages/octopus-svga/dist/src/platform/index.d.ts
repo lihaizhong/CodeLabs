@@ -1,6 +1,6 @@
 import { OctopusPlatform, PlatformPlugin } from "octopus-platform";
 export type PlatformProperties = "now" | "path" | "remote" | "local" | "decode" | "image" | "rAF" | "getCanvas" | "getOfsCanvas";
-declare class SvgaPlatform extends OctopusPlatform<PlatformProperties> {
+declare class EnHancedPlatform extends OctopusPlatform<PlatformProperties> {
     now: PlatformPlugin["now"];
     path: PlatformPlugin["path"];
     remote: PlatformPlugin["remote"];
@@ -11,6 +11,7 @@ declare class SvgaPlatform extends OctopusPlatform<PlatformProperties> {
     getCanvas: PlatformPlugin["getCanvas"];
     getOfsCanvas: PlatformPlugin["getOfsCanvas"];
     constructor();
+    init(): void;
 }
-export declare const platform: SvgaPlatform;
+export declare const platform: EnHancedPlatform;
 export {};
