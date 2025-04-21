@@ -8,7 +8,7 @@ export declare class OctopusPlatform<P extends PlatformPluginProperty> implement
     noop: () => any;
     retry: typeof retry;
     constructor(plugins: PlatformPluginOptions<P>[], version?: string);
-    private init;
+    protected init(): void;
     private autoEnv;
     private useBridge;
     private usePixelRatio;

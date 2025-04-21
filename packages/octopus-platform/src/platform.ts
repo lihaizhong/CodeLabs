@@ -26,7 +26,7 @@ export class OctopusPlatform<P extends PlatformPluginProperty> implements Platfo
     this.init();
   }
 
-  private init() {
+  protected init() {
     this.global.br = this.useBridge();
     this.global.dpr = this.usePixelRatio();
 

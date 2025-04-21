@@ -3,4 +3,4 @@ export * from "./definePlugin";
 export * from "./plugins";
 export * from "./extensions";
 
-// export * from "./types";
+export type * from "./types";

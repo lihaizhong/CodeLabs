@@ -20,13 +20,21 @@ export type PlatformProperties =
   | "local"
   | "decode"
   | "image"
-  | "intersectionObserver"
   | "rAF"
   | "getCanvas"
   | "getOfsCanvas";
 
 class SvgaPlatform extends OctopusPlatform<PlatformProperties> {
-  getCanvas: PlatformPlugin["getCanvas"]
+  // 为每个插件属性添加明确的类型声明
+  now!: PlatformPlugin["now"];
+  path!: PlatformPlugin["path"];
+  remote!: PlatformPlugin["remote"];
+  local!: PlatformPlugin["local"];
+  decode!: PlatformPlugin["decode"];
+  image!: PlatformPlugin["image"];
+  rAF!: PlatformPlugin["rAF"];
+  getCanvas!: PlatformPlugin["getCanvas"];
+  getOfsCanvas!: PlatformPlugin["getOfsCanvas"];
 
   constructor() {
     super(

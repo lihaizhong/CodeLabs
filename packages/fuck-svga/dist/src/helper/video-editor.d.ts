@@ -14,7 +14,7 @@ export declare class VideoEditor {
      * @param height
      * @returns
      */
-    createEditor(width: number, height: number): IGetOffscreenCanvasResult;
+    createEditor(width: number, height: number): import("octopus-platform").IGetOffscreenCanvasResult;
     /**
      * 创建画布图片
      * @param context

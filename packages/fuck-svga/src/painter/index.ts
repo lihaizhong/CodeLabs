@@ -26,12 +26,15 @@ export class Painter {
    * 主屏的 Canvas 元素
    * Main Screen
    */
-  private X: PlatformCanvas | null = null;
+  private X: PlatformCanvas | PlatformOffscreenCanvas | null = null;
   /**
    * 主屏的 Context 对象
    * Main Context
    */
-  private XC: CanvasRenderingContext2D | null = null;
+  private XC:
+    | CanvasRenderingContext2D
+    | OffscreenCanvasRenderingContext2D
+    | null = null;
   /**
    * 副屏的 Canvas 元素
    * Secondary Screen
@@ -112,10 +115,13 @@ export class Painter {
   ) {
     const { model, mode } = this;
     const { getCanvas, getOfsCanvas } = platform;
-    const { env } = platform.global
+    const { env } = platform.global;
     // #region set main screen implement
     // -------- 创建主屏 ---------
-    if (mode === "poster" && (env !== 'h5' || 'OffscreenCanvas' in globalThis)) {
+    if (
+      mode === "poster" &&
+      (env !== "h5" || "OffscreenCanvas" in globalThis)
+    ) {
       const { W, H } = this;
 
       if (!(W > 0 && H > 0)) {
@@ -248,9 +254,9 @@ export class Painter {
 
   /**
    * 计算缩放比例
-   * @param contentMode 
-   * @param videoSize 
-   * @returns 
+   * @param contentMode
+   * @param videoSize
+   * @returns
    */
   private calculateScale(
     contentMode: PLAYER_CONTENT_MODE,
@@ -287,9 +293,9 @@ export class Painter {
 
   /**
    * 调整画布尺寸
-   * @param contentMode 
-   * @param videoSize 
-   * @returns 
+   * @param contentMode
+   * @param videoSize
+   * @returns
    */
   public resize(contentMode: PLAYER_CONTENT_MODE, videoSize: VideoSize): void {
     const resizeKey = `${contentMode}-${videoSize.width}-${videoSize.height}-${
@@ -323,7 +329,7 @@ export class Painter {
       d: scale.scaleY,
       tx: scale.translateX,
       ty: scale.translateY,
-    };;
+    };
   }
 
   /**
@@ -358,7 +364,7 @@ export class Painter {
     start: number,
     end: number
   ) {
-    const { materials, dynamicMaterials } = this.IM
+    const { materials, dynamicMaterials } = this.IM;
 
     render(
       this.YC!,

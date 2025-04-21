@@ -1,5 +1,4 @@
 import typescript from "@rollup/plugin-typescript";
-// import eslint from '@rollup/plugin-eslint'
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
@@ -19,12 +18,7 @@ export default {
       compact: true,
     }),
     commonjs(),
-    // eslint(),
-    typescript({
-      declaration: true,
-      sourceMap: true,
-      include: ["src/**", "types/**"],
-    }),
+    typescript({ tsconfig: "./tsconfig.build.json" }),
     terser(),
   ],
 };
