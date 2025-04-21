@@ -1,4 +1,4 @@
-const REPLACE_SVGA_URL = `http://localhost:5151/public/svga`;
+const REPLACE_SVGA_URL = `${window.location.origin}/public/svga`;
 
 export const svgaSources = [
   "https://assets.2dfire.com/frontend/9ce0cce7205fbebba380ed44879e5660.svga",

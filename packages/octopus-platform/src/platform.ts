@@ -122,7 +122,6 @@ export class OctopusPlatform<P extends PlatformPluginProperty> implements Platfo
       const value = plugin.install.call<Platform<P>, [], PlatformPluginValue<P>>(this);
 
       usedPlugins[plugin.name] = true;
-      console.log(`Plugin ${pluginName} installed`, this, plugin.name, value);
       if (value !== undefined) {
         Reflect.set(this.constructor.prototype, plugin.name, value);
       }

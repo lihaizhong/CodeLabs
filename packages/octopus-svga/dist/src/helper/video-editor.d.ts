@@ -1,4 +1,4 @@
-import { IQrCodeImgOptions } from "../helper/qrcode-helper";
+import { IQrCodeImgOptions } from "./qrcode-helper";
 import type { Painter } from "../painter";
 interface VideoEditorOptions {
     mode: "R" | "A";

@@ -2,7 +2,7 @@ import { platform } from "../platform";
 import {
   generateImageBufferFromCode,
   IQrCodeImgOptions,
-} from "../helper/qrcode-helper";
+} from "./qrcode-helper";
 import { getBufferFromImageData } from "./png-helper";
 import type { Painter } from "../painter";
 
