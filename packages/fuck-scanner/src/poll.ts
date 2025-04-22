@@ -14,7 +14,7 @@ export class Poll {
    * @param callback 每次轮询时执行的回调函数
    * @param interval 轮询间隔时间（毫秒），默认为 0ms
    */
-  constructor(callback: Function, interval: number = 100) {
+  constructor(callback: Function, interval: number) {
     this.callback = callback;
     this.interval = interval;
   }
