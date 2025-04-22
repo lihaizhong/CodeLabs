@@ -2,7 +2,7 @@ import { PlatformGlobals, SupportedPlatform, PlatformPluginOptions, PlatformPlug
 import { noop, retry } from "./extensions";
 import { version } from "../package.json";
 
-export abstract class OctopusPlatform<P extends PlatformPluginProperty> implements Platform<P> {
+export abstract class OctopusPlatform<P extends PlatformPluginProperty> implements Platform {
   /**
    * 插件列表
    */
@@ -35,7 +35,6 @@ export abstract class OctopusPlatform<P extends PlatformPluginProperty> implemen
     this.version = version || "";
     this.plugins = plugins;
     this.globals.env = this.autoEnv();
-    this.init();
   }
 
   protected init() {

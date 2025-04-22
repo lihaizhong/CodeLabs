@@ -19,7 +19,7 @@ export interface PlatformPluginOptions<P extends PlatformPluginProperty> {
   install: (this: Platform<P>) => PlatformPluginValue<P>;
 }
 
-interface Platform<_> {
+export interface Platform {
   globals: PlatformGlobals;
 
   noop: () => any;

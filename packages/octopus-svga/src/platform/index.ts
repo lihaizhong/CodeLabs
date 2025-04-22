@@ -1,5 +1,6 @@
 import {
   OctopusPlatform,
+  Platform,
   PlatformPlugin,
   PlatformPluginOptions,
   PlatformPluginValue,
@@ -27,15 +28,45 @@ export type PlatformProperties =
   | "getCanvas"
   | "getOfsCanvas";
 
+declare module "octopus-platform" {
+  export interface Platform {
+    now: PlatformPlugin["now"];
+
+    path: PlatformPlugin["path"];
+
+    remote: PlatformPlugin["remote"];
+
+    local: PlatformPlugin["local"];
+
+    decode: PlatformPlugin["decode"];
+
+    image: PlatformPlugin["image"];
+
+    rAF: PlatformPlugin["rAF"];
+
+    getCanvas: PlatformPlugin["getCanvas"];
+
+    getOfsCanvas: PlatformPlugin["getOfsCanvas"];
+  }
+}
+
 class EnHancedPlatform extends OctopusPlatform<PlatformProperties> {
   now!: PlatformPlugin["now"];
+
   path!: PlatformPlugin["path"];
+
   remote!: PlatformPlugin["remote"];
+
   local!: PlatformPlugin["local"];
+
   decode!: PlatformPlugin["decode"];
+
   image!: PlatformPlugin["image"];
+
   rAF!: PlatformPlugin["rAF"];
+
   getCanvas!: PlatformPlugin["getCanvas"];
+
   getOfsCanvas!: PlatformPlugin["getOfsCanvas"];
 
   constructor() {

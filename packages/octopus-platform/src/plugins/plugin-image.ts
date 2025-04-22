@@ -1,7 +1,7 @@
 import { CreateImageInstance, PlatformImage, Platform, PlatformPlugin } from "../types";
 import { definePlugin } from "../definePlugin";
 
-type ExtendedPlatform<P> = Platform<P> & {
+type ExtendedPlatform = Platform & {
   local: PlatformPlugin["local"];
   path: PlatformPlugin["path"];
   decode: PlatformPlugin["decode"];
@@ -16,7 +16,7 @@ type ExtendedPlatform<P> = Platform<P> & {
 export default definePlugin<"image">({
   name: "image",
   install() {
-    const { local, path, decode, noop } = this as ExtendedPlatform<"image">;
+    const { local, path, decode, noop } = this as ExtendedPlatform;
     const { env } = this.globals;
     const cachedImages: Set<string> = new Set();
 

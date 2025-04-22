@@ -1,6 +1,6 @@
 import { PlatformGlobals, SupportedPlatform, PlatformPluginOptions, PlatformPluginProperty, Platform } from "./types";
 import { retry } from "./extensions";
-export declare abstract class OctopusPlatform<P extends PlatformPluginProperty> implements Platform<P> {
+export declare abstract class OctopusPlatform<P extends PlatformPluginProperty> implements Platform {
     /**
      * 插件列表
      */
