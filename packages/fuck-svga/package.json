@@ -26,7 +26,6 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "fflate": "^0.8.2",
-    "fuck-platform": "workspace:^"
+    "fflate": "^0.8.2"
   }
 }

@@ -22,5 +22,8 @@
     "rimraf": "^6.0.1",
     "rollup": "^4.39.0",
     "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "jsqr": "^1.4.0"
   }
 }
