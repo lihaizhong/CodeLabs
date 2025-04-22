@@ -1,8 +1,6 @@
 import typescript from '@rollup/plugin-typescript'
-// import eslint from '@rollup/plugin-eslint'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
-import json from '@rollup/plugin-json'
 import terser from '@rollup/plugin-terser'
 
 export default {
@@ -14,13 +12,8 @@ export default {
   },
   plugins: [
     nodeResolve(),
-    json({
-      include: ['./package.json'],
-      compact: true
-    }),
     commonjs(),
-    // eslint(),
-    typescript(),
+    typescript({ tsconfig: "./tsconfig.build.json" }),
     terser()
   ]
 }
