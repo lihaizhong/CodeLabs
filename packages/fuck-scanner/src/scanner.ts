@@ -33,7 +33,7 @@ export class MultiQRScanner {
    * @param config 分割配置
    * @returns 识别到的二维码结果数组
    */
-  static scanMultipleQRCodes(
+  scanMultipleQRCodes(
     imageData: ImageData,
     config: SplitConfig = { gridSize: 2, overlap: 0.2 }
   ): QRCodeResult[] {
@@ -96,7 +96,7 @@ export class MultiQRScanner {
    * @param config 分割配置
    * @returns 分割后的图像块数组
    */
-  private static splitImageData(
+  private splitImageData(
     imageData: ImageData,
     config: SplitConfig
   ): Array<{
@@ -167,7 +167,7 @@ export class MultiQRScanner {
     return chunks;
   }
 
-  private static scan(elem: HTMLVideoElement | HTMLImageElement, width: number, height: number, config: SplitConfig): QRCodeResult[] {
+  private scan(elem: HTMLVideoElement | HTMLImageElement, width: number, height: number, config: SplitConfig): QRCodeResult[] {
     // 创建 canvas 元素
     const canvas = new OffscreenCanvas(width, height);
     const context = canvas.getContext('2d');
@@ -181,7 +181,7 @@ export class MultiQRScanner {
     canvas.height = height;
     
     // 将视频帧绘制到 canvas 上
-    context.drawImage(elem, 0, 0, width, height);
+    context.drawImage(elem, 0, 0, width, height)
     
     // 获取图像数据
     const imageData = context.getImageData(0, 0, width, height);
@@ -196,13 +196,13 @@ export class MultiQRScanner {
    * @param config 分割配置
    * @returns 识别到的二维码结果数组
    */
-  static scanFromVideoFrame(
+  scanFromVideoFrame(
     videoElement: HTMLVideoElement,
     config: SplitConfig = { gridSize: 2, overlap: 0.2 }
   ): QRCodeResult[] {
     const { videoWidth: width, videoHeight: height } = videoElement;
 
-    return MultiQRScanner.scan(videoElement, width, height, config);
+    return this.scan(videoElement, width, height, config);
   }
   
   /**
@@ -211,13 +211,13 @@ export class MultiQRScanner {
    * @param config 分割配置
    * @returns 识别到的二维码结果数组
    */
-  static scanFromImage(
+  scanFromImage(
     imageElement: HTMLImageElement,
     config: SplitConfig = { gridSize: 2, overlap: 0.2 }
   ): QRCodeResult[] {
     const { naturalWidth: width, naturalHeight: height } = imageElement;
     
-    return MultiQRScanner.scan(imageElement, width, height, config);
+    return this.scan(imageElement, width, height, config);
   }
 }
 
