@@ -9,6 +9,7 @@
   "dependencies": {
     "@ungap/url-search-params": "^0.2.2",
     "excelsior-channel": "workspace:^",
+    "fuck-scanner": "workspace:^",
     "jsqr": "^1.4.0",
     "octopus-svga": "workspace:^",
     "weui": "^2.6.21"

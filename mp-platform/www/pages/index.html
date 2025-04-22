@@ -1,48 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>首页</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      padding: 60px 40px;
-    }
-  </style>
-  <!-- 引入 WeUI CDN 链接 https://weui.io/ -->
-  <!-- <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.3.0/weui.min.css"/> -->
-  <script type="module">
-    import "weui";
-
-    const createButton = (link, desc) => {
-      const $btn = document.createElement('button');
-
-      $btn.classList.add('weui-btn');
-      $btn.classList.add('weui-btn_primary');
-      $btn.innerText = desc;
-      $btn.onclick = () => {
-        window.location.href = link;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>首页</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
       }
 
-      document.body.appendChild($btn);
-    }
+      body {
+        padding: 60px 40px;
+      }
+    </style>
+    <!-- 引入 WeUI CDN 链接 https://weui.io/ -->
+    <!-- <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.3.0/weui.min.css"/> -->
+    <script type="module">
+      import "weui";
 
-    window.onload = () => {
-      createButton('/pages/svga/index.html', '跳转SVGA动画(自研版)');
-      createButton('/pages/svga-lite/index.html', '跳转SVGA动画(官方版)');
-      createButton('/pages/svga-poster/index.html', '跳转SVGA海报(自研版)');
-      createButton('/pages/svga-analyze/index.html', '跳转SVGA分析');
-      createButton('/pages/qrcode/index.html', '跳转二维码生成器');
-      createButton('/pages/apng/index.html', '跳转APNG动画');
-      createButton('/pages/navigate-to-miniprogram/index.html', '跳转微信小程序');
-      createButton('/subpackages/index.html', '跳转子页面');
-    }
-  </script>
-</head>
-<body></body>
+      const createCell = (link, desc) => {
+        const $link = document.createElement('a');
+        $link.classList.add('weui-cell');
+        $link.classList.add('weui-cell_access');
+        $link.href = link;
+
+        const $left = document.createElement('span');
+        $left.classList.add('weui-cell__bd');
+        $left.innerText = desc;
+
+        const $right = document.createElement('span');
+        $right.classList.add('weui-cell__ft');
+
+        $link.appendChild($left);
+        $link.appendChild($right);
+        document.body.appendChild($link);
+      }
+
+      window.onload = () => {
+        createCell('/pages/svga/index.html', '跳转SVGA动画(自研版)');
+        createCell('/pages/svga-lite/index.html', '跳转SVGA动画(官方版)');
+        createCell('/pages/svga-poster/index.html', '跳转SVGA海报(自研版)');
+        createCell('/pages/svga-analyze/index.html', '跳转SVGA分析');
+        createCell('/pages/qrcode/index.html', '跳转二维码生成器');
+        createCell('/pages/apng/index.html', '跳转APNG动画');
+        createCell('/pages/navigate-to-miniprogram/index.html', '跳转微信小程序');
+        createCell('/subpackages/index.html', '跳转子页面');
+      }
+    </script>
+  </head>
+  <body></body>
 </html>

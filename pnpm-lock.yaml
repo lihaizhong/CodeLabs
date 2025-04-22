@@ -124,6 +124,9 @@ importers:
       excelsior-channel:
         specifier: workspace:^
         version: link:../../packages/excelsior-channel
+      fuck-scanner:
+        specifier: workspace:^
+        version: link:../../packages/fuck-scanner
       jsqr:
         specifier: ^1.4.0
         version: 1.4.0
