@@ -1,7 +1,7 @@
 import { initialPlatformGlobal } from "../../__mocks__";
 import pluginDecode from "../../src/plugins/plugin-decode";
 
-jest.mock("../../extensions/protobuf", () => ({
+jest.mock("../../src/extensions/utf8", () => ({
   utf8: jest.fn(() => "mocked utf8 data")
 }));
 
@@ -24,7 +24,7 @@ describe("pluginDecode 插件", () => {
   });
 
   describe("H5 环境", () => {
-    const platform = { global: initialPlatformGlobal("h5") };
+    const platform = { globals: initialPlatformGlobal("h5") };
 
     it("检查插件是否正常安装", () => {
       const decode = pluginDecode.install.call(platform);
@@ -81,7 +81,7 @@ describe("pluginDecode 插件", () => {
   });
 
   describe("小程序(weapp, alipay, tt) 环境", () => {
-    const platform = { global: initialPlatformGlobal("weapp") };
+    const platform = { globals: initialPlatformGlobal("weapp") };
 
     it("检查插件是否正常安装", () => {
       const decode = pluginDecode.install.call(platform);

@@ -40,10 +40,13 @@ describe("pluginCanvas 插件", () => {
     });
 
     it("检查插件是否正常安装", () => {
-      const platform = { global: initialPlatformGlobal("h5") };
+      const platform = {
+        globals: initialPlatformGlobal("h5"),
+        retry: (callback: () => void) => Promise.resolve(callback()),
+      };
       const getCanvas = pluginCanvas.install.call(platform);
       const getCanvasForWeapp = pluginCanvas.install.call({
-        global: initialPlatformGlobal("weapp"),
+        globals: initialPlatformGlobal("weapp"),
       });
 
       expect(typeof getCanvas).toBe("function");
@@ -51,7 +54,10 @@ describe("pluginCanvas 插件", () => {
     });
 
     it("getCanvas 调用成功", () => {
-      const platform = { global: initialPlatformGlobal("h5") };
+      const platform = {
+        globals: initialPlatformGlobal("h5"),
+        retry: (callback: () => void) => Promise.resolve(callback()),
+      };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -62,17 +68,29 @@ describe("pluginCanvas 插件", () => {
       });
     });
 
-    it("getCanvas 调用失败", () => {
-      const platform = { global: initialPlatformGlobal("h5") };
+    it("getCanvas 调用失败", async () => {
+      const platform = {
+        globals: initialPlatformGlobal("h5"),
+        retry: (callback: () => void) => Promise.reject(callback()),
+      };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
       document.querySelector.mockReturnValue(null);
-      expect(getCanvas("#noContainer")).rejects.toThrow("canvas not found.");
+
+      try {
+        await getCanvas("#noContainer");
+      } catch (e: unknown) {
+        expect(e).toBeInstanceOf(Error);
+        expect((e as Error).message).toBe("canvas not found.");
+      }
     });
 
     it("canvas 尺寸", async () => {
-      const platform = { global: initialPlatformGlobal("h5") };
+      const platform = {
+        globals: initialPlatformGlobal("h5"),
+        retry: (callback: () => void) => Promise.resolve(callback()),
+      };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -80,12 +98,15 @@ describe("pluginCanvas 插件", () => {
 
       const { canvas } = await getCanvas("#container");
 
-      expect(canvas.width).toBe(platform.global.dpr * mockCanvas.clientWidth);
-      expect(canvas.height).toBe(platform.global.dpr * mockCanvas.clientHeight);
+      expect(canvas.width).toBe(platform.globals.dpr * mockCanvas.clientWidth);
+      expect(canvas.height).toBe(platform.globals.dpr * mockCanvas.clientHeight);
     });
 
     it("canvas 尺寸超出限制：常规", async () => {
-      const platform = { global: initialPlatformGlobal("h5") };
+      const platform = {
+        globals: initialPlatformGlobal("h5"),
+        retry: (callback: () => void) => Promise.resolve(callback()),
+      };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -93,8 +114,8 @@ describe("pluginCanvas 插件", () => {
 
       const { canvas } = await getCanvas("#container");
 
-      expect(canvas.width).toBe(platform.global.dpr * mockExceedCanvas.clientWidth);
-      expect(canvas.height).toBe(platform.global.dpr * mockExceedCanvas.clientHeight);
+      expect(canvas.width).toBe(platform.globals.dpr * mockExceedCanvas.clientWidth);
+      expect(canvas.height).toBe(platform.globals.dpr * mockExceedCanvas.clientHeight);
     })
   });
 
@@ -121,16 +142,19 @@ describe("pluginCanvas 插件", () => {
     }
 
     it("检查插件安装是否正常安装", () => {
-      const platform = { global: initialPlatformGlobal("weapp") };
+      const platform = {
+        globals: initialPlatformGlobal("weapp"),
+        retry: (callback: () => void) => Promise.resolve(callback()),
+      };
       const getCanvas = pluginCanvas.install.call(platform);
       const getCanvasForH5 = pluginCanvas.install.call({
-        global: initialPlatformGlobal("h5"),
+        globals: initialPlatformGlobal("h5"),
       });
       const getCanvasForAlipay = pluginCanvas.install.call({
-        global: initialPlatformGlobal("alipay"),
+        globals: initialPlatformGlobal("alipay"),
       });
       const getCanvasForTT = pluginCanvas.install.call({
-        global: initialPlatformGlobal("tt"),
+        globals: initialPlatformGlobal("tt"),
       });
 
       expect(typeof getCanvas).toBe("function");
@@ -140,11 +164,14 @@ describe("pluginCanvas 插件", () => {
     });
 
     it("getCanvas 调用成功", () => {
-      const platform = { global: initialPlatformGlobal("weapp") };
+      const platform = {
+        globals: initialPlatformGlobal("weapp"),
+        retry: (callback: () => void) => Promise.resolve(callback()),
+      };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
-      platform.global.br.createSelectorQuery.mockImplementation(() => ({
+      platform.globals.br.createSelectorQuery.mockImplementation(() => ({
         in: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
         fields: jest.fn((_, callback) => {
@@ -161,11 +188,14 @@ describe("pluginCanvas 插件", () => {
     });
 
     it("getCanvas 调用失败", () => {
-      const platform = { global: initialPlatformGlobal("weapp") };
+      const platform = {
+        globals: initialPlatformGlobal("weapp"),
+        retry: (callback: () => void) => Promise.resolve(callback()),
+      };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
-      platform.global.br.createSelectorQuery.mockImplementation(() => ({
+      platform.globals.br.createSelectorQuery.mockImplementation(() => ({
         in: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
         fields: jest.fn((_, callback) => {
@@ -179,11 +209,14 @@ describe("pluginCanvas 插件", () => {
     });
 
     it("canvas 尺寸", async () => {
-      const platform = { global: initialPlatformGlobal("weapp") };
+      const platform = {
+        globals: initialPlatformGlobal("weapp"),
+        retry: (callback: () => void) => Promise.resolve(callback()),
+      };
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
-      platform.global.br.createSelectorQuery.mockImplementation(() => ({
+      platform.globals.br.createSelectorQuery.mockImplementation(() => ({
         in: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
         fields: jest.fn((_, callback) => {
@@ -202,12 +235,15 @@ describe("pluginCanvas 插件", () => {
 
     describe("小程序 canvas 尺寸超出: 微信下程序最大不能超过 1365 * 1365", () => {
       it("微信小程序 canvas 尺寸超出: 宽度 > 高度", async () => {
-        const platform = { global: initialPlatformGlobal("weapp") };
+        const platform = {
+          globals: initialPlatformGlobal("weapp"),
+          retry: (callback: () => void) => Promise.resolve(callback()),
+        };
         const getCanvas = pluginCanvas.install.call(platform);
         const MAX_SIZE = 1365;
   
         // @ts-ignore
-        platform.global.br.createSelectorQuery.mockImplementation(() => ({
+        platform.globals.br.createSelectorQuery.mockImplementation(() => ({
           in: jest.fn().mockReturnThis(),
           select: jest.fn().mockReturnThis(),
           fields: jest.fn((_, callback) => {
@@ -225,12 +261,15 @@ describe("pluginCanvas 插件", () => {
       });
 
       it("微信小程序 canvas 尺寸超出: 高度 > 宽度", async () => {
-        const platform = { global: initialPlatformGlobal("weapp") };
+        const platform = {
+          globals: initialPlatformGlobal("weapp"),
+          retry: (callback: () => void) => Promise.resolve(callback()),
+        };
         const getCanvas = pluginCanvas.install.call(platform);
         const MAX_SIZE = 1365;
   
         // @ts-ignore
-        platform.global.br.createSelectorQuery.mockImplementation(() => ({
+        platform.globals.br.createSelectorQuery.mockImplementation(() => ({
           in: jest.fn().mockReturnThis(),
           select: jest.fn().mockReturnThis(),
           fields: jest.fn((_, callback) => {
@@ -248,11 +287,14 @@ describe("pluginCanvas 插件", () => {
       });
   
       it("支付宝小程序 canvas 尺寸超出：常规", async () => {
-        const platform = { global: initialPlatformGlobal("alipay") };
+        const platform = {
+          globals: initialPlatformGlobal("alipay"),
+          retry: (callback: () => void) => Promise.resolve(callback()),
+        };
         const getCanvas = pluginCanvas.install.call(platform);
   
         // @ts-ignore
-        platform.global.br.createSelectorQuery.mockImplementation(() => ({
+        platform.globals.br.createSelectorQuery.mockImplementation(() => ({
           in: jest.fn().mockReturnThis(),
           select: jest.fn().mockReturnThis(),
           fields: jest.fn((_, callback) => {
@@ -265,16 +307,19 @@ describe("pluginCanvas 插件", () => {
   
         const { canvas } = await getCanvas("#container");
   
-        expect(canvas.width).toBe(platform.global.dpr * mockExceedResult.width);
-        expect(canvas.height).toBe(platform.global.dpr * mockExceedResult.height);
+        expect(canvas.width).toBe(platform.globals.dpr * mockExceedResult.width);
+        expect(canvas.height).toBe(platform.globals.dpr * mockExceedResult.height);
       });
   
       it("抖音小程序 canvas 尺寸超出：常规", async () => {
-        const platform = { global: initialPlatformGlobal("tt") };
+        const platform = {
+          globals: initialPlatformGlobal("tt"),
+          retry: (callback: () => void) => Promise.resolve(callback()),
+        };
         const getCanvas = pluginCanvas.install.call(platform);
   
         // @ts-ignore
-        platform.global.br.createSelectorQuery.mockImplementation(() => ({
+        platform.globals.br.createSelectorQuery.mockImplementation(() => ({
           in: jest.fn().mockReturnThis(),
           select: jest.fn().mockReturnThis(),
           fields: jest.fn((_, callback) => {
@@ -287,8 +332,8 @@ describe("pluginCanvas 插件", () => {
   
         const { canvas } = await getCanvas("#container");
   
-        expect(canvas.width).toBe(platform.global.dpr * mockExceedResult.width);
-        expect(canvas.height).toBe(platform.global.dpr * mockExceedResult.height);
+        expect(canvas.width).toBe(platform.globals.dpr * mockExceedResult.width);
+        expect(canvas.height).toBe(platform.globals.dpr * mockExceedResult.height);
       });
     });
   });

@@ -1,5 +1,7 @@
-jest.mock("../src/platform/definePlugin", () => ({
-  definePlugin: <T extends string, R>(
-    plugin: FuckPlatform.PlatformPlugin<T, R>
+import { PlatformPlugin } from "src/types";
+
+jest.mock("../src/definePlugin", () => ({
+  definePlugin: (
+    plugin: PlatformPlugin
   ) => plugin,
 }));

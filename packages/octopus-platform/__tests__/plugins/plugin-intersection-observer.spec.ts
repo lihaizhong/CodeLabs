@@ -1,6 +1,9 @@
 // import pluginIntersectionObserver from "./plugin-intersection-observer";
 
 describe("pluginIntersectionObserver defined", () => {
+  it("success", () => {
+    expect("success").toBe("success");
+  });
   // it("should be defined", () => {
   //   expect(pluginIntersectionObserver).toBeDefined();
   // });

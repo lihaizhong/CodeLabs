@@ -3,8 +3,9 @@ import pluginDecode from "../../src/plugins/plugin-decode";
 import pluginFsm from "../../src/plugins/plugin-fsm";
 import pluginPath from "../../src/plugins/plugin-path";
 import pluginImage from "../../src/plugins/plugin-image";
+import { PlatformPlugin } from "../../src/types";
 
-jest.mock("./plugin-decode", () => ({
+jest.mock("../../src/plugins/plugin-decode", () => ({
   name: "decode",
   install: () => ({
     toBitmap: (data: Uint8Array) => {
@@ -16,7 +17,7 @@ jest.mock("./plugin-decode", () => ({
   }),
 }));
 
-jest.mock("./plugin-fsm", () => ({
+jest.mock("../../src/plugins/plugin-fsm", () => ({
   name: "local",
   install: () => ({
     write: () => Promise.resolve("write success"),
@@ -24,7 +25,7 @@ jest.mock("./plugin-fsm", () => ({
   }),
 }));
 
-jest.mock("./plugin-path", () => ({
+jest.mock("../../src/plugins/plugin-path", () => ({
   name: "path",
   install: () => ({
     USER_DATA_PATH: "user data path",
@@ -48,11 +49,11 @@ describe("pluginImage 定义", () => {
 describe("pluginImage 插件", () => {
   describe("H5 环境", () => {
     const platform = {
-      global: initialPlatformGlobal("h5"),
+      globals: initialPlatformGlobal("h5"),
       noop: () => {},
-      decode: {} as FuckPlatformPlugin.decode,
-      local: {} as FuckPlatformPlugin.local | null,
-      path: {} as FuckPlatformPlugin.path,
+      decode: {} as PlatformPlugin["decode"],
+      local: {} as PlatformPlugin["local"],
+      path: {} as PlatformPlugin["path"],
     };
 
     platform.decode = pluginDecode.install.call(platform);
@@ -147,11 +148,11 @@ describe("pluginImage 插件", () => {
 
   describe("小程序(weapp, alipay, tt) 环境", () => {
     const platform = {
-      global: initialPlatformGlobal("weapp"),
+      globals: initialPlatformGlobal("weapp"),
       noop: () => {},
-      decode: {} as FuckPlatformPlugin.decode,
-      local: {} as FuckPlatformPlugin.local | null,
-      path: {} as FuckPlatformPlugin.path,
+      decode: {} as PlatformPlugin["decode"],
+      local: {} as PlatformPlugin["local"],
+      path: {} as PlatformPlugin["path"],
     };
 
     platform.decode = pluginDecode.install.call(platform);
@@ -227,11 +228,11 @@ describe("pluginImage 插件", () => {
 
   describe("小程序(alipay) 环境", () => {
     const platform = {
-      global: initialPlatformGlobal("alipay"),
+      globals: initialPlatformGlobal("alipay"),
       noop: () => {},
-      decode: {} as FuckPlatformPlugin.decode,
-      local: {} as FuckPlatformPlugin.local | null,
-      path: {} as FuckPlatformPlugin.path,
+      decode: {} as PlatformPlugin["decode"],
+      local: {} as PlatformPlugin["local"],
+      path: {} as PlatformPlugin["path"],
     };
 
     platform.decode = pluginDecode.install.call(platform);

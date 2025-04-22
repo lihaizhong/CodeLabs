@@ -20,7 +20,7 @@ describe("pluginDownload 插件", () => {
   });
 
   describe("H5 环境", () => {
-    const platform = { global: initialPlatformGlobal("h5") };
+    const platform = { globals: initialPlatformGlobal("h5") };
 
     it("检查插件是否正常安装", () => {
       const download = pluginDownload.install.call(platform);
@@ -73,7 +73,7 @@ describe("pluginDownload 插件", () => {
   });
 
   describe("小程序(weapp, alipay, tt) 环境", () => {
-    const platform = { global: initialPlatformGlobal("weapp") };
+    const platform = { globals: initialPlatformGlobal("weapp") };
 
     it("检查插件是否正常安装", () => {
       const download = pluginDownload.install.call(platform);
@@ -92,7 +92,7 @@ describe("pluginDownload 插件", () => {
     });
 
     it("fetch 调用成功", async () => {
-      platform.global.br.request = jest.fn().mockImplementation((options) => {
+      platform.globals.br.request = jest.fn().mockImplementation((options) => {
         options.success({
           statusCode: 200,
           data: new ArrayBuffer(1024),
@@ -104,7 +104,7 @@ describe("pluginDownload 插件", () => {
         "https://www.test.com/test/frame01.svga"
       );
 
-      expect(platform.global.br.request).toHaveBeenCalledWith({
+      expect(platform.globals.br.request).toHaveBeenCalledWith({
         url: "https://www.test.com/test/frame01.svga",
         dataType: "arraybuffer",
         responseType: "arraybuffer",
@@ -116,7 +116,7 @@ describe("pluginDownload 插件", () => {
     });
 
     it("fetch 调用失败", () => {
-      platform.global.br.request = jest.fn().mockImplementation((options) => {
+      platform.globals.br.request = jest.fn().mockImplementation((options) => {
         options.fail({
           statusCode: 404,
           errMsg: "Not Found",
@@ -128,7 +128,7 @@ describe("pluginDownload 插件", () => {
         "https://www.test.com/test/frame01.svga"
       );
 
-      expect(platform.global.br.request).toHaveBeenCalledWith({
+      expect(platform.globals.br.request).toHaveBeenCalledWith({
         url: "https://www.test.com/test/frame01.svga",
         dataType: "arraybuffer",
         responseType: "arraybuffer",

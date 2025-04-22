@@ -35,7 +35,7 @@ export default async (): Promise<Config> => {
 
         // A list of paths to directories that Jest should use to search for files in
         roots: [
-          "<rootDir>/__mocks",
+          "<rootDir>/__mocks__",
           "<rootDir>/__tests__",
         ],
 
@@ -57,7 +57,7 @@ export default async (): Promise<Config> => {
 
         // The glob patterns Jest uses to detect test files
         testMatch: [
-          "<rootDir>/**/__tests__/**/*.[jt]s?(x)",
+          "<rootDir>/**/__tests__/**/?(*.)+(spec|test).[tj]s?(x)",
           "<rootDir>/**/?(*.)+(spec|test).[tj]s?(x)"
         ],
       },

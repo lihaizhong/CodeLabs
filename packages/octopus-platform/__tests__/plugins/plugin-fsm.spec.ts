@@ -20,7 +20,7 @@ describe("pluginFsm 插件", () => {
   });
 
   describe("H5 环境", () => {
-    const platform = { global: initialPlatformGlobal("h5") };
+    const platform = { globals: initialPlatformGlobal("h5") };
 
     it("检查插件是否正常安装", () => {
       expect(pluginFsm.install.call(platform)).toBeNull();
@@ -28,7 +28,7 @@ describe("pluginFsm 插件", () => {
   });
 
   describe("小程序(weapp, alipay, tt) 环境", () => {
-    const platform = { global: initialPlatformGlobal("weapp") };
+    const platform = { globals: initialPlatformGlobal("weapp") };
 
     it("检查插件是否正常安装", () => {
       const fsm = pluginFsm.install.call(platform);
@@ -40,7 +40,7 @@ describe("pluginFsm 插件", () => {
     });
 
     it("write 调用成功", async () => {
-      platform.global.br.getFileSystemManager.mockImplementation(() => ({
+      platform.globals.br.getFileSystemManager.mockImplementation(() => ({
         writeFile: jest.fn((options) => {
           options.success();
         }),
@@ -55,7 +55,7 @@ describe("pluginFsm 插件", () => {
     });
 
     it("write 调用失败", async () => {
-      platform.global.br.getFileSystemManager.mockImplementation(() => ({
+      platform.globals.br.getFileSystemManager.mockImplementation(() => ({
         writeFile: jest.fn().mockImplementation((options) => {
           options.fail("write fail");
         }),
@@ -69,7 +69,7 @@ describe("pluginFsm 插件", () => {
     });
 
     it("read 调用成功", async () => {
-      platform.global.br.getFileSystemManager.mockImplementation(() => ({
+      platform.globals.br.getFileSystemManager.mockImplementation(() => ({
         readFile: jest.fn().mockImplementation((options) => {
           options.success({ data: new ArrayBuffer(10) });
         }),
@@ -83,7 +83,7 @@ describe("pluginFsm 插件", () => {
     });
 
     it("read 调用失败", async () => {
-      platform.global.br.getFileSystemManager.mockImplementation(() => ({
+      platform.globals.br.getFileSystemManager.mockImplementation(() => ({
         readFile: jest.fn().mockImplementation((options) => {
           options.fail("read fail");
         }),
@@ -96,7 +96,7 @@ describe("pluginFsm 插件", () => {
     });
 
     it("remove 调用成功", async () => {
-      platform.global.br.getFileSystemManager.mockImplementation(() => ({
+      platform.globals.br.getFileSystemManager.mockImplementation(() => ({
         unlink: jest.fn().mockImplementation((options) => {
           options.success();
         }),
@@ -110,7 +110,7 @@ describe("pluginFsm 插件", () => {
     });
 
     it("remove 调用失败", async () => {
-      platform.global.br.getFileSystemManager.mockImplementation(() => ({
+      platform.globals.br.getFileSystemManager.mockImplementation(() => ({
         unlink: jest.fn().mockImplementation((options) => {
           options.fail("remove fail");
         }),
