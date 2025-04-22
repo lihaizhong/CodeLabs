@@ -48,7 +48,13 @@ export class Painter {
     | CanvasRenderingContext2D
     | OffscreenCanvasRenderingContext2D
     | null = null;
+  /**
+   * 画布的宽度
+   */
   private W: number;
+  /**
+   * 画布的高度
+   */
   private H: number;
   /**
    * 粉刷模式

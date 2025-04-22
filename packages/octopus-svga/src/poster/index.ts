@@ -18,6 +18,9 @@ export class Poster {
    */
   private contentMode = PLAYER_CONTENT_MODE.FILL;
 
+  /**
+   * 是否配置完成
+   */
   private isConfigured = false;
 
   /**
