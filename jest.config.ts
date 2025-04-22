@@ -22,7 +22,7 @@ export default async (): Promise<Config> => {
     ],
     projects: [
       {
-        displayName: "fuck-platform",
+        displayName: "OctopusPlatform",
 
         // The directory where Jest should output its coverage files
         coverageDirectory: "<rootDir>/coverage",
@@ -31,7 +31,7 @@ export default async (): Promise<Config> => {
         testEnvironment: "jsdom",
 
         // The root directory that Jest should scan for tests and modules within
-        rootDir: "./packages/fuck-platform",
+        rootDir: "./packages/octopus-platform",
 
         // A list of paths to directories that Jest should use to search for files in
         roots: [

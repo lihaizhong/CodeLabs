@@ -87,3 +87,9 @@ git submodule update --init --recursive
 ### 海报绘制思路
 
 - [小程序canvas绘制海报全流程](https://developer.aliyun.com/article/1259392)
+
+### VIDEO
+
+- [如何一步步抽出双端通用Video组件(Taro小程序/h5)](https://juejin.cn/post/7413541435331084351)
+- [HTML 音频/视频 DOM loadedmetadata 事件（保姆级教程）](https://www.exception.site/article/3489)
+- [什么是元数据（Metadata）?](https://zhuanlan.zhihu.com/p/101001989)
