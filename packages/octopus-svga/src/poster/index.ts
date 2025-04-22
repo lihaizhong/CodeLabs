@@ -18,6 +18,8 @@ export class Poster {
    */
   private contentMode = PLAYER_CONTENT_MODE.FILL;
 
+  private isConfigured = false;
+
   /**
    * 刷头实例
    */
@@ -32,17 +34,22 @@ export class Poster {
    * @param options 可配置项
    */
   public setConfig(
-    options: string | PosterConfig,
+    options: string | PosterConfig = {},
     component?: WechatMiniprogram.Component.TrivialInstance | null
   ): Promise<void> {
     const config: PosterConfig = typeof options === "string" ? { container: options } : options;
 
-    if (config.contentMode) {
+    if (config.container === undefined) {
+      config.container = "";
+    }
+
+    if (config.contentMode !== undefined) {
       this.contentMode = config.contentMode;
     }
 
     this.frame = typeof config.frame === 'number' ? config.frame : 0;
 
+    this.isConfigured = true;
     return this.painter.register(config.container, '', component);
   }
 
@@ -68,9 +75,13 @@ export class Poster {
    * @param currFrame
    * @returns
    */
-  public mount(videoEntity: Video): Promise<void[]> {
+  public async mount(videoEntity: Video): Promise<void[]> {
     if (!videoEntity) {
       throw new Error("videoEntity undefined");
+    }
+
+    if (!this.isConfigured) {
+      this.painter.register('', '', null);
     }
 
     const { images, filename } = videoEntity;

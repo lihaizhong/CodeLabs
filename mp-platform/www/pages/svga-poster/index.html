@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Svga 海报</title>
+    <script type="module">
+      import { Parser, Poster } from "octopus-svga";
+      import { posterFiles } from "../../utils/constants";
+
+      const parser = new Parser();
+      parser
+        .load(posterFiles[0])
+        .then(async (posterItem) => {
+          const poster = new Poster(
+            posterItem.size.width,
+            posterItem.size.height
+          );
+
+          // poster.setConfig();
+          console.log("posterItem", posterItem);
+          await poster.mount(posterItem);
+
+          return poster;
+        })
+        .then((poster) => {
+          const $elem = document.createElement("img");
+
+          poster.setContentMode("aspect-fit");
+          poster.draw();
+          $elem.src = poster.toDataURL();
+          $elem.style.width = "100%";
+          console.log("data url", $elem.src);
+          document.body.appendChild($elem);
+        });
+    </script>
+  </head>
+  <body></body>
+</html>

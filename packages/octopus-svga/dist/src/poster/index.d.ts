@@ -13,6 +13,7 @@ export declare class Poster {
      * 填充模式，类似于 content-mode。
      */
     private contentMode;
+    private isConfigured;
     /**
      * 刷头实例
      */
@@ -22,7 +23,7 @@ export declare class Poster {
      * 设置配置项
      * @param options 可配置项
      */
-    setConfig(options: string | PosterConfig, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
+    setConfig(options?: string | PosterConfig, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
     /**
      * 修改内容模式
      * @param contentMode

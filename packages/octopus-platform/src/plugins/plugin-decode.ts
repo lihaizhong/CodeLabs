@@ -17,6 +17,18 @@ export default definePlugin<"decode">({
 
         return buffer.slice(byteOffset, byteOffset + byteLength) as ArrayBuffer;
       },
+      bytesToString(data: Uint8Array): string {
+        const chunkSize = 8192; // 安全的块大小
+        let result = '';
+        
+        for (let i = 0; i < data.length; i += chunkSize) {
+          const chunk = data.slice(i, i + chunkSize);
+
+          result += String.fromCharCode.apply(null, Array.from(chunk));
+        }
+
+        return result;
+      }
     } as PlatformPlugin["decode"];
 
     if (env === "h5") {
@@ -25,8 +37,7 @@ export default definePlugin<"decode">({
       decode.toBitmap = (data: Uint8Array) =>
         globalThis.createImageBitmap(new Blob([decode.toBuffer(data)]));
 
-      decode.toDataURL = (data: Uint8Array) =>
-        b64Wrap(globalThis.btoa(String.fromCharCode(...data)));
+      decode.toDataURL = (data: Uint8Array) => b64Wrap(globalThis.btoa(decode.bytesToString(data)));
 
       decode.utf8 = (data: Uint8Array, start: number, end: number) =>
         textDecoder.decode(data.subarray(start, end));

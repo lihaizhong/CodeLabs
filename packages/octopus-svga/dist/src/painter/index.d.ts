@@ -1,8 +1,6 @@
 type PaintMode = "poster" | "animation";
 export declare class Painter {
     private readonly mode;
-    private W;
-    private H;
     /**
      * 主屏的 Canvas 元素
      * Main Screen
@@ -23,6 +21,8 @@ export declare class Painter {
      * Secondary Context
      */
     private YC;
+    private W;
+    private H;
     /**
      * 粉刷模式
      */
@@ -40,7 +40,7 @@ export declare class Painter {
      * @param W 海报模式必须传入
      * @param H 海报模式必须传入
      */
-    constructor(mode?: PaintMode, W?: number, H?: number);
+    constructor(mode?: PaintMode, width?: number, height?: number);
     private setModel;
     /**
      * 注册画笔，根据环境判断生成最优的绘制方式

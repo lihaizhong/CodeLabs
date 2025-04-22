@@ -272,7 +272,7 @@ interface PosterConfig {
   /**
    * 主屏，绘制海报的 Canvas 元素
    */
-  container: string;
+  container?: string;
   /**
    * 填充模式，类似于 content-mode。
    */

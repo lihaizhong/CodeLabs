@@ -48,6 +48,8 @@ export class Painter {
     | CanvasRenderingContext2D
     | OffscreenCanvasRenderingContext2D
     | null = null;
+  private W: number;
+  private H: number;
   /**
    * 粉刷模式
    */
@@ -71,9 +73,14 @@ export class Painter {
    */
   constructor(
     private readonly mode: PaintMode = "animation",
-    private W = 0,
-    private H = 0
-  ) {}
+    width = 0,
+    height = 0
+  ) {
+    const { dpr } = platform.globals;
+
+    this.W = width * dpr;
+    this.H = height * dpr;
+  }
 
   private setModel(type: "C" | "O"): void {
     const { model } = this;
@@ -298,9 +305,9 @@ export class Painter {
    * @returns
    */
   public resize(contentMode: PLAYER_CONTENT_MODE, videoSize: VideoSize): void {
-    const resizeKey = `${contentMode}-${videoSize.width}-${videoSize.height}-${
-      this.Y!.width
-    }-${this.Y!.height}`;
+    const { width: canvasWidth, height: canvasHeight } = this.Y!;
+    const { width: videoWidth, height: videoHeight } = videoSize;
+    const resizeKey = `${contentMode}-${videoWidth}-${videoHeight}-${canvasWidth}-${canvasHeight}`;
 
     if (this.lastResizeKey === resizeKey && this.lastTransform) {
       this.globalTransform = this.lastTransform;
@@ -315,8 +322,8 @@ export class Painter {
     };
 
     if (contentMode === PLAYER_CONTENT_MODE.FILL) {
-      scale.scaleX = this.Y!.width / videoSize.width;
-      scale.scaleY = this.Y!.height / videoSize.height;
+      scale.scaleX = canvasWidth / videoWidth;
+      scale.scaleY = canvasHeight / videoHeight;
     } else {
       scale = this.calculateScale(contentMode, videoSize);
     }

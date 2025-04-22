@@ -1,3 +1,5 @@
+import { platform } from "../../platform";
+
 // CRC32 表初始化
 function initCRC32Table(): Uint32Array {
   return Uint32Array.from(Array(256), (_, i) => {
@@ -21,7 +23,7 @@ export class CRC32 {
   
     const { table } = CRC32;
     const { cache } = this;
-    const key = String.fromCharCode.apply(null, Array.from(buff));
+    const key = platform.decode.bytesToString(buff);
   
     if (cache.has(key)) {
       return cache.get(key)!;

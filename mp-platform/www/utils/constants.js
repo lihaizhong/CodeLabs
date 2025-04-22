@@ -67,6 +67,10 @@ export const svgaLargeFiles = [
   "frame03.svga",
 ].map((url) => `${REPLACE_SVGA_URL}/large/${url}`);
 
+export const posterFiles = [
+  "支付宝商户授权码.svga"
+].map((url) => `${REPLACE_SVGA_URL}/poster/${url}`);
+
 export function getOneAtRandom(files) {
   const ranIndex = Math.floor(Math.random() * files.length);
 

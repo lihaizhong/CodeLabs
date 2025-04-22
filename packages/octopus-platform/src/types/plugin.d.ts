@@ -58,6 +58,7 @@ export interface PlatformPlugin {
     toBitmap?: (data: Uint8Array) => Promise<ImageBitmap>;
     toDataURL: (data: Uint8Array) => string;
     toBuffer: (data: Uint8Array) => ArrayBuffer;
+    bytesToString: (data: Uint8Array) => string;
     utf8: (data: Uint8Array, start: number, end: number) => string;
   };
 
