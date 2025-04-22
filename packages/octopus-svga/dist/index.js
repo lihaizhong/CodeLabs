@@ -5822,7 +5822,13 @@ class Painter {
      * Secondary Context
      */
     YC = null;
+    /**
+     * 画布的宽度
+     */
     W;
+    /**
+     * 画布的高度
+     */
     H;
     /**
      * 粉刷模式
@@ -5891,7 +5897,6 @@ class Painter {
             const { canvas, context } = getOfsCanvas({ width: W, height: H });
             this.X = canvas;
             this.XC = context;
-            console.log('X', this.X);
         }
         else {
             const { canvas, context } = await getCanvas(selector, component);
@@ -5909,7 +5914,6 @@ class Painter {
             this.Y = this.X;
             this.YC = this.XC;
             this.setModel("O");
-            console.log('Y', this.Y);
         }
         else {
             let ofsResult;
@@ -8168,6 +8172,9 @@ class Poster {
      * 填充模式，类似于 content-mode。
      */
     contentMode = "fill" /* PLAYER_CONTENT_MODE.FILL */;
+    /**
+     * 是否配置完成
+     */
     isConfigured = false;
     /**
      * 刷头实例

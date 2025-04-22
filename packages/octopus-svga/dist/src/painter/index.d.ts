@@ -21,7 +21,13 @@ export declare class Painter {
      * Secondary Context
      */
     private YC;
+    /**
+     * 画布的宽度
+     */
     private W;
+    /**
+     * 画布的高度
+     */
     private H;
     /**
      * 粉刷模式

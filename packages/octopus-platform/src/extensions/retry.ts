@@ -1,20 +1,22 @@
-export async function retry<T>(
+import { Platform } from "src/types";
+
+export const retry: Platform["retry"] = async <T>(
   fn: () => T | Promise<T>,
   intervals: number[] = [],
   times: number = 0
-): Promise<T> {
+) => {
   try {
-    return await fn();
+    return fn();
   } catch (err) {
     if (times >= intervals.length) {
       throw err;
     }
 
-    return new Promise((resolve) => {
+    return new Promise<T>((resolve) => {
       setTimeout(
-        () => resolve(retry(fn, intervals, times + 1)),
+        () => resolve(retry<T>(fn, intervals, times + 1)),
         intervals[times]
       );
     });
   }
-}
+};

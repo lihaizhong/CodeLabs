@@ -13,6 +13,9 @@ export declare class Poster {
      * 填充模式，类似于 content-mode。
      */
     private contentMode;
+    /**
+     * 是否配置完成
+     */
     private isConfigured;
     /**
      * 刷头实例
