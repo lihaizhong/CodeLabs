@@ -4,9 +4,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Svga动画库 文件分析</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background-color: var(--weui-BG-0);
+    }
+
+    .analyze-stage {
+      width: 100%;
+      height: 100%;
+      object-fit: scale-down;
+    }
+  </style>
   <script type="module" src="./index.js"></script>
 </head>
 <body>
-  
+  <div class="weui-bottom-fixed-opr-page">
+    <div class="weui-bottom-fixed-opr-page__content">
+      <img class="analyze-stage" alt="svga-analyze">
+    </div>
+    <div class="weui-bottom-fixed-opr-page__tool">
+      <div class="weui-bottom-fixed-opr-page__tips weui-agree__text">
+        本网站动画文件仅供学习使用，禁止商用
+      </div>
+      <div class="weui-bottom-fixed-opr">
+        <button id="prevbtn" class="weui-btn weui-btn_primary">上一张</button>
+        <button id="operbtn" class="weui-btn weui-btn_primary">打开功能台</button>
+        <button id="nextbtn" class="weui-btn weui-btn_primary">下一张</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

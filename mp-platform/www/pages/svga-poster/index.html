@@ -17,23 +17,8 @@
 
       .poster {
         width: 100%;
-      }
-
-      .footer {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 20px;
-        z-index: 3;
-        display: flex;
-        justify-content: space-between;
-        padding-left: 20px;
-        padding-right: 20px;
-        padding-bottom: constant(safe-area-inset-bottom);
-        /* 兼容 iOS < 11.2 */
-        padding-bottom: env(safe-area-inset-bottom);
-        /* 兼容 iOS >= 11.2 */
-        text-align: center;
+        height: 100%;
+        object-fit: scale-down;
       }
 
       .analyze-container {
@@ -43,15 +28,21 @@
     <script type="module" src="./index.js"></script>
   </head>
   <body>
-    <img id="poster" class="poster" alt="poster" />
-    <div class="footer">
-      <div>
-        <button id="prev-btn" class="foot-btn weui-btn weui-btn_primary">上一张</button>
+    <div class="weui-bottom-fixed-opr-page">
+      <div class="weui-bottom-fixed-opr-page__content">
+        <img id="poster" class="poster" alt="poster" />
       </div>
-      <div>
-        <button id="next-btn" class="foot-btn weui-btn weui-btn_primary">下一张</button>
+      <div class="weui-bottom-fixed-opr-page__tool">
+        <div class="weui-bottom-fixed-opr-page__tips weui-agree__text">
+          本网站动画文件仅供学习使用，禁止商用
+        </div>
+        <div class="weui-bottom-fixed-opr">
+          <button id="prev-btn" class="weui-btn weui-btn_primary">上一张</button>
+          <button id="next-btn" class="weui-btn weui-btn_primary">下一张</button>
+        </div>
       </div>
     </div>
+
     <div id="analyze-container" class="analyze-container"></div>
   </body>
 </html>

@@ -1,37 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>APNG动画</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>APNG动画</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--weui-BG-0);
+      }
 
-    .apng-container {
-      margin: 40px 20px;
-      text-align: center;
-    }
+      .apng-container {
+        margin: 40px 20px;
+        text-align: center;
+      }
 
-    .apng-img {
-      margin: 20px;
-    }
-  </style>
-</head>
-<body>
-  <div class="apng-container">
-    <img class="apng-img" src="/public/apng/APNG-clock.png" alt="APNG-clock.png">
-  </div>
-  <div class="apng-container">
-    <img class="apng-img" src="/public/apng/APNG-cube.png" alt="APNG-cube.png">
-  </div>
-  <div class="apng-container">
-    <img class="apng-img" src="/public/apng/APNG-icos4D.png" alt="APNG-icos4D.png">
-  </div>
-  <div class="apng-container">
-    <img class="apng-img" src="/public/apng/APNG-pyani.png" alt="APNG-pyani.png">
-  </div>
-</body>
+      .apng-img {
+        margin: 20px;
+      }
+    </style>
+    <script type="module">
+      import "weui";
+    </script>
+  </head>
+  <body>
+    <div class="apng-container">
+      <img
+        class="apng-img"
+        src="/public/apng/APNG-clock.png"
+        alt="APNG-clock.png"
+      />
+    </div>
+    <div class="apng-container">
+      <img
+        class="apng-img"
+        src="/public/apng/APNG-cube.png"
+        alt="APNG-cube.png"
+      />
+    </div>
+    <div class="apng-container">
+      <img
+        class="apng-img"
+        src="/public/apng/APNG-icos4D.png"
+        alt="APNG-icos4D.png"
+      />
+    </div>
+    <div class="apng-container">
+      <img
+        class="apng-img"
+        src="/public/apng/APNG-pyani.png"
+        alt="APNG-pyani.png"
+      />
+    </div>
+  </body>
 </html>
