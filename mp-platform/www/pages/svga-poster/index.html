@@ -4,32 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Svga 海报</title>
-    <script type="module">
-      import { Parser, Poster } from "octopus-svga";
-      import { posterFiles } from "../../utils/constants";
-
-      const parser = new Parser();
-
-      window.addEventListener("DOMContentLoaded", async () => {
-        const posterItem = await parser.load(posterFiles[0]);
-        const { width, height } = posterItem.size;
-        const poster = new Poster(width, height);
-
-        // poster.setConfig();
-        console.log("posterItem", posterItem);
-        await poster.mount(posterItem);
-
-        const $elem = document.createElement("img");
-
-        poster.setContentMode("aspect-fit");
-        poster.draw();
-
-        $elem.src = poster.toDataURL();
-        $elem.style.width = "100%";
-        console.log("data url", $elem.src);
-        document.body.appendChild($elem);
-      })
-    </script>
+    <script type="module" src="./index.js"></script>
   </head>
   <body></body>
 </html>
