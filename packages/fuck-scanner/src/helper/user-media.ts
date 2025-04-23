@@ -28,14 +28,6 @@ export class UserMedia {
   }
 
   /**
-   * 设置媒体约束条件
-   * @param constraints 媒体约束条件
-   */
-  setConstraints(constraints: MediaStreamConstraints): void {
-    this.constraints = constraints;
-  }
-
-  /**
    * 设置使用前置或后置摄像头
    * @param useFront 是否使用前置摄像头
    */
@@ -108,10 +100,6 @@ export class UserMedia {
         this.videoElement.srcObject = null;
       }
     }
-  }
-
-  hasEnoughData() {
-    return this.videoElement.readyState === this.videoElement.HAVE_ENOUGH_DATA;
   }
 
   /**
