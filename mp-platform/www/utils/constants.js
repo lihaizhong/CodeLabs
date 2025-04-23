@@ -67,6 +67,21 @@ export const svgaLargeFiles = [
   "frame03.svga",
 ].map((url) => `${REPLACE_SVGA_URL}/large/${url}`);
 
+export const yyFiles = [
+  "angel.svga",
+  "EmptyState.svga",
+  "halloween.svga",
+  "HamburgerArrow.svga",
+  "kingset.svga",
+  "matteBitmap.svga",
+  "matteRect.svga",
+  "PinJump.svga",
+  "posche.svga",
+  "rose.svga",
+  "TwitterHeart.svga",
+  "Walkthrough.svga"
+].map((url) => `${REPLACE_SVGA_URL}/yy/${url}`);
+
 export const posterFiles = [
   "支付宝商户授权码.svga",
   "支付宝商户授权码（白色色块）.svga",

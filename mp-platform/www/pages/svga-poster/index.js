@@ -56,7 +56,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   $nextBtn.addEventListener("click", async () => {
-    if (current + 1 > len) {
+    if (current + 1 >= len) {
       return;
     }
 

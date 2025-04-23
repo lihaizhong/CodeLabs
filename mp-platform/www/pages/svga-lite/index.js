@@ -2,13 +2,13 @@ import "weui";
 import { Parser, Player } from "../../utils/svga-lite";
 import Page from "../../utils/Page";
 import {
-  // svgaSources,
+  svgaSources,
   svgaLargeFiles,
-  // posterFiles,
+  yyFiles,
   getOneAtRandom,
 } from "../../utils/constants";
 
-const files = svgaLargeFiles;
+const files = [svgaSources, svgaLargeFiles, yyFiles][2];
 const parser = new Parser();
 let player;
 
@@ -92,12 +92,6 @@ Page({
     player = new Player({
       container: document.querySelector("#palette"),
       loop: 1,
-      // playMode: "fallbacks",
-      // fillMode: "forwards",
-      // contentMode: "aspect-fill",
-      // contentMode: "fill",
-      // contentMode: "aspect-fit",
-      contentMode: "center",
     });
     player.onProcess = (percent, frame) => {
       console.log("当前进度", percent, frame);

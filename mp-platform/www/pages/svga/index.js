@@ -2,13 +2,13 @@ import "weui";
 import { Parser, Player } from "octopus-svga";
 import Page from "../../utils/Page";
 import {
-  // svgaSources,
+  svgaSources,
   svgaLargeFiles,
-  // posterFiles,
+  yyFiles,
   getOneAtRandom,
 } from "../../utils/constants";
 
-const files = svgaLargeFiles;
+const files = [svgaSources, svgaLargeFiles, yyFiles][2];
 const parser = new Parser();
 const player = new Player();
 let lastStatus = "next";
@@ -110,9 +110,9 @@ Page({
       // playMode: "fallbacks",
       // fillMode: "forwards",
       // contentMode: "aspect-fill",
-      contentMode: "fill",
-      // contentMode: "aspect-fit",
-      contentMode: "center",
+      // contentMode: "fill",
+      contentMode: "aspect-fit",
+      // contentMode: "center",
     });
     player.onProcess = (percent, frame) => {
       console.log("当前进度", percent, frame);
