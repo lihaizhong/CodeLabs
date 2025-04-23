@@ -83,9 +83,12 @@ export const yyFiles = [
 ].map((url) => `${REPLACE_SVGA_URL}/yy/${url}`);
 
 export const posterFiles = [
-  "支付宝商户授权码.svga",
-  "支付宝商户授权码（白色色块）.svga",
-  "支付宝商户授权码（透明色块）.svga"
+  // "支付宝商户授权码.svga",
+  // "支付宝商户授权码（白色色块）.svga",
+  // "支付宝商户授权码（透明色块）.svga",
+  // "测试.svga",
+  // "测试1.svga",
+  "测试2.svga"
 ].map((url) => `${REPLACE_SVGA_URL}/poster/${url}`);
 
 export function getOneAtRandom(files) {
