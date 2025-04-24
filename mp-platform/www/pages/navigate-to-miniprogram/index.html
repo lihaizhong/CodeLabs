@@ -3,24 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>wx.miniProgram.navigateTo()</title>
-  <script src="https://res.wx.qq.com/open/js/jweixin-1.3.2.js"></script>
+  <title>跳转微信小程序</title>
   <style>
-    .btn {
-      display: block;
-      width: 80%;
-      height: 40px;
-      margin: 0 auto;
-    }
-
-    .btn + .btn {
-      margin-top: 40px;
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background-color: var(--weui-BG-0);
     }
   </style>
+  <script async src="http://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
   <script type="module" src="./index.js"></script>
 </head>
 <body>
-  <button id="navigate-to-miniprogram-btn" class="btn">跳转小程序</button>
-  <button id="navigate-to-miniprogram-of-error-path-btn" class="btn">跳转小程序（不完整地址）</button>
+  <div class="weui-bottom-fixed-opr-page">
+    <div class="weui-bottom-fixed-opr-page__content">
+      <div class="weui-cells">
+        <div id="navigate-to-miniprogram-btn" class="weui-cell weui-cell_access">
+          <div class="weui-cell__bd">跳转小程序</div>
+          <div class="weui-cell__ft"></div>
+        </div>
+        <div id="navigate-to-miniprogram-of-error-path-btn" class="weui-cell weui-cell_access">
+          <div class="weui-cell__bd">跳转小程序（不完整地址）</div>
+          <div class="weui-cell__ft"></div>
+        </div>
+      </div>
+    </div>
+    <div class="weui-bottom-fixed-opr-page__tool">
+      <div class="weui-bottom-fixed-opr-page__tips weui-agree__text">
+        本网站动画文件仅供学习使用，禁止商用
+      </div>
+      <div class="weui-bottom-fixed-opr">
+        <button id="back-btn" class="weui-btn weui-btn_primary">返回上一页</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

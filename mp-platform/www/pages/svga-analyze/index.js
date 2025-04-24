@@ -39,12 +39,14 @@ async function render(current) {
 
     image.src = b64Image;
     image.onload = () => {
-      $item.classList.add("weui-cell", "weui-cell_active", "weui-cell_access");
+      $item.classList.add("weui-cell", "weui-cell_access");
       $item.innerHTML = `
         <div class="weui-cell__bd">${key}</div>
         <div class="weui-cell__ft">${image.width} x ${image.height}</div>
       `;
       $item.addEventListener("click", () => {
+        $switch.querySelector(".weui-cell_active").classList.remove("weui-cell_active");
+        $item.classList.add("weui-cell_active");
         document.getElementById("analyze-stage").src = b64Image;
         document.getElementById(
           "analyze-half-screen-dialog-close"

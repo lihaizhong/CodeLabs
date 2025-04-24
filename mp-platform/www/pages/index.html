@@ -17,10 +17,9 @@
     <script type="module">
       import "weui";
 
-      const createCell = (link, desc) => {
+      const createCell = (link, desc, parentNode) => {
         const $link = document.createElement('a');
-        $link.classList.add('weui-cell');
-        $link.classList.add('weui-cell_access');
+        $link.classList.add('weui-cell', 'weui-cell_access');
         $link.href = link;
 
         const $left = document.createElement('span');
@@ -32,20 +31,24 @@
 
         $link.appendChild($left);
         $link.appendChild($right);
-        document.body.appendChild($link);
+        parentNode.appendChild($link);
       }
 
-      window.onload = () => {
-        createCell('/pages/svga/index.html', '跳转SVGA动画(自研版)');
-        createCell('/pages/svga-lite/index.html', '跳转SVGA动画(官方版)');
-        createCell('/pages/svga-poster/index.html', '跳转SVGA海报(自研版)');
-        createCell('/pages/svga-analyze/index.html', '跳转SVGA分析');
-        createCell('/pages/qrcode/index.html', '跳转二维码生成器');
-        createCell('/pages/apng/index.html', '跳转APNG动画');
-        createCell('/pages/navigate-to-miniprogram/index.html', '跳转微信小程序');
-        createCell('/subpackages/index.html', '跳转子页面');
-      }
+      window.addEventListener('DOMContentLoaded', () => {
+        const $cellContainer = document.getElementById('cell-container');
+
+        createCell('/pages/svga/index.html', '跳转SVGA动画(自研版)', $cellContainer);
+        createCell('/pages/svga-lite/index.html', '跳转SVGA动画(官方版)', $cellContainer);
+        createCell('/pages/svga-poster/index.html', '跳转SVGA海报(自研版)', $cellContainer);
+        createCell('/pages/svga-analyze/index.html', '跳转SVGA分析', $cellContainer);
+        createCell('/pages/qrcode/index.html', '跳转二维码生成器', $cellContainer);
+        createCell('/pages/apng/index.html', '跳转APNG动画', $cellContainer);
+        createCell('/pages/navigate-to-miniprogram/index.html', '跳转微信小程序', $cellContainer);
+        createCell('/subpackages/index.html', '跳转子页面', $cellContainer);
+      })
     </script>
   </head>
-  <body></body>
+  <body>
+    <div id="cell-container" class="weui-cells"></div>
+  </body>
 </html>
