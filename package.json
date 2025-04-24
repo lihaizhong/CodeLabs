@@ -8,7 +8,7 @@
     "preinstall": "npx -y only-allow pnpm",
     "dev": "rm -rf dist .parcel-cache && parcel serve",
     "build": "rm -rf dist .parcel-cache && parcel build",
-    "static": "serve -p 5151 public",
+    "static:serve": "serve",
     "test": "jest",
     "zx:sync": "zx .scripts/sync.mjs"
   },

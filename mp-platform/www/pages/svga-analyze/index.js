@@ -18,6 +18,7 @@ async function render(current) {
     ["动画帧率", videoItem.fps],
   ]
 
+  console.log(videoItem.filename, videoItem);
   $infos.innerHTML = "";
   for (const [key, value] of infos) {
     const $item = document.createElement("div");
