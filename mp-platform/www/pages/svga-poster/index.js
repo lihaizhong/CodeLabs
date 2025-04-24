@@ -4,23 +4,6 @@ import { posterFiles } from "../../utils/constants";
 
 const parser = new Parser();
 
-async function analyzeSpriteImages(url) {
-  const $analyze = document.getElementById("analyze-container");
-
-  const videoItem = await parser.load(url);
-
-  $analyze.innerHTML = "";  
-  for (const key in videoItem.images) {
-    const image = videoItem.images[key];
-    const $image = document.createElement("img");
-
-    $image.src = platform.decode.toDataURL(image);
-    $image.style.width = "100%";
-    $image.style.objectFit = "scale-down";
-    $analyze.appendChild($image);
-  }
-}
-
 async function generatePoster(url) {
   const posterItem = await parser.load(url);
   const { width, height } = posterItem.size;
@@ -37,7 +20,6 @@ async function generatePoster(url) {
 
   $elem.src = poster.toDataURL();
   console.log("data url", $elem.src);
-  analyzeSpriteImages(url);
 }
 
 window.addEventListener("DOMContentLoaded", () => {

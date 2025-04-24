@@ -83,12 +83,13 @@ export const yyFiles = [
 ].map((url) => `${REPLACE_SVGA_URL}/yy/${url}`);
 
 export const posterFiles = [
-  // "支付宝商户授权码.svga",
-  // "支付宝商户授权码（白色色块）.svga",
-  // "支付宝商户授权码（透明色块）.svga",
-  // "测试.svga",
-  // "测试1.svga",
-  // "测试2.svga"
+  "测试(1).svga",
+  "支付宝商户授权码.svga",
+  "支付宝商户授权码（白色色块）.svga",
+  "支付宝商户授权码（透明色块）.svga",
+  "测试.svga",
+  "测试1.svga",
+  "测试2.svga",
   "支付宝授权码（白色）.svga",
   "支付宝授权码（透明）.svga",
 ].map((url) => `${REPLACE_SVGA_URL}/poster/${url}`);
