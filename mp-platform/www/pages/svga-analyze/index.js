@@ -45,7 +45,12 @@ async function render(current) {
         <div class="weui-cell__ft">${image.width} x ${image.height}</div>
       `;
       $item.addEventListener("click", () => {
-        $switch.querySelector(".weui-cell_active").classList.remove("weui-cell_active");
+        const $active = $switch.querySelector(".weui-cell_active");
+
+        if ($active) {
+          $active.classList.remove("weui-cell_active");
+        }
+
         $item.classList.add("weui-cell_active");
         document.getElementById("analyze-stage").src = b64Image;
         document.getElementById(
