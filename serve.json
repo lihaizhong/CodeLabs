@@ -22,12 +22,5 @@
         }
       ]
     }
-  ],
-  "rewrite": [
-    {
-      "source": "/**",
-      "destination": "/minio/"
-    }
-  ],
-  "etag": true
+  ]
 }

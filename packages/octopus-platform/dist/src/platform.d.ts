@@ -1,5 +1,4 @@
 import { PlatformGlobals, SupportedPlatform, PlatformPluginOptions, PlatformPluginProperty, Platform } from "./types";
-import { retry } from "./extensions";
 export declare abstract class OctopusPlatform<P extends PlatformPluginProperty> implements Platform {
     /**
      * 插件列表
@@ -18,7 +17,7 @@ export declare abstract class OctopusPlatform<P extends PlatformPluginProperty> 
      */
     globals: PlatformGlobals;
     noop: () => any;
-    retry: typeof retry;
+    retry: <T>(fn: () => T | Promise<T>, intervals?: number[], times?: number) => Promise<T>;
     constructor(plugins: PlatformPluginOptions<P>[], version?: string);
     protected init(): void;
     private autoEnv;

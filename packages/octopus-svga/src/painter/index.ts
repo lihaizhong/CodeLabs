@@ -146,6 +146,7 @@ export class Painter {
       const { canvas, context } = getOfsCanvas({ width: W, height: H });
       this.X = canvas;
       this.XC = context;
+      this.setModel("O");
     } else {
       const { canvas, context } = await getCanvas(selector, component);
       const { width, height } = canvas;
@@ -154,6 +155,7 @@ export class Painter {
       this.XC = context;
       this.W = width;
       this.H = height;
+      this.setModel("C");
     }
     // #endregion set main screen implement
 
@@ -162,7 +164,6 @@ export class Painter {
     if (mode === "poster") {
       this.Y = this.X;
       this.YC = this.XC;
-      this.setModel("O");
     } else {
       let ofsResult;
 

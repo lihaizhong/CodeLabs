@@ -44,7 +44,7 @@ export default definePlugin<"image">({
     }
 
     if (env === "h5") {
-      const createImage = (_?: CreateImageInstance) =>
+      const createImage = (_: CreateImageInstance) =>
         new Image();
       const genImageSource = (data: Uint8Array | string) => {
         if (typeof data === "string") {

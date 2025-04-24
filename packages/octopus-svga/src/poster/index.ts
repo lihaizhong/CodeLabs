@@ -85,6 +85,7 @@ export class Poster {
 
     if (!this.isConfigured) {
       this.painter.register('', '', null);
+      this.isConfigured = true;
     }
 
     const { images, filename } = videoEntity;

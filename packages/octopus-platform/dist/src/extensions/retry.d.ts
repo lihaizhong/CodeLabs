@@ -1,1 +1,2 @@
-export declare function retry<T>(fn: () => T | Promise<T>, intervals?: number[], times?: number): Promise<T>;
+import { Platform } from "src/types";
+export declare const retry: Platform["retry"];

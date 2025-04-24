@@ -1,3 +1,4 @@
+import type { CreateImageInstance } from "octopus-platform";
 import benchmark from "../benchmark";
 import { platform } from "../platform";
 import type { Painter } from ".";
@@ -24,7 +25,7 @@ export class ImagePool {
    * @returns
    */
   public createImage(
-    canvas: FuckSvga.PlatformCreateImageInstance
+    canvas: CreateImageInstance
   ): PlatformImage {
     return this.images.shift() || platform.image.create(canvas);
   }

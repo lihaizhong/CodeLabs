@@ -65,9 +65,9 @@ export interface PlatformPlugin {
   image: {
     isImage: (data: unknown) => boolean;
     isImageBitmap: (data: unknown) => boolean;
-    create: (canvas?: PlatformCreateImageInstance) => PlatformImage;
+    create: (canvas: CreateImageInstance) => PlatformImage;
     load: (
-      canvas: PlatformCreateImageInstance,
+      canvas: CreateImageInstance,
       data: ImageBitmap | Uint8Array | string,
       filename: string,
       prefix?: string

@@ -17,3 +17,5 @@ export type Bitmap =
   | OffscreenCanvas;
 
 export type RawImage = string | Uint8Array;
+
+export type PlatformCreateImageInstance = {}

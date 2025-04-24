@@ -1,3 +1,4 @@
+import type { CreateImageInstance } from "octopus-platform";
 import type { Painter } from ".";
 export declare class ImagePool {
     /**
@@ -16,7 +17,7 @@ export declare class ImagePool {
      * 创建图片标签
      * @returns
      */
-    createImage(canvas: FuckSvga.PlatformCreateImageInstance): PlatformImage;
+    createImage(canvas: CreateImageInstance): PlatformImage;
     /**
      * 加载图片集
      * @param images 图片数据
