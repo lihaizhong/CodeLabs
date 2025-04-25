@@ -12,7 +12,10 @@ interface VideoEditorOptions {
 }
 
 export class VideoEditor {
-  constructor(private readonly entity: Video, private readonly painter: Painter) {}
+  constructor(
+    private readonly entity: Video,
+    private readonly painter: Painter
+  ) {}
 
   private async set(
     key: string,
@@ -40,6 +43,13 @@ export class VideoEditor {
   createEditor(width: number, height: number) {
     return platform.getOfsCanvas({ width, height });
   }
+
+  createTextEditor(
+    key: string,
+    width: number,
+    height: number,
+    options?: VideoEditorOptions
+  ) {}
 
   /**
    * 创建画布图片
