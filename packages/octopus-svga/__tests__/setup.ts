@@ -6,7 +6,7 @@ import {
   OffscreenCanvasRenderingContext2DMock,
   requestAnimationFrame,
   cancelAnimationFrame,
-} from "./mocks";
+} from "../__mocks__";
 
 // 向全局模块引入 TextEncoder 和 TextDecoder
 Object.assign(global, {
