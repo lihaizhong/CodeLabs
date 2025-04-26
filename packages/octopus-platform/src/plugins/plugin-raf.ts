@@ -12,7 +12,7 @@ export default definePlugin<"rAF">({
 
     if (env === "h5") {
       return (_: PlatformCanvas, callback: () => void) =>
-        globalThis.requestAnimationFrame(callback);
+        requestAnimationFrame(callback);
     }
 
     return (canvas: PlatformCanvas, callback: () => void) =>

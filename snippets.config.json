@@ -2,17 +2,17 @@
   "sync": {
     "miniprogram-weapp": {
       "dependencies": {
-        "fuck-svga": "./utils/fuck-svga.js"
+        "octopus-svga": "./utils/fuck-svga.js"
       }
     },
     "miniprogram-alipay": {
       "dependencies": {
-        "fuck-svga": "./utils/fuck-svga.js"
+        "octopus-svga": "./utils/fuck-svga.js"
       }
     },
     "miniprogram-tt": {
       "dependencies": {
-        "fuck-svga": "./utils/fuck-svga.js"
+        "octopus-svga": "./utils/fuck-svga.js"
       }
     }
   }

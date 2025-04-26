@@ -1,8 +1,16 @@
-import { PlatformGlobals, SupportedPlatform, PlatformPluginOptions, PlatformPluginProperty, Platform } from "./types";
+import {
+  PlatformGlobals,
+  SupportedPlatform,
+  PlatformPluginOptions,
+  PlatformPluginProperty,
+  Platform,
+} from "./types";
 import { noop, retry } from "./extensions";
 import { version } from "../package.json";
 
-export abstract class OctopusPlatform<P extends PlatformPluginProperty> implements Platform {
+export abstract class OctopusPlatform<P extends PlatformPluginProperty>
+  implements Platform
+{
   /**
    * 插件列表
    */
@@ -41,14 +49,14 @@ export abstract class OctopusPlatform<P extends PlatformPluginProperty> implemen
     this.globals.br = this.useBridge();
     this.globals.dpr = this.usePixelRatio();
 
-    const plugins: Record<
-      P,
-      PlatformPluginOptions<P>
-    > = this.plugins.reduce((acc, plugin) => {
-      acc[plugin.name] = plugin;
+    const plugins: Record<P, PlatformPluginOptions<P>> = this.plugins.reduce(
+      (acc, plugin) => {
+        acc[plugin.name] = plugin;
 
-      return acc;
-    }, {} as Record<P, PlatformPluginOptions<P>>);
+        return acc;
+      },
+      {} as Record<P, PlatformPluginOptions<P>>
+    );
     const pluginNames = this.plugins.map((plugin) => plugin.name);
     const installedPlugins: Record<string, boolean> = {};
 
@@ -96,7 +104,7 @@ export abstract class OctopusPlatform<P extends PlatformPluginProperty> implemen
     const { env, br } = this.globals;
 
     if (env === "h5") {
-      return globalThis.devicePixelRatio;
+      return devicePixelRatio;
     }
 
     if ("getWindowInfo" in br) {

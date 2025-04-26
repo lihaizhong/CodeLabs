@@ -5,7 +5,7 @@ export default definePlugin<"now">({
   install() {
     const { env, br } = this.globals;
     // performance可以提供更高精度的时间测量，且不受系统时间的调整（如更改系统时间或同步时间）的影响
-    const perf = env === "h5" ? globalThis.performance : env === "tt" ? br.performance : br.getPerformance();
+    const perf = env === "h5" ? performance : env === "tt" ? br.performance : br.getPerformance();
 
     if(typeof perf?.now === "function") {
       // 数值差别大，说明perf.now()获得的是高精度的时间戳
