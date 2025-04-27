@@ -12,6 +12,7 @@
     "fflate": "^0.8.2",
     "fuck-scanner": "workspace:^",
     "jsqr": "^1.4.0",
+    "octopus-layout-engine": "workspace:^",
     "octopus-svga": "workspace:^",
     "weui": "^2.6.21"
   }

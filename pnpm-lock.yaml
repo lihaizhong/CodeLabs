@@ -133,6 +133,9 @@ importers:
       jsqr:
         specifier: ^1.4.0
         version: 1.4.0
+      octopus-layout-engine:
+        specifier: workspace:^
+        version: link:../../packages/octopus-layout-engine
       octopus-svga:
         specifier: workspace:^
         version: link:../../packages/octopus-svga
