@@ -2,8 +2,8 @@ import { LayoutContext } from './LayoutContext';
 import { LayoutNode } from './LayoutNode';
 import { FlowLayout } from '../layout/FlowLayout';
 import { FlexLayout } from '../layout/FlexLayout';
-import { CanvasRenderer } from '../renderer/CanvasRenderer';
-import { LayoutContextOptions, LayoutNodeOptions } from '../types';
+import { CanvasRenderer } from './CanvasRenderer';
+import { LayoutNodeOptions } from '../types';
 
 /**
  * 布局引擎主类
@@ -13,25 +13,20 @@ export class LayoutEngine {
   private readonly context: LayoutContext;
   private readonly flowLayout: FlowLayout;
   private readonly flexLayout: FlexLayout;
-  private renderer: CanvasRenderer | null;
+  private readonly renderer: CanvasRenderer | null;
   
   /**
    * 创建布局引擎
    * @param options 布局上下文配置
    */
-  constructor(options: LayoutContextOptions) {
-    this.context = new LayoutContext(options);
+  constructor(canvas: HTMLCanvasElement | OffscreenCanvas) {
+    this.renderer = new CanvasRenderer(canvas);
+
+    const context = this.renderer.getContext();
+
+    this.context = new LayoutContext(context);
     this.flowLayout = new FlowLayout();
     this.flexLayout = new FlexLayout();
-    this.renderer = null;
-  }
-  
-  /**
-   * 设置渲染器
-   * @param renderer Canvas渲染器
-   */
-  setRenderer(renderer: CanvasRenderer): void {
-    this.renderer = renderer;
   }
   
   /**
@@ -60,7 +55,7 @@ export class LayoutEngine {
 
     this.renderer.render(rootNode);
   }
-  
+
   /**
    * 一次性完成布局和渲染
    * @param rootNode 根节点

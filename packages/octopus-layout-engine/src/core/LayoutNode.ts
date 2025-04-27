@@ -1,109 +1,55 @@
-import { LayoutContext } from './LayoutContext';
-import { LayoutNodeOptions, NodeRect, NodeStyle, NodeType, TextMetrics } from '../types';
+import { LayoutContext } from "./LayoutContext";
+import {
+  LayoutNodeOptions,
+  NodeRect,
+  NodeStyle,
+  NodeType,
+  TextMetrics,
+} from "../types";
 
 /**
  * 布局节点类
  * 表示布局树中的一个节点，可以是容器、文本或图像
  */
 export class LayoutNode {
-  private id: string;
-  private type: NodeType;
-  private content: string;
-  private style: NodeStyle;
-  private children: LayoutNode[];
-  private parent: LayoutNode | null;
-  private rect: NodeRect;
-  private textMetrics: TextMetrics | null;
+  public readonly type: NodeType;
+  public readonly content: string;
+  public readonly style: NodeStyle;
+  public readonly children: LayoutNode[];
+  public readonly parent: LayoutNode | null;
+  public readonly rect: NodeRect;
+  private textMetrics: TextMetrics | null = null;
 
-  constructor(options: LayoutNodeOptions) {
-    this.id = options.id || Math.random().toString(36).substring(2, 9);
+  constructor(options: LayoutNodeOptions, parent: LayoutNode | null = null) {
     this.type = options.type;
-    this.content = options.content || '';
+    this.content = options.content || "";
     this.style = options.style || {};
-    this.children = [];
-    this.parent = null;
+    this.parent = parent;
     this.rect = { x: 0, y: 0, width: 0, height: 0 };
-    this.textMetrics = null;
 
     // 创建子节点
-    if (options.children && options.children.length > 0) {
-      this.children = options.children.map(childOptions => {
-        const child = new LayoutNode(childOptions);
-        child.setParent(this);
-        return child;
-      });
+    if (Array.isArray(options.children) && options.children.length > 0) {
+      this.children = options.children.map(
+        (childOptions) => new LayoutNode(childOptions, this)
+      );
+    } else {
+      this.children = [];
     }
-  }
-
-  /**
-   * 获取节点ID
-   */
-  getId(): string {
-    return this.id;
-  }
-
-  /**
-   * 获取节点类型
-   */
-  getType(): NodeType {
-    return this.type;
-  }
-
-  /**
-   * 获取节点内容
-   */
-  getContent(): string {
-    return this.content;
-  }
-
-  /**
-   * 获取节点样式
-   */
-  getStyle(): NodeStyle {
-    return this.style;
-  }
-
-  /**
-   * 获取子节点列表
-   */
-  getChildren(): LayoutNode[] {
-    return this.children;
-  }
-
-  /**
-   * 获取父节点
-   */
-  getParent(): LayoutNode | null {
-    return this.parent;
-  }
-
-  /**
-   * 设置父节点
-   */
-  setParent(parent: LayoutNode | null): void {
-    this.parent = parent;
   }
 
   /**
    * 添加子节点
    */
-  appendChild(child: LayoutNode): void {
-    this.children.push(child);
-    child.setParent(this);
+  appendChild(options: LayoutNodeOptions): void {
+    this.children.push(new LayoutNode(options, this));
   }
 
   /**
-   * 获取节点位置和尺寸
+   * 获取节点的绝对位置
    */
-  getRect(): NodeRect {
-    return this.rect;
-  }
-
-  /**
-   * 设置节点位置和尺寸
-   */
-  setRect(rect: NodeRect): void {
-    this.rect = rect;
+  setPosition(x: number, y: number): void {
+    this.rect.x = x;
+    this.rect.y = y;
   }
 
   /**
@@ -125,13 +71,16 @@ export class LayoutNode {
    * @param context 布局上下文
    */
   measure(context: LayoutContext): void {
+    const { style, type } = this;
+    const { width, height } = style;
+    const maxWidth = width;
+
     // 根据节点类型进行不同的测量
-    if (this.type === NodeType.TEXT && this.content) {
-      const fontSize = this.style.fontSize || 16;
-      const fontFamily = this.style.fontFamily || 'sans-serif';
-      const lineHeight = this.style.lineHeight || fontSize * 1.2;
-      const maxWidth = this.style.width || context.width;
-      
+    const fontSize = style.fontSize || 16;
+    const fontFamily = style.fontFamily || "sans-serif";
+    const lineHeight = style.lineHeight || fontSize * 1.2;
+
+    if (type === "text") {
       // 测量文本
       this.textMetrics = context.measureText(
         this.content,
@@ -142,16 +91,11 @@ export class LayoutNode {
       );
 
       // 设置节点尺寸
-      this.rect.width = this.style.width || this.textMetrics.width;
-      this.rect.height = this.style.height || this.textMetrics.height;
-    } else if (this.type === NodeType.IMAGE) {
-      // 图像节点尺寸
-      this.rect.width = this.style.width || 0;
-      this.rect.height = this.style.height || 0;
+      this.rect.width = width || this.textMetrics.width;
+      this.rect.height = height || this.textMetrics.height;
     } else {
-      // 容器节点尺寸
-      this.rect.width = this.style.width || 0;
-      this.rect.height = this.style.height || 0;
+      this.rect.width = width || 0;
+      this.rect.height = height || 0;
     }
 
     // 递归测量子节点
