@@ -172,7 +172,7 @@ importers:
         version: 12.1.2(rollup@4.40.0)(tslib@2.8.1)(typescript@5.8.3)
       '@types/node':
         specifier: ^22.13.17
-        version: 22.14.1
+        version: 22.15.2
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
@@ -209,7 +209,7 @@ importers:
         version: 12.1.2(rollup@4.40.0)(tslib@2.8.1)(typescript@5.8.3)
       '@types/node':
         specifier: ^22.13.17
-        version: 22.14.1
+        version: 22.15.2
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
@@ -243,7 +243,7 @@ importers:
         version: 12.1.2(rollup@4.40.0)(tslib@2.8.1)(typescript@5.8.3)
       '@types/node':
         specifier: ^22.13.17
-        version: 22.14.1
+        version: 22.15.2
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
@@ -255,6 +255,76 @@ importers:
         version: 2.8.1
       typescript:
         specifier: ^5.8.2
+        version: 5.8.3
+
+  packages/octopus-apng:
+    dependencies:
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.2
+      octopus-platform:
+        specifier: workspace:^
+        version: link:../octopus-platform
+    devDependencies:
+      '@rollup/plugin-commonjs':
+        specifier: ^28.0.3
+        version: 28.0.3(rollup@4.40.0)
+      '@rollup/plugin-json':
+        specifier: ^6.1.0
+        version: 6.1.0(rollup@4.40.0)
+      '@rollup/plugin-node-resolve':
+        specifier: ^16.0.1
+        version: 16.0.1(rollup@4.40.0)
+      '@rollup/plugin-terser':
+        specifier: ^0.4.4
+        version: 0.4.4(rollup@4.40.0)
+      '@rollup/plugin-typescript':
+        specifier: ^12.1.2
+        version: 12.1.2(rollup@4.40.0)(tslib@2.8.1)(typescript@5.8.3)
+      '@types/wechat-miniprogram':
+        specifier: ^3.4.8
+        version: 3.4.8
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
+      rollup:
+        specifier: ^4.40.0
+        version: 4.40.0
+      tslib:
+        specifier: ^2.8.1
+        version: 2.8.1
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
+  packages/octopus-layout-engine:
+    devDependencies:
+      '@rollup/plugin-json':
+        specifier: ^6.1.0
+        version: 6.1.0(rollup@4.40.0)
+      '@rollup/plugin-terser':
+        specifier: ^0.4.4
+        version: 0.4.4(rollup@4.40.0)
+      '@rollup/plugin-typescript':
+        specifier: ^12.1.2
+        version: 12.1.2(rollup@4.40.0)(tslib@2.8.1)(typescript@5.8.3)
+      '@types/wechat-miniprogram':
+        specifier: ^3.4.8
+        version: 3.4.8
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
+      rollup:
+        specifier: ^4.40.0
+        version: 4.40.0
+      rollup-plugin-copy:
+        specifier: ^3.5.0
+        version: 3.5.0
+      tslib:
+        specifier: ^2.8.1
+        version: 2.8.1
+      typescript:
+        specifier: ^5.8.3
         version: 5.8.3
 
   packages/octopus-platform:
@@ -327,7 +397,14 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
-  packages/uni-engine:
+  packages/octopus-webp:
+    dependencies:
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.2
+      octopus-platform:
+        specifier: workspace:^
+        version: link:../octopus-platform
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^28.0.3
@@ -344,14 +421,57 @@ importers:
       '@rollup/plugin-typescript':
         specifier: ^12.1.2
         version: 12.1.2(rollup@4.40.0)(tslib@2.8.1)(typescript@5.8.3)
+      '@types/wechat-miniprogram':
+        specifier: ^3.4.8
+        version: 3.4.8
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
       rollup:
-        specifier: ^4.39.0
+        specifier: ^4.40.0
         version: 4.40.0
+      tslib:
+        specifier: ^2.8.1
+        version: 2.8.1
       typescript:
-        specifier: ^5.8.2
+        specifier: ^5.8.3
+        version: 5.8.3
+
+  packages/uni-engine:
+    dependencies:
+      alien-signals:
+        specifier: ^1.0.13
+        version: 1.0.13
+    devDependencies:
+      '@rollup/plugin-commonjs':
+        specifier: ^28.0.3
+        version: 28.0.3(rollup@4.40.0)
+      '@rollup/plugin-json':
+        specifier: ^6.1.0
+        version: 6.1.0(rollup@4.40.0)
+      '@rollup/plugin-node-resolve':
+        specifier: ^16.0.1
+        version: 16.0.1(rollup@4.40.0)
+      '@rollup/plugin-terser':
+        specifier: ^0.4.4
+        version: 0.4.4(rollup@4.40.0)
+      '@rollup/plugin-typescript':
+        specifier: ^12.1.2
+        version: 12.1.2(rollup@4.40.0)(tslib@2.8.1)(typescript@5.8.3)
+      '@types/wechat-miniprogram':
+        specifier: ^3.4.8
+        version: 3.4.8
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
+      rollup:
+        specifier: ^4.40.0
+        version: 4.40.0
+      tslib:
+        specifier: ^2.8.1
+        version: 2.8.1
+      typescript:
+        specifier: ^5.8.3
         version: 5.8.3
 
   packages/uni-kits:
@@ -1593,9 +1713,6 @@ packages:
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
 
-  '@types/node@22.14.1':
-    resolution: {integrity: sha512-u0HuPQwe/dHrItgHHpmw3N2fYCR6x4ivMNbPHRkBVP4CvN+kiRrKHWk3i8tXiO/joPwXLMYvF9TTF0eqgHIuOw==}
-
   '@types/node@22.15.2':
     resolution: {integrity: sha512-uKXqKN9beGoMdBfcaTY1ecwz6ctxuJAcUlwE55938g0ZJ8lRxwAZqRz2AJ4pzpt5dHdTPMB863UZ0ESiFUcP7A==}
 
@@ -1664,6 +1781,9 @@ packages:
 
   ajv@8.12.0:
     resolution: {integrity: sha512-sRu1kpcO9yLtYxBKvqfTeh9KzZEwO3STyX1HT+4CaDzC6HpTGYhIhPIzj9XuKU7KYDwnaeh5hcOwjy1QuJzBPA==}
+
+  alien-signals@1.0.13:
+    resolution: {integrity: sha512-OGj9yyTnJEttvzhTUWuscOvtqxq5vrhF7vL9oS0xJ2mK0ItPYP1/y+vCFebfxoEyAz0++1AIwJ5CMr+Fk3nDmg==}
 
   ansi-align@3.0.1:
     resolution: {integrity: sha512-IOfwwBF5iczOjp/WeY4YxyjqAFMQoZufdQWDd19SEExbVLNXqvpzSJ/M7Za4/sCPmQ0+GRquoA7bGcINcxew6w==}
@@ -5565,10 +5685,6 @@ snapshots:
 
   '@types/node@12.20.55': {}
 
-  '@types/node@22.14.1':
-    dependencies:
-      undici-types: 6.21.0
-
   '@types/node@22.15.2':
     dependencies:
       undici-types: 6.21.0
@@ -5632,6 +5748,8 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
       uri-js: 4.4.1
+
+  alien-signals@1.0.13: {}
 
   ansi-align@3.0.1:
     dependencies:

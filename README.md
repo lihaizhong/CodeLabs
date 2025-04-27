@@ -55,6 +55,9 @@ git submodule update --init --recursive
 - [GITHUB awesome-canvas](https://github.com/chinaBerg/awesome-canvas)
 - [「干货」一份小白前端可视化学习指南——附思维导图](https://juejin.cn/post/6994169182216519710)
 - [提高HTML5 canvas性能的几种方法！](https://blog.csdn.net/zyz511919766/article/details/7401792)
+- [canvas 性能优化原理，加亿点点细节](https://blog.kuaitu.cc/2024/09/11/canvas%20%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%8E%9F%E7%90%86%EF%BC%8C%E5%8A%A0%E4%BA%BF%E7%82%B9%E7%82%B9%E7%BB%86%E8%8A%82/)
+- [2D Canvas 的渲染优化](https://www.cnblogs.com/tongbowen/articles/14925816.html)
+- [游戏编程模式](https://gpp.tkchu.me/)
 
 ### 性能优化
 

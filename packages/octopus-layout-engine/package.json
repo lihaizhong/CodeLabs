@@ -11,7 +11,7 @@
   },
   "keywords": [],
   "author": "lihzsky",
-  "license": "Apache License 2.0",
+  "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-terser": "^0.4.4",

@@ -5,8 +5,8 @@
     "suggest",
     "levenshtein"
   ],
-  "author": "lihz",
-  "license": "ISC",
+  "author": "lihzsky",
+  "license": "MIT",
   "description": "本地动态筛选功能",
   "main": "lib/index.js",
   "module": "es/index.js",

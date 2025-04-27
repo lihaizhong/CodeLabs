@@ -10,8 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "lihzsky",
+  "license": "MIT",
   "dependencies": {
     "crc-32": "^1.2.2",
     "fflate": "^0.8.2"
