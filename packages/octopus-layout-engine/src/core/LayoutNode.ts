@@ -128,14 +128,16 @@ export class LayoutNode {
     // 根据节点类型进行不同的测量
     if (this.type === NodeType.TEXT && this.content) {
       const fontSize = this.style.fontSize || 16;
+      const fontFamily = this.style.fontFamily || 'sans-serif';
       const lineHeight = this.style.lineHeight || fontSize * 1.2;
-      const maxWidth = this.style.width;
+      const maxWidth = this.style.width || context.width;
       
       // 测量文本
       this.textMetrics = context.measureText(
         this.content,
         fontSize,
-        maxWidth || context.getWidth(),
+        fontFamily,
+        maxWidth,
         lineHeight
       );
 

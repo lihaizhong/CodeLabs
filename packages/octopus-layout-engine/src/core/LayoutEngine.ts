@@ -1,4 +1,4 @@
-import { LayoutContext, LayoutContextImpl } from './LayoutContext';
+import { LayoutContext } from './LayoutContext';
 import { LayoutNode } from './LayoutNode';
 import { FlowLayout } from '../layout/FlowLayout';
 import { FlexLayout } from '../layout/FlexLayout';
@@ -10,9 +10,9 @@ import { LayoutContextOptions, LayoutNodeOptions } from '../types';
  * 整合布局上下文、布局算法和渲染器
  */
 export class LayoutEngine {
-  private context: LayoutContext;
-  private flowLayout: FlowLayout;
-  private flexLayout: FlexLayout;
+  private readonly context: LayoutContext;
+  private readonly flowLayout: FlowLayout;
+  private readonly flexLayout: FlexLayout;
   private renderer: CanvasRenderer | null;
   
   /**
@@ -20,7 +20,7 @@ export class LayoutEngine {
    * @param options 布局上下文配置
    */
   constructor(options: LayoutContextOptions) {
-    this.context = new LayoutContextImpl(options);
+    this.context = new LayoutContext(options);
     this.flowLayout = new FlowLayout();
     this.flexLayout = new FlexLayout();
     this.renderer = null;
@@ -48,33 +48,17 @@ export class LayoutEngine {
   createLayoutTree(options: LayoutNodeOptions): LayoutNode {
     return new LayoutNode(options);
   }
-  
-  /**
-   * 使用流式布局算法布局节点
-   * @param rootNode 根节点
-   */
-  layoutWithFlow(rootNode: LayoutNode): void {
-    this.flowLayout.layout(rootNode, this.context);
-  }
-  
-  /**
-   * 使用Flex布局算法布局节点
-   * @param rootNode 根节点
-   */
-  layoutWithFlex(rootNode: LayoutNode): void {
-    this.flexLayout.layout(rootNode, this.context);
-  }
-  
+
   /**
    * 渲染布局树
    * @param rootNode 根节点
    */
   render(rootNode: LayoutNode): void {
-    if (this.renderer) {
-      this.renderer.render(rootNode);
-    } else {
-      console.warn('No renderer set. Call setRenderer() before rendering.');
+    if (!this.renderer) {
+      throw new Error('No renderer set. Call setRenderer() before rendering.');
     }
+
+    this.renderer.render(rootNode);
   }
   
   /**
@@ -84,9 +68,11 @@ export class LayoutEngine {
    */
   layoutAndRender(rootNode: LayoutNode, useFlexLayout: boolean = false): void {
     if (useFlexLayout) {
-      this.layoutWithFlex(rootNode);
+      // 使用Flex布局算法布局节点
+      this.flexLayout.layout(rootNode, this.context);
     } else {
-      this.layoutWithFlow(rootNode);
+      // 使用流式布局算法布局节点
+      this.flowLayout.layout(rootNode, this.context);
     }
     
     this.render(rootNode);

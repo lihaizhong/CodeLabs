@@ -84,6 +84,7 @@ export interface NodeStyle {
   paddingLeft?: number;
   textAlign?: TextAlign;
   verticalAlign?: VerticalAlign;
+  fontFamily?: string;
   fontSize?: number;
   lineHeight?: number;
   color?: string;

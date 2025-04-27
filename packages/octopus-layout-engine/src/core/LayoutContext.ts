@@ -1,42 +1,23 @@
-import { LayoutContextOptions, NodeRect, TextMetrics } from '../types';
-
-/**
- * 布局上下文接口
- * 提供布局计算所需的环境和工具方法
- */
-export interface LayoutContext {
-  /**
-   * 获取布局上下文的宽度
-   */
-  getWidth(): number;
-
-  /**
-   * 获取布局上下文的高度
-   */
-  getHeight(): number;
-
-  /**
-   * 获取设备像素比
-   */
-  getDevicePixelRatio(): number;
-
-  /**
-   * 测量文本尺寸和断行
-   * @param text 要测量的文本
-   * @param fontSize 字体大小
-   * @param maxWidth 最大宽度，用于计算换行
-   * @param lineHeight 行高
-   */
-  measureText(text: string, fontSize: number, maxWidth: number, lineHeight: number): TextMetrics;
-}
+import { LayoutContextOptions, TextMetrics } from '../types';
 
 /**
  * 布局上下文实现类
+ * 提供布局计算所需的环境和工具方法
  */
-export class LayoutContextImpl implements LayoutContext {
-  private width: number;
-  private height: number;
-  private devicePixelRatio: number;
+export class LayoutContext {
+  /**
+   * 获取布局上下文的宽度
+   */
+  public readonly width: number;
+  /**
+   * 获取布局上下文的高度
+   */
+  public readonly height: number;
+  /**
+   * 获取设备像素比
+   */
+  public readonly devicePixelRatio: number;
+
   private canvas: OffscreenCanvas;
   private ctx: OffscreenCanvasRenderingContext2D;
 
@@ -50,44 +31,41 @@ export class LayoutContextImpl implements LayoutContext {
     this.ctx = this.canvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
   }
 
-  getWidth(): number {
-    return this.width;
-  }
-
-  getHeight(): number {
-    return this.height;
-  }
-
-  getDevicePixelRatio(): number {
-    return this.devicePixelRatio;
-  }
-
-  measureText(text: string, fontSize: number, maxWidth: number, lineHeight: number): TextMetrics {
+  /**
+   * 测量文本尺寸
+   * @param text 要测量的文本
+   * @param fontSize 字体大小
+   * @param fontFamily 字体族
+   * @param maxWidth 最大宽度，用于计算换行
+   * @param lineHeight 行高
+   */
+  measureText(text: string, fontSize: number, fontFamily: string = 'sans-serif', maxWidth?: number, lineHeight?: number): TextMetrics {
     if (!text) {
       return { width: 0, height: 0, lines: [] };
     }
 
-    this.ctx.font = `${fontSize}px sans-serif`;
+    const actualLineHeight = lineHeight || fontSize * 1.2;
+    this.ctx.font = `${fontSize}px ${fontFamily}`;
     
     // 如果没有最大宽度限制或文本宽度小于最大宽度，不需要换行
     const metrics = this.ctx.measureText(text);
     if (!maxWidth || metrics.width <= maxWidth) {
       return {
         width: metrics.width,
-        height: lineHeight || fontSize * 1.2,
+        height: actualLineHeight,
         lines: [text]
       };
     }
 
     // 需要换行处理
-    return this.breakTextIntoLines(text, fontSize, maxWidth, lineHeight);
+    return this.breakTextIntoLines(text, fontSize, fontFamily, maxWidth, actualLineHeight);
   }
 
   /**
    * 将文本按照最大宽度断行
    */
-  private breakTextIntoLines(text: string, fontSize: number, maxWidth: number, lineHeight: number): TextMetrics {
-    const actualLineHeight = lineHeight || fontSize * 1.2;
+  private breakTextIntoLines(text: string, fontSize: number, fontFamily: string, maxWidth: number, lineHeight: number): TextMetrics {
+    this.ctx.font = `${fontSize}px ${fontFamily}`;
     const words = text.split(' ');
     const lines: string[] = [];
     let currentLine = '';
@@ -114,7 +92,69 @@ export class LayoutContextImpl implements LayoutContext {
 
     return {
       width: maxLineWidth,
-      height: lines.length * actualLineHeight,
+      height: lines.length * lineHeight,
+      lines
+    };
+  }
+
+  /**
+   * 测量中文文本，按字符分割
+   * 针对中文等不使用空格分词的语言
+   */
+  measureCJKText(text: string, fontSize: number, fontFamily: string = 'sans-serif', maxWidth?: number, lineHeight?: number): TextMetrics {
+    if (!text) {
+      return { width: 0, height: 0, lines: [] };
+    }
+
+    const actualLineHeight = lineHeight || fontSize * 1.2;
+    this.ctx.font = `${fontSize}px ${fontFamily}`;
+    
+    // 如果没有最大宽度限制或文本宽度小于最大宽度，不需要换行
+    const metrics = this.ctx.measureText(text);
+    if (!maxWidth || metrics.width <= maxWidth) {
+      return {
+        width: metrics.width,
+        height: actualLineHeight,
+        lines: [text]
+      };
+    }
+
+    // 需要换行处理，按字符分割
+    return this.breakCJKTextIntoLines(text, fontSize, fontFamily, maxWidth, actualLineHeight);
+  }
+
+  /**
+   * 将中文文本按照最大宽度断行，按字符分割
+   */
+  private breakCJKTextIntoLines(text: string, fontSize: number, fontFamily: string, maxWidth: number, lineHeight: number): TextMetrics {
+    this.ctx.font = `${fontSize}px ${fontFamily}`;
+    const chars = Array.from(text); // 将文本拆分为字符数组
+    const lines: string[] = [];
+    let currentLine = '';
+    let maxLineWidth = 0;
+
+    for (let i = 0; i < chars.length; i++) {
+      const char = chars[i];
+      const testLine = currentLine + char;
+      const metrics = this.ctx.measureText(testLine);
+      
+      if (metrics.width <= maxWidth || !currentLine) {
+        currentLine = testLine;
+      } else {
+        lines.push(currentLine);
+        maxLineWidth = Math.max(maxLineWidth, this.ctx.measureText(currentLine).width);
+        currentLine = char;
+      }
+    }
+
+    if (currentLine) {
+      lines.push(currentLine);
+      maxLineWidth = Math.max(maxLineWidth, this.ctx.measureText(currentLine).width);
+    }
+
+    return {
+      width: maxLineWidth,
+      height: lines.length * lineHeight,
       lines
     };
   }
