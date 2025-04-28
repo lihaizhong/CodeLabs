@@ -1,13 +1,13 @@
-import { LayoutNode } from "../core/LayoutNode";
+import { LayoutNode } from "./LayoutNode";
 import { NodeType } from "../types";
 
 /**
  * Canvas渲染器
  * 将布局结果渲染到Canvas上
  */
-export class CanvasRenderer {
-  private readonly context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
-
+export class LayoutRenderer {
+  private readonly width: number;
+  private readonly height: number;
   /**
    * 创建Canvas渲染器
    * @param canvas HTML Canvas元素或OffscreenCanvas
@@ -15,31 +15,20 @@ export class CanvasRenderer {
    * @param devicePixelRatio 设备像素比
    */
   constructor(
-    private readonly canvas: HTMLCanvasElement | OffscreenCanvas,
+    private readonly context:
+      | CanvasRenderingContext2D
+      | OffscreenCanvasRenderingContext2D,
     private readonly devicePixelRatio: number = 1
   ) {
-    this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
-    // 设置Canvas尺寸，考虑设备像素比
-    this.updateCanvasSize();
-  }
-
-  /**
-   * 更新Canvas尺寸
-   */
-  private updateCanvasSize(): void {
-    const { width, height } = this.canvas;
+    const { canvas } = this.context;
+    const { width, height } = canvas;
 
     // 设置Canvas的实际尺寸，考虑设备像素比
-    if (this.canvas instanceof HTMLCanvasElement) {
-      this.canvas.width = width * this.devicePixelRatio;
-      this.canvas.height = height * this.devicePixelRatio;
-      this.canvas.style.width = `${width}px`;
-      this.canvas.style.height = `${height}px`;
-    } else {
-      this.canvas.width = width * this.devicePixelRatio;
-      this.canvas.height = height * this.devicePixelRatio;
-    }
+    canvas.width = width * this.devicePixelRatio;
+    canvas.height = height * this.devicePixelRatio;
 
+    this.width = width;
+    this.height = height;
     // 缩放上下文以匹配设备像素比
     this.context.scale(this.devicePixelRatio, this.devicePixelRatio);
   }
@@ -48,12 +37,7 @@ export class CanvasRenderer {
    * 清除Canvas
    */
   clear(): void {
-    this.context.clearRect(
-      0,
-      0,
-      this.canvas.width / this.devicePixelRatio,
-      this.canvas.height / this.devicePixelRatio
-    );
+    this.context.clearRect(0, 0, this.width, this.height);
   }
 
   /**
@@ -69,7 +53,7 @@ export class CanvasRenderer {
    * 获取Canvas元素
    */
   getCanvas(): HTMLCanvasElement | OffscreenCanvas {
-    return this.canvas;
+    return this.context.canvas;
   }
 
   /**
@@ -133,7 +117,7 @@ export class CanvasRenderer {
     }
 
     // 渲染每一行文本
-    const lines = textMetrics.lines;
+    const { lines } = textMetrics;
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const y = rect.y + i * lineHeight;
@@ -163,11 +147,13 @@ export class CanvasRenderer {
 
     // 假设content是图像URL或数据URL
     const image = new Image();
-    image.src = content;
 
     // 图像加载完成后渲染
     image.onload = () => {
-      this.context.drawImage(image, rect.x, rect.y, rect.width, rect.height);
+      const { width, height, x, y } = rect;
+
+      this.context.drawImage(image, x, y, width, height);
     };
+    image.src = content;
   }
 }

@@ -4,11 +4,10 @@ export { LayoutContext } from './core/LayoutContext';
 export { LayoutNode } from './core/LayoutNode';
 
 // 导出布局算法
-export { FlowLayout } from './layout/FlowLayout';
-export { FlexLayout } from './layout/FlexLayout';
+export { LayoutCalculator } from './core/LayoutCalculator';
 
 // 导出渲染器
-export { CanvasRenderer } from './renderer/CanvasRenderer';
+export { CanvasRenderer } from './core/LayoutRenderer';
 
 // 导出类型定义
 export * from './types';

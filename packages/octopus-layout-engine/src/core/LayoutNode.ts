@@ -12,12 +12,33 @@ import {
  * 表示布局树中的一个节点，可以是容器、文本或图像
  */
 export class LayoutNode {
+  /**
+   * 节点类型
+   */
   public readonly type: NodeType;
+  /**
+   * 节点内容
+   */
   public readonly content: string;
+  /**
+   * 节点样式
+   */
   public readonly style: NodeStyle;
+  /**
+   * 子节点
+   */
   public readonly children: LayoutNode[];
+  /**
+   * 父节点
+   */
   public readonly parent: LayoutNode | null;
+  /**
+   * 节点位置和尺寸
+   */
   public readonly rect: NodeRect;
+  /**
+   * 文本测量结果
+   */
   private textMetrics: TextMetrics | null = null;
 
   constructor(options: LayoutNodeOptions, parent: LayoutNode | null = null) {
@@ -26,22 +47,9 @@ export class LayoutNode {
     this.style = options.style || {};
     this.parent = parent;
     this.rect = { x: 0, y: 0, width: 0, height: 0 };
-
-    // 创建子节点
-    if (Array.isArray(options.children) && options.children.length > 0) {
-      this.children = options.children.map(
-        (childOptions) => new LayoutNode(childOptions, this)
-      );
-    } else {
-      this.children = [];
-    }
-  }
-
-  /**
-   * 添加子节点
-   */
-  appendChild(options: LayoutNodeOptions): void {
-    this.children.push(new LayoutNode(options, this));
+    this.children = (options.children || []).map(
+      (childOptions) => new LayoutNode(childOptions, this)
+    );;
   }
 
   /**
