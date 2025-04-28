@@ -192,7 +192,7 @@ export class Player {
     this.pause();
     this.config.loopStartFrame = frame;
     if (andPlay) {
-      this.startAnimation();
+      this.start();
     }
   }
 
