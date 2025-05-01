@@ -40,16 +40,9 @@ export class VideoEditor {
    * @param height
    * @returns
    */
-  createEditor(width: number, height: number) {
+  createContext(width: number, height: number) {
     return platform.getOfsCanvas({ width, height });
   }
-
-  createTextEditor(
-    key: string,
-    width: number,
-    height: number,
-    options?: VideoEditorOptions
-  ) {}
 
   /**
    * 创建画布图片

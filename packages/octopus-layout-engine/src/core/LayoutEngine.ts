@@ -15,8 +15,7 @@ export class LayoutEngine {
    * 创建布局引擎
    * @param options 布局上下文配置
    */
-  constructor(canvas: HTMLCanvasElement | OffscreenCanvas) {
-    const context = canvas.getContext('2d')!;
+  constructor(context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
     this.renderer = new LayoutRenderer(context);
     this.context = new LayoutContext(context);
   }
