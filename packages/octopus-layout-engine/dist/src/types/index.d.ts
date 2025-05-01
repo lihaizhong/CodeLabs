@@ -109,18 +109,9 @@ export interface TextMetrics {
     lines: string[];
 }
 /**
- * 布局上下文配置
- */
-export interface LayoutContextOptions {
-    width: number;
-    height: number;
-    devicePixelRatio?: number;
-}
-/**
  * 布局节点配置
  */
 export interface LayoutNodeOptions {
-    id?: string;
     type: NodeType;
     content?: string;
     style?: NodeStyle;

@@ -1,7 +1,6 @@
 import { LayoutContext } from './LayoutContext';
 import { LayoutNode } from './LayoutNode';
 import { LayoutRenderer } from './LayoutRenderer';
-import { LayoutCalculator } from './LayoutCalculator';
 import { LayoutNodeOptions } from '../types';
 
 /**
@@ -11,7 +10,6 @@ import { LayoutNodeOptions } from '../types';
 export class LayoutEngine {
   private readonly context: LayoutContext;
   private readonly renderer: LayoutRenderer | null;
-  private readonly calculator: LayoutCalculator;
   
   /**
    * 创建布局引擎
@@ -21,7 +19,6 @@ export class LayoutEngine {
     const context = canvas.getContext('2d')!;
     this.renderer = new LayoutRenderer(context);
     this.context = new LayoutContext(context);
-    this.calculator = new LayoutCalculator(this.context);
   }
   
   /**
@@ -44,7 +41,7 @@ export class LayoutEngine {
    * @param rootNode 根节点
    */
   layout(rootNode: LayoutNode): void {
-    this.calculator.calculateLayout(rootNode);
+    this.context.calculateLayout(rootNode);
   }
 
   /**

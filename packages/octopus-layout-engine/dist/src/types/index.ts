@@ -72,6 +72,7 @@ export enum FlexWrap {
  * 布局节点样式接口
  */
 export interface NodeStyle {
+  // 布局相关属性
   width?: number;
   height?: number;
   marginTop?: number;
@@ -82,6 +83,7 @@ export interface NodeStyle {
   paddingRight?: number;
   paddingBottom?: number;
   paddingLeft?: number;
+  // 文本相关属性
   textAlign?: TextAlign;
   verticalAlign?: VerticalAlign;
   fontFamily?: string;
@@ -120,19 +122,9 @@ export interface TextMetrics {
 }
 
 /**
- * 布局上下文配置
- */
-export interface LayoutContextOptions {
-  width: number;
-  height: number;
-  devicePixelRatio?: number;
-}
-
-/**
  * 布局节点配置
  */
 export interface LayoutNodeOptions {
-  id?: string;
   type: NodeType;
   content?: string;
   style?: NodeStyle;

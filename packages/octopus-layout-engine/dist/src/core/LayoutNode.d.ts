@@ -1,59 +1,43 @@
-import { LayoutContext } from './LayoutContext';
-import { LayoutNodeOptions, NodeRect, NodeStyle, NodeType, TextMetrics } from '../types';
+import { LayoutContext } from "./LayoutContext";
+import { LayoutNodeOptions, NodeRect, NodeStyle, NodeType, TextMetrics } from "../types";
 /**
  * 布局节点类
  * 表示布局树中的一个节点，可以是容器、文本或图像
  */
 export declare class LayoutNode {
-    private id;
-    private type;
-    private content;
-    private style;
-    private children;
-    private parent;
-    private rect;
+    /**
+     * 节点类型
+     */
+    readonly type: NodeType;
+    /**
+     * 节点内容
+     */
+    readonly content: string;
+    /**
+     * 节点样式
+     */
+    readonly style: NodeStyle;
+    /**
+     * 子节点
+     */
+    readonly children: LayoutNode[];
+    /**
+     * 父节点
+     */
+    readonly parent: LayoutNode | null;
+    /**
+     * 节点位置和尺寸
+     */
+    readonly rect: NodeRect;
+    /**
+     * 文本测量结果
+     */
     private textMetrics;
-    constructor(options: LayoutNodeOptions);
+    constructor(options: LayoutNodeOptions, parent?: LayoutNode | null);
     /**
-     * 获取节点ID
+     * 获取节点的绝对位置
      */
-    getId(): string;
-    /**
-     * 获取节点类型
-     */
-    getType(): NodeType;
-    /**
-     * 获取节点内容
-     */
-    getContent(): string;
-    /**
-     * 获取节点样式
-     */
-    getStyle(): NodeStyle;
-    /**
-     * 获取子节点列表
-     */
-    getChildren(): LayoutNode[];
-    /**
-     * 获取父节点
-     */
-    getParent(): LayoutNode | null;
-    /**
-     * 设置父节点
-     */
-    setParent(parent: LayoutNode | null): void;
-    /**
-     * 添加子节点
-     */
-    appendChild(child: LayoutNode): void;
-    /**
-     * 获取节点位置和尺寸
-     */
-    getRect(): NodeRect;
-    /**
-     * 设置节点位置和尺寸
-     */
-    setRect(rect: NodeRect): void;
+    setPosition(x: number, y: number): void;
     /**
      * 获取文本测量结果
      */

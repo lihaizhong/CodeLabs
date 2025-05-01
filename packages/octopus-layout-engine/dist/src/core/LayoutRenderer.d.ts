@@ -1,22 +1,20 @@
-import { LayoutNode } from '../core/LayoutNode';
+import { LayoutNode } from "./LayoutNode";
 /**
  * Canvas渲染器
  * 将布局结果渲染到Canvas上
  */
-export declare class CanvasRenderer {
-    private canvas;
-    private ctx;
-    private devicePixelRatio;
+export declare class LayoutRenderer {
+    private readonly context;
+    private readonly devicePixelRatio;
+    private readonly width;
+    private readonly height;
     /**
      * 创建Canvas渲染器
      * @param canvas HTML Canvas元素或OffscreenCanvas
+     * @param context Canvas上下文
      * @param devicePixelRatio 设备像素比
      */
-    constructor(canvas: HTMLCanvasElement | OffscreenCanvas, devicePixelRatio?: number);
-    /**
-     * 更新Canvas尺寸
-     */
-    private updateCanvasSize;
+    constructor(context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, devicePixelRatio?: number);
     /**
      * 清除Canvas
      */
@@ -26,6 +24,14 @@ export declare class CanvasRenderer {
      * @param rootNode 布局树的根节点
      */
     render(rootNode: LayoutNode): void;
+    /**
+     * 获取Canvas元素
+     */
+    getCanvas(): HTMLCanvasElement | OffscreenCanvas;
+    /**
+     * 获取Canvas上下文
+     */
+    getContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
     /**
      * 渲染单个节点及其子节点
      * @param node 要渲染的节点
@@ -41,12 +47,4 @@ export declare class CanvasRenderer {
      * @param node 图像节点
      */
     private renderImage;
-    /**
-     * 获取Canvas元素
-     */
-    getCanvas(): HTMLCanvasElement | OffscreenCanvas;
-    /**
-     * 获取Canvas上下文
-     */
-    getContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 }

@@ -1,24 +1,27 @@
-import { LayoutContextOptions, TextMetrics } from '../types';
+import { TextMetrics } from "../types";
+import { LayoutNode } from "./LayoutNode";
 /**
  * 布局上下文实现类
  * 提供布局计算所需的环境和工具方法
  */
 export declare class LayoutContext {
+    private readonly context;
+    constructor(context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D);
     /**
-     * 获取布局上下文的宽度
+     * 计算布局
+     * @param node 根节点
      */
-    readonly width: number;
+    calculateLayout(node: LayoutNode): void;
     /**
-     * 获取布局上下文的高度
+     * 计算Flex布局
+     * @param node 容器节点
      */
-    readonly height: number;
+    private calculateFlexLayout;
     /**
-     * 获取设备像素比
+     * 计算流式布局
+     * @param node 容器节点
      */
-    readonly devicePixelRatio: number;
-    private canvas;
-    private ctx;
-    constructor(options: LayoutContextOptions);
+    private calculateFlowLayout;
     /**
      * 测量文本尺寸
      * @param text 要测量的文本
