@@ -1,10 +1,4 @@
-import {
-  PlatformCanvas,
-  PlatformOffscreenCanvas,
-  PlatformRenderingContext2D,
-  Bitmap,
-  RawImage,
-} from "./extension";
+import { PlatformCanvas, PlatformOffscreenCanvas } from "./extension";
 
 export interface IGetCanvasResult {
   canvas: PlatformCanvas;

@@ -6,7 +6,7 @@ interface VideoEditorOptions {
 export declare class VideoEditor {
     private readonly entity;
     private readonly painter;
-    constructor(entity: Video, painter: Painter);
+    constructor(entity: PlatformVideo.Video, painter: Painter);
     private set;
     /**
      * 创建自定义编辑器

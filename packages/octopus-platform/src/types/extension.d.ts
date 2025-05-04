@@ -1,14 +1,10 @@
-export type PlatformCanvas = HTMLCanvasElement | WechatMiniprogram.Canvas;
+export type PlatformCanvas = WechatMiniprogram.Canvas | HTMLCanvasElement;
 
 export type PlatformOffscreenCanvas =
   | WechatMiniprogram.OffscreenCanvas
   | OffscreenCanvas;
 
-export type PlatformRenderingContext2D =
-  | OffscreenCanvasRenderingContext2D
-  | CanvasRenderingContext2D;
-
-export type PlatformImage = HTMLImageElement | WechatMiniprogram.Image;
+export type PlatformImage = WechatMiniprogram.Image | HTMLImageElement;
 
 export type Bitmap =
   | PlatformImage
@@ -17,5 +13,3 @@ export type Bitmap =
   | OffscreenCanvas;
 
 export type RawImage = string | Uint8Array;
-
-export type PlatformCreateImageInstance = {}

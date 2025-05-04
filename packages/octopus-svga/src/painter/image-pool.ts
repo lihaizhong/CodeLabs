@@ -80,7 +80,7 @@ export class ImagePool {
 
     // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
     if (env !== "alipay") {
-      const releaseOne = (image: Bitmap | PlatformCanvas) => {
+      const releaseOne = (image: Bitmap) => {
         if (isImage(image)) {
           (image as unknown as PlatformImage).onload = null;
           (image as unknown as PlatformImage).onerror = null;

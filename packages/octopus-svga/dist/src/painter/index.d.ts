@@ -36,7 +36,7 @@ export declare class Painter {
     private IM;
     private lastResizeKey;
     private lastTransform?;
-    globalTransform?: Transform;
+    globalTransform?: PlatformVideo.Transform;
     /**
      *
      * @param mode
@@ -90,7 +90,7 @@ export declare class Painter {
      * @param videoSize
      * @returns
      */
-    resize(contentMode: PLAYER_CONTENT_MODE, videoSize: VideoSize): void;
+    resize(contentMode: PLAYER_CONTENT_MODE, videoSize: PlatformVideo.VideoSize): void;
     /**
      * 注册刷新屏幕的回调函数
      * @param cb
@@ -109,7 +109,7 @@ export declare class Painter {
      * @param start
      * @param end
      */
-    draw(videoEntity: Video, currentFrame: number, start: number, end: number): void;
+    draw(videoEntity: PlatformVideo.Video, currentFrame: number, start: number, end: number): void;
     stick(): void;
     /**
      * 销毁画笔

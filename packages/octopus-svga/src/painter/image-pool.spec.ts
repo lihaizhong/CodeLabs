@@ -1,4 +1,4 @@
-import { ImagePool } from "../player/image-pool";
+import { ImagePool } from "./image-pool";
 
 describe("ImagePool 定义", () => {
   it("ImagePool 是否被定义", () => {

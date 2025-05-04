@@ -1,13 +1,13 @@
-import { Brush } from ".";
+import { Painter } from ".";
 
-describe("Brush 定义", () => {
-  it("Brush 是否被定义", () => {
-    expect(Brush).toBeDefined();
+describe("Painter 定义", () => {
+  it("Painter 是否被定义", () => {
+    expect(Painter).toBeDefined();
   });
 
-  it("Brush 定义是否正确", () => {});
+  it("Painter 定义是否正确", () => {});
 
-  it("Brush 静态方法", () => {});
+  it("Painter 静态方法", () => {});
 
-  it("Brush 实例方法", () => {});
+  it("Painter 实例方法", () => {});
 });

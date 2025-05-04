@@ -8,7 +8,7 @@ export declare class Parser {
      * @param url 视频地址
      * @returns
      */
-    static parseVideo(data: ArrayBuffer, url: string): Video;
+    static parseVideo(data: ArrayBuffer, url: string): PlatformVideo.Video;
     /**
      * 读取文件资源
      * @param url 文件资源地址
@@ -20,5 +20,5 @@ export declare class Parser {
      * @param url SVGA 文件的下载链接
      * @returns Promise<SVGA 数据源
      */
-    load(url: string): Promise<Video>;
+    load(url: string): Promise<PlatformVideo.Video>;
 }

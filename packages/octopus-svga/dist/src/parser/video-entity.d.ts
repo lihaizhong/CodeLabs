@@ -1,5 +1,5 @@
 import type { MovieEntity } from "../extensions/protobuf";
-export declare class VideoEntity implements Video {
+export declare class VideoEntity implements PlatformVideo.Video {
     /**
      * svga 版本号
      */
@@ -11,7 +11,7 @@ export declare class VideoEntity implements Video {
     /**
      * svga 尺寸
      */
-    size: VideoSize;
+    size: PlatformVideo.VideoSize;
     /**
      * svga 帧率
      */
@@ -35,7 +35,7 @@ export declare class VideoEntity implements Video {
     /**
      * svga 关键帧信息
      */
-    sprites: VideoSprite[];
+    sprites: PlatformVideo.VideoSprite[];
     constructor(movie: MovieEntity, filename: string);
     /**
      * 格式化精灵图

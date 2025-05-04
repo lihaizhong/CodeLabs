@@ -7,11 +7,11 @@ export interface Bucket {
   // 本地地址
   local: string;
   // 实例
-  entity: Video | ArrayBuffer | null;
+  entity: PlatformVideo.Video | ArrayBuffer | null;
   // 文件大小（单位：字节）
   // filesize: number;
   // 下载实例中
-  promise: Promise<Video | null> | null;
+  promise: Promise<PlatformVideo.Video | null> | null;
 }
 
 export interface NeedUpdatePoint {
@@ -158,7 +158,7 @@ export class VideoManager {
 
     const operators = this.updateBucketOperators(point);
     if (operators.length) {
-      const waitings: Promise<Video | null>[] = [];
+      const waitings: Promise<PlatformVideo.Video | null>[] = [];
 
       operators.forEach(({ action, start, end }) => {
         for (let i = start; i < end; i++) {

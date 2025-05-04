@@ -13,7 +13,7 @@ interface VideoEditorOptions {
 
 export class VideoEditor {
   constructor(
-    private readonly entity: Video,
+    private readonly entity: PlatformVideo.Video,
     private readonly painter: Painter
   ) {}
 

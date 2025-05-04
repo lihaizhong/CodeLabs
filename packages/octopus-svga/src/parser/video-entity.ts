@@ -5,7 +5,7 @@ import type {
   SpriteEntity,
 } from "../extensions/protobuf";
 
-export class VideoEntity implements Video {
+export class VideoEntity implements PlatformVideo.Video {
   /**
    * svga 版本号
    */
@@ -17,7 +17,7 @@ export class VideoEntity implements Video {
   /**
    * svga 尺寸
    */
-  public size: VideoSize = {
+  public size: PlatformVideo.VideoSize = {
     width: 0,
     height: 0
   };
@@ -44,7 +44,7 @@ export class VideoEntity implements Video {
   /**
    * svga 关键帧信息
    */
-  public sprites: VideoSprite[] = [];
+  public sprites: PlatformVideo.VideoSprite[] = [];
 
   constructor(movie: MovieEntity, filename: string) {
     const { viewBoxWidth, viewBoxHeight, fps, frames } = movie.params!;
@@ -77,7 +77,7 @@ export class VideoEntity implements Video {
    * @returns 
    */
   private formatFrames(mFrames: FrameEntity[]) {
-    let lastShapes: VideoFrameShapes | undefined;
+    let lastShapes: PlatformVideo.VideoFrameShapes | undefined;
 
     return mFrames.map((mFrame) => {
       const { layout: FL, transform: FT, alpha: FA } = mFrame;
@@ -99,7 +99,7 @@ export class VideoEntity implements Video {
         ty: FT?.ty ?? 0.0,
       };
 
-      let shapes: VideoFrameShapes = this.formatShapes(mFrame.shapes || []);
+      let shapes: PlatformVideo.VideoFrameShapes = this.formatShapes(mFrame.shapes || []);
 
       if (mFrame.shapes[0]?.type === 3 && lastShapes) {
         shapes = lastShapes;
@@ -125,7 +125,7 @@ export class VideoEntity implements Video {
               d: CP,
               transform: undefined,
               styles: {
-                fill: "rgba(0, 0, 0, 0)" as RGBA<0, 0, 0, 0>,
+                fill: "rgba(0, 0, 0, 0)" as PlatformVideo.RGBA<0, 0, 0, 0>,
                 stroke: null,
                 strokeWidth: null,
                 lineCap: null,
@@ -154,8 +154,8 @@ export class VideoEntity implements Video {
    * @param mShapes 
    * @returns 
    */
-  private formatShapes(mShapes: ShapeEntity[]): VideoFrameShapes {
-    const shapes: VideoFrameShapes = [];
+  private formatShapes(mShapes: ShapeEntity[]): PlatformVideo.VideoFrameShapes {
+    const shapes: PlatformVideo.VideoFrameShapes = [];
 
     for (let mShape of mShapes) {
       const mStyles = mShape.styles;
@@ -212,14 +212,14 @@ export class VideoEntity implements Video {
       }
 
       const { fill: StF, stroke: StS } = mStyles;
-      let fill: RGBA<number, number, number, number> | null = null;
+      let fill: PlatformVideo.RGBA<number, number, number, number> | null = null;
       if (StF) {
         fill = `rgba(${(StF.r * 255) | 0}, ${(StF.g * 255) | 0}, ${
           (StF.b * 255) | 0
         }, ${(StF.a * 1) | 0})`;
       }
 
-      let stroke: RGBA<number, number, number, number> | null = null;
+      let stroke: PlatformVideo.RGBA<number, number, number, number> | null = null;
       if (StS) {
         stroke = `rgba(${(StS.r * 255) | 0}, ${(StS.g * 255) | 0}, ${
           (StS.b * 255) | 0
@@ -247,21 +247,21 @@ export class VideoEntity implements Video {
 
       if (mShape.type === 0 && shape) {
         shapes.push({
-          type: SHAPE_TYPE.SHAPE,
+          type: PlatformVideo.SHAPE_TYPE.SHAPE,
           path: shape,
           styles: SS,
           transform: ST,
         });
       } else if (mShape.type === 1 && rect) {
         shapes.push({
-          type: SHAPE_TYPE.RECT,
+          type: PlatformVideo.SHAPE_TYPE.RECT,
           path: rect,
           styles: SS,
           transform: ST,
         });
       } else if (mShape.type === 2 && ellipse) {
         shapes.push({
-          type: SHAPE_TYPE.ELLIPSE,
+          type: PlatformVideo.SHAPE_TYPE.ELLIPSE,
           path: ellipse,
           styles: SS,
           transform: ST,

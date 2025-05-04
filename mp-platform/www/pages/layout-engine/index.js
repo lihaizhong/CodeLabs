@@ -1,5 +1,5 @@
 import "weui";
-import { LayoutEngine, LayoutNode, CanvasRenderer } from "octopus-layout-engine";
+import { LayoutEngine, LayoutNode, LayoutRenderer } from "octopus-layout-engine";
 
 window.addEventListener("DOMContentLoaded", () => {
   const $palette = document.getElementById("palette");
@@ -8,7 +8,7 @@ window.addEventListener("DOMContentLoaded", () => {
     height: window.innerHeight,
     devicePixelRatio: window.devicePixelRatio,
   });
-  const layoutRenderer = new CanvasRenderer($palette, window.devicePixelRatio);
+  const layoutRenderer = new LayoutRenderer($palette, window.devicePixelRatio);
   const node = new LayoutNode({
     type: "text",
     content: "Hello World",

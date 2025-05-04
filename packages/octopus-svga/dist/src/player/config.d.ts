@@ -33,7 +33,7 @@ export declare class Config {
      */
     register(config: Partial<PlayerConfig>): void;
     setItem<T extends keyof PlayerConfig>(key: T, value: PlayerConfig[T]): void;
-    getConfig(entity: Video): {
+    getConfig(entity: PlatformVideo.Video): {
         currFrame: number;
         startFrame: number;
         endFrame: number;

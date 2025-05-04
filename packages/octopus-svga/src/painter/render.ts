@@ -23,11 +23,11 @@ function render(
   context: PlatformRenderingContext2D,
   materials: Map<string, Bitmap>,
   dynamicMaterials: Map<string, Bitmap>,
-  videoEntity: Video,
+  videoEntity: PlatformVideo.Video,
   currentFrame: number,
   head: number,
   tail: number,
-  globalTransform?: Transform
+  globalTransform?: PlatformVideo.Transform
 ): void {
   const { sprites } = videoEntity;
 
@@ -50,11 +50,11 @@ function render(
 
 function drawSprite(
   context: PlatformRenderingContext2D,
-  sprite: VideoSprite,
+  sprite: PlatformVideo.VideoSprite,
   currentFrame: number,
   bitmap?: Bitmap,
   dynamicElement?: Bitmap,
-  globalTransform?: Transform
+  globalTransform?: PlatformVideo.Transform
 ): void {
   const frame = sprite.frames[currentFrame];
 
@@ -119,13 +119,13 @@ function drawSprite(
 
 function drawShape(
   context: PlatformRenderingContext2D,
-  shape: VideoFrameShape
+  shape: PlatformVideo.VideoFrameShape
 ): void {
   switch (shape.type) {
-    case SHAPE_TYPE.SHAPE:
+    case PlatformVideo.SHAPE_TYPE.SHAPE:
       drawBezier(context, shape.path.d, shape.transform, shape.styles);
       break;
-    case SHAPE_TYPE.ELLIPSE:
+    case PlatformVideo.SHAPE_TYPE.ELLIPSE:
       drawEllipse(
         context,
         shape.path.x ?? 0.0,
@@ -136,7 +136,7 @@ function drawShape(
         shape.styles
       );
       break;
-    case SHAPE_TYPE.RECT:
+    case PlatformVideo.SHAPE_TYPE.RECT:
       drawRect(
         context,
         shape.path.x ?? 0.0,
@@ -153,7 +153,7 @@ function drawShape(
 
 function resetShapeStyles(
   context: PlatformRenderingContext2D,
-  styles: VideoStyles | undefined
+  styles: PlatformVideo.VideoStyles | undefined
 ): void {
   if (!styles) return;
 
@@ -184,8 +184,8 @@ function resetShapeStyles(
 function drawBezier(
   context: PlatformRenderingContext2D,
   d: string | undefined,
-  transform: Transform | undefined,
-  styles: VideoStyles
+  transform: PlatformVideo.Transform | undefined,
+  styles: PlatformVideo.VideoStyles
 ): void {
   context.save();
   resetShapeStyles(context, styles);
@@ -410,8 +410,8 @@ function drawEllipse(
   y: number,
   radiusX: number,
   radiusY: number,
-  transform: Transform | undefined,
-  styles: VideoStyles
+  transform: PlatformVideo.Transform | undefined,
+  styles: PlatformVideo.VideoStyles
 ): void {
   context.save();
   resetShapeStyles(context, styles);
@@ -458,8 +458,8 @@ function drawRect(
   width: number,
   height: number,
   cornerRadius: number,
-  transform: Transform | undefined,
-  styles: VideoStyles
+  transform: PlatformVideo.Transform | undefined,
+  styles: PlatformVideo.VideoStyles
 ): void {
   context.save();
   resetShapeStyles(context, styles);

@@ -2,6 +2,7 @@ import { platform } from "../platform";
 import benchmark from "../benchmark";
 import render from "./render";
 import { ImagePool } from "./image-pool";
+import { PlatformCanvas, PlatformOffscreenCanvas } from "octopus-platform";
 
 interface PaintModel {
   // canvas or offscreen
@@ -64,9 +65,9 @@ export class Painter {
   private IM = new ImagePool();
 
   private lastResizeKey = "";
-  private lastTransform?: Transform;
+  private lastTransform?: PlatformVideo.Transform;
 
-  public globalTransform?: Transform;
+  public globalTransform?: PlatformVideo.Transform;
 
   /**
    *
@@ -274,7 +275,7 @@ export class Painter {
    */
   private calculateScale(
     contentMode: PLAYER_CONTENT_MODE,
-    videoSize: VideoSize
+    videoSize: PlatformVideo.VideoSize
   ): TransformScale {
     const { Y } = this;
     const imageRatio = videoSize.width / videoSize.height;
@@ -311,7 +312,7 @@ export class Painter {
    * @param videoSize
    * @returns
    */
-  public resize(contentMode: PLAYER_CONTENT_MODE, videoSize: VideoSize): void {
+  public resize(contentMode: PLAYER_CONTENT_MODE, videoSize: PlatformVideo.VideoSize): void {
     const { width: canvasWidth, height: canvasHeight } = this.Y!;
     const { width: videoWidth, height: videoHeight } = videoSize;
     const resizeKey = `${contentMode}-${videoWidth}-${videoHeight}-${canvasWidth}-${canvasHeight}`;
@@ -373,7 +374,7 @@ export class Painter {
    * @param end
    */
   public draw(
-    videoEntity: Video,
+    videoEntity: PlatformVideo.Video,
     currentFrame: number,
     start: number,
     end: number

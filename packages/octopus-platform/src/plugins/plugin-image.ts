@@ -15,6 +15,7 @@ type ExtendedPlatform = Platform & {
  */
 export default definePlugin<"image">({
   name: "image",
+  dependencies: ["local", "path", "decode"],
   install() {
     const { local, path, decode, noop } = this as ExtendedPlatform;
     const { env } = this.globals;

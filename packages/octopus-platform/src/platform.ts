@@ -135,6 +135,14 @@ export abstract class OctopusPlatform<P extends PlatformPluginProperty>
       }
 
       if (Array.isArray(plugin.dependencies)) {
+        for (const dependency of plugin.dependencies) {
+          if (typeof plugins[dependency as P] !== "function") {
+            throw new Error(
+              `Plugin ${pluginName} depends on plugin ${dependency}, but ${dependency} is not found`
+            );
+          }
+        }
+
         this.usePlugins(plugins, plugin.dependencies, installedPlugins);
       }
 

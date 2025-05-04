@@ -14,7 +14,7 @@ export class Parser {
    * @param url 视频地址
    * @returns
    */
-  static parseVideo(data: ArrayBuffer, url: string): Video {
+  static parseVideo(data: ArrayBuffer, url: string): PlatformVideo.Video {
     const header = new Uint8Array(data, 0, 4);
     const u8a = new Uint8Array(data);
 
@@ -65,7 +65,7 @@ export class Parser {
    * @param url SVGA 文件的下载链接
    * @returns Promise<SVGA 数据源
    */
-  public async load(url: string): Promise<Video> {
+  public async load(url: string): Promise<PlatformVideo.Video> {
     return Parser.parseVideo((await this.download(url))!, url);
   }
 }

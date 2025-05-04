@@ -1,5 +1,5 @@
 /**
- * 用于获取canvas
+ * 通过选择器匹配获取canvas实例
  * @returns
  */
 declare const _default: import("../types").PlatformPluginOptions<"getCanvas">;

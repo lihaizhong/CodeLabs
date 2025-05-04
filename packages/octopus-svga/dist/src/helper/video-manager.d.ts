@@ -1,8 +1,8 @@
 export interface Bucket {
     origin: string;
     local: string;
-    entity: Video | ArrayBuffer | null;
-    promise: Promise<Video | null> | null;
+    entity: PlatformVideo.Video | ArrayBuffer | null;
+    promise: Promise<PlatformVideo.Video | null> | null;
 }
 export interface NeedUpdatePoint {
     action: "remove" | "add";

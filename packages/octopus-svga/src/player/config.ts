@@ -84,7 +84,7 @@ export class Config {
     this.register({ [key]: value });
   }
 
-  public getConfig(entity: Video) {
+  public getConfig(entity: PlatformVideo.Video) {
     const { playMode, loopStartFrame, startFrame, endFrame, fillMode, loop } =
       this;
     const { fps, sprites } = entity;

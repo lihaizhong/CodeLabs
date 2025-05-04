@@ -12,7 +12,7 @@ export class Player {
    * SVGA 元数据
    * Video Entity
    */
-  private entity: Video | undefined = undefined;
+  private entity: PlatformVideo.Video | undefined = undefined;
 
   /**
    * 当前配置项
@@ -90,7 +90,7 @@ export class Player {
    * @param videoEntity SVGA 数据源
    * @returns Promise<void>
    */
-  public mount(videoEntity: Video): Promise<void[]> {
+  public mount(videoEntity: PlatformVideo.Video): Promise<void[]> {
     if (!videoEntity) throw new Error("videoEntity undefined");
 
     const { images, filename } = videoEntity;

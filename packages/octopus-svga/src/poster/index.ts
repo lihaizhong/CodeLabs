@@ -6,7 +6,7 @@ export class Poster {
    * SVGA 元数据
    * Video Entity
    */
-  private entity: Video | undefined = undefined;
+  private entity: PlatformVideo.Video | undefined = undefined;
 
   /**
    * 当前的帧，默认值 0
@@ -78,7 +78,7 @@ export class Poster {
    * @param currFrame
    * @returns
    */
-  public async mount(videoEntity: Video): Promise<void[]> {
+  public async mount(videoEntity: PlatformVideo.Video): Promise<void[]> {
     if (!videoEntity) {
       throw new Error("videoEntity undefined");
     }

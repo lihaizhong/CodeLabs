@@ -2,7 +2,7 @@ import { PlatformCanvas, IGetCanvasResult } from "../types";
 import { definePlugin } from "../definePlugin";
 
 /**
- * 用于获取canvas
+ * 通过选择器匹配获取canvas实例
  * @returns
  */
 export default definePlugin<"getCanvas">({
