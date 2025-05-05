@@ -50,20 +50,322 @@ export class LayoutContext {
     const paddingBottom = style.paddingBottom || 0;
 
     // 容器的内部宽度和高度
-    const innerWidth = rect.width - paddingLeft - paddingRight;
-    const innerHeight = rect.height - paddingTop - paddingBottom;
+    const contentWidth = rect.width - paddingLeft - paddingRight;
+    const contentHeight = rect.height - paddingTop - paddingBottom;
 
     // 是否是水平方向的Flex
     const isHorizontal = flexDirection === FlexDirection.ROW || 
                          flexDirection === FlexDirection.ROW_REVERSE;
 
     // 主轴尺寸和交叉轴尺寸
-    const mainAxisSize = isHorizontal ? innerWidth : innerHeight;
-    const crossAxisSize = isHorizontal ? innerHeight : innerWidth;
+    const mainAxisSize = isHorizontal ? contentWidth : contentHeight;
+    const crossAxisSize = isHorizontal ? contentHeight : contentWidth;
 
     // 是否反向
     const isReverse = flexDirection === FlexDirection.ROW_REVERSE || 
                       flexDirection === FlexDirection.COLUMN_REVERSE;
+    
+    // 是否需要换行
+    const isWrapping = flexWrap !== FlexWrap.NOWRAP;
+    // 是否反向换行
+    const isWrapReverse = flexWrap === FlexWrap.WRAP_REVERSE;
+
+    // 根据是否需要换行选择不同的布局算法
+    if (isWrapping) {
+      this.calculateWrappingFlexLayout(
+        node,
+        isHorizontal,
+        isReverse,
+        mainAxisSize,
+        crossAxisSize,
+        justifyContent,
+        alignItems,
+        isWrapReverse
+      );
+    } else {
+      this.calculateNonWrappingFlexLayout(
+        node,
+        isHorizontal,
+        isReverse,
+        mainAxisSize,
+        crossAxisSize,
+        justifyContent,
+        alignItems
+      );
+    }
+  }
+
+  /**
+   * 计算需要换行的Flex布局
+   * @param node 容器节点
+   * @param isHorizontal 是否是水平方向的Flex
+   * @param isReverse 是否反向
+   * @param mainAxisSize 主轴尺寸
+   * @param crossAxisSize 交叉轴尺寸
+   * @param justifyContent 主轴对齐方式
+   * @param alignItems 交叉轴对齐方式
+   * @param isWrapReverse 是否反向换行
+   */
+  private calculateWrappingFlexLayout(
+    node: LayoutNode, 
+    isHorizontal: boolean, 
+    isReverse: boolean, 
+    mainAxisSize: number, 
+    crossAxisSize: number, 
+    justifyContent: JustifyContent, 
+    alignItems: AlignItems,
+    isWrapReverse: boolean
+  ): void {
+    const { style, rect, children } = node;
+    if (children.length === 0) return;
+
+    // 容器的内边距
+    const paddingLeft = style.paddingLeft || 0;
+    const paddingTop = style.paddingTop || 0;
+    const paddingRight = style.paddingRight || 0;
+    const paddingBottom = style.paddingBottom || 0;
+    
+    // 存储每一行的子节点
+    const lines: LayoutNode[][] = [];
+    let currentLine: LayoutNode[] = [];
+    let currentLineMainAxisSize = 0;
+
+    // 第一遍：将子节点分配到不同的行
+    for (const child of children) {
+      const childStyle = child.style;
+      const childRect = child.rect;
+
+      // 计算子节点在主轴上的尺寸（包括margin）
+      const mainSize = isHorizontal ? childRect.width : childRect.height;
+      const marginMain = isHorizontal 
+        ? (childStyle.marginLeft || 0) + (childStyle.marginRight || 0)
+        : (childStyle.marginTop || 0) + (childStyle.marginBottom || 0);
+      const childTotalMainSize = mainSize + marginMain;
+
+      // 检查当前行是否还有足够空间
+      if (currentLine.length > 0 && currentLineMainAxisSize + childTotalMainSize > mainAxisSize) {
+        // 当前行已满，创建新行
+        lines.push(currentLine);
+        currentLine = [child];
+        currentLineMainAxisSize = childTotalMainSize;
+      } else {
+        // 当前行有足够空间，添加到当前行
+        currentLine.push(child);
+        currentLineMainAxisSize += childTotalMainSize;
+      }
+    }
+
+    // 添加最后一行
+    if (currentLine.length > 0) {
+      lines.push(currentLine);
+    }
+
+    // 如果是wrap-reverse，反转行的顺序
+    if (isWrapReverse) {
+      lines.reverse();
+    }
+
+    // 计算每行的交叉轴尺寸
+    const lineCrossSizes: number[] = lines.map(line => {
+      let maxCrossSize = 0;
+      for (const child of line) {
+        const childStyle = child.style;
+        const childRect = child.rect;
+        const crossSize = isHorizontal ? childRect.height : childRect.width;
+        const marginCross = isHorizontal 
+          ? (childStyle.marginTop || 0) + (childStyle.marginBottom || 0)
+          : (childStyle.marginLeft || 0) + (childStyle.marginRight || 0);
+        maxCrossSize = Math.max(maxCrossSize, crossSize + marginCross);
+      }
+      return maxCrossSize;
+    });
+
+    // 计算所有行的交叉轴总尺寸
+    const totalCrossSize = lineCrossSizes.reduce((sum, size) => sum + size, 0);
+
+    // 计算每行的起始交叉轴位置
+    let crossAxisPos = 0;
+    if (isWrapReverse) {
+      crossAxisPos = crossAxisSize - lineCrossSizes[0];
+    }
+
+    // 第二遍：为每行中的子节点设置位置
+    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+      const line = lines[lineIndex];
+      const lineCrossSize = lineCrossSizes[lineIndex];
+
+      // 计算当前行的主轴剩余空间
+      let lineMainAxisSize = 0;
+      for (const child of line) {
+        const childStyle = child.style;
+        const childRect = child.rect;
+        const mainSize = isHorizontal ? childRect.width : childRect.height;
+        const marginMain = isHorizontal 
+          ? (childStyle.marginLeft || 0) + (childStyle.marginRight || 0)
+          : (childStyle.marginTop || 0) + (childStyle.marginBottom || 0);
+        lineMainAxisSize += mainSize + marginMain;
+      }
+
+      // 计算当前行的主轴起始位置
+      let lineMainAxisPos = isReverse ? mainAxisSize : 0;
+      const lineRemainingSpace = mainAxisSize - lineMainAxisSize;
+
+      // 根据justifyContent计算主轴起始位置
+      if (lineRemainingSpace > 0) {
+        switch (justifyContent) {
+          case JustifyContent.FLEX_END:
+            lineMainAxisPos = isReverse ? 0 : lineRemainingSpace;
+            break;
+          case JustifyContent.CENTER:
+            lineMainAxisPos = isReverse ? lineRemainingSpace / 2 : lineRemainingSpace / 2;
+            break;
+          case JustifyContent.SPACE_BETWEEN:
+            if (line.length > 1) {
+              // 在第一个和最后一个子节点之间平均分配空间
+              // 保持默认位置，后续会调整间距
+            }
+            break;
+          case JustifyContent.SPACE_AROUND:
+            if (line.length > 0) {
+              // 在每个子节点周围平均分配空间
+              const spacePerSide = lineRemainingSpace / (line.length * 2);
+              lineMainAxisPos = isReverse ? lineMainAxisPos - spacePerSide : lineMainAxisPos + spacePerSide;
+            }
+            break;
+          case JustifyContent.SPACE_EVENLY:
+            if (line.length > 0) {
+              // 在每个子节点之间和周围平均分配空间
+              const spacesCount = line.length + 1;
+              const spaceSize = lineRemainingSpace / spacesCount;
+              lineMainAxisPos = isReverse ? lineMainAxisPos - spaceSize : lineMainAxisPos + spaceSize;
+            }
+            break;
+          default:
+            lineMainAxisPos = isReverse ? mainAxisSize : 0;
+        }
+      }
+
+      // 为当前行的每个子节点设置位置
+      for (const child of line) {
+        const childStyle = child.style;
+        const childRect = child.rect;
+
+        // 计算子节点的margin
+        const marginLeft = childStyle.marginLeft || 0;
+        const marginTop = childStyle.marginTop || 0;
+        const marginRight = childStyle.marginRight || 0;
+        const marginBottom = childStyle.marginBottom || 0;
+
+        // 计算子节点在主轴和交叉轴上的尺寸
+        const mainSize = isHorizontal ? childRect.width : childRect.height;
+        const crossSize = isHorizontal ? childRect.height : childRect.width;
+
+        // 计算子节点在主轴上的位置
+        let childMainPos;
+        if (isReverse) {
+          childMainPos = lineMainAxisPos - mainSize - (isHorizontal ? marginRight : marginBottom);
+          lineMainAxisPos -= mainSize + (isHorizontal ? marginLeft + marginRight : marginTop + marginBottom);
+
+          // 处理space-between, space-around和space-evenly的间距
+          if (justifyContent === JustifyContent.SPACE_BETWEEN && line.length > 1) {
+            const spaceBetween = lineRemainingSpace / (line.length - 1);
+            lineMainAxisPos -= spaceBetween;
+          } else if (justifyContent === JustifyContent.SPACE_AROUND && line.length > 0) {
+            const spacePerSide = lineRemainingSpace / (line.length * 2);
+            lineMainAxisPos -= spacePerSide * 2;
+          } else if (justifyContent === JustifyContent.SPACE_EVENLY && line.length > 0) {
+            const spacesCount = line.length + 1;
+            const spaceSize = lineRemainingSpace / spacesCount;
+            lineMainAxisPos -= spaceSize;
+          }
+        } else {
+          childMainPos = lineMainAxisPos + (isHorizontal ? marginLeft : marginTop);
+          lineMainAxisPos += mainSize + (isHorizontal ? marginLeft + marginRight : marginTop + marginBottom);
+
+          // 处理space-between, space-around和space-evenly的间距
+          if (justifyContent === JustifyContent.SPACE_BETWEEN && line.length > 1) {
+            const spaceBetween = lineRemainingSpace / (line.length - 1);
+            lineMainAxisPos += spaceBetween;
+          } else if (justifyContent === JustifyContent.SPACE_AROUND && line.length > 0) {
+            const spacePerSide = lineRemainingSpace / (line.length * 2);
+            lineMainAxisPos += spacePerSide * 2;
+          } else if (justifyContent === JustifyContent.SPACE_EVENLY && line.length > 0) {
+            const spacesCount = line.length + 1;
+            const spaceSize = lineRemainingSpace / spacesCount;
+            lineMainAxisPos += spaceSize;
+          }
+        }
+
+        // 计算子节点在交叉轴上的位置
+        let childCrossPos;
+        switch (alignItems) {
+          case AlignItems.FLEX_END:
+            childCrossPos = crossAxisPos + lineCrossSize - crossSize - (isHorizontal ? marginBottom : marginRight);
+            break;
+          case AlignItems.CENTER:
+            childCrossPos = crossAxisPos + (lineCrossSize - crossSize) / 2 + 
+                           (isHorizontal ? marginTop - marginBottom : marginLeft - marginRight) / 2;
+            break;
+          case AlignItems.STRETCH:
+            // 拉伸到行的交叉轴尺寸
+            // 这里简化处理，实际实现需要调整子节点尺寸
+            childCrossPos = crossAxisPos + (isHorizontal ? marginTop : marginLeft);
+            break;
+          default: // FLEX_START
+            childCrossPos = crossAxisPos + (isHorizontal ? marginTop : marginLeft);
+        }
+
+        // 设置子节点的最终位置
+        const childX = isHorizontal ? childMainPos : childCrossPos;
+        const childY = isHorizontal ? childCrossPos : childMainPos;
+
+        // 考虑容器的内边距
+        const finalX = rect.x + paddingLeft + childX;
+        const finalY = rect.y + paddingTop + childY;
+
+        // 设置子节点位置
+        child.setPosition(finalX, finalY);
+
+        // 递归计算子节点的布局
+        this.calculateLayout(child);
+      }
+
+      // 更新交叉轴位置，为下一行做准备
+      if (isWrapReverse) {
+        crossAxisPos -= lineIndex + 1 < lines.length ? lineCrossSizes[lineIndex + 1] : 0;
+      } else {
+        crossAxisPos += lineCrossSize;
+      }
+    }
+  }
+
+  /**
+   * 计算不需要换行的Flex布局
+   * @param node 容器节点
+   * @param isHorizontal 是否是水平方向的Flex
+   * @param isReverse 是否反向
+   * @param mainAxisSize 主轴尺寸
+   * @param crossAxisSize 交叉轴尺寸
+   * @param justifyContent 主轴对齐方式
+   * @param alignItems 交叉轴对齐方式
+   */
+  private calculateNonWrappingFlexLayout(
+    node: LayoutNode, 
+    isHorizontal: boolean, 
+    isReverse: boolean, 
+    mainAxisSize: number, 
+    crossAxisSize: number, 
+    justifyContent: JustifyContent, 
+    alignItems: AlignItems
+  ): void {
+    const { style, rect, children } = node;
+    if (children.length === 0) return;
+
+    // 容器的内边距
+    const paddingLeft = style.paddingLeft || 0;
+    const paddingTop = style.paddingTop || 0;
+    const paddingRight = style.paddingRight || 0;
+    const paddingBottom = style.paddingBottom || 0;
 
     // 计算子节点的flex属性总和
     let totalFlexGrow = 0;
@@ -113,15 +415,24 @@ export class LayoutContext {
           break;
         case JustifyContent.SPACE_BETWEEN:
           // 在第一个和最后一个子节点之间平均分配空间
-          // 这里简化处理，实际实现需要考虑子节点数量
+          if (children.length > 1) {
+            // 保持默认位置，后续会调整间距
+          }
           break;
         case JustifyContent.SPACE_AROUND:
-          // 在每个子节点周围平均分配空间
-          // 这里简化处理，实际实现需要考虑子节点数量
+          if (children.length > 0) {
+            // 在每个子节点周围平均分配空间
+            const spacePerSide = remainingSpace / (children.length * 2);
+            mainAxisPos = isReverse ? mainAxisPos - spacePerSide : mainAxisPos + spacePerSide;
+          }
           break;
         case JustifyContent.SPACE_EVENLY:
-          // 在每个子节点之间和周围平均分配空间
-          // 这里简化处理，实际实现需要考虑子节点数量
+          if (children.length > 0) {
+            // 在每个子节点之间和周围平均分配空间
+            const spacesCount = children.length + 1;
+            const spaceSize = remainingSpace / spacesCount;
+            mainAxisPos = isReverse ? mainAxisPos - spaceSize : mainAxisPos + spaceSize;
+          }
           break;
         default:
           mainAxisPos = isReverse ? mainAxisSize : 0;
@@ -148,9 +459,35 @@ export class LayoutContext {
       if (isReverse) {
         childMainPos = mainAxisPos - mainSize - (isHorizontal ? marginRight : marginBottom);
         mainAxisPos -= mainSize + (isHorizontal ? marginLeft + marginRight : marginTop + marginBottom);
+
+        // 处理space-between, space-around和space-evenly的间距
+        if (justifyContent === JustifyContent.SPACE_BETWEEN && children.length > 1) {
+          const spaceBetween = remainingSpace / (children.length - 1);
+          mainAxisPos -= spaceBetween;
+        } else if (justifyContent === JustifyContent.SPACE_AROUND && children.length > 0) {
+          const spacePerSide = remainingSpace / (children.length * 2);
+          mainAxisPos -= spacePerSide * 2;
+        } else if (justifyContent === JustifyContent.SPACE_EVENLY && children.length > 0) {
+          const spacesCount = children.length + 1;
+          const spaceSize = remainingSpace / spacesCount;
+          mainAxisPos -= spaceSize;
+        }
       } else {
         childMainPos = mainAxisPos + (isHorizontal ? marginLeft : marginTop);
         mainAxisPos += mainSize + (isHorizontal ? marginLeft + marginRight : marginTop + marginBottom);
+
+        // 处理space-between, space-around和space-evenly的间距
+        if (justifyContent === JustifyContent.SPACE_BETWEEN && children.length > 1) {
+          const spaceBetween = remainingSpace / (children.length - 1);
+          mainAxisPos += spaceBetween;
+        } else if (justifyContent === JustifyContent.SPACE_AROUND && children.length > 0) {
+          const spacePerSide = remainingSpace / (children.length * 2);
+          mainAxisPos += spacePerSide * 2;
+        } else if (justifyContent === JustifyContent.SPACE_EVENLY && children.length > 0) {
+          const spacesCount = children.length + 1;
+          const spaceSize = remainingSpace / spacesCount;
+          mainAxisPos += spaceSize;
+        }
       }
 
       // 计算子节点在交叉轴上的位置
