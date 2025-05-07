@@ -216,6 +216,12 @@ CREATE: 重新创建 OffscreenCanvas 实例。
 
 <!-- PS: **选择哪种数据交换方案是出于对当前平台支持的能力以及性能考量做出的决定。** -->
 
+## OTHER
+
+SVGA AE设计插件
+
+- [SVGA-AEConverter](https://github.com/abcxo/SVGA-AEConverter)
+
 ## LICENSE
 
 [Apache License 2.0](./LICENSE)
