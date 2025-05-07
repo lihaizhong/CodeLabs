@@ -73,33 +73,33 @@ export enum FlexWrap {
  */
 export interface NodeStyle {
   // 布局相关属性
-  width?: number;
-  height?: number;
-  marginTop?: number;
-  marginRight?: number;
-  marginBottom?: number;
-  marginLeft?: number;
-  paddingTop?: number;
-  paddingRight?: number;
-  paddingBottom?: number;
-  paddingLeft?: number;
+  width: number;
+  height: number;
+  marginTop: number;
+  marginRight: number;
+  marginBottom: number;
+  marginLeft: number;
+  paddingTop: number;
+  paddingRight: number;
+  paddingBottom: number;
+  paddingLeft: number;
   // 文本相关属性
-  textAlign?: TextAlign;
-  verticalAlign?: VerticalAlign;
-  fontFamily?: string;
-  fontSize?: number;
-  lineHeight?: number;
-  color?: string;
-  backgroundColor?: string;
+  textAlign: TextAlign;
+  verticalAlign: VerticalAlign;
+  fontFamily: string;
+  fontSize: number;
+  lineHeight: number;
+  color: string;
+  backgroundColor: string;
   // Flex相关属性
-  display?: 'flex' | 'block';
-  flexDirection?: FlexDirection;
-  justifyContent?: JustifyContent;
-  alignItems?: AlignItems;
-  flexWrap?: FlexWrap;
-  flexGrow?: number;
-  flexShrink?: number;
-  flexBasis?: number | 'auto';
+  display: 'flex' | 'block' | 'inline';
+  flexDirection: FlexDirection;
+  justifyContent: JustifyContent;
+  alignItems: AlignItems;
+  flexWrap: FlexWrap;
+  flexGrow: number;
+  flexShrink: number;
+  flexBasis: number | 'auto';
 }
 
 /**
@@ -127,6 +127,6 @@ export interface TextMetrics {
 export interface LayoutNodeOptions {
   type: NodeType;
   content?: string;
-  style?: NodeStyle;
+  style?: Partial<NodeStyle>;
   children?: LayoutNodeOptions[];
 }

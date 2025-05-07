@@ -1,10 +1,16 @@
 import { LayoutContext } from "./LayoutContext";
 import {
+  AlignItems,
+  FlexDirection,
+  FlexWrap,
+  JustifyContent,
   LayoutNodeOptions,
   NodeRect,
   NodeStyle,
   NodeType,
+  TextAlign,
   TextMetrics,
+  VerticalAlign,
 } from "../types";
 
 /**
@@ -44,12 +50,44 @@ export class LayoutNode {
   constructor(options: LayoutNodeOptions, parent: LayoutNode | null = null) {
     this.type = options.type;
     this.content = options.content || "";
-    this.style = options.style || {};
+    this.style =  this.normalizeStyle(options.style || {});
     this.parent = parent;
     this.rect = { x: 0, y: 0, width: 0, height: 0 };
     this.children = (options.children || []).map(
-      (childOptions) => new LayoutNode(childOptions, this)
-    );;
+      (childOptions: LayoutNodeOptions) => new LayoutNode(childOptions, this)
+    );
+  }
+
+  private normalizeStyle(style: Partial<NodeStyle>): NodeStyle {
+    const defaultStyle: NodeStyle = {
+      display: "inline",
+      width: 0,
+      height: 0,
+      fontSize: 16,
+      fontFamily: "sans-serif",
+      lineHeight: 1.2,
+      color: "#000",
+      backgroundColor: "#fff",
+      textAlign: TextAlign.LEFT,
+      verticalAlign: VerticalAlign.TOP,
+      paddingLeft: 0,
+      paddingTop: 0,
+      paddingRight: 0,
+      paddingBottom: 0,
+      marginLeft: 0,
+      marginTop: 0,
+      marginRight: 0,
+      marginBottom: 0,
+      flexDirection: FlexDirection.ROW,
+      justifyContent: JustifyContent.FLEX_START,
+      alignItems: AlignItems.FLEX_START,
+      flexWrap: FlexWrap.NOWRAP,
+      flexGrow: 0,
+      flexShrink: 0,
+      flexBasis: "auto",
+    }
+
+    return { ...defaultStyle, ...style };
   }
 
   /**

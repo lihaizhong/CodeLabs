@@ -117,13 +117,10 @@ export class LayoutContext {
     isWrapReverse: boolean
   ): void {
     const { style, rect, children } = node;
-    if (children.length === 0) return;
 
     // 容器的内边距
     const paddingLeft = style.paddingLeft || 0;
     const paddingTop = style.paddingTop || 0;
-    const paddingRight = style.paddingRight || 0;
-    const paddingBottom = style.paddingBottom || 0;
     
     // 存储每一行的子节点
     const lines: LayoutNode[][] = [];
@@ -146,13 +143,13 @@ export class LayoutContext {
       if (currentLine.length > 0 && currentLineMainAxisSize + childTotalMainSize > mainAxisSize) {
         // 当前行已满，创建新行
         lines.push(currentLine);
-        currentLine = [child];
-        currentLineMainAxisSize = childTotalMainSize;
-      } else {
-        // 当前行有足够空间，添加到当前行
-        currentLine.push(child);
-        currentLineMainAxisSize += childTotalMainSize;
+        currentLine = [];
+        currentLineMainAxisSize = 0;
       }
+      
+      // 当前行有足够空间，添加到当前行
+      currentLine.push(child);
+      currentLineMainAxisSize += childTotalMainSize;
     }
 
     // 添加最后一行
@@ -168,6 +165,7 @@ export class LayoutContext {
     // 计算每行的交叉轴尺寸
     const lineCrossSizes: number[] = lines.map(line => {
       let maxCrossSize = 0;
+
       for (const child of line) {
         const childStyle = child.style;
         const childRect = child.rect;
@@ -177,11 +175,9 @@ export class LayoutContext {
           : (childStyle.marginLeft || 0) + (childStyle.marginRight || 0);
         maxCrossSize = Math.max(maxCrossSize, crossSize + marginCross);
       }
+
       return maxCrossSize;
     });
-
-    // 计算所有行的交叉轴总尺寸
-    const totalCrossSize = lineCrossSizes.reduce((sum, size) => sum + size, 0);
 
     // 计算每行的起始交叉轴位置
     let crossAxisPos = 0;
@@ -359,13 +355,10 @@ export class LayoutContext {
     alignItems: AlignItems
   ): void {
     const { style, rect, children } = node;
-    if (children.length === 0) return;
 
     // 容器的内边距
     const paddingLeft = style.paddingLeft || 0;
     const paddingTop = style.paddingTop || 0;
-    const paddingRight = style.paddingRight || 0;
-    const paddingBottom = style.paddingBottom || 0;
 
     // 计算子节点的flex属性总和
     let totalFlexGrow = 0;
@@ -534,13 +527,6 @@ export class LayoutContext {
 
     // 容器的内边距
     const paddingLeft = style.paddingLeft || 0;
-    const paddingTop = style.paddingTop || 0;
-    const paddingRight = style.paddingRight || 0;
-    const paddingBottom = style.paddingBottom || 0;
-
-    // 容器的内部宽度和高度
-    const innerWidth = rect.width - paddingLeft - paddingRight;
-    const innerHeight = rect.height - paddingTop - paddingBottom;
 
     // 当前行的Y坐标和高度
     let currentY = 0;
@@ -554,11 +540,7 @@ export class LayoutContext {
       // 计算子节点的margin
       const marginLeft = childStyle.marginLeft || 0;
       const marginTop = childStyle.marginTop || 0;
-      const marginRight = childStyle.marginRight || 0;
       const marginBottom = childStyle.marginBottom || 0;
-
-      // 子节点的总宽度（包括margin）
-      const childTotalWidth = childRect.width + marginLeft + marginRight;
 
       // 设置子节点位置
       const childX = paddingLeft + marginLeft;
