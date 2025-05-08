@@ -1,5 +1,5 @@
 import "weui";
-import { LayoutEngine, LayoutNode, LayoutRenderer } from "octopus-layout-engine";
+import { LayoutEngine, LayoutNode, LayoutRenderer } from "octopus-layout";
 
 window.addEventListener("DOMContentLoaded", () => {
   const $palette = document.getElementById("palette");
