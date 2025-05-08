@@ -1,5 +1,3 @@
-/// <reference path="../node_modules/octopus-platform/types/index.d.ts" />
-
 type MiniProgramCanvas = WechatMiniprogram.Canvas | WechatMiniprogram.OffscreenCanvas;
 
 type PlatformRenderingContext2D =
