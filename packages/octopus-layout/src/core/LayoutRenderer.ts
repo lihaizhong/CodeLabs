@@ -1,5 +1,4 @@
 import { LayoutNode } from "./LayoutNode";
-import { NodeType } from "../types";
 
 /**
  * Canvas渲染器
@@ -77,9 +76,9 @@ export class LayoutRenderer {
     }
 
     // 根据节点类型进行不同的渲染
-    if (type === NodeType.TEXT) {
+    if (type === OctopusLayout.NodeType.TEXT) {
       this.renderText(node);
-    } else if (type === NodeType.IMAGE) {
+    } else if (type === OctopusLayout.NodeType.IMAGE) {
       this.renderImage(node);
     }
 

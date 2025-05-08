@@ -1,17 +1,4 @@
 import { LayoutContext } from "./LayoutContext";
-import {
-  AlignItems,
-  FlexDirection,
-  FlexWrap,
-  JustifyContent,
-  LayoutNodeOptions,
-  NodeRect,
-  NodeStyle,
-  NodeType,
-  TextAlign,
-  TextMetrics,
-  VerticalAlign,
-} from "../types";
 
 /**
  * 布局节点类
@@ -21,7 +8,7 @@ export class LayoutNode {
   /**
    * 节点类型
    */
-  public readonly type: NodeType;
+  public readonly type: OctopusLayout.NodeType;
   /**
    * 节点内容
    */
@@ -29,7 +16,7 @@ export class LayoutNode {
   /**
    * 节点样式
    */
-  public readonly style: NodeStyle;
+  public readonly style: OctopusLayout.NodeStyle;
   /**
    * 子节点
    */
@@ -41,25 +28,25 @@ export class LayoutNode {
   /**
    * 节点位置和尺寸
    */
-  public readonly rect: NodeRect;
+  public readonly rect: OctopusLayout.NodeRect;
   /**
    * 文本测量结果
    */
-  private textMetrics: TextMetrics | null = null;
+  private textMetrics: OctopusLayout.TextMetrics | null = null;
 
-  constructor(options: LayoutNodeOptions, parent: LayoutNode | null = null) {
+  constructor(options: OctopusLayout.LayoutNodeOptions, parent: LayoutNode | null = null) {
     this.type = options.type;
     this.content = options.content || "";
     this.style =  this.normalizeStyle(options.style || {});
     this.parent = parent;
     this.rect = { x: 0, y: 0, width: 0, height: 0 };
     this.children = (options.children || []).map(
-      (childOptions: LayoutNodeOptions) => new LayoutNode(childOptions, this)
+      (childOptions: OctopusLayout.LayoutNodeOptions) => new LayoutNode(childOptions, this)
     );
   }
 
-  private normalizeStyle(style: Partial<NodeStyle>): NodeStyle {
-    const defaultStyle: NodeStyle = {
+  private normalizeStyle(style: Partial<OctopusLayout.NodeStyle>): OctopusLayout.NodeStyle {
+    const defaultStyle: OctopusLayout.NodeStyle = {
       display: "inline",
       width: 0,
       height: 0,
@@ -68,8 +55,8 @@ export class LayoutNode {
       lineHeight: 1.2,
       color: "#000",
       backgroundColor: "#fff",
-      textAlign: TextAlign.LEFT,
-      verticalAlign: VerticalAlign.TOP,
+      textAlign: OctopusLayout.TextAlign.LEFT,
+      verticalAlign: OctopusLayout.VerticalAlign.TOP,
       paddingLeft: 0,
       paddingTop: 0,
       paddingRight: 0,
@@ -78,10 +65,10 @@ export class LayoutNode {
       marginTop: 0,
       marginRight: 0,
       marginBottom: 0,
-      flexDirection: FlexDirection.ROW,
-      justifyContent: JustifyContent.FLEX_START,
-      alignItems: AlignItems.FLEX_START,
-      flexWrap: FlexWrap.NOWRAP,
+      flexDirection: OctopusLayout.FlexDirection.ROW,
+      justifyContent: OctopusLayout.JustifyContent.FLEX_START,
+      alignItems: OctopusLayout.AlignItems.FLEX_START,
+      flexWrap: OctopusLayout.FlexWrap.NOWRAP,
       flexGrow: 0,
       flexShrink: 0,
       flexBasis: "auto",
@@ -101,14 +88,14 @@ export class LayoutNode {
   /**
    * 获取文本测量结果
    */
-  getTextMetrics(): TextMetrics | null {
+  getTextMetrics(): OctopusLayout.TextMetrics | null {
     return this.textMetrics;
   }
 
   /**
    * 设置文本测量结果
    */
-  setTextMetrics(metrics: TextMetrics): void {
+  setTextMetrics(metrics: OctopusLayout.TextMetrics): void {
     this.textMetrics = metrics;
   }
 
@@ -137,8 +124,8 @@ export class LayoutNode {
       );
 
       // 设置节点尺寸
-      this.rect.width = width || this.textMetrics.width;
-      this.rect.height = height || this.textMetrics.height;
+      this.rect.width = width || this.textMetrics!.width;
+      this.rect.height = height || this.textMetrics!.height;
     } else {
       this.rect.width = width || 0;
       this.rect.height = height || 0;

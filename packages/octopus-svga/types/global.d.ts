@@ -1,6 +1,4 @@
-/// <reference path="../node_modules/octopus-platform/types/platform.d.ts" />
-/// <reference path="../node_modules/octopus-platform/types/plugin.d.ts" />
-/// <reference path="../node_modules/octopus-platform/types/extension.d.ts" />
+/// <reference path="../node_modules/octopus-platform/types/index.d.ts" />
 
 type MiniProgramCanvas = WechatMiniprogram.Canvas | WechatMiniprogram.OffscreenCanvas;
 

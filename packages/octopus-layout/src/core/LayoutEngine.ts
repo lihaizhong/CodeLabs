@@ -1,7 +1,6 @@
 import { LayoutContext } from './LayoutContext';
 import { LayoutNode } from './LayoutNode';
 import { LayoutRenderer } from './LayoutRenderer';
-import { LayoutNodeOptions } from '../types';
 
 /**
  * 布局引擎主类
@@ -31,7 +30,7 @@ export class LayoutEngine {
    * 创建布局树
    * @param options 布局节点配置
    */
-  createLayoutTree(options: LayoutNodeOptions): LayoutNode {
+  createLayoutTree(options: OctopusLayout.LayoutNodeOptions): LayoutNode {
     return new LayoutNode(options);
   }
 
