@@ -1,5 +1,5 @@
 {
-  "name": "octopus-layout-engine",
+  "name": "octopus-layout",
   "version": "0.0.1",
   "type": "module",
   "description": "Canvas 2D 布局引擎",

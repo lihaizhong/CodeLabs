@@ -133,9 +133,9 @@ importers:
       jsqr:
         specifier: ^1.4.0
         version: 1.4.0
-      octopus-layout-engine:
+      octopus-layout:
         specifier: workspace:^
-        version: link:../../packages/octopus-layout-engine
+        version: link:../../packages/octopus-layout
       octopus-svga:
         specifier: workspace:^
         version: link:../../packages/octopus-svga
@@ -300,7 +300,7 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
-  packages/octopus-layout-engine:
+  packages/octopus-layout:
     devDependencies:
       '@rollup/plugin-json':
         specifier: ^6.1.0
