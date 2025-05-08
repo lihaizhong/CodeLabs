@@ -79,25 +79,29 @@ export const yyFiles = [
   "posche.svga",
   "rose.svga",
   "TwitterHeart.svga",
-  "Walkthrough.svga"
+  "Walkthrough.svga",
 ].map((url) => `${REPLACE_SVGA_URL}/yy/${url}`);
 
 export const posterFiles = [
   {
-    src: "微信认证授权码.svga"
+    src: "微信认证授权码.svga",
+    modify: (entity) => {},
   },
   {
-    src: "支付宝认证授权码.svga"
+    src: "支付宝认证授权码.svga",
+    modify: (entity) => {},
   },
   {
-    src: "微信认证授权码-纯净版.svga"
+    src: "微信认证授权码-纯净版.svga",
+    modify: (entity) => {},
   },
   {
-    src: "支付宝认证授权码-纯净版.svga"
-  }
+    src: "支付宝认证授权码-纯净版.svga",
+    modify: (entity) => {},
+  },
 ].map((item) => ({
   ...item,
-  src: `${REPLACE_SVGA_URL}/poster/${item.src}`
+  src: `${REPLACE_SVGA_URL}/poster/${item.src}`,
 }));
 
 export function getOneAtRandom(files) {

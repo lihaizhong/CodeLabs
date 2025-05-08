@@ -10,6 +10,7 @@ async function generatePoster(point) {
   const { width, height } = posterItem.size;
   const poster = new Poster(width, height);
 
+  data.modify?.(posterItem);
   console.log("posterItem", posterItem);
   await poster.mount(posterItem);
 
