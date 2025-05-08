@@ -1,12 +1,15 @@
 import { IQrCodeImgOptions } from "./qrcode-helper";
 import type { Painter } from "../painter";
 interface VideoEditorOptions {
-    mode: "R" | "A";
+    mode?: "R" | "A";
+    container?: string;
+    component?: any;
 }
 export declare class VideoEditor {
     private readonly entity;
     private readonly painter;
-    constructor(entity: PlatformVideo.Video, painter: Painter);
+    private readonly options;
+    constructor(entity: PlatformVideo.Video, painter: Painter, options?: Omit<VideoEditorOptions, "mode">);
     private set;
     /**
      * 创建自定义编辑器
@@ -14,14 +17,14 @@ export declare class VideoEditor {
      * @param height
      * @returns
      */
-    createContext(width: number, height: number): import("octopus-platform").IGetOffscreenCanvasResult;
+    createContext(width: number, height: number): Promise<import("octopus-platform").IGetOffscreenCanvasResult | import("octopus-platform").IGetCanvasResult>;
     /**
      * 创建画布图片
      * @param context
      * @param options
      * @returns
      */
-    setCanvas(key: string, context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D, options?: VideoEditorOptions): Promise<void>;
+    setCanvas(key: string, context: PlatformRenderingContext2D, options?: VideoEditorOptions): Promise<void>;
     /**
      * 创建二进制图片
      * @param key

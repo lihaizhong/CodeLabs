@@ -156,6 +156,8 @@ export class Painter {
       this.XC = context;
 
       if (mode === "poster") {
+        canvas.width = width;
+        canvas.height = height;
         this.setModel("C");
       } else {
         this.W = width;

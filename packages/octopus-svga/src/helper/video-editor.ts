@@ -8,18 +8,21 @@ import type { Painter } from "../painter";
 
 interface VideoEditorOptions {
   // 模式: R 替换, A 追加
-  mode: "R" | "A";
+  mode?: "R" | "A";
+  container?: string;
+  component?: any;
 }
 
 export class VideoEditor {
   constructor(
     private readonly entity: PlatformVideo.Video,
-    private readonly painter: Painter
+    private readonly painter: Painter,
+    private readonly options: Omit<VideoEditorOptions, "mode"> = {}
   ) {}
 
   private async set(
     key: string,
-    value: Uint8Array,
+    value: RawImage,
     mode: VideoEditorOptions["mode"] = "R"
   ) {
     if (mode === "A") {
@@ -40,8 +43,25 @@ export class VideoEditor {
    * @param height
    * @returns
    */
-  createContext(width: number, height: number) {
-    return platform.getOfsCanvas({ width, height });
+  async createContext(width: number, height: number) {
+    if ("OffscreenCanvas" in globalThis) {
+      return platform.getOfsCanvas({ width, height });
+    }
+
+    const { container, component } = this.options;
+    if (container) {
+      const result = await platform.getCanvas(container, component);
+      if (result.context) {
+        result.canvas.width = width;
+        result.canvas.height = height;
+      }
+
+      return result;
+    }
+
+    throw new Error(
+      "Don't support OffscreenCanvas, and please provide a container"
+    );
   }
 
   /**
@@ -52,7 +72,7 @@ export class VideoEditor {
    */
   async setCanvas(
     key: string,
-    context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D,
+    context: PlatformRenderingContext2D,
     options?: VideoEditorOptions
   ) {
     if (this.entity.locked) return;
@@ -74,9 +94,13 @@ export class VideoEditor {
   async setImage(key: string, url: string, options?: VideoEditorOptions) {
     if (this.entity.locked) return;
 
-    const buff = await platform.remote.fetch(url);
+    if (url.startsWith('data:image')) {
+      await this.set(key, url, options?.mode)
+    } else {
+      const buff = await platform.remote.fetch(url)
 
-    await this.set(key, new Uint8Array(buff), options?.mode);
+      await this.set(key, new Uint8Array(buff), options?.mode)
+    }
   }
 
   /**
