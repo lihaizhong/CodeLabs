@@ -45,14 +45,6 @@ export declare class Poster {
      */
     mount(videoEntity: PlatformVideo.Video): Promise<void[]>;
     /**
-     * 开始绘画事件回调
-     */
-    onStart?: PosterEventCallback;
-    /**
-     * 结束绘画事件回调
-     */
-    onEnd?: PosterEventCallback;
-    /**
      * 绘制海报
      */
     draw(): void;

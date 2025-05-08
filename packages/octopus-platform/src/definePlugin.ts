@@ -1,5 +1,3 @@
-import { PlatformPluginProperty, PlatformPluginOptions } from "./types";
-
-export const definePlugin = <T extends PlatformPluginProperty>(
-  plugin: PlatformPluginOptions<T>
+export const definePlugin = <T extends OctopusPlatform.PlatformPluginProperty>(
+  plugin: OctopusPlatform.PlatformPluginOptions<T>
 ) => plugin;

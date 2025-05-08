@@ -1,4 +1,3 @@
-import { PlatformPlugin } from "../types";
 import { definePlugin } from "../definePlugin";
 import { utf8 } from "../extensions/utf8";
 
@@ -31,7 +30,7 @@ export default definePlugin<"decode">({
 
         return result;
       },
-    } as PlatformPlugin["decode"];
+    } as OctopusPlatform.PlatformPlugin["decode"];
 
     if (env === "h5") {
       const textDecoder = new TextDecoder('utf-8', { fatal: true });

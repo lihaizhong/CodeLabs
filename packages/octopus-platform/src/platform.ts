@@ -1,22 +1,13 @@
-import {
-  PlatformGlobals,
-  SupportedPlatform,
-  PlatformPluginOptions,
-  PlatformPluginProperty,
-  Platform,
-  PlatformCanvas,
-  CreateImageInstance,
-} from "./types";
 import { noop, retry } from "./extensions";
 import { version } from "../package.json";
 
-export abstract class OctopusPlatform<P extends PlatformPluginProperty>
-  implements Platform
+export abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty>
+  implements OctopusPlatform.Platform
 {
   /**
    * 插件列表
    */
-  private plugins: PlatformPluginOptions<P>[] = [];
+  private plugins: OctopusPlatform.PlatformPluginOptions<P>[] = [];
 
   /**
    * 平台版本
@@ -31,7 +22,7 @@ export abstract class OctopusPlatform<P extends PlatformPluginProperty>
   /**
    * 全局变量
    */
-  public globals: PlatformGlobals = {
+  public globals: OctopusPlatform.PlatformGlobals = {
     env: "unknown",
     br: null,
     dpr: 1,
@@ -42,7 +33,7 @@ export abstract class OctopusPlatform<P extends PlatformPluginProperty>
 
   public retry = retry;
 
-  constructor(plugins: PlatformPluginOptions<P>[], version?: string) {
+  constructor(plugins: OctopusPlatform.PlatformPluginOptions<P>[], version?: string) {
     this.version = version || "";
     this.plugins = plugins;
     this.globals.env = this.autoEnv();
@@ -52,13 +43,13 @@ export abstract class OctopusPlatform<P extends PlatformPluginProperty>
     this.globals.br = this.useBridge();
     this.globals.dpr = this.usePixelRatio();
 
-    const plugins: Record<P, PlatformPluginOptions<P>> = this.plugins.reduce(
+    const plugins: Record<P, OctopusPlatform.PlatformPluginOptions<P>> = this.plugins.reduce(
       (acc, plugin) => {
         acc[plugin.name] = plugin;
 
         return acc;
       },
-      {} as Record<P, PlatformPluginOptions<P>>
+      {} as Record<P, OctopusPlatform.PlatformPluginOptions<P>>
     );
     const pluginNames = this.plugins.map((plugin) => plugin.name);
     const installedPlugins: Record<string, boolean> = {};
@@ -122,7 +113,7 @@ export abstract class OctopusPlatform<P extends PlatformPluginProperty>
   }
 
   private usePlugins(
-    plugins: Record<P, PlatformPluginOptions<P>>,
+    plugins: Record<P, OctopusPlatform.PlatformPluginOptions<P>>,
     pluginNames: string[],
     installedPlugins: Record<string, boolean>
   ) {
@@ -154,9 +145,9 @@ export abstract class OctopusPlatform<P extends PlatformPluginProperty>
     });
   }
 
-  abstract installPlugin(plugin: PlatformPluginOptions<P>): void;
+  abstract installPlugin(plugin: OctopusPlatform.PlatformPluginOptions<P>): void;
 
-  public setGlobalCanvas(canvas: CreateImageInstance) {
+  public setGlobalCanvas(canvas: OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas) {
     this.globals.canvas = canvas;
   }
 
@@ -164,7 +155,7 @@ export abstract class OctopusPlatform<P extends PlatformPluginProperty>
     return this.globals.canvas;
   }
 
-  public switch(env: SupportedPlatform) {
+  public switch(env: OctopusPlatform.SupportedPlatform) {
     this.globals.env = env;
     this.init();
   }

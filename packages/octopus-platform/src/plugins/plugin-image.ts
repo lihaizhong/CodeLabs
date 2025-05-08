@@ -1,10 +1,9 @@
-import { PlatformImage, Platform, PlatformPlugin } from "../types";
 import { definePlugin } from "../definePlugin";
 
-type ExtendedPlatform = Platform & {
-  local: PlatformPlugin["local"];
-  path: PlatformPlugin["path"];
-  decode: PlatformPlugin["decode"];
+interface ExtendedPlatform extends OctopusPlatform.Platform {
+  local: OctopusPlatform.PlatformPlugin["local"];
+  path: OctopusPlatform.PlatformPlugin["path"];
+  decode: OctopusPlatform.PlatformPlugin["decode"];
 }
 
 /**
@@ -27,8 +26,8 @@ export default definePlugin<"image">({
      * @param src
      * @returns
      */
-    function loadImage(img: PlatformImage, src: string) {
-      return new Promise<PlatformImage>((resolve, reject) => {
+    function loadImage(img: OctopusPlatform.PlatformImage, src: string) {
+      return new Promise<OctopusPlatform.PlatformImage>((resolve, reject) => {
         img.onload = () => {
           resolve(img);
           if (cachedImages.has(src)) {
@@ -45,8 +44,7 @@ export default definePlugin<"image">({
     }
 
     if (env === "h5") {
-      const createImage = () =>
-        new Image();
+      const createImage = () => new Image();
       const genImageSource = (data: Uint8Array | string) => {
         if (typeof data === "string") {
           return data;
@@ -75,18 +73,22 @@ export default definePlugin<"image">({
 
           return loadImage(createImage(), genImageSource(data));
         },
-      };
+      } satisfies OctopusPlatform.PlatformPlugin["image"];
     }
 
     const createImage = () => {
-      const canvas = (this as ExtendedPlatform).getGlobalCanvas();
+      const canvas = (
+        this as ExtendedPlatform
+      ).getGlobalCanvas() as WechatMiniprogram.Canvas;
 
       if (!canvas) {
-        throw new Error("Canvas not found, please use `platform.setCanvas` first!");
+        throw new Error(
+          "Canvas not found, please use `platform.setCanvas` first!"
+        );
       }
 
       return canvas.createImage();
-    }
+    };
     const genImageSource = async (
       data: Uint8Array | string,
       filename: string,
@@ -138,6 +140,6 @@ export default definePlugin<"image">({
 
         return loadImage(createImage(), src);
       },
-    };
+    } satisfies OctopusPlatform.PlatformPlugin["image"];
   },
 });

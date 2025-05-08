@@ -1,5 +1,3 @@
-import { Platform } from "src/types";
-
 function delay<T>(callback: () => T | Promise<T>, interval: number): Promise<T> {
   return new Promise<T>(
     (resolve) => setTimeout(
@@ -9,7 +7,7 @@ function delay<T>(callback: () => T | Promise<T>, interval: number): Promise<T> 
   )
 }
 
-export const retry: Platform["retry"] = async <T>(
+export const retry: OctopusPlatform.Platform["retry"] = async <T>(
   fn: () => T | Promise<T>,
   intervals: number[] = [],
   /*

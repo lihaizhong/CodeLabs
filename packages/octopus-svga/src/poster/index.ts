@@ -99,27 +99,15 @@ export class Poster {
   }
 
   /**
-   * 开始绘画事件回调
-   */
-  public onStart?: PosterEventCallback;
-
-  /**
-   * 结束绘画事件回调
-   */
-  public onEnd?: PosterEventCallback;
-
-  /**
    * 绘制海报
    */
   public draw(): void {
     if (!this.entity) return;
 
-    const { painter, entity, contentMode, frame, onStart, onEnd } = this;
+    const { painter, entity, contentMode, frame } = this;
 
-    onStart?.();
     painter.resize(contentMode, entity!.size);
     painter.draw(entity!, frame, 0, entity!.sprites.length);
-    onEnd?.();
   }
 
   /**

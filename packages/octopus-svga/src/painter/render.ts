@@ -21,8 +21,8 @@ const VALID_METHODS = "MLHVCSQZmlhvcsqz";
 
 function render(
   context: PlatformRenderingContext2D,
-  materials: Map<string, Bitmap>,
-  dynamicMaterials: Map<string, Bitmap>,
+  materials: Map<string, OctopusPlatform.Bitmap>,
+  dynamicMaterials: Map<string, OctopusPlatform.Bitmap>,
   videoEntity: PlatformVideo.Video,
   currentFrame: number,
   head: number,
@@ -52,8 +52,8 @@ function drawSprite(
   context: PlatformRenderingContext2D,
   sprite: PlatformVideo.VideoSprite,
   currentFrame: number,
-  bitmap?: Bitmap,
-  dynamicElement?: Bitmap,
+  bitmap?: OctopusPlatform.Bitmap,
+  dynamicElement?: OctopusPlatform.Bitmap,
   globalTransform?: PlatformVideo.Transform
 ): void {
   const frame = sprite.frames[currentFrame];

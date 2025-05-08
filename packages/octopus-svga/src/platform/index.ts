@@ -1,9 +1,5 @@
 import {
-  OctopusPlatform,
   Platform,
-  PlatformPlugin,
-  PlatformPluginOptions,
-  PlatformPluginValue,
   pluginCanvas,
   pluginDecode,
   pluginDownload,
@@ -28,46 +24,24 @@ export type PlatformProperties =
   | "getCanvas"
   | "getOfsCanvas";
 
-declare module "octopus-platform" {
-  export interface Platform {
-    now: PlatformPlugin["now"];
+class EnhancedPlatform extends Platform<PlatformProperties> {
+  now!: OctopusPlatform.PlatformPlugin["now"];
 
-    path: PlatformPlugin["path"];
+  path!: OctopusPlatform.PlatformPlugin["path"];
 
-    remote: PlatformPlugin["remote"];
+  remote!: OctopusPlatform.PlatformPlugin["remote"];
 
-    local: PlatformPlugin["local"];
+  local!: OctopusPlatform.PlatformPlugin["local"];
 
-    decode: PlatformPlugin["decode"];
+  decode!: OctopusPlatform.PlatformPlugin["decode"];
 
-    image: PlatformPlugin["image"];
+  image!: OctopusPlatform.PlatformPlugin["image"];
 
-    rAF: PlatformPlugin["rAF"];
+  rAF!: OctopusPlatform.PlatformPlugin["rAF"];
 
-    getCanvas: PlatformPlugin["getCanvas"];
+  getCanvas!: OctopusPlatform.PlatformPlugin["getCanvas"];
 
-    getOfsCanvas: PlatformPlugin["getOfsCanvas"];
-  }
-}
-
-class EnHancedPlatform extends OctopusPlatform<PlatformProperties> {
-  now!: PlatformPlugin["now"];
-
-  path!: PlatformPlugin["path"];
-
-  remote!: PlatformPlugin["remote"];
-
-  local!: PlatformPlugin["local"];
-
-  decode!: PlatformPlugin["decode"];
-
-  image!: PlatformPlugin["image"];
-
-  rAF!: PlatformPlugin["rAF"];
-
-  getCanvas!: PlatformPlugin["getCanvas"];
-
-  getOfsCanvas!: PlatformPlugin["getOfsCanvas"];
+  getOfsCanvas!: OctopusPlatform.PlatformPlugin["getOfsCanvas"];
 
   constructor() {
     super(
@@ -88,11 +62,13 @@ class EnHancedPlatform extends OctopusPlatform<PlatformProperties> {
     this.init();
   }
 
-  installPlugin(plugin: PlatformPluginOptions<PlatformProperties>) {
+  installPlugin(
+    plugin: OctopusPlatform.PlatformPluginOptions<PlatformProperties>
+  ) {
     const value = plugin.install.call<
-      EnHancedPlatform,
+      EnhancedPlatform,
       [],
-      PlatformPluginValue<PlatformProperties>
+      OctopusPlatform.PlatformPluginValue<PlatformProperties>
     >(this);
 
     Object.defineProperty(this, plugin.name, {
@@ -105,6 +81,11 @@ class EnHancedPlatform extends OctopusPlatform<PlatformProperties> {
   }
 }
 
-export const platform = new EnHancedPlatform();
+export const platform = new EnhancedPlatform();
 
-benchmark.log('PLATFORM VERSION', platform.platformVersion, 'VERSION', platform.version);
+benchmark.log(
+  "PLATFORM VERSION",
+  platform.platformVersion,
+  "VERSION",
+  platform.version
+);

@@ -71,7 +71,7 @@ export declare class Painter {
      * 创建图片标签
      * @returns
      */
-    createImage(): PlatformImage;
+    createImage(): OctopusPlatform.PlatformImage;
     /**
      * 生成图片
      * @returns

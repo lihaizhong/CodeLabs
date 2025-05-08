@@ -1,2 +1,2 @@
-declare const _default: import("..").PlatformPluginOptions<"now">;
+declare const _default: OctopusPlatform.PlatformPluginOptions<"now">;
 export default _default;

@@ -1,5 +1,4 @@
-import { PlatformGlobals, SupportedPlatform, PlatformPluginOptions, PlatformPluginProperty, Platform, CreateImageInstance } from "./types";
-export declare abstract class OctopusPlatform<P extends PlatformPluginProperty> implements Platform {
+export declare abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty> implements OctopusPlatform.Platform {
     /**
      * 插件列表
      */
@@ -15,17 +14,17 @@ export declare abstract class OctopusPlatform<P extends PlatformPluginProperty> 
     /**
      * 全局变量
      */
-    globals: PlatformGlobals;
+    globals: OctopusPlatform.PlatformGlobals;
     noop: () => any;
     retry: <T>(fn: () => T | Promise<T>, intervals?: number[], times?: number) => Promise<T>;
-    constructor(plugins: PlatformPluginOptions<P>[], version?: string);
+    constructor(plugins: OctopusPlatform.PlatformPluginOptions<P>[], version?: string);
     protected init(): void;
     private autoEnv;
     private useBridge;
     private usePixelRatio;
     private usePlugins;
-    abstract installPlugin(plugin: PlatformPluginOptions<P>): void;
-    setGlobalCanvas(canvas: CreateImageInstance): void;
-    getGlobalCanvas(): CreateImageInstance | null;
-    switch(env: SupportedPlatform): void;
+    abstract installPlugin(plugin: OctopusPlatform.PlatformPluginOptions<P>): void;
+    setGlobalCanvas(canvas: OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas): void;
+    getGlobalCanvas(): OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas | null;
+    switch(env: OctopusPlatform.SupportedPlatform): void;
 }

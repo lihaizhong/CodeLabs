@@ -20,7 +20,7 @@ export class VideoEditor {
 
   private async set(
     key: string,
-    value: RawImage,
+    value: OctopusPlatform.RawImage,
     mode: VideoEditorOptions["mode"] = "R"
   ) {
     if (mode === "A") {

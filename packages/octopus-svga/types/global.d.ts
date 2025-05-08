@@ -1,21 +1,19 @@
+/// <reference path="../node_modules/octopus-platform/types/platform.d.ts" />
+/// <reference path="../node_modules/octopus-platform/types/plugin.d.ts" />
+/// <reference path="../node_modules/octopus-platform/types/extension.d.ts" />
+
 type MiniProgramCanvas = WechatMiniprogram.Canvas | WechatMiniprogram.OffscreenCanvas;
 
 type PlatformRenderingContext2D =
   | OffscreenCanvasRenderingContext2D
   | CanvasRenderingContext2D;
 
-type PlatformImage = HTMLImageElement | WechatMiniprogram.Image;
-
-type Bitmap = PlatformImage | ImageBitmap | HTMLCanvasElement | OffscreenCanvas;
-
-type RawImage = string | Uint8Array;
-
 interface RawImages {
-  [key: string]: RawImage;
+  [key: string]: OctopusPlatform.RawImage;
 }
 
 interface PlatformImages {
-  [key: string]: Bitmap;
+  [key: string]: OctopusPlatform.Bitmap;
 }
 
 declare namespace PlatformVideo {

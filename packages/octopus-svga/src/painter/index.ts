@@ -2,7 +2,6 @@ import { platform } from "../platform";
 import benchmark from "../benchmark";
 import render from "./render";
 import { ImagePool } from "./image-pool";
-import { PlatformCanvas, PlatformOffscreenCanvas } from "octopus-platform";
 
 interface PaintModel {
   // canvas or offscreen
@@ -27,7 +26,7 @@ export class Painter {
    * 主屏的 Canvas 元素
    * Main Screen
    */
-  private X: PlatformCanvas | PlatformOffscreenCanvas | null = null;
+  private X: OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas | null = null;
   /**
    * 主屏的 Context 对象
    * Main Context
@@ -40,7 +39,7 @@ export class Painter {
    * 副屏的 Canvas 元素
    * Secondary Screen
    */
-  private Y: PlatformCanvas | PlatformOffscreenCanvas | null = null;
+  private Y: OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas | null = null;
   /**
    * 副屏的 Context 对象
    * Secondary Context
@@ -265,7 +264,7 @@ export class Painter {
    * 创建图片标签
    * @returns
    */
-  public createImage(): PlatformImage {
+  public createImage(): OctopusPlatform.PlatformImage {
     return this.IM.createImage();
   }
 
@@ -362,7 +361,7 @@ export class Painter {
    * @param cb
    */
   public flush(cb: () => void): void {
-    platform.rAF(this.X as WechatMiniprogram.Canvas, cb);
+    platform.rAF(cb);
   }
 
   public clearContainer: () => void = noop;

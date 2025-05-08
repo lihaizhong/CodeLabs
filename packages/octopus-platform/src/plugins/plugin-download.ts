@@ -23,7 +23,7 @@ export default definePlugin<"remote">({
               `HTTP error, status=${response.status}, statusText=${response.statusText}`
             );
           }),
-      };
+      } satisfies OctopusPlatform.PlatformPlugin['remote'];
     }
 
     function download(url: string, enableCache: boolean): Promise<ArrayBuffer> {
@@ -51,6 +51,6 @@ export default definePlugin<"remote">({
     return {
       is: isRemote,
       fetch: (url: string) => download(url, true),
-    };
+    } satisfies OctopusPlatform.PlatformPlugin['remote'];
   },
 });

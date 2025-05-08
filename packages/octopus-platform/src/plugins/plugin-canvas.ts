@@ -1,4 +1,3 @@
-import { PlatformCanvas, IGetCanvasResult } from "../types";
 import { definePlugin } from "../definePlugin";
 
 /**
@@ -10,12 +9,13 @@ export default definePlugin<"getCanvas">({
   install() {
     const { retry } = this;
     const { env, br, dpr } = this.globals;
+    const intervals = [50, 100, 100];
 
     function initCanvas(
-      canvas: PlatformCanvas | null,
+      canvas: OctopusPlatform.PlatformCanvas | null,
       width: number,
       height: number
-    ): IGetCanvasResult {
+    ): OctopusPlatform.GetCanvasResult {
       if (!canvas) {
         throw new Error("canvas not found.");
       }
@@ -50,23 +50,23 @@ export default definePlugin<"getCanvas">({
         document.querySelector(selector);
 
       return (selector: string) =>
-        retry<IGetCanvasResult>(() => {
+        retry<OctopusPlatform.GetCanvasResult>(() => {
           // FIXME: Taro 对 canvas 做了特殊处理，canvas 元素的 id 会被加上 canvas-id 的前缀
           const canvas = (querySelector(
             `canvas[canvas-id=${selector.slice(1)}]`
           ) || querySelector(selector)) as HTMLCanvasElement;
 
           return initCanvas(canvas, canvas?.clientWidth, canvas?.clientHeight);
-        }, [50, 100, 100]);
+        }, intervals);
     }
 
     return (
       selector: string,
       component?: WechatMiniprogram.Component.TrivialInstance | null
     ) =>
-      retry<IGetCanvasResult>(
+      retry<OctopusPlatform.GetCanvasResult>(
         () =>
-          new Promise<IGetCanvasResult>((resolve, reject) => {
+          new Promise<OctopusPlatform.GetCanvasResult>((resolve, reject) => {
             let query = (br as WechatMiniprogram.Wx).createSelectorQuery();
 
             if (component) {
@@ -85,7 +85,8 @@ export default definePlugin<"getCanvas">({
                 }
               })
               .exec();
-          })
+          }),
+        intervals
       );
   },
 });

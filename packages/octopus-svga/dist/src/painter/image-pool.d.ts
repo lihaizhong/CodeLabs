@@ -6,16 +6,16 @@ export declare class ImagePool {
     /**
      * 动态素材
      */
-    dynamicMaterials: Map<string, Bitmap>;
+    dynamicMaterials: Map<string, OctopusPlatform.Bitmap>;
     /**
      * 素材
      */
-    materials: Map<string, Bitmap>;
+    materials: Map<string, OctopusPlatform.Bitmap>;
     /**
      * 创建图片标签
      * @returns
      */
-    createImage(): PlatformImage;
+    createImage(): OctopusPlatform.PlatformImage;
     /**
      * 加载图片集
      * @param images 图片数据

@@ -1,30 +1,28 @@
-import type { CreateImageInstance } from "octopus-platform";
 import benchmark from "../benchmark";
 import { platform } from "../platform";
-import type { Painter } from ".";
 
 export class ImagePool {
   /**
    * 待复用的 img 标签
    */
   // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
-  private images: PlatformImage[] = [];
+  private images: OctopusPlatform.PlatformImage[] = [];
 
   /**
    * 动态素材
    */
-  public dynamicMaterials: Map<string, Bitmap> = new Map();
+  public dynamicMaterials: Map<string, OctopusPlatform.Bitmap> = new Map();
 
   /**
    * 素材
    */
-  public materials: Map<string, Bitmap> = new Map();
+  public materials: Map<string, OctopusPlatform.Bitmap> = new Map();
 
   /**
    * 创建图片标签
    * @returns
    */
-  public createImage(): PlatformImage {
+  public createImage(): OctopusPlatform.PlatformImage {
     return this.images.shift() || platform.image.create();
   }
 
@@ -46,9 +44,9 @@ export class ImagePool {
         const image = images[key];
   
         if (isImage(image)) {
-          this.materials.set(key, image as unknown as PlatformImage);
+          this.materials.set(key, image as OctopusPlatform.PlatformImage);
         } else {
-          const p = load(image as RawImage, filename, key).then((img) => {
+          const p = load(image as OctopusPlatform.RawImage, filename, key).then((img) => {
             this.materials.set(key, img)
           });
   
@@ -77,15 +75,15 @@ export class ImagePool {
 
     // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
     if (env !== "alipay") {
-      const releaseOne = (image: Bitmap) => {
+      const releaseOne = (image: OctopusPlatform.Bitmap) => {
         if (isImage(image)) {
-          (image as unknown as PlatformImage).onload = null;
-          (image as unknown as PlatformImage).onerror = null;
-          (image as unknown as PlatformImage).src = "";
+          (image as OctopusPlatform.PlatformImage).onload = null;
+          (image as OctopusPlatform.PlatformImage).onerror = null;
+          (image as OctopusPlatform.PlatformImage).src = "";
 
-          this.images.push(image as PlatformImage);
+          this.images.push(image as OctopusPlatform.PlatformImage);
         } else if (isImageBitmap(image)) {
-          (image as unknown as ImageBitmap).close();
+          (image as ImageBitmap).close();
         }
       }
 

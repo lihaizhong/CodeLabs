@@ -4,5 +4,5 @@
  * @package plugin-path 路径处理能力
  * @package plugin-decode 解码能力
  */
-declare const _default: import("../types").PlatformPluginOptions<"image">;
+declare const _default: OctopusPlatform.PlatformPluginOptions<"image">;
 export default _default;

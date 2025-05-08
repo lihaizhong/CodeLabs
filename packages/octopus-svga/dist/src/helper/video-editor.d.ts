@@ -15,7 +15,7 @@ export declare class VideoEditor {
      * @param height
      * @returns
      */
-    createContext(width: number, height: number): Promise<import("octopus-platform").IGetOffscreenCanvasResult | import("octopus-platform").IGetCanvasResult>;
+    createContext(width: number, height: number): Promise<OctopusPlatform.GetOffscreenCanvasResult | OctopusPlatform.GetCanvasResult>;
     /**
      * 创建画布图片
      * @param context

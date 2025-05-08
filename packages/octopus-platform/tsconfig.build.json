@@ -3,12 +3,6 @@
   "compilerOptions": {
     "baseUrl": ".",
     "declaration": true,
-    "resolveJsonModule": true,
     "esModuleInterop": true
-  },
-  "include": [
-    "src/**/*",
-    "global.d.ts",
-    "package.json"
-  ],
+  }
 }

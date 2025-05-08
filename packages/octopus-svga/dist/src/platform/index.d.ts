@@ -1,30 +1,17 @@
-import { OctopusPlatform, PlatformPlugin, PlatformPluginOptions } from "octopus-platform";
+import { Platform } from "octopus-platform";
 export type PlatformProperties = "now" | "path" | "remote" | "local" | "decode" | "image" | "rAF" | "getCanvas" | "getOfsCanvas";
-declare module "octopus-platform" {
-    interface Platform {
-        now: PlatformPlugin["now"];
-        path: PlatformPlugin["path"];
-        remote: PlatformPlugin["remote"];
-        local: PlatformPlugin["local"];
-        decode: PlatformPlugin["decode"];
-        image: PlatformPlugin["image"];
-        rAF: PlatformPlugin["rAF"];
-        getCanvas: PlatformPlugin["getCanvas"];
-        getOfsCanvas: PlatformPlugin["getOfsCanvas"];
-    }
-}
-declare class EnHancedPlatform extends OctopusPlatform<PlatformProperties> {
-    now: PlatformPlugin["now"];
-    path: PlatformPlugin["path"];
-    remote: PlatformPlugin["remote"];
-    local: PlatformPlugin["local"];
-    decode: PlatformPlugin["decode"];
-    image: PlatformPlugin["image"];
-    rAF: PlatformPlugin["rAF"];
-    getCanvas: PlatformPlugin["getCanvas"];
-    getOfsCanvas: PlatformPlugin["getOfsCanvas"];
+declare class EnhancedPlatform extends Platform<PlatformProperties> {
+    now: OctopusPlatform.PlatformPlugin["now"];
+    path: OctopusPlatform.PlatformPlugin["path"];
+    remote: OctopusPlatform.PlatformPlugin["remote"];
+    local: OctopusPlatform.PlatformPlugin["local"];
+    decode: OctopusPlatform.PlatformPlugin["decode"];
+    image: OctopusPlatform.PlatformPlugin["image"];
+    rAF: OctopusPlatform.PlatformPlugin["rAF"];
+    getCanvas: OctopusPlatform.PlatformPlugin["getCanvas"];
+    getOfsCanvas: OctopusPlatform.PlatformPlugin["getOfsCanvas"];
     constructor();
-    installPlugin(plugin: PlatformPluginOptions<PlatformProperties>): void;
+    installPlugin(plugin: OctopusPlatform.PlatformPluginOptions<PlatformProperties>): void;
 }
-export declare const platform: EnHancedPlatform;
+export declare const platform: EnhancedPlatform;
 export {};

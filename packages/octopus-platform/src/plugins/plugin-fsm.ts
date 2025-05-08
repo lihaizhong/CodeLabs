@@ -47,6 +47,6 @@ export default definePlugin<"local">({
           });
         });
       }
-    };
+    } satisfies OctopusPlatform.PlatformPlugin["local"];
   },
 });
