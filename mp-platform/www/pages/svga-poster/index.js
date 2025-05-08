@@ -1,15 +1,15 @@
 import "weui";
-import { Parser, Poster, platform } from "octopus-svga";
+import { Parser, Poster } from "octopus-svga";
 import { posterFiles } from "../../utils/constants";
 
 const parser = new Parser();
 
-async function generatePoster(url) {
-  const posterItem = await parser.load(url);
+async function generatePoster(point) {
+  const data = posterFiles[point];
+  const posterItem = await parser.load(data.src);
   const { width, height } = posterItem.size;
   const poster = new Poster(width, height);
 
-  // poster.setConfig();
   console.log("posterItem", posterItem);
   await poster.mount(posterItem);
 
@@ -34,7 +34,7 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    generatePoster(posterFiles[--current]);
+    generatePoster(--current);
   });
 
   $nextBtn.addEventListener("click", async () => {
@@ -42,8 +42,8 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    generatePoster(posterFiles[++current]);
+    generatePoster(++current);
   });
 
-  generatePoster(posterFiles[current]);
+  generatePoster(current);
 });

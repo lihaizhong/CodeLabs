@@ -2,7 +2,7 @@ import "weui";
 import { Parser, platform } from "octopus-svga";
 import { posterFiles } from "../../utils/constants";
 
-const files = posterFiles;
+const files = posterFiles.map((item) => item.src);
 const parser = new Parser();
 
 async function render(current) {

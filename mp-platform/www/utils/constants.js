@@ -83,21 +83,22 @@ export const yyFiles = [
 ].map((url) => `${REPLACE_SVGA_URL}/yy/${url}`);
 
 export const posterFiles = [
-  // "支付宝商户授权码-测试01.svga",
-  // "支付宝商户授权码-测试02.svga",
-  // "支付宝商户授权码-测试03.svga",
-  // "支付宝商户授权码-测试04.svga",
-  // "支付宝商户授权码-测试05.svga",
-  // "支付宝商户授权码-测试06.svga",
-  // "支付宝商户授权码-测试07.svga",
-  // "支付宝商户授权码-测试08.svga",
-  // "支付宝商户授权码-测试09.svga",
-  // "支付宝商户授权码-测试10.svga",
-  "微信认证授权码.svga",
-  "支付宝认证授权码.svga",
-  "微信认证授权码-纯净版.svga",
-  "支付宝认证授权码-纯净版.svga"
-].map((url) => `${REPLACE_SVGA_URL}/poster/${url}`);
+  {
+    src: "微信认证授权码.svga"
+  },
+  {
+    src: "支付宝认证授权码.svga"
+  },
+  {
+    src: "微信认证授权码-纯净版.svga"
+  },
+  {
+    src: "支付宝认证授权码-纯净版.svga"
+  }
+].map((item) => ({
+  ...item,
+  src: `${REPLACE_SVGA_URL}/poster/${item.src}`
+}));
 
 export function getOneAtRandom(files) {
   const ranIndex = Math.floor(Math.random() * files.length);
