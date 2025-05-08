@@ -154,9 +154,13 @@ export class Painter {
       // 添加主屏
       this.X = canvas;
       this.XC = context;
-      this.W = width;
-      this.H = height;
-      this.setModel("C");
+
+      if (mode === "poster") {
+        this.setModel("C");
+      } else {
+        this.W = width;
+        this.H = height;
+      }
     }
     // #endregion set main screen implement
 
