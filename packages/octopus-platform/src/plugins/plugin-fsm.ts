@@ -39,11 +39,11 @@ export default definePlugin<"local">({
         });
       },
       remove: (filePath: string) => {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
           fsm!.unlink({
             filePath,
             success: () => resolve(filePath),
-            fail: (err: unknown) => resolve(filePath),
+            fail: (err: unknown) => reject(err),
           });
         });
       }

@@ -1,4 +1,4 @@
-import { PlatformPlugin } from "./plugin";
+import { PlatformPlugin, CreateImageInstance } from "./plugin";
 
 export type SupportedPlatform = "weapp" | "alipay" | "tt" | "h5" | "unknown";
 
@@ -6,6 +6,7 @@ export interface PlatformGlobals {
   env: SupportedPlatform;
   br: any;
   dpr: number;
+  canvas: CreateImageInstance | null;
 }
 
 export type PlatformPluginProperty = keyof PlatformPlugin;
@@ -29,6 +30,10 @@ export interface Platform {
     intervals?: number[],
     times?: number
   ) => Promise<T>;
+
+  setGlobalCanvas: (canvas: CreateImageInstance) => void;
+
+  getGlobalCanvas: () => CreateImageInstance | null;
 
   switch: (env: SupportedPlatform) => void;
 }

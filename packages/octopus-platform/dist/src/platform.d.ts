@@ -1,4 +1,4 @@
-import { PlatformGlobals, SupportedPlatform, PlatformPluginOptions, PlatformPluginProperty, Platform } from "./types";
+import { PlatformGlobals, SupportedPlatform, PlatformPluginOptions, PlatformPluginProperty, Platform, CreateImageInstance } from "./types";
 export declare abstract class OctopusPlatform<P extends PlatformPluginProperty> implements Platform {
     /**
      * 插件列表
@@ -25,5 +25,7 @@ export declare abstract class OctopusPlatform<P extends PlatformPluginProperty> 
     private usePixelRatio;
     private usePlugins;
     abstract installPlugin(plugin: PlatformPluginOptions<P>): void;
+    setGlobalCanvas(canvas: CreateImageInstance): void;
+    getGlobalCanvas(): CreateImageInstance | null;
     switch(env: SupportedPlatform): void;
 }

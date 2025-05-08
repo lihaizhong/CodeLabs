@@ -34,10 +34,8 @@ export default definePlugin<"decode">({
     } as PlatformPlugin["decode"];
 
     if (env === "h5") {
-      const textDecoder = new TextDecoder();
+      const textDecoder = new TextDecoder('utf-8', { fatal: true });
 
-      decode.toBitmap = (data: Uint8Array) =>
-        createImageBitmap(new Blob([decode.toBuffer(data)]));
       decode.toDataURL = (data: Uint8Array) =>
         b64Wrap(btoa(decode.bytesToString(data)));
       decode.utf8 = (data: Uint8Array, start: number, end: number) =>

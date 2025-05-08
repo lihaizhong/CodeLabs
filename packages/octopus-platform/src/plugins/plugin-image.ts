@@ -1,4 +1,4 @@
-import { CreateImageInstance, PlatformImage, Platform, PlatformPlugin } from "../types";
+import { PlatformImage, Platform, PlatformPlugin } from "../types";
 import { definePlugin } from "../definePlugin";
 
 type ExtendedPlatform = Platform & {
@@ -45,7 +45,7 @@ export default definePlugin<"image">({
     }
 
     if (env === "h5") {
-      const createImage = (_: CreateImageInstance) =>
+      const createImage = () =>
         new Image();
       const genImageSource = (data: Uint8Array | string) => {
         if (typeof data === "string") {
@@ -60,27 +60,33 @@ export default definePlugin<"image">({
         isImageBitmap: (data: unknown) => data instanceof ImageBitmap,
         create: createImage,
         load: (
-          canvas: CreateImageInstance,
           data: ImageBitmap | Uint8Array | string,
           _filename: string,
           _prefix?: string
         ) => {
           // 由于ImageBitmap在图片渲染上有优势，故优先使用
           if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
-            return decode.toBitmap!(data);
+            return createImageBitmap(new Blob([decode.toBuffer(data)]));
           }
 
           if (data instanceof ImageBitmap) {
             return Promise.resolve(data);
           }
 
-          return loadImage(createImage(canvas), genImageSource(data));
+          return loadImage(createImage(), genImageSource(data));
         },
       };
     }
 
-    const createImage = (canvas: CreateImageInstance) =>
-      canvas.createImage();
+    const createImage = () => {
+      const canvas = (this as ExtendedPlatform).getGlobalCanvas();
+
+      if (!canvas) {
+        throw new Error("Canvas not found, please use `platform.setCanvas` first!");
+      }
+
+      return canvas.createImage();
+    }
     const genImageSource = async (
       data: Uint8Array | string,
       filename: string,
@@ -120,7 +126,6 @@ export default definePlugin<"image">({
       isImageBitmap: (_: unknown) => false,
       create: createImage,
       load: async (
-        canvas: CreateImageInstance,
         data: ImageBitmap | Uint8Array | string,
         filename: string,
         prefix?: string
@@ -131,7 +136,7 @@ export default definePlugin<"image">({
           prefix
         );
 
-        return loadImage(createImage(canvas), src);
+        return loadImage(createImage(), src);
       },
     };
   },

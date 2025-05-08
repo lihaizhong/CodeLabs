@@ -24,10 +24,8 @@ export class ImagePool {
    * 创建图片标签
    * @returns
    */
-  public createImage(
-    canvas: CreateImageInstance
-  ): PlatformImage {
-    return this.images.shift() || platform.image.create(canvas);
+  public createImage(): PlatformImage {
+    return this.images.shift() || platform.image.create();
   }
 
   /**
@@ -38,7 +36,6 @@ export class ImagePool {
    */
   public loadAll(
     images: RawImages | PlatformImages,
-    painter: Painter,
     filename: string
   ): Promise<void[]> {
     return benchmark.time<void[]>("loadAll", () => {
@@ -51,7 +48,7 @@ export class ImagePool {
         if (isImage(image)) {
           this.materials.set(key, image as unknown as PlatformImage);
         } else {
-          const p = load(painter, image as RawImage, filename, key).then((img) => {
+          const p = load(image as RawImage, filename, key).then((img) => {
             this.materials.set(key, img)
           });
   

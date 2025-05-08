@@ -164,6 +164,10 @@ export class Painter {
         this.H = height;
       }
     }
+
+    if (env !== "h5") {
+      platform.setGlobalCanvas(this.X as MiniProgramCanvas);
+    }
     // #endregion set main screen implement
 
     // #region set secondary screen implement
@@ -254,7 +258,7 @@ export class Painter {
    * @returns
    */
   public loadImages(images: RawImages, filename: string): Promise<void[]> {
-    return this.IM.loadAll(images, this, filename);
+    return this.IM.loadAll(images, filename);
   }
 
   /**
@@ -262,7 +266,7 @@ export class Painter {
    * @returns
    */
   public createImage(): PlatformImage {
-    return this.IM.createImage(this.X as WechatMiniprogram.Canvas);
+    return this.IM.createImage();
   }
 
   /**

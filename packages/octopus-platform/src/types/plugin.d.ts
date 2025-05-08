@@ -49,7 +49,6 @@ export interface PlatformPlugin {
   } | null;
 
   decode: {
-    toBitmap?: (data: Uint8Array) => Promise<ImageBitmap>;
     toDataURL: (data: Uint8Array) => string;
     toBuffer: (data: Uint8Array) => ArrayBuffer;
     bytesToString: (data: Uint8Array) => string;
@@ -59,9 +58,8 @@ export interface PlatformPlugin {
   image: {
     isImage: (data: unknown) => boolean;
     isImageBitmap: (data: unknown) => boolean;
-    create: (canvas: CreateImageInstance) => PlatformImage;
+    create: () => PlatformImage;
     load: (
-      canvas: CreateImageInstance,
       data: ImageBitmap | Uint8Array | string,
       filename: string,
       prefix?: string

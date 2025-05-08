@@ -4,6 +4,8 @@ import {
   PlatformPluginOptions,
   PlatformPluginProperty,
   Platform,
+  PlatformCanvas,
+  CreateImageInstance,
 } from "./types";
 import { noop, retry } from "./extensions";
 import { version } from "../package.json";
@@ -33,6 +35,7 @@ export abstract class OctopusPlatform<P extends PlatformPluginProperty>
     env: "unknown",
     br: null,
     dpr: 1,
+    canvas: null,
   };
 
   public noop = noop;
@@ -152,6 +155,14 @@ export abstract class OctopusPlatform<P extends PlatformPluginProperty>
   }
 
   abstract installPlugin(plugin: PlatformPluginOptions<P>): void;
+
+  public setGlobalCanvas(canvas: CreateImageInstance) {
+    this.globals.canvas = canvas;
+  }
+
+  public getGlobalCanvas() {
+    return this.globals.canvas;
+  }
 
   public switch(env: SupportedPlatform) {
     this.globals.env = env;

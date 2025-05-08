@@ -32,7 +32,6 @@ describe("pluginDecode 插件", () => {
       expect(typeof decode).toBe("object");
       expect(typeof decode.toBuffer).toBe("function");
       expect(typeof decode.toDataURL).toBe("function");
-      expect(typeof decode.toBitmap).toBe("function");
       expect(typeof decode.utf8).toBe("function");
     });
 
@@ -57,21 +56,6 @@ describe("pluginDecode 插件", () => {
       expect(decode.toDataURL(u8a)).toBe("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mP4z8DwH4QZYAwAR8oH+Rq28akAAAAASUVORK5CYII=");
     });
 
-    it("toBitmap 调用成功", async () => {
-      // @ts-ignore
-      global.createImageBitmap = jest.fn();
-      // @ts-ignore
-      global.createImageBitmap.mockResolvedValue(Promise.resolve("mocked image bitmap"));
-
-      const decode = pluginDecode.install.call(platform);
-      const u8a = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
-      const { buffer, byteOffset, byteLength } = u8a;
-      const result = await decode.toBitmap!(u8a);
-
-      expect(global.createImageBitmap).toHaveBeenCalledWith(new Blob([buffer.slice(byteOffset, byteOffset + byteLength)]));
-      expect(result).toBe("mocked image bitmap");
-    });
-
     it("utf8 调用成功", () => {
       const decode = pluginDecode.install.call(platform);
       const u8a = new Uint8Array([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100]);
@@ -89,7 +73,6 @@ describe("pluginDecode 插件", () => {
       expect(typeof decode).toBe("object");
       expect(typeof decode.toBuffer).toBe("function");
       expect(typeof decode.toDataURL).toBe("function");
-      expect(decode.toBitmap).toBeUndefined();
       expect(typeof decode.utf8).toBe("function");
     });
 

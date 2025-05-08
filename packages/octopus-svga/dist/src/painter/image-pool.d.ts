@@ -1,5 +1,3 @@
-import type { CreateImageInstance } from "octopus-platform";
-import type { Painter } from ".";
 export declare class ImagePool {
     /**
      * 待复用的 img 标签
@@ -17,14 +15,14 @@ export declare class ImagePool {
      * 创建图片标签
      * @returns
      */
-    createImage(canvas: CreateImageInstance): PlatformImage;
+    createImage(): PlatformImage;
     /**
      * 加载图片集
      * @param images 图片数据
      * @param filename 文件名称
      * @returns
      */
-    loadAll(images: RawImages | PlatformImages, painter: Painter, filename: string): Promise<void[]>;
+    loadAll(images: RawImages | PlatformImages, filename: string): Promise<void[]>;
     /**
      * 更新动态素材
      * @param images

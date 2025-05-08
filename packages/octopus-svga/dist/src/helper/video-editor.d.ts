@@ -1,5 +1,4 @@
 import { IQrCodeImgOptions } from "./qrcode-helper";
-import type { Painter } from "../painter";
 interface VideoEditorOptions {
     mode?: "R" | "A";
     container?: string;
@@ -7,9 +6,8 @@ interface VideoEditorOptions {
 }
 export declare class VideoEditor {
     private readonly entity;
-    private readonly painter;
     private readonly options;
-    constructor(entity: PlatformVideo.Video, painter: Painter, options?: Omit<VideoEditorOptions, "mode">);
+    constructor(entity: PlatformVideo.Video, options?: Omit<VideoEditorOptions, "mode">);
     private set;
     /**
      * 创建自定义编辑器
