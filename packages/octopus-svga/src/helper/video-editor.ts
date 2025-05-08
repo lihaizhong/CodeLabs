@@ -41,7 +41,7 @@ export class VideoEditor {
    * @returns
    */
   async createContext(width: number, height: number) {
-    if ("OffscreenCanvas" in globalThis) {
+    if (platform.globals.env !== "h5" || "OffscreenCanvas" in globalThis) {
       return platform.getOfsCanvas({ width, height });
     }
 
