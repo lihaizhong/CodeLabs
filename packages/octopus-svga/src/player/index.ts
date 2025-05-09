@@ -51,10 +51,10 @@ export class Player {
     const config: PlayerConfigOptions = typeof options === "string" ? { container: options } : options;
 
     this.config.register(config);
-    await this.painter.register(config.container, config.secondary, component);
+    this.animator = new Animator();
     // 监听容器是否处于浏览器视窗内
     // this.setIntersectionObserver()
-    this.animator = new Animator(this.painter);
+    await this.painter.register(config.container, config.secondary, component);
   }
 
   /**

@@ -86,11 +86,6 @@ export declare class Painter {
      * @returns
      */
     resize(contentMode: PLAYER_CONTENT_MODE, videoSize: PlatformVideo.VideoSize): void;
-    /**
-     * 注册刷新屏幕的回调函数
-     * @param cb
-     */
-    flush(cb: () => void): void;
     clearContainer: () => void;
     clearSecondary: () => void;
     /**

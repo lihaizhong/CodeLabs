@@ -354,14 +354,6 @@ export class Painter {
     };
   }
 
-  /**
-   * 注册刷新屏幕的回调函数
-   * @param cb
-   */
-  public flush(cb: () => void): void {
-    platform.rAF(cb);
-  }
-
   public clearContainer: () => void = noop;
 
   public clearSecondary: () => void = noop;

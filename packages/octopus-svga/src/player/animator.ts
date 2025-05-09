@@ -32,8 +32,6 @@ export class Animator {
   public onUpdate: (timePercent: number) => void = noop;
   public onEnd: () => void = noop;
 
-  constructor(private readonly painter: Painter) {}
-
   /**
    * 设置动画的必要参数
    * @param duration
@@ -80,7 +78,7 @@ export class Animator {
     if (this.isRunning) {
       this.doDeltaTime(platform.now() - this.startTime);
       if (this.isRunning) {
-        this.painter.flush(() => this.doFrame());
+        platform.rAF(() => this.doFrame());
       }
     }
   }
