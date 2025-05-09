@@ -6,6 +6,9 @@ const parser = new Parser();
 
 async function generatePoster(point) {
   const data = posterFiles[point];
+  // const data = {
+  //   src: "https://assets.2dfire.com/frontend/6c746c8bcb52df0216a97841e1dc6f1e.svga"
+  // }
   const posterItem = await parser.load(data.src);
   const { width, height } = posterItem.size;
   const poster = new Poster(width, height);

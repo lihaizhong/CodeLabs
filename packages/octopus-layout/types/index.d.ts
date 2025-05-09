@@ -89,6 +89,7 @@ declare namespace OctopusLayout {
     verticalAlign: VerticalAlign;
     fontFamily: string;
     fontSize: number;
+    fontWeight: number;
     lineHeight: number;
     color: string;
     backgroundColor: string;
@@ -111,6 +112,14 @@ declare namespace OctopusLayout {
     y: number;
     width: number;
     height: number;
+    marginLeft: number;
+    marginTop: number;
+    marginRight: number;
+    marginBottom: number;
+    paddingLeft: number;
+    paddingTop: number;
+    paddingRight: number;
+    paddingBottom: number;
   }
 
   /**
@@ -126,9 +135,9 @@ declare namespace OctopusLayout {
    * 布局节点配置
    */
   export interface LayoutNodeOptions {
-    type: NodeType;
+    type?: NodeType;
     content?: string;
     style?: Partial<NodeStyle>;
-    children?: LayoutNodeOptions[];
+    children?: LayoutNode[];
   }
 }

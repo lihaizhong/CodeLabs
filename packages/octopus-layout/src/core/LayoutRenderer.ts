@@ -78,8 +78,6 @@ export class LayoutRenderer {
     // 根据节点类型进行不同的渲染
     if (type === OctopusLayout.NodeType.TEXT) {
       this.renderText(node);
-    } else if (type === OctopusLayout.NodeType.IMAGE) {
-      this.renderImage(node);
     }
 
     // 递归渲染子节点
@@ -137,22 +135,22 @@ export class LayoutRenderer {
    * 渲染图像节点
    * @param node 图像节点
    */
-  private renderImage(node: LayoutNode): void {
-    const { rect, content } = node;
+  // private renderImage(node: LayoutNode): void {
+  //   const { rect, content } = node;
 
-    if (!content) {
-      return;
-    }
+  //   if (!content) {
+  //     return;
+  //   }
 
-    // 假设content是图像URL或数据URL
-    const image = new Image();
+  //   // 假设content是图像URL或数据URL
+  //   const image = new Image();
 
-    // 图像加载完成后渲染
-    image.onload = () => {
-      const { width, height, x, y } = rect;
+  //   // 图像加载完成后渲染
+  //   image.onload = () => {
+  //     const { width, height, x, y } = rect;
 
-      this.context.drawImage(image, x, y, width, height);
-    };
-    image.src = content;
-  }
+  //     this.context.drawImage(image, x, y, width, height);
+  //   };
+  //   image.src = content;
+  // }
 }

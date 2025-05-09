@@ -5,10 +5,59 @@ import { LayoutContext } from "./LayoutContext";
  * 表示布局树中的一个节点，可以是容器、文本或图像
  */
 export class LayoutNode {
+  private static readonly DEFAULT_STYLE: Required<OctopusLayout.NodeStyle> = {
+    display: "block",
+    fontSize: 16,
+    // 兼容iOS，Android设备，保证字体与App一致
+    fontFamily: "-apple-system, BlinkMacSystemFont, SFProDisplay-Regular, sans-serif",
+    fontWeight: 400,
+    lineHeight: 1.2,
+    color: "#000",
+    backgroundColor: "#fff",
+    textAlign: OctopusLayout.TextAlign.LEFT,
+    verticalAlign: OctopusLayout.VerticalAlign.TOP,
+    // 宽高
+    width: 0,
+    height: 0,
+    // padding
+    paddingLeft: 0,
+    paddingTop: 0,
+    paddingRight: 0,
+    paddingBottom: 0,
+    // margin
+    marginLeft: 0,
+    marginTop: 0,
+    marginRight: 0,
+    marginBottom: 0,
+    // flex
+    flexDirection: OctopusLayout.FlexDirection.ROW,
+    justifyContent: OctopusLayout.JustifyContent.FLEX_START,
+    alignItems: OctopusLayout.AlignItems.FLEX_START,
+    flexWrap: OctopusLayout.FlexWrap.NOWRAP,
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: "auto",
+  }
+
+  private static readonly DEFAULT_RECT: Required<OctopusLayout.NodeRect> = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    marginLeft: 0,
+    marginTop: 0,
+    marginRight: 0,
+    marginBottom: 0,
+    paddingLeft: 0,
+    paddingTop: 0,
+    paddingRight: 0,
+    paddingBottom: 0,
+  };
+
   /**
    * 节点类型
    */
-  public readonly type: OctopusLayout.NodeType;
+  public readonly type: OctopusLayout.NodeType | "unknown" = "unknown";
   /**
    * 节点内容
    */
@@ -35,58 +84,54 @@ export class LayoutNode {
   private textMetrics: OctopusLayout.TextMetrics | null = null;
 
   constructor(options: OctopusLayout.LayoutNodeOptions) {
-    this.type = options.type;
     this.content = options.content || "";
-    this.style =  this.normalizeStyle(options.style || {});
-    this.rect = { x: 0, y: 0, width: 0, height: 0 };
-  }
+    this.style = { ...LayoutNode.DEFAULT_STYLE, ...options.style };
+    this.rect = Object.create(LayoutNode.DEFAULT_RECT);
+    this.children = (options.children || []).map((child) => {
+      child.setParent(this);
 
-  private normalizeStyle(style: Partial<OctopusLayout.NodeStyle>): OctopusLayout.NodeStyle {
-    const defaultStyle: OctopusLayout.NodeStyle = {
-      display: "block",
-      width: 0,
-      height: 0,
-      fontSize: 16,
-      // 兼容iOS，Android设备，保证字体与App一致
-      fontFamily: "-apple-system, BlinkMacSystemFont, SFProDisplay-Regular, sans-serif",
-      lineHeight: 1.2,
-      color: "#000",
-      backgroundColor: "#fff",
-      textAlign: OctopusLayout.TextAlign.LEFT,
-      verticalAlign: OctopusLayout.VerticalAlign.TOP,
-      paddingLeft: 0,
-      paddingTop: 0,
-      paddingRight: 0,
-      paddingBottom: 0,
-      marginLeft: 0,
-      marginTop: 0,
-      marginRight: 0,
-      marginBottom: 0,
-      flexDirection: OctopusLayout.FlexDirection.ROW,
-      justifyContent: OctopusLayout.JustifyContent.FLEX_START,
-      alignItems: OctopusLayout.AlignItems.FLEX_START,
-      flexWrap: OctopusLayout.FlexWrap.NOWRAP,
-      flexGrow: 0,
-      flexShrink: 0,
-      flexBasis: "auto",
+      return child;
+    });
+
+    if (options.type) {
+      this.type = options.type;
     }
-
-    return { ...defaultStyle, ...style };
+    
+    switch (this.type) {
+      case OctopusLayout.NodeType.TEXT: {
+        this.style.display = "inline";
+        break;
+      }
+      case OctopusLayout.NodeType.CONTAINER: {
+        if (this.style.display === "inline") {
+          this.style.display = "block";
+        }
+        break;
+      }
+      case OctopusLayout.NodeType.IMAGE: {
+        this.style.display = "block";
+        break;
+      }
+      default: {
+        if (this.style.display === "inline") {
+          this.type = OctopusLayout.NodeType.TEXT;
+        } else {
+          this.type = OctopusLayout.NodeType.CONTAINER;
+        }
+      }
+    }
   }
 
-  appendChild(child: LayoutNode): this {
-    child.setParent(this);
-    this.children.push(child);
-
-    return this;
-  }
-
+  /**
+   * 设置父节点
+   * @param parent 
+   */
   setParent(parent: LayoutNode): void {
     this.parent = parent;
   }
 
   /**
-   * 获取节点的绝对位置
+   * 设置节点的绝对位置
    */
   setPosition(x: number, y: number): void {
     this.rect.x = x;
@@ -112,46 +157,41 @@ export class LayoutNode {
    * @param context 布局上下文
    */
   measure(context: LayoutContext): void {
-    const { style, type } = this;
-    const { display, width, height } = style;
-    const maxWidth = width;
+    const { style, type, content } = this;
+    const { width, height } = style;
 
     // 根据节点类型进行不同的测量
-    const fontSize = style.fontSize;
-    const fontFamily = style.fontFamily;
-    const lineHeight = style.lineHeight;
+    const { fontWeight, fontSize, fontFamily, lineHeight } = style;
 
     if (type === "text") {
+      const font = `${fontWeight} ${fontSize}px ${fontFamily}`;
       // 测量文本
       this.textMetrics = context.measureText(
-        this.content,
-        fontSize,
-        fontFamily,
-        maxWidth,
+        content,
+        font,
+        width,
         lineHeight
       );
-
-      if (display !== "inline" && width) {
-        this.rect.width = width;
-      } else {
-        this.rect.width = width || this.textMetrics!.width;
-      }
-
-      if (display !== "inline" && height) {
-        this.rect.height = height;
-      } else {
-        this.rect.height = height || this.textMetrics!.height;
-      }
+      // 设置文本节点的宽度和高度
+      this.rect.width = this.textMetrics!.width;
+      this.rect.height = this.textMetrics!.height;
     } else {
-      if (display !== "inline" && width) {
-        this.rect.width = width;
-      }
+      // 测量容器宽度和高度
+      this.rect.width = width;
+      this.rect.height = height;
 
-      if (display !== "inline" && height) {
-        this.rect.height = height;
-      }
+      // 块级元素需要计算margin
+      this.rect.marginLeft = style.marginLeft;
+      this.rect.marginTop = style.marginTop;
+      this.rect.marginRight = style.marginRight;
+      this.rect.marginBottom = style.marginBottom;
     }
 
+    // 计算padding
+    this.rect.paddingLeft = style.paddingLeft;
+    this.rect.paddingTop = style.paddingTop;
+    this.rect.paddingRight = style.paddingRight;
+    this.rect.paddingBottom = style.paddingBottom;
     // 递归测量子节点
     for (const child of this.children) {
       child.measure(context);

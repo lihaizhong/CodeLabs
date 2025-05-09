@@ -21,7 +21,7 @@ export class LayoutContext {
 
     // 根据节点的display属性选择布局算法
     const { style } = node;
-    if (style.display === 'flex') {
+    if (style.display === "flex") {
       this.calculateFlexLayout(node);
     } else {
       this.calculateFlowLayout(node);
@@ -37,8 +37,10 @@ export class LayoutContext {
     if (children.length === 0) return;
 
     // 获取Flex相关样式属性
-    const flexDirection = style.flexDirection || OctopusLayout.FlexDirection.ROW;
-    const justifyContent = style.justifyContent || OctopusLayout.JustifyContent.FLEX_START;
+    const flexDirection =
+      style.flexDirection || OctopusLayout.FlexDirection.ROW;
+    const justifyContent =
+      style.justifyContent || OctopusLayout.JustifyContent.FLEX_START;
     const alignItems = style.alignItems || OctopusLayout.AlignItems.FLEX_START;
     const flexWrap = style.flexWrap || OctopusLayout.FlexWrap.NOWRAP;
 
@@ -53,17 +55,19 @@ export class LayoutContext {
     const contentHeight = rect.height - paddingTop - paddingBottom;
 
     // 是否是水平方向的Flex
-    const isHorizontal = flexDirection === OctopusLayout.FlexDirection.ROW || 
-                         flexDirection === OctopusLayout.FlexDirection.ROW_REVERSE;
+    const isHorizontal =
+      flexDirection === OctopusLayout.FlexDirection.ROW ||
+      flexDirection === OctopusLayout.FlexDirection.ROW_REVERSE;
 
     // 主轴尺寸和交叉轴尺寸
     const mainAxisSize = isHorizontal ? contentWidth : contentHeight;
     const crossAxisSize = isHorizontal ? contentHeight : contentWidth;
 
     // 是否反向
-    const isReverse = flexDirection === OctopusLayout.FlexDirection.ROW_REVERSE || 
-                      flexDirection === OctopusLayout.FlexDirection.COLUMN_REVERSE;
-    
+    const isReverse =
+      flexDirection === OctopusLayout.FlexDirection.ROW_REVERSE ||
+      flexDirection === OctopusLayout.FlexDirection.COLUMN_REVERSE;
+
     // 是否需要换行
     const isWrapping = flexWrap !== OctopusLayout.FlexWrap.NOWRAP;
     // 是否反向换行
@@ -106,12 +110,12 @@ export class LayoutContext {
    * @param isWrapReverse 是否反向换行
    */
   private calculateWrappingFlexLayout(
-    node: LayoutNode, 
-    isHorizontal: boolean, 
-    isReverse: boolean, 
-    mainAxisSize: number, 
-    crossAxisSize: number, 
-    justifyContent: OctopusLayout.JustifyContent, 
+    node: LayoutNode,
+    isHorizontal: boolean,
+    isReverse: boolean,
+    mainAxisSize: number,
+    crossAxisSize: number,
+    justifyContent: OctopusLayout.JustifyContent,
     alignItems: OctopusLayout.AlignItems,
     isWrapReverse: boolean
   ): void {
@@ -120,7 +124,7 @@ export class LayoutContext {
     // 容器的内边距
     const paddingLeft = style.paddingLeft || 0;
     const paddingTop = style.paddingTop || 0;
-    
+
     // 存储每一行的子节点
     const lines: LayoutNode[][] = [];
     let currentLine: LayoutNode[] = [];
@@ -133,19 +137,22 @@ export class LayoutContext {
 
       // 计算子节点在主轴上的尺寸（包括margin）
       const mainSize = isHorizontal ? childRect.width : childRect.height;
-      const marginMain = isHorizontal 
+      const marginMain = isHorizontal
         ? (childStyle.marginLeft || 0) + (childStyle.marginRight || 0)
         : (childStyle.marginTop || 0) + (childStyle.marginBottom || 0);
       const childTotalMainSize = mainSize + marginMain;
 
       // 检查当前行是否还有足够空间
-      if (currentLine.length > 0 && currentLineMainAxisSize + childTotalMainSize > mainAxisSize) {
+      if (
+        currentLine.length > 0 &&
+        currentLineMainAxisSize + childTotalMainSize > mainAxisSize
+      ) {
         // 当前行已满，创建新行
         lines.push(currentLine);
         currentLine = [];
         currentLineMainAxisSize = 0;
       }
-      
+
       // 当前行有足够空间，添加到当前行
       currentLine.push(child);
       currentLineMainAxisSize += childTotalMainSize;
@@ -162,14 +169,14 @@ export class LayoutContext {
     }
 
     // 计算每行的交叉轴尺寸
-    const lineCrossSizes: number[] = lines.map(line => {
+    const lineCrossSizes: number[] = lines.map((line) => {
       let maxCrossSize = 0;
 
       for (const child of line) {
         const childStyle = child.style;
         const childRect = child.rect;
         const crossSize = isHorizontal ? childRect.height : childRect.width;
-        const marginCross = isHorizontal 
+        const marginCross = isHorizontal
           ? (childStyle.marginTop || 0) + (childStyle.marginBottom || 0)
           : (childStyle.marginLeft || 0) + (childStyle.marginRight || 0);
         maxCrossSize = Math.max(maxCrossSize, crossSize + marginCross);
@@ -195,7 +202,7 @@ export class LayoutContext {
         const childStyle = child.style;
         const childRect = child.rect;
         const mainSize = isHorizontal ? childRect.width : childRect.height;
-        const marginMain = isHorizontal 
+        const marginMain = isHorizontal
           ? (childStyle.marginLeft || 0) + (childStyle.marginRight || 0)
           : (childStyle.marginTop || 0) + (childStyle.marginBottom || 0);
         lineMainAxisSize += mainSize + marginMain;
@@ -212,7 +219,9 @@ export class LayoutContext {
             lineMainAxisPos = isReverse ? 0 : lineRemainingSpace;
             break;
           case OctopusLayout.JustifyContent.CENTER:
-            lineMainAxisPos = isReverse ? lineRemainingSpace / 2 : lineRemainingSpace / 2;
+            lineMainAxisPos = isReverse
+              ? lineRemainingSpace / 2
+              : lineRemainingSpace / 2;
             break;
           case OctopusLayout.JustifyContent.SPACE_BETWEEN:
             if (line.length > 1) {
@@ -224,7 +233,9 @@ export class LayoutContext {
             if (line.length > 0) {
               // 在每个子节点周围平均分配空间
               const spacePerSide = lineRemainingSpace / (line.length * 2);
-              lineMainAxisPos = isReverse ? lineMainAxisPos - spacePerSide : lineMainAxisPos + spacePerSide;
+              lineMainAxisPos = isReverse
+                ? lineMainAxisPos - spacePerSide
+                : lineMainAxisPos + spacePerSide;
             }
             break;
           case OctopusLayout.JustifyContent.SPACE_EVENLY:
@@ -232,7 +243,9 @@ export class LayoutContext {
               // 在每个子节点之间和周围平均分配空间
               const spacesCount = line.length + 1;
               const spaceSize = lineRemainingSpace / spacesCount;
-              lineMainAxisPos = isReverse ? lineMainAxisPos - spaceSize : lineMainAxisPos + spaceSize;
+              lineMainAxisPos = isReverse
+                ? lineMainAxisPos - spaceSize
+                : lineMainAxisPos + spaceSize;
             }
             break;
           default:
@@ -258,33 +271,63 @@ export class LayoutContext {
         // 计算子节点在主轴上的位置
         let childMainPos;
         if (isReverse) {
-          childMainPos = lineMainAxisPos - mainSize - (isHorizontal ? marginRight : marginBottom);
-          lineMainAxisPos -= mainSize + (isHorizontal ? marginLeft + marginRight : marginTop + marginBottom);
+          childMainPos =
+            lineMainAxisPos -
+            mainSize -
+            (isHorizontal ? marginRight : marginBottom);
+          lineMainAxisPos -=
+            mainSize +
+            (isHorizontal
+              ? marginLeft + marginRight
+              : marginTop + marginBottom);
 
           // 处理space-between, space-around和space-evenly的间距
-          if (justifyContent === OctopusLayout.JustifyContent.SPACE_BETWEEN && line.length > 1) {
+          if (
+            justifyContent === OctopusLayout.JustifyContent.SPACE_BETWEEN &&
+            line.length > 1
+          ) {
             const spaceBetween = lineRemainingSpace / (line.length - 1);
             lineMainAxisPos -= spaceBetween;
-          } else if (justifyContent === OctopusLayout.JustifyContent.SPACE_AROUND && line.length > 0) {
+          } else if (
+            justifyContent === OctopusLayout.JustifyContent.SPACE_AROUND &&
+            line.length > 0
+          ) {
             const spacePerSide = lineRemainingSpace / (line.length * 2);
             lineMainAxisPos -= spacePerSide * 2;
-          } else if (justifyContent === OctopusLayout.JustifyContent.SPACE_EVENLY && line.length > 0) {
+          } else if (
+            justifyContent === OctopusLayout.JustifyContent.SPACE_EVENLY &&
+            line.length > 0
+          ) {
             const spacesCount = line.length + 1;
             const spaceSize = lineRemainingSpace / spacesCount;
             lineMainAxisPos -= spaceSize;
           }
         } else {
-          childMainPos = lineMainAxisPos + (isHorizontal ? marginLeft : marginTop);
-          lineMainAxisPos += mainSize + (isHorizontal ? marginLeft + marginRight : marginTop + marginBottom);
+          childMainPos =
+            lineMainAxisPos + (isHorizontal ? marginLeft : marginTop);
+          lineMainAxisPos +=
+            mainSize +
+            (isHorizontal
+              ? marginLeft + marginRight
+              : marginTop + marginBottom);
 
           // 处理space-between, space-around和space-evenly的间距
-          if (justifyContent === OctopusLayout.JustifyContent.SPACE_BETWEEN && line.length > 1) {
+          if (
+            justifyContent === OctopusLayout.JustifyContent.SPACE_BETWEEN &&
+            line.length > 1
+          ) {
             const spaceBetween = lineRemainingSpace / (line.length - 1);
             lineMainAxisPos += spaceBetween;
-          } else if (justifyContent === OctopusLayout.JustifyContent.SPACE_AROUND && line.length > 0) {
+          } else if (
+            justifyContent === OctopusLayout.JustifyContent.SPACE_AROUND &&
+            line.length > 0
+          ) {
             const spacePerSide = lineRemainingSpace / (line.length * 2);
             lineMainAxisPos += spacePerSide * 2;
-          } else if (justifyContent === OctopusLayout.JustifyContent.SPACE_EVENLY && line.length > 0) {
+          } else if (
+            justifyContent === OctopusLayout.JustifyContent.SPACE_EVENLY &&
+            line.length > 0
+          ) {
             const spacesCount = line.length + 1;
             const spaceSize = lineRemainingSpace / spacesCount;
             lineMainAxisPos += spaceSize;
@@ -295,19 +338,30 @@ export class LayoutContext {
         let childCrossPos;
         switch (alignItems) {
           case OctopusLayout.AlignItems.FLEX_END:
-            childCrossPos = crossAxisPos + lineCrossSize - crossSize - (isHorizontal ? marginBottom : marginRight);
+            childCrossPos =
+              crossAxisPos +
+              lineCrossSize -
+              crossSize -
+              (isHorizontal ? marginBottom : marginRight);
             break;
           case OctopusLayout.AlignItems.CENTER:
-            childCrossPos = crossAxisPos + (lineCrossSize - crossSize) / 2 + 
-                           (isHorizontal ? marginTop - marginBottom : marginLeft - marginRight) / 2;
+            childCrossPos =
+              crossAxisPos +
+              (lineCrossSize - crossSize) / 2 +
+              (isHorizontal
+                ? marginTop - marginBottom
+                : marginLeft - marginRight) /
+                2;
             break;
           case OctopusLayout.AlignItems.STRETCH:
             // 拉伸到行的交叉轴尺寸
             // 这里简化处理，实际实现需要调整子节点尺寸
-            childCrossPos = crossAxisPos + (isHorizontal ? marginTop : marginLeft);
+            childCrossPos =
+              crossAxisPos + (isHorizontal ? marginTop : marginLeft);
             break;
           default: // FLEX_START
-            childCrossPos = crossAxisPos + (isHorizontal ? marginTop : marginLeft);
+            childCrossPos =
+              crossAxisPos + (isHorizontal ? marginTop : marginLeft);
         }
 
         // 设置子节点的最终位置
@@ -327,7 +381,8 @@ export class LayoutContext {
 
       // 更新交叉轴位置，为下一行做准备
       if (isWrapReverse) {
-        crossAxisPos -= lineIndex + 1 < lines.length ? lineCrossSizes[lineIndex + 1] : 0;
+        crossAxisPos -=
+          lineIndex + 1 < lines.length ? lineCrossSizes[lineIndex + 1] : 0;
       } else {
         crossAxisPos += lineCrossSize;
       }
@@ -345,12 +400,12 @@ export class LayoutContext {
    * @param alignItems 交叉轴对齐方式
    */
   private calculateNonWrappingFlexLayout(
-    node: LayoutNode, 
-    isHorizontal: boolean, 
-    isReverse: boolean, 
-    mainAxisSize: number, 
-    crossAxisSize: number, 
-    justifyContent: OctopusLayout.JustifyContent, 
+    node: LayoutNode,
+    isHorizontal: boolean,
+    isReverse: boolean,
+    mainAxisSize: number,
+    crossAxisSize: number,
+    justifyContent: OctopusLayout.JustifyContent,
     alignItems: OctopusLayout.AlignItems
   ): void {
     const { style, rect, children } = node;
@@ -374,7 +429,7 @@ export class LayoutContext {
 
       // 计算子节点在主轴上的尺寸
       const mainSize = isHorizontal ? childRect.width : childRect.height;
-      const marginMain = isHorizontal 
+      const marginMain = isHorizontal
         ? (childStyle.marginLeft || 0) + (childStyle.marginRight || 0)
         : (childStyle.marginTop || 0) + (childStyle.marginBottom || 0);
 
@@ -415,7 +470,9 @@ export class LayoutContext {
           if (children.length > 0) {
             // 在每个子节点周围平均分配空间
             const spacePerSide = remainingSpace / (children.length * 2);
-            mainAxisPos = isReverse ? mainAxisPos - spacePerSide : mainAxisPos + spacePerSide;
+            mainAxisPos = isReverse
+              ? mainAxisPos - spacePerSide
+              : mainAxisPos + spacePerSide;
           }
           break;
         case OctopusLayout.JustifyContent.SPACE_EVENLY:
@@ -423,7 +480,9 @@ export class LayoutContext {
             // 在每个子节点之间和周围平均分配空间
             const spacesCount = children.length + 1;
             const spaceSize = remainingSpace / spacesCount;
-            mainAxisPos = isReverse ? mainAxisPos - spaceSize : mainAxisPos + spaceSize;
+            mainAxisPos = isReverse
+              ? mainAxisPos - spaceSize
+              : mainAxisPos + spaceSize;
           }
           break;
         default:
@@ -449,33 +508,56 @@ export class LayoutContext {
       // 计算子节点在主轴上的位置
       let childMainPos;
       if (isReverse) {
-        childMainPos = mainAxisPos - mainSize - (isHorizontal ? marginRight : marginBottom);
-        mainAxisPos -= mainSize + (isHorizontal ? marginLeft + marginRight : marginTop + marginBottom);
+        childMainPos =
+          mainAxisPos - mainSize - (isHorizontal ? marginRight : marginBottom);
+        mainAxisPos -=
+          mainSize +
+          (isHorizontal ? marginLeft + marginRight : marginTop + marginBottom);
 
         // 处理space-between, space-around和space-evenly的间距
-        if (justifyContent === OctopusLayout.JustifyContent.SPACE_BETWEEN && children.length > 1) {
+        if (
+          justifyContent === OctopusLayout.JustifyContent.SPACE_BETWEEN &&
+          children.length > 1
+        ) {
           const spaceBetween = remainingSpace / (children.length - 1);
           mainAxisPos -= spaceBetween;
-        } else if (justifyContent === OctopusLayout.JustifyContent.SPACE_AROUND && children.length > 0) {
+        } else if (
+          justifyContent === OctopusLayout.JustifyContent.SPACE_AROUND &&
+          children.length > 0
+        ) {
           const spacePerSide = remainingSpace / (children.length * 2);
           mainAxisPos -= spacePerSide * 2;
-        } else if (justifyContent === OctopusLayout.JustifyContent.SPACE_EVENLY && children.length > 0) {
+        } else if (
+          justifyContent === OctopusLayout.JustifyContent.SPACE_EVENLY &&
+          children.length > 0
+        ) {
           const spacesCount = children.length + 1;
           const spaceSize = remainingSpace / spacesCount;
           mainAxisPos -= spaceSize;
         }
       } else {
         childMainPos = mainAxisPos + (isHorizontal ? marginLeft : marginTop);
-        mainAxisPos += mainSize + (isHorizontal ? marginLeft + marginRight : marginTop + marginBottom);
+        mainAxisPos +=
+          mainSize +
+          (isHorizontal ? marginLeft + marginRight : marginTop + marginBottom);
 
         // 处理space-between, space-around和space-evenly的间距
-        if (justifyContent === OctopusLayout.JustifyContent.SPACE_BETWEEN && children.length > 1) {
+        if (
+          justifyContent === OctopusLayout.JustifyContent.SPACE_BETWEEN &&
+          children.length > 1
+        ) {
           const spaceBetween = remainingSpace / (children.length - 1);
           mainAxisPos += spaceBetween;
-        } else if (justifyContent === OctopusLayout.JustifyContent.SPACE_AROUND && children.length > 0) {
+        } else if (
+          justifyContent === OctopusLayout.JustifyContent.SPACE_AROUND &&
+          children.length > 0
+        ) {
           const spacePerSide = remainingSpace / (children.length * 2);
           mainAxisPos += spacePerSide * 2;
-        } else if (justifyContent === OctopusLayout.JustifyContent.SPACE_EVENLY && children.length > 0) {
+        } else if (
+          justifyContent === OctopusLayout.JustifyContent.SPACE_EVENLY &&
+          children.length > 0
+        ) {
           const spacesCount = children.length + 1;
           const spaceSize = remainingSpace / spacesCount;
           mainAxisPos += spaceSize;
@@ -486,10 +568,18 @@ export class LayoutContext {
       let childCrossPos;
       switch (alignItems) {
         case OctopusLayout.AlignItems.FLEX_END:
-          childCrossPos = crossAxisSize - crossSize - (isHorizontal ? marginBottom : marginRight);
+          childCrossPos =
+            crossAxisSize -
+            crossSize -
+            (isHorizontal ? marginBottom : marginRight);
           break;
         case OctopusLayout.AlignItems.CENTER:
-          childCrossPos = (crossAxisSize - crossSize) / 2 + (isHorizontal ? marginTop - marginBottom : marginLeft - marginRight) / 2;
+          childCrossPos =
+            (crossAxisSize - crossSize) / 2 +
+            (isHorizontal
+              ? marginTop - marginBottom
+              : marginLeft - marginRight) /
+              2;
           break;
         case OctopusLayout.AlignItems.STRETCH:
           // 拉伸到容器交叉轴尺寸
@@ -522,10 +612,11 @@ export class LayoutContext {
    */
   private calculateFlowLayout(node: LayoutNode): void {
     const { style, rect, children } = node;
+
     if (children.length === 0) return;
 
     // 容器的内边距
-    const paddingLeft = style.paddingLeft || 0;
+    const { paddingLeft } = style;
 
     // 当前行的Y坐标和高度
     let currentY = 0;
@@ -549,7 +640,10 @@ export class LayoutContext {
       child.setPosition(rect.x + childX, rect.y + childY);
 
       // 更新当前行高度
-      currentLineHeight = Math.max(currentLineHeight, childRect.height + marginTop + marginBottom);
+      currentLineHeight = Math.max(
+        currentLineHeight,
+        childRect.height + marginTop + marginBottom
+      );
 
       // 更新Y坐标，为下一个子节点做准备
       currentY += currentLineHeight;
@@ -569,36 +663,29 @@ export class LayoutContext {
    */
   measureText(
     text: string,
-    fontSize: number,
-    fontFamily: string = "sans-serif",
-    maxWidth?: number,
-    lineHeight?: number
+    font: string,
+    maxWidth: number,
+    lineHeight: number
   ): OctopusLayout.TextMetrics {
     if (!text) {
       return { width: 0, height: 0, lines: [] };
     }
 
-    const actualLineHeight = lineHeight || fontSize * 1.2;
-    this.context.font = `${fontSize}px ${fontFamily}`;
+    const { context } = this;
 
+    context.font = font;
     // 如果没有最大宽度限制或文本宽度小于最大宽度，不需要换行
-    const metrics = this.context.measureText(text);
+    const metrics = context.measureText(text);
     if (!maxWidth || metrics.width <= maxWidth) {
       return {
         width: metrics.width,
-        height: actualLineHeight,
+        height: lineHeight,
         lines: [text],
       };
     }
 
     // 需要换行处理
-    return this.breakTextIntoLines(
-      text,
-      fontSize,
-      fontFamily,
-      maxWidth,
-      actualLineHeight
-    );
+    return this.breakTextIntoLines(text, maxWidth, lineHeight);
   }
 
   /**
@@ -606,126 +693,69 @@ export class LayoutContext {
    */
   private breakTextIntoLines(
     text: string,
-    fontSize: number,
-    fontFamily: string,
     maxWidth: number,
     lineHeight: number
   ): OctopusLayout.TextMetrics {
-    this.context.font = `${fontSize}px ${fontFamily}`;
-    const words = text.split(" ");
+    const { context } = this;
+
+    const chars = text.split("");
     const lines: string[] = [];
-    let currentLine = "";
-    let maxLineWidth = 0;
-
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const metrics = this.context.measureText(testLine);
-
-      if (metrics.width <= maxWidth || !currentLine) {
-        currentLine = testLine;
-      } else {
-        lines.push(currentLine);
-        maxLineWidth = Math.max(
-          maxLineWidth,
-          this.context.measureText(currentLine).width
-        );
-        currentLine = word;
+    // 处理英文单词截断
+    const wordExec = {
+      word: "",
+      needExtract: (c: string) => !/[a-zA-Z]/.test(c),
+      appendChar(c: string) {
+        // 如果是字母，添加到当前单词中
+        if (!this.needExtract(c)) {
+          this.word += c;
+        } else if (this.word !== "") {
+          this.word = "";
+        }
+      },
+      extractWord(str: string) {
+        return str.slice(-this.word.length);
+      },
+      clear() {
+        this.word = "";
       }
-    }
-
-    if (currentLine) {
-      lines.push(currentLine);
-      maxLineWidth = Math.max(
-        maxLineWidth,
-        this.context.measureText(currentLine).width
-      );
-    }
-
-    return {
-      width: maxLineWidth,
-      height: lines.length * lineHeight,
-      lines,
     };
-  }
-
-  /**
-   * 测量中文文本，按字符分割
-   * 针对中文等不使用空格分词的语言
-   */
-  measureCJKText(
-    text: string,
-    fontSize: number,
-    fontFamily: string = "sans-serif",
-    maxWidth?: number,
-    lineHeight?: number
-  ): OctopusLayout.TextMetrics {
-    if (!text) {
-      return { width: 0, height: 0, lines: [] };
-    }
-
-    const actualLineHeight = lineHeight || fontSize * 1.2;
-    this.context.font = `${fontSize}px ${fontFamily}`;
-
-    // 如果没有最大宽度限制或文本宽度小于最大宽度，不需要换行
-    const metrics = this.context.measureText(text);
-    if (!maxWidth || metrics.width <= maxWidth) {
-      return {
-        width: metrics.width,
-        height: actualLineHeight,
-        lines: [text],
-      };
-    }
-
-    // 需要换行处理，按字符分割
-    return this.breakCJKTextIntoLines(
-      text,
-      fontSize,
-      fontFamily,
-      maxWidth,
-      actualLineHeight
-    );
-  }
-
-  /**
-   * 将中文文本按照最大宽度断行，按字符分割
-   */
-  private breakCJKTextIntoLines(
-    text: string,
-    fontSize: number,
-    fontFamily: string,
-    maxWidth: number,
-    lineHeight: number
-  ): OctopusLayout.TextMetrics {
-    this.context.font = `${fontSize}px ${fontFamily}`;
-    const chars = Array.from(text); // 将文本拆分为字符数组
-    const lines: string[] = [];
+    const measureTextWidth = (str: string) => Math.max(
+      maxLineWidth,
+      context.measureText(str).width
+    )
     let currentLine = "";
     let maxLineWidth = 0;
 
     for (let i = 0; i < chars.length; i++) {
       const char = chars[i];
       const testLine = currentLine + char;
-      const metrics = this.context.measureText(testLine);
+      const metrics = context.measureText(testLine);
 
       if (metrics.width <= maxWidth || !currentLine) {
         currentLine = testLine;
+        wordExec.appendChar(char);
       } else {
+        // 处理单词截断
+        if (!wordExec.needExtract(char)) {
+          currentLine = wordExec.extractWord(currentLine);
+        }
+
+        // 处理截取完后是空行
+        if (currentLine === "") {
+          currentLine = wordExec.word;
+          wordExec.clear();
+        }
+
         lines.push(currentLine);
-        maxLineWidth = Math.max(
-          maxLineWidth,
-          this.context.measureText(currentLine).width
-        );
-        currentLine = char;
+        maxLineWidth = measureTextWidth(currentLine);
+        wordExec.appendChar(char);
+        currentLine = wordExec.word;
       }
     }
 
     if (currentLine) {
       lines.push(currentLine);
-      maxLineWidth = Math.max(
-        maxLineWidth,
-        this.context.measureText(currentLine).width
-      );
+      maxLineWidth = measureTextWidth(currentLine);
     }
 
     return {
