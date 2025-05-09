@@ -18,73 +18,103 @@
   <script type="module" src="./index.js"></script>
 </head>
 <body>
-  <div>
-    <h1 class="flex items-center h-12 px-3 border-b text-xl bg-slate-100">电池</h1>
-    <div class="flex items-center h-11 border-b px-3 bg-slate-50">
-      <div>设备是否接入电源：</div>
-      <div id="charging" class="flex-1"></div>
+  <div class="mt-2 border-b border-b-green-100">
+    <h1 class="flex items-center h-10 px-3 border-b border-b-green-100 text-base bg-green-100">电池</h1>
+    <div class="px-3 bg-green-50 text-sm">
+      <div class="flex items-center h-10 border-b border-b-green-100">
+        <div class="flex-1">设备是否接入电源：</div>
+        <div id="charging"></div>
+      </div>
     </div>
-    <div class="flex items-center h-11 border-b px-3 bg-slate-50">
-      <div>预计充满需要多久：</div>
-      <div id="charging-time" class="flex-1"></div>
+    <div class="px-3 bg-green-50 text-sm">
+      <div class="flex items-center h-10 border-b border-b-green-100">
+        <div class="flex-1">预计充满需要多久：</div>
+        <div id="charging-time"></div>
+      </div>
     </div>
-    <div class="flex items-center h-11 border-b px-3 bg-slate-50">
-      <div>预计电池耗尽时间：</div>
-      <div id="discharging-time" class="flex-1"></div>
+    <div class="px-3 bg-green-50 text-sm">
+      <div class="flex items-center h-10 border-b border-b-green-100">
+        <div class="flex-1">预计电池耗尽时间：</div>
+        <div id="discharging-time"></div>
+      </div>
     </div>
-    <div class="flex items-center h-11 border-b px-3 bg-slate-50">
-      <div>电量百分比：</div>
-      <div id="electric-quantity" class="flex-1"></div>
-    </div>
-  </div>
-  <div>
-    <h1 class="flex items-center h-12 px-3 border-b text-xl bg-slate-100">网络</h1>
-    <div class="flex items-center h-11 border-b px-3 bg-slate-50">
-      <div>当前设备的带宽：</div>
-      <div id="downlink" class="flex-1"></div>
-    </div>
-    <div class="flex items-center h-11 border-b px-3 bg-slate-50">
-      <div>当前设备最大的下行带宽：</div>
-      <div id="downlink-max" class="flex-1"></div>
-    </div>
-    <div class="flex items-center h-11 border-b px-3 bg-slate-50">
-      <div>连接速度和质量：</div>
-      <div id="effective-type" class="flex-1"></div>
-    </div>
-    <div class="flex items-center h-11 border-b px-3 bg-slate-50">
-      <div>当前网络实际的往返时间：</div>
-      <div id="rtt" class="flex-1"></div>
-    </div>
-    <div class="flex items-center h-11 border-b px-3 bg-slate-50">
-      <div>网络连接技术：</div>
-      <div id="connection-type" class="flex-1"></div>
-    </div>
-    <div class="flex items-center h-11 border-b px-3 bg-slate-50">
-      <div>用户设备是否启用了“节流(reduced data)”模式：</div>
-      <div id="connection-save-data" class="flex-1"></div>
+    <div class="px-3 bg-green-50 text-sm">
+      <div class="flex items-center h-10">
+        <div class="flex-1">电量百分比：</div>
+        <div id="electric-quantity"></div>
+      </div>
     </div>
   </div>
-  <div>
-    <h1 class="flex items-center h-12 px-3 border-b text-xl bg-slate-100">导航</h1>
-    <a class="flex items-center h-11 border-b px-3 bg-slate-50" href="./pages/MutationObserver/index.html">
-      <div class="flex-1">MutationObserver</div>
-      <div class="after-arrow relative"></div>
+  <div class="border-b border-b-green-100">
+    <h1 class="flex items-center h-10 px-3 border-b border-b-green-100 text-base bg-green-100">网络</h1>
+    <div class="px-3 bg-green-50 text-sm">
+      <div class="flex items-center h-10 border-b border-b-green-100">
+        <div class="flex-1">当前设备的带宽：</div>
+        <div id="downlink"></div>
+      </div>
+    </div>
+    <div class="px-3 bg-green-50 text-sm">
+      <div class="flex items-center h-10 border-b border-b-green-100">
+        <div class="flex-1">当前设备最大的下行带宽：</div>
+        <div id="downlink-max"></div>
+      </div>
+    </div>
+    <div class="px-3 bg-green-50 text-sm">
+      <div class="flex items-center h-10 border-b border-b-green-100">
+        <div class="flex-1">连接速度和质量：</div>
+        <div id="effective-type"></div>
+      </div>
+    </div>
+    <div class="px-3 bg-green-50 text-sm">
+      <div class="flex items-center h-10 border-b border-b-green-100">
+        <div class="flex-1">当前网络实际的往返时间：</div>
+        <div id="rtt"></div>
+      </div>
+    </div>
+    <div class="px-3 bg-green-50 text-sm">
+      <div class="flex items-center h-10 border-b border-b-green-100">
+        <div class="flex-1">网络连接技术：</div>
+        <div id="connection-type"></div>
+      </div>
+    </div>
+    <div class="px-3 bg-green-50 text-sm">
+      <div class="flex items-center h-10">
+        <div class="flex-1">用户设备是否启用了“节流(reduced data)”模式：</div>
+        <div id="connection-save-data"></div>
+      </div>
+    </div>
+  </div>
+  <div class="border-b border-b-green-100">
+    <h1 class="flex items-center h-10 px-3 border-b border-b-green-100 text-base bg-green-100">导航</h1>
+    <a class="block px-3 bg-green-50 text-sm" href="./pages/MutationObserver/index.html">
+      <div class="flex items-center h-10 border-b border-b-green-100">
+        <div class="flex-1">MutationObserver</div>
+        <div class="after-arrow relative"></div>
+      </div>
     </a>
-    <a class="flex items-center h-11 border-b px-3 bg-slate-50" href="./pages/PostMessage/main.html">
-      <div class="flex-1">PostMessage</div>
-      <div class="after-arrow relative"></div>
+    <a class="block px-3 bg-green-50 text-sm" href="./pages/PostMessage/main.html">
+      <div class="flex items-center h-10 border-b border-b-green-100">
+        <div class="flex-1">PostMessage</div>
+        <div class="after-arrow relative"></div>
+      </div>
     </a>
-    <a class="flex items-center h-11 border-b px-3 bg-slate-50" href="./pages/ScanQRCode/index.html">
-      <div class="flex-1">ScanQRCode</div>
-      <div class="after-arrow relative"></div>
+    <a class="block px-3 bg-green-50 text-sm" href="./pages/ScanQRCode/index.html">
+      <div class="flex items-center h-10 border-b border-b-green-100">
+        <div class="flex-1">ScanQRCode</div>
+        <div class="after-arrow relative"></div>
+      </div>
     </a>
-    <a class="flex items-center h-11 border-b px-3 bg-slate-50" href="./pages/ServiceWorker/index.html">
-      <div class="flex-1">ServiceWorker</div>
-      <div class="after-arrow relative"></div>
+    <a class="block px-3 bg-green-50 text-sm" href="./pages/ServiceWorker/index.html">
+      <div class="flex items-center h-10 border-b border-b-green-100">
+        <div class="flex-1">ServiceWorker</div>
+        <div class="after-arrow relative"></div>
+      </div>
     </a>
-    <a class="flex items-center h-11 border-b px-3 bg-slate-50" href="./pages/WebRTC/index.html">
-      <div class="flex-1">WebRTC</div>
-      <div class="after-arrow relative"></div>
+    <a class="block px-3 bg-green-50 text-sm" href="./pages/WebRTC/index.html">
+      <div class="flex items-center h-10">
+        <div class="flex-1">WebRTC</div>
+        <div class="after-arrow relative"></div>
+      </div>
     </a>
   </div>
 </body>
