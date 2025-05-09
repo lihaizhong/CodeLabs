@@ -20,11 +20,11 @@ export class LayoutNode {
   /**
    * 子节点
    */
-  public readonly children: LayoutNode[];
+  public readonly children: LayoutNode[] = [];
   /**
    * 父节点
    */
-  public readonly parent: LayoutNode | null;
+  public parent: LayoutNode | null = null;
   /**
    * 节点位置和尺寸
    */
@@ -34,24 +34,21 @@ export class LayoutNode {
    */
   private textMetrics: OctopusLayout.TextMetrics | null = null;
 
-  constructor(options: OctopusLayout.LayoutNodeOptions, parent: LayoutNode | null = null) {
+  constructor(options: OctopusLayout.LayoutNodeOptions) {
     this.type = options.type;
     this.content = options.content || "";
     this.style =  this.normalizeStyle(options.style || {});
-    this.parent = parent;
     this.rect = { x: 0, y: 0, width: 0, height: 0 };
-    this.children = (options.children || []).map(
-      (childOptions: OctopusLayout.LayoutNodeOptions) => new LayoutNode(childOptions, this)
-    );
   }
 
   private normalizeStyle(style: Partial<OctopusLayout.NodeStyle>): OctopusLayout.NodeStyle {
     const defaultStyle: OctopusLayout.NodeStyle = {
-      display: "inline",
+      display: "block",
       width: 0,
       height: 0,
       fontSize: 16,
-      fontFamily: "sans-serif",
+      // 兼容iOS，Android设备，保证字体与App一致
+      fontFamily: "-apple-system, BlinkMacSystemFont, SFProDisplay-Regular, sans-serif",
       lineHeight: 1.2,
       color: "#000",
       backgroundColor: "#fff",
@@ -75,6 +72,17 @@ export class LayoutNode {
     }
 
     return { ...defaultStyle, ...style };
+  }
+
+  appendChild(child: LayoutNode): this {
+    child.setParent(this);
+    this.children.push(child);
+
+    return this;
+  }
+
+  setParent(parent: LayoutNode): void {
+    this.parent = parent;
   }
 
   /**
@@ -105,13 +113,13 @@ export class LayoutNode {
    */
   measure(context: LayoutContext): void {
     const { style, type } = this;
-    const { width, height } = style;
+    const { display, width, height } = style;
     const maxWidth = width;
 
     // 根据节点类型进行不同的测量
-    const fontSize = style.fontSize || 16;
-    const fontFamily = style.fontFamily || "sans-serif";
-    const lineHeight = style.lineHeight || fontSize * 1.2;
+    const fontSize = style.fontSize;
+    const fontFamily = style.fontFamily;
+    const lineHeight = style.lineHeight;
 
     if (type === "text") {
       // 测量文本
@@ -123,12 +131,25 @@ export class LayoutNode {
         lineHeight
       );
 
-      // 设置节点尺寸
-      this.rect.width = width || this.textMetrics!.width;
-      this.rect.height = height || this.textMetrics!.height;
+      if (display !== "inline" && width) {
+        this.rect.width = width;
+      } else {
+        this.rect.width = width || this.textMetrics!.width;
+      }
+
+      if (display !== "inline" && height) {
+        this.rect.height = height;
+      } else {
+        this.rect.height = height || this.textMetrics!.height;
+      }
     } else {
-      this.rect.width = width || 0;
-      this.rect.height = height || 0;
+      if (display !== "inline" && width) {
+        this.rect.width = width;
+      }
+
+      if (display !== "inline" && height) {
+        this.rect.height = height;
+      }
     }
 
     // 递归测量子节点
