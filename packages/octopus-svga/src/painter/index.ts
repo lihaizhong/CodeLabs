@@ -165,7 +165,13 @@ export class Painter {
     }
 
     if (env !== "h5") {
-      platform.setGlobalCanvas(this.X as MiniProgramCanvas);
+      const { X, IM } = this;
+
+      Object.defineProperty(X, "createImage", {
+        get() { return () => IM.createImage() },
+      })
+
+      platform.setGlobalCanvas(X as MiniProgramCanvas);
     }
     // #endregion set main screen implement
 
@@ -258,14 +264,6 @@ export class Painter {
    */
   public loadImages(images: RawImages, filename: string): Promise<void[]> {
     return this.IM.loadAll(images, filename);
-  }
-
-  /**
-   * 创建图片标签
-   * @returns
-   */
-  public createImage(): OctopusPlatform.PlatformImage {
-    return this.IM.createImage();
   }
 
   /**

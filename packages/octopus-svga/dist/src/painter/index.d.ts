@@ -68,11 +68,6 @@ export declare class Painter {
      */
     loadImages(images: RawImages, filename: string): Promise<void[]>;
     /**
-     * 创建图片标签
-     * @returns
-     */
-    createImage(): OctopusPlatform.PlatformImage;
-    /**
      * 生成图片
      * @returns
      */
