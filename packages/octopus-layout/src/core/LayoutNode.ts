@@ -44,14 +44,6 @@ export class LayoutNode {
     y: 0,
     width: 0,
     height: 0,
-    marginLeft: 0,
-    marginTop: 0,
-    marginRight: 0,
-    marginBottom: 0,
-    paddingLeft: 0,
-    paddingTop: 0,
-    paddingRight: 0,
-    paddingBottom: 0,
   };
 
   /**
@@ -179,19 +171,8 @@ export class LayoutNode {
       // 测量容器宽度和高度
       this.rect.width = width;
       this.rect.height = height;
-
-      // 块级元素需要计算margin
-      this.rect.marginLeft = style.marginLeft;
-      this.rect.marginTop = style.marginTop;
-      this.rect.marginRight = style.marginRight;
-      this.rect.marginBottom = style.marginBottom;
     }
 
-    // 计算padding
-    this.rect.paddingLeft = style.paddingLeft;
-    this.rect.paddingTop = style.paddingTop;
-    this.rect.paddingRight = style.paddingRight;
-    this.rect.paddingBottom = style.paddingBottom;
     // 递归测量子节点
     for (const child of this.children) {
       child.measure(context);

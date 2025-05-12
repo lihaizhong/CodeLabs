@@ -1,4 +1,3 @@
-import { LayoutContext } from './LayoutContext';
 import { LayoutNode } from './LayoutNode';
 import { LayoutRenderer } from './LayoutRenderer';
 
@@ -7,7 +6,6 @@ import { LayoutRenderer } from './LayoutRenderer';
  * 整合布局上下文、布局算法和渲染器
  */
 export class LayoutEngine {
-  private readonly context: LayoutContext;
   private readonly renderer: LayoutRenderer | null;
   
   /**
@@ -16,14 +14,6 @@ export class LayoutEngine {
    */
   constructor(context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
     this.renderer = new LayoutRenderer(context);
-    this.context = new LayoutContext(context);
-  }
-  
-  /**
-   * 获取布局上下文
-   */
-  getContext(): LayoutContext {
-    return this.context;
   }
   
   /**
@@ -39,7 +29,7 @@ export class LayoutEngine {
    * @param rootNode 根节点
    */
   layout(rootNode: LayoutNode): void {
-    this.context.calculateLayout(rootNode);
+    // TODO: 实现布局算法
   }
 
   /**

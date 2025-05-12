@@ -112,14 +112,6 @@ declare namespace OctopusLayout {
     y: number;
     width: number;
     height: number;
-    marginLeft: number;
-    marginTop: number;
-    marginRight: number;
-    marginBottom: number;
-    paddingLeft: number;
-    paddingTop: number;
-    paddingRight: number;
-    paddingBottom: number;
   }
 
   /**
