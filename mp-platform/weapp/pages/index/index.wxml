@@ -1,3 +1,7 @@
-<view class="page-container">
+<mp-cells>
+  <mp-cell wx:for="{{ btnList }}" wx:key="path" title="{{ item.text }}" data-url="{{ item.path }}" bindtap="handleNavigateTo" link />
+</mp-cells>
+
+<!-- <view class="page-container">
   <button wx:for="{{ btnList }}" wx:key="path" class="btn" type="primary" data-url="{{ item.path }}" bindtap="handleNavigateTo">{{ item.text }}</button>
-</view>
+</view> -->
