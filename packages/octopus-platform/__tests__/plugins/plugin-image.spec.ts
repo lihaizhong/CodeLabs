@@ -3,7 +3,6 @@ import pluginDecode from "../../src/plugins/plugin-decode";
 import pluginFsm from "../../src/plugins/plugin-fsm";
 import pluginPath from "../../src/plugins/plugin-path";
 import pluginImage from "../../src/plugins/plugin-image";
-import { PlatformPlugin } from "../../src/types";
 
 jest.mock("../../src/plugins/plugin-decode", () => ({
   name: "decode",
@@ -47,9 +46,9 @@ describe("pluginImage 插件", () => {
     const platform = {
       globals: initialPlatformGlobal("h5"),
       noop: () => {},
-      decode: {} as PlatformPlugin["decode"],
-      local: {} as PlatformPlugin["local"],
-      path: {} as PlatformPlugin["path"],
+      decode: {} as OctopusPlatform.PlatformPlugin["decode"],
+      local: {} as OctopusPlatform.PlatformPlugin["local"],
+      path: {} as OctopusPlatform.PlatformPlugin["path"],
     };
 
     platform.decode = pluginDecode.install.call(platform);
@@ -146,9 +145,9 @@ describe("pluginImage 插件", () => {
     const platform = {
       globals: initialPlatformGlobal("weapp"),
       noop: () => {},
-      decode: {} as PlatformPlugin["decode"],
-      local: {} as PlatformPlugin["local"],
-      path: {} as PlatformPlugin["path"],
+      decode: {} as OctopusPlatform.PlatformPlugin["decode"],
+      local: {} as OctopusPlatform.PlatformPlugin["local"],
+      path: {} as OctopusPlatform.PlatformPlugin["path"],
     };
 
     platform.decode = pluginDecode.install.call(platform);
@@ -225,9 +224,9 @@ describe("pluginImage 插件", () => {
     const platform = {
       globals: initialPlatformGlobal("alipay"),
       noop: () => {},
-      decode: {} as PlatformPlugin["decode"],
-      local: {} as PlatformPlugin["local"],
-      path: {} as PlatformPlugin["path"],
+      decode: {} as OctopusPlatform.PlatformPlugin["decode"],
+      local: {} as OctopusPlatform.PlatformPlugin["local"],
+      path: {} as OctopusPlatform.PlatformPlugin["path"],
     };
 
     platform.decode = pluginDecode.install.call(platform);

@@ -38,8 +38,7 @@ describe("pluginRaf 插件", () => {
       const rAF = pluginRaf.install.call(platform);
 
       const callback = jest.fn();
-      const mockCanvas = {} as WechatMiniprogram.Canvas;
-      const handle = rAF(mockCanvas, callback);
+      const handle = rAF(callback);
       expect(typeof handle).toBe("number");
       expect(callback).not.toHaveBeenCalled();
 
@@ -50,7 +49,16 @@ describe("pluginRaf 插件", () => {
   });
 
   describe("小程序(weapp, alipay, tt) 环境", () => {
-    const platform = { globals: initialPlatformGlobal("weapp") };
+    const platform = {
+      globals: initialPlatformGlobal("weapp"),
+      getGlobalCanvas() {
+        return {
+          requestAnimationFrame(callback: FrameRequestCallback) {
+            return globalThis.requestAnimationFrame(callback);
+          }
+        } as WechatMiniprogram.Canvas;
+      }
+    };
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginRaf.install.call(platform)).toBe("function");
@@ -60,12 +68,7 @@ describe("pluginRaf 插件", () => {
       const rAF = pluginRaf.install.call(platform);
 
       const callback = jest.fn();
-      const mockCanvas = {
-        requestAnimationFrame(callback: FrameRequestCallback) {
-          return globalThis.requestAnimationFrame(callback);
-        }
-      } as WechatMiniprogram.Canvas;
-      const handle = rAF(mockCanvas, callback);
+      const handle = rAF(callback);
       expect(typeof handle).toBe("number");
       expect(callback).not.toHaveBeenCalled();
 

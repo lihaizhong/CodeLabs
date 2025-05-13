@@ -4,10 +4,12 @@
     "baseUrl": ".",
     "declaration": true,
     "resolveJsonModule": true,
+    "sourceMap": true,
     "esModuleInterop": true
   },
-  "exclude": [
-    "src/**/*.spec.ts",
-    "src/**/*.test.ts",
+  "include": [
+    "src/**/*",
+    "types/**/*",
+    "package.json"
   ]
 }
