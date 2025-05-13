@@ -1,19 +1,16 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "outDir": "./dist",
     "declaration": true,
     "resolveJsonModule": true,
     "sourceMap": false,
     "esModuleInterop": true
   },
-  "include": [
-    "src/**/*",
-    "types/**/*",
-    "package.json"
-  ],
   "exclude": [
+    "__mocks__",
+    "__tests__",
     "**/*.test.ts",
-    "**/*.spec.ts",
+    "**/*.spec.ts"
   ]
 }

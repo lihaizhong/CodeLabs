@@ -10,9 +10,3 @@ jest.mock("../src/benchmark", () => {
     log: noop,
   };
 });
-
-jest.mock("../src/platform/definePlugin", () => ({
-  definePlugin: <T extends FuckSvga.PlatformProperties>(
-    plugin: FuckSvga.PlatformPlugin<T>
-  ) => plugin,
-}));
