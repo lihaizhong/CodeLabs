@@ -1,5 +1,3 @@
-import { LayoutContext } from "./LayoutContext";
-
 /**
  * 布局节点类
  * 表示布局树中的一个节点，可以是容器、文本或图像
