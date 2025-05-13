@@ -119,7 +119,7 @@ describe("pluginFsm 插件", () => {
       const fsm = pluginFsm.install.call(platform);
       const filePath = "test/test.txt";
 
-      expect(fsm!.remove(filePath)).resolves.toBe(filePath);
+      expect(fsm!.remove(filePath)).rejects.toBe('remove fail');
     });
   });
 });

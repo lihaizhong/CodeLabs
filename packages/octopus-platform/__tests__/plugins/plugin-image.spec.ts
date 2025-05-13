@@ -124,15 +124,17 @@ describe("pluginImage 插件", () => {
       expect(image.load(bitmap, "")).resolves.toBeInstanceOf(ImageBitmap);
 
       // @ts-ignore
-      globalThis = jest.mocked(new Proxy(global, {
-        has(target, prop) {
-          if (prop === "createImageBitmap") {
-            return false;
-          }
+      globalThis = jest.mocked(
+        new Proxy(global, {
+          has(target, prop) {
+            if (prop === "createImageBitmap") {
+              return false;
+            }
 
-          return Reflect.has(target, prop);
-        }
-      }))
+            return Reflect.has(target, prop);
+          },
+        })
+      );
 
       expect(image.load(u8a, "")).toBeInstanceOf(Promise);
       expect(image.load(u8a, "")).resolves.toBeInstanceOf(Image);
@@ -148,6 +150,11 @@ describe("pluginImage 插件", () => {
       decode: {} as OctopusPlatform.PlatformPlugin["decode"],
       local: {} as OctopusPlatform.PlatformPlugin["local"],
       path: {} as OctopusPlatform.PlatformPlugin["path"],
+      getGlobalCanvas() {
+        return {
+          createImage: () => new Image(),
+        } as unknown as WechatMiniprogram.Canvas;
+      },
     };
 
     platform.decode = pluginDecode.install.call(platform);
@@ -211,12 +218,24 @@ describe("pluginImage 插件", () => {
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mP4z8DwH4QZYAwAR8oH+Rq28akAAAAASUVORK5CYII=";
       const bitmap = await globalThis.createImageBitmap(new Blob([u8a]));
 
-      expect(image.load(b64, "https://www.test.com/test/test.png")).toBeInstanceOf(Promise);
-      expect(image.load(b64, "https://www.test.com/test/test.png")).resolves.toBeInstanceOf(Image);
-      expect(image.load(u8a, "https://www.test.com/test/test.png")).toBeInstanceOf(Promise);
-      expect(image.load(u8a, "https://www.test.com/test/test.png")).resolves.toBeInstanceOf(Image);
-      expect(image.load(bitmap, "https://www.test.com/test/test.png")).toBeInstanceOf(Promise);
-      expect(image.load(bitmap, "https://www.test.com/test/test.png")).resolves.toBeInstanceOf(Image);
+      expect(
+        image.load(b64, "https://www.test.com/test/test.png")
+      ).toBeInstanceOf(Promise);
+      expect(
+        image.load(b64, "https://www.test.com/test/test.png")
+      ).resolves.toBeInstanceOf(Image);
+      expect(
+        image.load(u8a, "https://www.test.com/test/test.png")
+      ).toBeInstanceOf(Promise);
+      expect(
+        image.load(u8a, "https://www.test.com/test/test.png")
+      ).resolves.toBeInstanceOf(Image);
+      expect(
+        image.load(bitmap, "https://www.test.com/test/test.png")
+      ).toBeInstanceOf(Promise);
+      expect(
+        image.load(bitmap, "https://www.test.com/test/test.png")
+      ).resolves.toBeInstanceOf(Image);
     });
   });
 
@@ -227,6 +246,11 @@ describe("pluginImage 插件", () => {
       decode: {} as OctopusPlatform.PlatformPlugin["decode"],
       local: {} as OctopusPlatform.PlatformPlugin["local"],
       path: {} as OctopusPlatform.PlatformPlugin["path"],
+      getGlobalCanvas() {
+        return {
+          createImage: () => new Image(),
+        } as unknown as WechatMiniprogram.Canvas;
+      },
     };
 
     platform.decode = pluginDecode.install.call(platform);
@@ -249,12 +273,24 @@ describe("pluginImage 插件", () => {
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mP4z8DwH4QZYAwAR8oH+Rq28akAAAAASUVORK5CYII=";
       const bitmap = await globalThis.createImageBitmap(new Blob([u8a]));
 
-      expect(image.load(b64, "https://www.test.com/test/test.png")).toBeInstanceOf(Promise);
-      expect(image.load(b64, "https://www.test.com/test/test.png")).resolves.toBeInstanceOf(Image);
-      expect(image.load(u8a, "https://www.test.com/test/test.png")).toBeInstanceOf(Promise);
-      expect(image.load(u8a, "https://www.test.com/test/test.png")).resolves.toBeInstanceOf(Image);
-      expect(image.load(bitmap, "https://www.test.com/test/test.png")).toBeInstanceOf(Promise);
-      expect(image.load(bitmap, "https://www.test.com/test/test.png")).resolves.toBeInstanceOf(Image);
+      expect(
+        image.load(b64, "https://www.test.com/test/test.png")
+      ).toBeInstanceOf(Promise);
+      expect(
+        image.load(b64, "https://www.test.com/test/test.png")
+      ).resolves.toBeInstanceOf(Image);
+      expect(
+        image.load(u8a, "https://www.test.com/test/test.png")
+      ).toBeInstanceOf(Promise);
+      expect(
+        image.load(u8a, "https://www.test.com/test/test.png")
+      ).resolves.toBeInstanceOf(Image);
+      expect(
+        image.load(bitmap, "https://www.test.com/test/test.png")
+      ).toBeInstanceOf(Promise);
+      expect(
+        image.load(bitmap, "https://www.test.com/test/test.png")
+      ).resolves.toBeInstanceOf(Image);
     });
   });
 });
