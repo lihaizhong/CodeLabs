@@ -3,6 +3,7 @@ export declare abstract class Platform<P extends OctopusPlatform.PlatformPluginP
      * 插件列表
      */
     private plugins;
+    private globalCanvas;
     /**
      * 平台版本
      */

@@ -5,10 +5,6 @@ declare namespace OctopusPlatform {
     env: SupportedPlatform;
     br: any;
     dpr: number;
-    canvas:
-      | OctopusPlatform.PlatformCanvas
-      | OctopusPlatform.PlatformOffscreenCanvas
-      | null;
   }
 
   export type PlatformPluginProperty = keyof PlatformPlugin;

@@ -22,8 +22,8 @@ export class ImagePool {
    * 创建图片标签
    * @returns
    */
-  public createImage(): OctopusPlatform.PlatformImage {
-    return this.images.shift() || platform.image.create();
+  public getReleaseImage(): OctopusPlatform.PlatformImage | undefined {
+    return this.images.shift()
   }
 
   /**

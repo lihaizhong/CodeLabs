@@ -15,7 +15,7 @@ export declare class ImagePool {
      * 创建图片标签
      * @returns
      */
-    createImage(): OctopusPlatform.PlatformImage;
+    getReleaseImage(): OctopusPlatform.PlatformImage | undefined;
     /**
      * 加载图片集
      * @param images 图片数据

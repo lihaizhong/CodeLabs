@@ -41,23 +41,14 @@ export interface MockBasicPlatformGlobal {
 
 export interface MockWeappPlatformGlobal extends MockBasicPlatformGlobal {
   br: MockWeappBridge;
-  canvas: {
-    createImage: () => HTMLImageElement;
-  };
 }
 
 export interface MockAlipayPlatformGlobal extends MockBasicPlatformGlobal {
   br: MockAlipayBridge;
-  canvas: {
-    createImage: () => HTMLImageElement;
-  };
 }
 
 export interface MockTtPlatformGlobal extends MockBasicPlatformGlobal {
   br: MockTtBridge;
-  canvas: {
-    createImage: () => HTMLImageElement;
-  };
 }
 
 export interface MockH5PlatformGlobal extends MockBasicPlatformGlobal {
@@ -111,12 +102,7 @@ function initialPlatformGlobal(
             new OffscreenCanvas(options.width, options.height)
         ),
       },
-      dpr: 2,
-      canvas: {
-        createImage() {
-          return new Image()
-        }
-      }
+      dpr: 2
     };
   }
 
@@ -136,12 +122,7 @@ function initialPlatformGlobal(
             new OffscreenCanvas(options.width, options.height)
         ),
       },
-      dpr: 2,
-      canvas: {
-        createImage() {
-          return new Image()
-        }
-      }
+      dpr: 2
     };
   }
 
@@ -171,12 +152,7 @@ function initialPlatformGlobal(
         ),
         createOffscreenCanvas: jest.fn(() => new OffscreenCanvas(100, 100)),
       },
-      dpr: 2,
-      canvas: {
-        createImage() {
-          return new Image()
-        }
-      }
+      dpr: 2
     };
   }
 

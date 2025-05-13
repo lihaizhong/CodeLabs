@@ -166,9 +166,12 @@ export class Painter {
 
     if (env !== "h5") {
       const { X, IM } = this;
+      const { createImage } = (X as (WechatMiniprogram.Canvas | WechatMiniprogram.OffscreenCanvas));
 
       Object.defineProperty(X, "createImage", {
-        get() { return () => IM.createImage() },
+        get() {
+          return () => IM.getReleaseImage() || createImage.call(X)
+        },
       })
 
       platform.setGlobalCanvas(X as MiniProgramCanvas);

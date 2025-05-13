@@ -8,25 +8,44 @@ export default definePlugin<"rAF">({
   name: "rAF",
   dependencies: ["now"],
   install() {
-    const { env, canvas } = this.globals;
+    const { env } = this.globals;
 
     function requestAnimationFrameImpl(): (callback: () => void) => number {
-      return (callback: () => void) => {
-        const currentTime = Date.now();
-        const timeToCall = Math.max(0, 16 - (currentTime % 16));
-
-        return setTimeout(callback, timeToCall) as unknown as number;
-      };
+      return (callback: () => void) =>
+        setTimeout(
+          callback,
+          Math.max(0, 16 - (Date.now() % 16))
+        ) as unknown as number;
     }
 
     if (env === "h5") {
-      const rAF = "requestAnimationFrame" in globalThis? globalThis.requestAnimationFrame : requestAnimationFrameImpl();
+      const rAF =
+        "requestAnimationFrame" in globalThis
+          ? globalThis.requestAnimationFrame
+          : requestAnimationFrameImpl();
 
       return (callback: () => void) => rAF(callback);
     }
 
-    const rAF = "requestAnimationFrame" in canvas ? canvas.requestAnimationFrame : requestAnimationFrameImpl();
+    let canvas:
+      | OctopusPlatform.PlatformCanvas
+      | OctopusPlatform.PlatformOffscreenCanvas
+      | null = null;
+    return (callback: () => void) => {
+      // 检查canvas是否存在
+      if (!canvas) {
+        canvas = this.getGlobalCanvas();
 
-    return (callback: () => void) => rAF(callback);
+        if (canvas === null) {
+          throw new Error(
+            "requestAnimationFrame is not ready, please call `platform.setGlobalCanvas` first"
+          );
+        }
+      }
+
+      return (canvas as WechatMiniprogram.Canvas).requestAnimationFrame?.(
+        callback
+      );
+    };
   },
 });
