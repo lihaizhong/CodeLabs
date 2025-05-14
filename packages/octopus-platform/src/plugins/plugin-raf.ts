@@ -15,7 +15,7 @@ export default definePlugin<"rAF">({
         setTimeout(
           callback,
           Math.max(0, 16 - (Date.now() % 16))
-        );
+        ) as unknown as number;
     }
 
     if (env === "h5") {
@@ -35,7 +35,9 @@ export default definePlugin<"rAF">({
         try {
           const canvas = this.getGlobalCanvas() as WechatMiniprogram.Canvas;
 
-          rAF = (canvas as WechatMiniprogram.Canvas).requestAnimationFrame.bind(canvas)
+          rAF = (canvas as WechatMiniprogram.Canvas).requestAnimationFrame.bind(
+            canvas
+          );
         } catch (error: any) {
           console.warn(error.message);
           rAF = requestAnimationFrameImpl();

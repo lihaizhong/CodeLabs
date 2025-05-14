@@ -1,6 +1,6 @@
 import { definePlugin } from "../definePlugin";
 
-interface EnhancedPlatform extends OctopusPlatform.Platform {
+export interface EnhancedPlatform extends OctopusPlatform.Platform {
   local: OctopusPlatform.PlatformPlugin["local"];
   path: OctopusPlatform.PlatformPlugin["path"];
   decode: OctopusPlatform.PlatformPlugin["decode"];

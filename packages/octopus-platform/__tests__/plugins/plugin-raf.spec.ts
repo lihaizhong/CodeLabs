@@ -28,7 +28,7 @@ describe("pluginRaf 插件", () => {
   });
 
   describe("H5 环境", () => {
-    const platform = { globals: initialPlatformGlobal("h5") };
+    const platform = { globals: initialPlatformGlobal("h5") } as OctopusPlatform.Platform;
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginRaf.install.call(platform)).toBe("function");
@@ -58,7 +58,7 @@ describe("pluginRaf 插件", () => {
           }
         } as WechatMiniprogram.Canvas;
       }
-    };
+    } as OctopusPlatform.Platform;
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginRaf.install.call(platform)).toBe("function");

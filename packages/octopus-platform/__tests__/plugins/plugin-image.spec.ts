@@ -2,7 +2,7 @@ import { initialPlatformGlobal } from "../../__mocks__";
 import pluginDecode from "../../src/plugins/plugin-decode";
 import pluginFsm from "../../src/plugins/plugin-fsm";
 import pluginPath from "../../src/plugins/plugin-path";
-import pluginImage from "../../src/plugins/plugin-image";
+import pluginImage, { type EnhancedPlatform } from "../../src/plugins/plugin-image";
 
 jest.mock("../../src/plugins/plugin-decode", () => ({
   name: "decode",
@@ -49,7 +49,7 @@ describe("pluginImage 插件", () => {
       decode: {} as OctopusPlatform.PlatformPlugin["decode"],
       local: {} as OctopusPlatform.PlatformPlugin["local"],
       path: {} as OctopusPlatform.PlatformPlugin["path"],
-    };
+    } as EnhancedPlatform;
 
     platform.decode = pluginDecode.install.call(platform);
     platform.local = null;
@@ -155,7 +155,7 @@ describe("pluginImage 插件", () => {
           createImage: () => new Image(),
         } as unknown as WechatMiniprogram.Canvas;
       },
-    };
+    } as EnhancedPlatform;
 
     platform.decode = pluginDecode.install.call(platform);
     platform.local = pluginFsm.install.call(platform);
@@ -251,7 +251,7 @@ describe("pluginImage 插件", () => {
           createImage: () => new Image(),
         } as unknown as WechatMiniprogram.Canvas;
       },
-    };
+    } as EnhancedPlatform;
 
     platform.decode = pluginDecode.install.call(platform);
     platform.local = pluginFsm.install.call(platform);

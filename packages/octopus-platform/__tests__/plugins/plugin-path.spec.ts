@@ -16,7 +16,7 @@ describe("pluginPath 定义", () => {
 
 describe("pluginPath 插件", () => {
   describe("H5 环境", () => {
-    const platform = { globals: initialPlatformGlobal("h5") };
+    const platform = { globals: initialPlatformGlobal("h5") } as OctopusPlatform.Platform;
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginPath.install.call(platform)).toBe("object");
@@ -45,7 +45,7 @@ describe("pluginPath 插件", () => {
   });
 
   describe("小程序(weapp, alipay) 环境", () => {
-    const platform = { globals: initialPlatformGlobal("weapp") };
+    const platform = { globals: initialPlatformGlobal("weapp") } as OctopusPlatform.Platform;
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginPath.install.call(platform)).toBe("object");
@@ -75,7 +75,7 @@ describe("pluginPath 插件", () => {
   });
 
   describe("小程序(tt) 环境", () => {
-    const platform = { globals: initialPlatformGlobal("tt") };
+    const platform = { globals: initialPlatformGlobal("tt") } as OctopusPlatform.Platform;
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginPath.install.call(platform)).toBe("object");
