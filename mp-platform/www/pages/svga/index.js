@@ -22,7 +22,7 @@ Page({
   bindEvents: {
     "#prevbtn:click": "handleSwitchPrev",
     "#nextbtn:click": "handleSwitchNext",
-    // "#randbtn:click": "handleSwitchAtRandom"
+    "#trybtn:click": "handleSwitchAtRandom",
   },
 
   observers: {
