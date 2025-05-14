@@ -2,9 +2,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
+    "baseUrl": ".",
+    "mapRoot": ".",
     "declaration": true,
     "resolveJsonModule": true,
-    "sourceMap": false,
+    "sourceMap": true,
     "esModuleInterop": true
   },
   "exclude": [

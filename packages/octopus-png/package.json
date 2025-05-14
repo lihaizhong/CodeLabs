@@ -1,5 +1,5 @@
 {
-  "name": "octopus-apng",
+  "name": "octopus-png",
   "version": "0.0.1",
   "description": "高性能APNG播放器",
   "type": "module",

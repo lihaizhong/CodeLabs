@@ -3,8 +3,10 @@
   "compilerOptions": {
     "outDir": "./dist",
     "baseUrl": ".",
+    "mapRoot": ".",
     "declaration": true,
-    "sourceMap": false,
+    "sourceMap": true,
+    "inlineSourceMap": false,
     "esModuleInterop": true
   },
   "exclude": [
