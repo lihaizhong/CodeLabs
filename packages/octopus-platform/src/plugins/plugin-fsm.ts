@@ -25,7 +25,7 @@ export default definePlugin<"local">({
             filePath,
             data,
             success: () => resolve(filePath),
-            fail: (err: unknown) => reject(err),
+            fail: reject,
           });
         });
       },
@@ -34,7 +34,7 @@ export default definePlugin<"local">({
           fsm!.readFile({
             filePath,
             success: (res: any) => resolve(res.data as ArrayBuffer),
-            fail: (err: unknown) => reject(err),
+            fail: reject,
           });
         });
       },
@@ -43,7 +43,7 @@ export default definePlugin<"local">({
           fsm!.unlink({
             filePath,
             success: () => resolve(filePath),
-            fail: (err: unknown) => reject(err),
+            fail: reject,
           });
         });
       }
