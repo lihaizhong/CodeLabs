@@ -166,7 +166,7 @@ export class Painter {
 
     if (env !== "h5") {
       const { X, IM } = this;
-      const { createImage } = (X as (WechatMiniprogram.Canvas | WechatMiniprogram.OffscreenCanvas));
+      const { createImage } = (X as OctopusPlatform.MiniProgramCanvas);
 
       Object.defineProperty(X, "createImage", {
         get() {
@@ -174,7 +174,7 @@ export class Painter {
         },
       })
 
-      platform.setGlobalCanvas(X as MiniProgramCanvas);
+      platform.setGlobalCanvas(X as OctopusPlatform.PlatformCanvas);
     }
     // #endregion set main screen implement
 

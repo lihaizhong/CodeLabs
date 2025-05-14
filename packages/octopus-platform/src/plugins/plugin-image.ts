@@ -79,13 +79,7 @@ export default definePlugin<"image">({
     const createImage = () => {
       const canvas = (
         this as ExtendedPlatform
-      ).getGlobalCanvas() as WechatMiniprogram.Canvas;
-
-      if (!canvas) {
-        throw new Error(
-          "Canvas not found, please use `platform.setCanvas` first!"
-        );
-      }
+      ).getGlobalCanvas() as OctopusPlatform.MiniProgramCanvas;
 
       return canvas.createImage();
     };

@@ -1,5 +1,4 @@
 import { platform } from "../platform";
-import type { Painter } from "../painter";
 
 const { noop } = platform;
 /**

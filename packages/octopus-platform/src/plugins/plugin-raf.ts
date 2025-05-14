@@ -15,37 +15,34 @@ export default definePlugin<"rAF">({
         setTimeout(
           callback,
           Math.max(0, 16 - (Date.now() % 16))
-        ) as unknown as number;
+        );
     }
 
     if (env === "h5") {
       const rAF =
         "requestAnimationFrame" in globalThis
-          ? globalThis.requestAnimationFrame
+          ? requestAnimationFrame
           : requestAnimationFrameImpl();
 
       return (callback: () => void) => rAF(callback);
     }
 
-    let canvas:
-      | OctopusPlatform.PlatformCanvas
-      | OctopusPlatform.PlatformOffscreenCanvas
-      | null = null;
-    return (callback: () => void) => {
-      // 检查canvas是否存在
-      if (!canvas) {
-        canvas = this.getGlobalCanvas();
+    let rAF: ((callback: () => void) => number) | null = null;
 
-        if (canvas === null) {
-          throw new Error(
-            "requestAnimationFrame is not ready, please call `platform.setGlobalCanvas` first"
-          );
+    return (callback: () => void) => {
+      if (rAF === null) {
+        // 检查canvas是否存在
+        try {
+          const canvas = this.getGlobalCanvas() as WechatMiniprogram.Canvas;
+
+          rAF = (canvas as WechatMiniprogram.Canvas).requestAnimationFrame.bind(canvas)
+        } catch (error: any) {
+          console.warn(error.message);
+          rAF = requestAnimationFrameImpl();
         }
       }
 
-      return (canvas as WechatMiniprogram.Canvas).requestAnimationFrame?.(
-        callback
-      );
+      return rAF(callback);
     };
   },
 });

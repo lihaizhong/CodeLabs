@@ -153,6 +153,12 @@ export abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty>
   }
 
   public getGlobalCanvas() {
+    if (!this.globalCanvas) {
+      throw new Error(
+        "requestAnimationFrame is not ready, please call `platform.setGlobalCanvas` first"
+      );
+    }
+
     return this.globalCanvas;
   }
 
