@@ -1,6 +1,6 @@
 import { definePlugin } from "../definePlugin";
 
-interface ExtendedPlatform extends OctopusPlatform.Platform {
+interface EnhancedPlatform extends OctopusPlatform.Platform {
   local: OctopusPlatform.PlatformPlugin["local"];
   path: OctopusPlatform.PlatformPlugin["path"];
   decode: OctopusPlatform.PlatformPlugin["decode"];
@@ -16,9 +16,9 @@ export default definePlugin<"image">({
   name: "image",
   dependencies: ["local", "path", "decode"],
   install() {
-    const { local, path, decode, noop } = this as ExtendedPlatform;
+    const { local, path, decode, noop } = this as EnhancedPlatform;
     const { env } = this.globals;
-    const cachedImages: Set<string> = new Set();
+    const loadedFiles: Set<string> = new Set();
 
     /**
      * 加载图片
@@ -30,11 +30,11 @@ export default definePlugin<"image">({
       return new Promise<OctopusPlatform.PlatformImage>((resolve, reject) => {
         img.onload = () => {
           resolve(img);
-          if (cachedImages.has(src)) {
+          if (loadedFiles.has(src)) {
             local!
               .remove(src)
               .catch(noop)
-              .then(() => cachedImages.delete(src));
+              .then(() => loadedFiles.delete(src));
           }
         };
         img.onerror = () =>
@@ -77,9 +77,7 @@ export default definePlugin<"image">({
     }
 
     const createImage = () => {
-      const canvas = (
-        this as ExtendedPlatform
-      ).getGlobalCanvas() as OctopusPlatform.MiniProgramCanvas;
+      const canvas = this.getGlobalCanvas() as OctopusPlatform.MiniProgramCanvas;
 
       return canvas.createImage();
     };
@@ -102,7 +100,7 @@ export default definePlugin<"image">({
         const filePath = path.resolve(filename, prefix);
 
         await local!.write(decode.toBuffer(data), filePath);
-        cachedImages.add(filePath);
+        loadedFiles.add(filePath);
 
         return filePath;
       } catch (ex: any) {
