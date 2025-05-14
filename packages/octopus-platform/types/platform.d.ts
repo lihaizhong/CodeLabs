@@ -15,7 +15,7 @@ declare namespace OctopusPlatform {
   export interface PlatformPluginOptions<P extends PlatformPluginProperty> {
     name: P;
     dependencies?: string[];
-    install: (this: Platform<P>) => PlatformPluginValue<P>;
+    install: (this: Platform) => PlatformPluginValue<P>;
   }
 
   export interface Platform {
