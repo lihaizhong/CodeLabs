@@ -1,10 +1,9 @@
-# FuckSVGA
+# Octopus Svga
 
 这是一个 SVGA 在移动端 **Web/小程序** 上的播放器，它的目标是 **更轻量**、**更高效**
 
 ## 实现
 
-- [x] 体积 < 60kb (gzip < 18kb)
 - [x] 兼容 Android 4.4+ / iOS 9+
 - [x] 支持双缓冲渲染机制
 - [x] 支持分片渲染机制
@@ -12,10 +11,7 @@
 
 ## 实验性
 
-- [ ] 渲染引擎模拟运行在 WebWorker
-- [ ] 使用 WebAssembly 替代 WebWorker
 - [ ] GPU 加速运算
-- [ ] 更好的异步操作
 - [ ] 多线程 (WebWorker) 解析文件数据
 
 ## 注意事项
@@ -28,7 +24,7 @@
 ### NPM
 
 ```sh
-npm i fuck-svga -S
+npm i octopus-svga -S
 ```
 
 ## 使用
@@ -41,7 +37,7 @@ npm i fuck-svga -S
 ```
 
 ```js
-import { Parser, Player } from "fuck-svga";
+import { Parser, Player } from "octopus-svga";
 
 const player = new Player();
 await player.setConfig({

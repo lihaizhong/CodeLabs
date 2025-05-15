@@ -3,17 +3,16 @@
   "compilerOptions": {
     "outDir": "./dist",
     "baseUrl": ".",
+    "mapRoot": ".",
     "declaration": true,
-    "resolveJsonModule": true,
+    "sourceMap": true,
+    "inlineSourceMap": false,
     "esModuleInterop": true
   },
-  "include": [
-    "src/**/*",
-    "types",
-    "package.json"
-  ],
   "exclude": [
-    "src/**/*.spec.ts",
-    "src/**/*.test.ts",
+    "__mocks__",
+    "__tests__",
+    "**/*.test.ts",
+    "**/*.spec.ts"
   ]
 }
