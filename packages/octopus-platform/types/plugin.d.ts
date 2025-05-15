@@ -1,5 +1,4 @@
 declare namespace OctopusPlatform {
-  export type MiniProgramCanvas = WechatMiniprogram.Canvas | WechatMiniprogram.OffscreenCanvas;
 
   export interface GetCanvasResult {
     canvas: PlatformCanvas;
