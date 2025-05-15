@@ -1,0 +1,29 @@
+{
+  "name": "octopus-svga-convertor",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "AE 动画导出的 SVGA 文件转换为小程序支持的格式",
+  "main": "dist/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "types"
+  ],
+  "scripts": {
+    "build": "rimraf -rf dist && rollup -c",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "lihzsky",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/jest": "^29.5.14",
+    "@types/wechat-miniprogram": "^3.4.8",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.40.2",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.3"
+  }
+}

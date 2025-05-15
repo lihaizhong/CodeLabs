@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "mapRoot": ".",
+    "declaration": true,
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "esModuleInterop": true
+  },
+  "exclude": [
+    "__mocks__",
+    "__tests__",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}
