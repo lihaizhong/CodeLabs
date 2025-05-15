@@ -26,6 +26,6 @@
     "url": "https://github.com/lihaizhong/CodeSnippets/issues"
   },
   "devDependencies": {
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   }
 }
