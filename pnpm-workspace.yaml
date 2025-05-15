@@ -5,6 +5,7 @@ packages:
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - '@swc/core'
+  - '@tailwindcss/oxide'
   - lmdb
   - msgpackr-extract
   - re2
