@@ -1,8 +1,9 @@
 import "weui";
 import { Parser, platform } from "octopus-svga";
-import { posterFiles } from "../../utils/constants";
+import { posterFiles, analyticsFiles } from "../../utils/constants";
 
-const files = posterFiles.map((item) => item.src);
+// const files = posterFiles.map((item) => item.src);
+const files = analyticsFiles;
 const parser = new Parser();
 
 async function render(current) {
@@ -26,7 +27,7 @@ async function render(current) {
     $item.classList.add("weui-cell", "weui-cell_active");
     $item.innerHTML = `
       <div class="weui-cell__bd">${key}</div>
-      <div class="weui-cell__ft">${value}</div>
+      <div class="weui-cell__ft" style="max-width: 62%; word-break: break-all;">${value}</div>
     `;
 
     $infos.appendChild($item);

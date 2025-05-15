@@ -104,6 +104,12 @@ export const posterFiles = [
   src: `${REPLACE_SVGA_URL}/poster/${item.src}`,
 }));
 
+export const analyticsFiles = [
+  "https://assets.2dfire.com/frontend/ce051bbeccc7a1ec71f71af9b8ee5a76.svga",
+  "https://assets.2dfire.com/frontend/93727e7f2c7dfb68cc96d18f43b75a15.svga",
+  "https://assets.2dfire.com/frontend/6c746c8bcb52df0216a97841e1dc6f1e.svga"
+]
+
 export function getOneAtRandom(files) {
   const ranIndex = Math.floor(Math.random() * files.length);
 
