@@ -144,6 +144,7 @@ export class Painter {
       }
 
       const { canvas, context } = getOfsCanvas({ width: W, height: H });
+
       this.X = canvas;
       this.XC = context;
       this.setModel("O");
@@ -164,6 +165,7 @@ export class Painter {
       }
     }
 
+    // 小程序环境下，重写 createImage 方法
     if (env !== "h5") {
       const { X, IM } = this;
       const { createImage } = (X as OctopusPlatform.MiniProgramCanvas);
