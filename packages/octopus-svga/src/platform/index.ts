@@ -72,9 +72,7 @@ class EnhancedPlatform extends Platform<PlatformProperties> {
     >(this);
 
     Object.defineProperty(this, plugin.name, {
-      get() {
-        return value;
-      },
+      get: () => value,
       enumerable: true,
       configurable: true,
     });
