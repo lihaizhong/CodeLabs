@@ -62,6 +62,14 @@ export declare class VideoManager {
      */
     private getBucket;
     /**
+     * 创建bucket
+     * @param url 远程地址
+     * @param inRemainRange 是否在留存范围内
+     * @param needDownloadAndParse 是否需要下载并解析
+     * @returns
+     */
+    private createBucket;
+    /**
      * 视频加载模式
      * @param loadMode
      */

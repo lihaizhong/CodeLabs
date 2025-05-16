@@ -152,8 +152,10 @@ export class VideoManager {
    * @returns
    */
   private async getBucket(point: number): Promise<Bucket> {
-    if (point < 0 || point >= this.length) {
-      return this.buckets[this.point];
+    const { length, buckets, parser, loadMode } = this;
+
+    if (point < 0 || point >= length) {
+      return buckets[point];
     }
 
     const operators = this.updateBucketOperators(point);
@@ -162,14 +164,16 @@ export class VideoManager {
 
       operators.forEach(({ action, start, end }) => {
         for (let i = start; i < end; i++) {
-          const bucket = this.buckets[i];
+          const bucket = buckets[i];
 
           if (action === "remove") {
             bucket.entity = null;
           } else if (action === "add") {
-            bucket.promise = this.parser.load(bucket.local || bucket.origin);
-            if (this.loadMode === "whole" || this.point === i) {
-              waitings.push(bucket.promise);
+            if (bucket.entity === null) {
+              bucket.promise = parser.load(bucket.local || bucket.origin);
+              if (loadMode === "whole" || point === i) {
+                waitings.push(bucket.promise);
+              }
             }
           }
         }
@@ -178,6 +182,71 @@ export class VideoManager {
     }
 
     return this.get();
+  }
+
+  /**
+   * 创建bucket
+   * @param url 远程地址
+   * @param inRemainRange 是否在留存范围内
+   * @param needDownloadAndParse 是否需要下载并解析
+   * @returns 
+   */
+  private async createBucket(
+    url: string,
+    inRemainRange: boolean = true,
+    needDownloadAndParse: boolean = true
+  ): Promise<Bucket> {
+    const { parser } = this;
+    const { globals, path, local } = platform;
+    const { env } = globals;
+    const bucket: Bucket = {
+      origin: url,
+      local: "",
+      entity: null,
+      promise: null,
+    };
+
+    if (env === "h5" || env === "tt") {
+      // 利用浏览器缓存
+      bucket.local = url;
+      if (inRemainRange) {
+        if (needDownloadAndParse) {
+          bucket.entity = await parser.load(url);
+        } else {
+          bucket.promise = parser.load(url);
+        }
+      }
+
+      return bucket;
+    }
+
+    const filePath = path.resolve(path.filename(url), "full");
+    const downloadAwait = parser.download(bucket.origin);
+    const parseVideoAwait = async (buff: ArrayBuffer | null) => {
+      if (buff) {
+        try {
+          await local!.write(buff, filePath);
+          bucket.local = filePath;
+        } catch (ex) {
+          console.error(ex);
+        }
+
+        // bucket.filesize = buff.byteLength / 8;
+        if (inRemainRange) {
+          return Parser.parseVideo(buff, url);
+        }
+      }
+
+      return null;
+    };
+
+    if (needDownloadAndParse) {
+      bucket.entity = await parseVideoAwait(await downloadAwait);
+    } else {
+      bucket.promise = downloadAwait.then(parseVideoAwait);
+    }
+
+    return bucket;
   }
 
   /**
@@ -199,65 +268,31 @@ export class VideoManager {
     point?: number,
     maxRemain?: number
   ): Promise<void> {
-    const { parser, loadMode } = this;
-    const { globals, path, local } = platform;
-    const { env } = globals;
+    let preloadBucket: Bucket | null = null;
 
     this.point =
       typeof point === "number" && point > 0 && point < urls.length ? point : 0;
     this.maxRemain =
       typeof maxRemain === "number" && maxRemain > 0 ? maxRemain : 3;
     this.updateRemainPoints();
+
+    if (this.loadMode === "fast") {
+      preloadBucket = await this.createBucket(urls[this.point]);
+    }
+
     this.buckets = await Promise.all(
-      urls.map(async (url: string, index: number) => {
-        const bucket: Bucket = {
-          origin: url,
-          local: "",
-          entity: null,
-          // filesize: 0,
-          promise: null,
-        };
-
-        if (env === "h5" || env === "tt") {
-          bucket.local = url;
-          if (this.remainStart <= index && index < this.remainEnd) {
-            if (loadMode === "whole" || index === this.point) {
-              bucket.entity = await parser.load(url);
-            } else {
-              bucket.promise = parser.load(url);
-            }
-          }
-
-          return bucket;
+      urls.map((url: string, index: number) => {
+        if (preloadBucket && index === this.point) {
+          return preloadBucket;
         }
 
-        const filePath = path.resolve(path.filename(url), "full");
-        const downloadAwait = parser.download(bucket.origin);
-        const parseVideoAwait = async (buff: ArrayBuffer | null) => {
-          if (buff) {
-            try {
-              await local!.write(buff, filePath);
-              bucket.local = filePath;
-            } catch (ex) {
-              console.error(ex);
-            }
+        const { loadMode, remainStart, remainEnd, point: currentPoint } = this;
 
-            // bucket.filesize = buff.byteLength / 8;
-            if (this.remainStart <= index && index < this.remainEnd) {
-              return Parser.parseVideo(buff, url);
-            }
-          }
-
-          return null;
-        };
-
-        if (loadMode === "whole" || index === this.point) {
-          bucket.entity = await parseVideoAwait(await downloadAwait);
-        } else {
-          bucket.promise = downloadAwait.then(parseVideoAwait);
-        }
-
-        return bucket;
+        return this.createBucket(
+          url,
+          remainStart <= index && index < remainEnd,
+          loadMode === "whole" || index === currentPoint
+        );
       })
     );
   }
@@ -296,7 +331,7 @@ export class VideoManager {
 
   /**
    * 获取当前指针位置
-   * @returns 
+   * @returns
    */
   getPoint() {
     return this.point;
