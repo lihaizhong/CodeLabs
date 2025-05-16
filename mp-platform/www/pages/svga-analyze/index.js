@@ -1,14 +1,16 @@
 import "weui";
-import { Parser, platform } from "octopus-svga";
+import { VideoManager, platform } from "octopus-svga";
 import { posterFiles, analyticsFiles } from "../../utils/constants";
 
 // const files = posterFiles.map((item) => item.src);
 const files = analyticsFiles;
-const parser = new Parser();
+const videoManager = new VideoManager();
+
+videoManager.prepare(files);
 
 async function render(current) {
-  const url = files[current];
-  const videoItem = await parser.load(url);
+  const bucket = await videoManager.go(current);
+  const videoItem = bucket.entity;
   const $infos = document.getElementById("js-animate-infos");
   const $switch = document.getElementById("js-animate-switch");
   const infos = [
