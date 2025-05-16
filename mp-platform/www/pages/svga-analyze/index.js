@@ -6,10 +6,9 @@ import { posterFiles, analyticsFiles } from "../../utils/constants";
 const files = analyticsFiles;
 const videoManager = new VideoManager();
 
-videoManager.prepare(files);
-
 async function render(current) {
   const bucket = await videoManager.go(current);
+  console.log('bucket', bucket, current, files);
   const videoItem = bucket.entity;
   const $infos = document.getElementById("js-animate-infos");
   const $switch = document.getElementById("js-animate-switch");
@@ -107,5 +106,8 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   toggleHalfScreenDialog();
-  render(current);
+
+  videoManager.prepare(files).then(() => {
+    render(current);
+  });
 });
