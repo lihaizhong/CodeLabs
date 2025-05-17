@@ -102,9 +102,7 @@ export function generateImageBufferFromCode(options: IQrCodeImgOptions) {
     }
   }
 
-  png.flush();
-
-  return png.toBuffer();
+  return png.flush();
 }
 
 export function generateImageFromCode(options: IQrCodeImgOptions) {

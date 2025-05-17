@@ -4,8 +4,6 @@ import { CRC32 } from "./crc";
 export class PNGEncoder {
   private readonly view: DataView;
 
-  private pngData: Uint8Array = new Uint8Array(0);
-
   private crc32 = new CRC32();
 
   constructor(private readonly width: number, private readonly height: number) {
@@ -86,7 +84,7 @@ export class PNGEncoder {
     this.view.setUint32((y * this.width + x) * 4, pixel, false);
   }
 
-  public write(pixels: Uint8Array | Uint8ClampedArray): void {
+  public write(pixels: Uint8Array | Uint8ClampedArray): this {
     const { width, height } = this;
 
     for (let y = 0; y < height; y++) {
@@ -101,38 +99,38 @@ export class PNGEncoder {
         this.setPixel(x, y, pixel);
       }
     }
+
+    return this;
   }
 
-  public flush(): void {
+  public flush(): Uint8Array {
     // 1. 文件头（固定 8 字节）
     const pngSignature = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
     
     // 预先创建所有块
-    const ihdrChunk = this.createIHDRChunk();
-    const idatChunk = this.createIDATChunk();
-    const iendChunk = this.createIENDChunk();
+    const iHDRChunk = this.createIHDRChunk();
+    const iDATChunk = this.createIDATChunk();
+    const iENDChunk = this.createIENDChunk();
     
     // 直接计算总大小
-    const totalSize = 8 + ihdrChunk.length + idatChunk.length + iendChunk.length;
+    const totalSize = 8 + iHDRChunk.length + iDATChunk.length + iENDChunk.length;
     
     // 一次性分配内存
-    this.pngData = new Uint8Array(totalSize);
+    const pngData = new Uint8Array(totalSize);
     let offset = 0;
     
     // 按顺序写入数据
-    this.pngData.set(pngSignature, offset);
+    pngData.set(pngSignature, offset);
     offset += pngSignature.length;
-    this.pngData.set(ihdrChunk, offset);
-    offset += ihdrChunk.length;
-    this.pngData.set(idatChunk, offset);
-    offset += idatChunk.length;
-    this.pngData.set(iendChunk, offset);
+    pngData.set(iHDRChunk, offset);
+    offset += iHDRChunk.length;
+    pngData.set(iDATChunk, offset);
+    offset += iDATChunk.length;
+    pngData.set(iENDChunk, offset);
 
     // 清空缓存
     this.crc32.clear();
-  }
 
-  public toBuffer(): Uint8Array {
-    return this.pngData;
+    return pngData;
   }
 }

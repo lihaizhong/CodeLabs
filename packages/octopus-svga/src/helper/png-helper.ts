@@ -3,12 +3,8 @@ import { PNGEncoder } from "../extensions";
 
 export function getBufferFromImageData(imageData: ImageData) {
   const { width, height, data } = imageData;
-  const pngEncoder = new PNGEncoder(width, height);
 
-  pngEncoder.write(data);
-  pngEncoder.flush();
-
-  return pngEncoder.toBuffer()
+  return new PNGEncoder(width, height).write(data).flush();
 }
 
 export function getDataURLFromImageData(imageData: ImageData) {
