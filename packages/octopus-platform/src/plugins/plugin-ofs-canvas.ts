@@ -38,10 +38,7 @@ export default definePlugin<"getOfsCanvas">({
     } else {
       createOffscreenCanvas = (
         options: OctopusPlatform.OffscreenCanvasOptions
-      ) => wx.createOffscreenCanvas({
-        ...options,
-        type: "2d",
-      });
+      ) => wx.createOffscreenCanvas(options);
     }
 
     return (options: OctopusPlatform.OffscreenCanvasOptions) => {
