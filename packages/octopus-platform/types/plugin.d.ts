@@ -8,6 +8,7 @@ declare namespace OctopusPlatform {
   export interface OffscreenCanvasOptions {
     width: number;
     height: number;
+    type?: "2d" | "webgl";
   }
   
   export interface GetOffscreenCanvasResult {

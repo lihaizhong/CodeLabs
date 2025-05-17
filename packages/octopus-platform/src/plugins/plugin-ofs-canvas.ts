@@ -20,10 +20,7 @@ export default definePlugin<"getOfsCanvas">({
     } else if (env === "alipay") {
       createOffscreenCanvas = (
         options: OctopusPlatform.OffscreenCanvasOptions
-      ) => my.createOffscreenCanvas({
-        width: options.width,
-        height: options.height,
-      });
+      ) => my.createOffscreenCanvas(options);
     } else if (env === "tt") {
       createOffscreenCanvas = (
         options: OctopusPlatform.OffscreenCanvasOptions
@@ -42,8 +39,9 @@ export default definePlugin<"getOfsCanvas">({
     }
 
     return (options: OctopusPlatform.OffscreenCanvasOptions) => {
-      const canvas = createOffscreenCanvas(options);
-      const context = canvas.getContext("2d");
+      const type = options.type || "2d";
+      const canvas = createOffscreenCanvas({ ...options, type });
+      const context = canvas.getContext(type);
 
       return {
         canvas,
