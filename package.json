@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
-    "dev": "rm -rf dist .parcel-cache && parcel serve",
-    "build": "rm -rf dist .parcel-cache && parcel build",
+    "dev": "rm -rf dist .parcel-cache && parcel serve --no-cache",
+    "build": "rm -rf dist .parcel-cache && parcel build --no-cache",
     "static": "serve",
     "test": "jest",
     "zx:sync": "zx .scripts/sync.mjs"
@@ -38,6 +38,7 @@
     "@jest/globals": "^29.7.0",
     "@parcel/config-default": "^2.15.1",
     "@parcel/packager-raw-url": "2.15.1",
+    "@parcel/transformer-postcss": "^2.15.1",
     "@parcel/transformer-webmanifest": "2.15.1",
     "@tailwindcss/postcss": "^4.1.7",
     "@types/benchmark": "^2.1.5",
@@ -50,7 +51,7 @@
     "postcss": "^8.5.3",
     "serve": "^14.2.4",
     "tailwindcss": "^4.1.7",
-    "ts-jest": "^29.3.3",
+    "ts-jest": "^29.3.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "zx": "^8.5.4"
