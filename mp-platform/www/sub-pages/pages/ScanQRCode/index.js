@@ -1,3 +1,4 @@
+import "weui";
 // 基于zxing的二维码识别 https://github.com/LazarSoft/jsqrcode
 import Scanner from './core/Scanner'
 
