@@ -4,7 +4,7 @@ Page({
   data: {
     btnList: [
       {
-        text: "跳转SVGA动画",
+        text: "跳转SVGA动画(自研版)",
         path: "/pages/svga/index",
       },
       {
