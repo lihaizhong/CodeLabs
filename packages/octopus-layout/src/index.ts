@@ -7,10 +7,11 @@ export interface TextStyle {
   fontSize?: number;
   fontFamily?: string;
   fontWeight?: string | number;
+  fontStyle?: "normal" | "italic" | "oblique";
   color?: string;
   lineHeight?: number;
-  textAlign?: 'left' | 'center' | 'right' | 'justify';
-  textDecoration?: 'none' | 'underline' | 'line-through';
+  textAlign?: "left" | "center" | "right" | "justify";
+  textDecoration?: "none" | "underline" | "line-through";
   letterSpacing?: number;
   wordSpacing?: number;
 }
@@ -33,13 +34,13 @@ export interface BoxModel {
   border?: {
     width?: number;
     color?: string;
-    style?: 'solid' | 'dashed' | 'dotted';
+    style?: "solid" | "dashed" | "dotted";
   };
 }
 
 export interface LayoutNode {
   id?: string;
-  type: 'text' | 'container';
+  type: "text" | "container";
   content?: string;
   style?: TextStyle;
   box?: BoxModel;
@@ -53,51 +54,69 @@ export interface LayoutNode {
 export interface LayoutOptions {
   containerWidth: number;
   containerHeight: number;
+  defaultFontStyle: "normal" | "italic" | "oblique";
+  defaultFontWeight: string | number;
   defaultFontSize?: number;
   defaultFontFamily?: string;
+  defaultColor?: string;
   defaultLineHeight?: number;
 }
 
 export class CanvasLayoutEngine {
-  private ctx: CanvasRenderingContext2D;
-  private options: LayoutOptions;
+  private static DEFAULT_STYLE: Required<Omit<LayoutOptions, "containerWidth" | "containerHeight">> = {
+    defaultFontStyle: "normal",
+    defaultFontWeight: "normal",
+    defaultFontSize: 14,
+    // 兼容iOS，Android设备，保证字体与App一致
+    defaultFontFamily:
+      "-apple-system, BlinkMacSystemFont, SFProDisplay-Regular, sans-serif",
+    defaultColor: "#000000",
+    defaultLineHeight: 1.4,
+  };
 
-  constructor(canvas: HTMLCanvasElement, options: LayoutOptions) {
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      throw new Error('无法获取 Canvas 2D 上下文');
-    }
-    this.ctx = ctx;
+  private ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+  private options: Required<LayoutOptions>;
+
+  constructor(
+    context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+    options: LayoutOptions
+  ) {
+    this.ctx = context;
     this.options = {
-      defaultFontSize: 14,
-      defaultFontFamily: 'Arial, sans-serif',
-      defaultLineHeight: 1.4,
-      ...options
+      ...CanvasLayoutEngine.DEFAULT_STYLE,
+      ...options,
     };
   }
 
   /**
    * 计算文本尺寸
    */
-  private measureText(text: string, style: TextStyle = {}): { width: number; height: number } {
+  private measureText(
+    text: string,
+    style: TextStyle = {}
+  ): { width: number; height: number } {
     const fontSize = style.fontSize || this.options.defaultFontSize!;
     const fontFamily = style.fontFamily || this.options.defaultFontFamily!;
-    const fontWeight = style.fontWeight || 'normal';
+    const fontWeight = style.fontWeight || this.options.defaultFontWeight;
+    const fontStyle = style.fontStyle || this.options.defaultFontStyle;
     const lineHeight = style.lineHeight || this.options.defaultLineHeight!;
 
-    this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+    this.ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
     const metrics = this.ctx.measureText(text);
-    
+
     return {
       width: metrics.width + (style.letterSpacing || 0) * (text.length - 1),
-      height: fontSize * lineHeight
+      height: fontSize * lineHeight,
     };
   }
 
   /**
    * 计算盒模型尺寸
    */
-  private calculateBoxSize(node: LayoutNode): { width: number; height: number } {
+  private calculateBoxSize(node: LayoutNode): {
+    width: number;
+    height: number;
+  } {
     const box = node.box || {};
     const padding = box.padding || {};
     const margin = box.margin || {};
@@ -113,7 +132,7 @@ export class CanvasLayoutEngine {
     let contentWidth = 0;
     let contentHeight = 0;
 
-    if (node.type === 'text' && node.content) {
+    if (node.type === "text" && node.content) {
       const textSize = this.measureText(node.content, node.style);
       contentWidth = textSize.width;
       contentHeight = textSize.height;
@@ -124,15 +143,21 @@ export class CanvasLayoutEngine {
     if (box.height !== undefined) contentHeight = box.height;
 
     return {
-      width: contentWidth + paddingHorizontal + borderHorizontal + marginHorizontal,
-      height: contentHeight + paddingVertical + borderVertical + marginVertical
+      width:
+        contentWidth + paddingHorizontal + borderHorizontal + marginHorizontal,
+      height: contentHeight + paddingVertical + borderVertical + marginVertical,
     };
   }
 
   /**
    * 布局计算
    */
-  private layout(node: LayoutNode, parentWidth: number, x: number = 0, y: number = 0): void {
+  private layout(
+    node: LayoutNode,
+    parentWidth: number,
+    x: number = 0,
+    y: number = 0
+  ): void {
     const size = this.calculateBoxSize(node);
     node.computedWidth = Math.min(size.width, parentWidth);
     node.computedHeight = size.height;
@@ -144,16 +169,32 @@ export class CanvasLayoutEngine {
       const box = node.box || {};
       const padding = box.padding || {};
       const contentX = x + (padding.left || 0) + (box.border?.width || 0);
-      const contentWidth = node.computedWidth - (padding.left || 0) - (padding.right || 0) - (box.border?.width || 0) * 2;
+      const contentWidth =
+        node.computedWidth -
+        (padding.left || 0) -
+        (padding.right || 0) -
+        (box.border?.width || 0) * 2;
 
       for (const child of node.children) {
-        this.layout(child, contentWidth, contentX, currentY + (padding.top || 0) + (box.border?.width || 0));
+        this.layout(
+          child,
+          contentWidth,
+          contentX,
+          currentY + (padding.top || 0) + (box.border?.width || 0)
+        );
         currentY += child.computedHeight || 0;
       }
 
       // 重新计算容器高度
-      const totalChildrenHeight = node.children.reduce((sum, child) => sum + (child.computedHeight || 0), 0);
-      node.computedHeight = totalChildrenHeight + (padding.top || 0) + (padding.bottom || 0) + (box.border?.width || 0) * 2;
+      const totalChildrenHeight = node.children.reduce(
+        (sum, child) => sum + (child.computedHeight || 0),
+        0
+      );
+      node.computedHeight =
+        totalChildrenHeight +
+        (padding.top || 0) +
+        (padding.bottom || 0) +
+        (box.border?.width || 0) * 2;
     }
   }
 
@@ -161,7 +202,7 @@ export class CanvasLayoutEngine {
    * 渲染文本
    */
   private renderText(node: LayoutNode): void {
-    if (!node.content || node.type !== 'text') return;
+    if (!node.content || node.type !== "text") return;
 
     const style = node.style || {};
     const box = node.box || {};
@@ -170,40 +211,45 @@ export class CanvasLayoutEngine {
 
     const fontSize = style.fontSize || this.options.defaultFontSize!;
     const fontFamily = style.fontFamily || this.options.defaultFontFamily!;
-    const fontWeight = style.fontWeight || 'normal';
-    const color = style.color || '#000000';
-    const textAlign = style.textAlign || 'left';
+    const fontWeight = style.fontWeight || this.options.defaultFontWeight;
+    const color = style.color || this.options.defaultColor;
+    const textAlign = style.textAlign || "left";
 
     // 设置字体样式
-    this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+    const fontStyle = style.fontStyle || this.options.defaultFontStyle;
+    this.ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
     this.ctx.fillStyle = color;
-    this.ctx.textBaseline = 'top';
+    this.ctx.textBaseline = "top";
 
     // 计算文本位置
     const contentX = (node.x || 0) + (padding.left || 0) + (border.width || 0);
     const contentY = (node.y || 0) + (padding.top || 0) + (border.width || 0);
-    const contentWidth = (node.computedWidth || 0) - (padding.left || 0) - (padding.right || 0) - (border.width || 0) * 2;
+    const contentWidth =
+      (node.computedWidth || 0) -
+      (padding.left || 0) -
+      (padding.right || 0) -
+      (border.width || 0) * 2;
 
     let textX = contentX;
-    if (textAlign === 'center') {
+    if (textAlign === "center") {
       textX = contentX + contentWidth / 2;
-      this.ctx.textAlign = 'center';
-    } else if (textAlign === 'right') {
+      this.ctx.textAlign = "center";
+    } else if (textAlign === "right") {
       textX = contentX + contentWidth;
-      this.ctx.textAlign = 'right';
+      this.ctx.textAlign = "right";
     } else {
-      this.ctx.textAlign = 'left';
+      this.ctx.textAlign = "left";
     }
 
     // 处理文本换行
-    const words = node.content.split(' ');
+    const words = node.content.split(" ");
     const lines: string[] = [];
-    let currentLine = '';
+    let currentLine = "";
 
     for (const word of words) {
-      const testLine = currentLine + (currentLine ? ' ' : '') + word;
+      const testLine = currentLine + (currentLine ? " " : "") + word;
       const metrics = this.ctx.measureText(testLine);
-      
+
       if (metrics.width > contentWidth && currentLine) {
         lines.push(currentLine);
         currentLine = word;
@@ -216,18 +262,25 @@ export class CanvasLayoutEngine {
     }
 
     // 渲染每一行
-    const lineHeight = fontSize * (style.lineHeight || this.options.defaultLineHeight!);
+    const lineHeight =
+      fontSize * (style.lineHeight || this.options.defaultLineHeight!);
     lines.forEach((line, index) => {
       const lineY = contentY + index * lineHeight;
       this.ctx.fillText(line, textX, lineY);
 
       // 渲染文本装饰
-      if (style.textDecoration === 'underline') {
+      if (style.textDecoration === "underline") {
         const lineWidth = this.ctx.measureText(line).width;
         const underlineY = lineY + fontSize;
         this.ctx.beginPath();
-        this.ctx.moveTo(textAlign === 'center' ? textX - lineWidth / 2 : textX, underlineY);
-        this.ctx.lineTo(textAlign === 'center' ? textX + lineWidth / 2 : textX + lineWidth, underlineY);
+        this.ctx.moveTo(
+          textAlign === "center" ? textX - lineWidth / 2 : textX,
+          underlineY
+        );
+        this.ctx.lineTo(
+          textAlign === "center" ? textX + lineWidth / 2 : textX + lineWidth,
+          underlineY
+        );
         this.ctx.strokeStyle = color;
         this.ctx.lineWidth = 1;
         this.ctx.stroke();
@@ -241,19 +294,19 @@ export class CanvasLayoutEngine {
   private renderBox(node: LayoutNode): void {
     const box = node.box || {};
     const border = box.border || {};
-    
+
     if (border.width && border.width > 0) {
-      this.ctx.strokeStyle = border.color || '#000000';
+      this.ctx.strokeStyle = border.color || "#000000";
       this.ctx.lineWidth = border.width;
-      
-      if (border.style === 'dashed') {
+
+      if (border.style === "dashed") {
         this.ctx.setLineDash([5, 5]);
-      } else if (border.style === 'dotted') {
+      } else if (border.style === "dotted") {
         this.ctx.setLineDash([2, 2]);
       } else {
         this.ctx.setLineDash([]);
       }
-      
+
       this.ctx.strokeRect(
         (node.x || 0) + border.width / 2,
         (node.y || 0) + border.width / 2,
@@ -268,8 +321,8 @@ export class CanvasLayoutEngine {
    */
   private renderNode(node: LayoutNode): void {
     this.renderBox(node);
-    
-    if (node.type === 'text') {
+
+    if (node.type === "text") {
       this.renderText(node);
     }
 
@@ -285,11 +338,16 @@ export class CanvasLayoutEngine {
    */
   public render(layoutTree: LayoutNode): void {
     // 清空画布
-    this.ctx.clearRect(0, 0, this.options.containerWidth, this.options.containerHeight);
-    
+    this.ctx.clearRect(
+      0,
+      0,
+      this.options.containerWidth,
+      this.options.containerHeight
+    );
+
     // 计算布局
     this.layout(layoutTree, this.options.containerWidth);
-    
+
     // 渲染
     this.renderNode(layoutTree);
   }
@@ -302,9 +360,12 @@ export class CanvasLayoutEngine {
       return null;
     }
 
-    if (x >= node.x && x <= node.x + node.computedWidth &&
-        y >= node.y && y <= node.y + node.computedHeight) {
-      
+    if (
+      x >= node.x &&
+      x <= node.x + node.computedWidth &&
+      y >= node.y &&
+      y <= node.y + node.computedHeight
+    ) {
       // 检查子节点
       if (node.children) {
         for (const child of node.children) {
@@ -314,7 +375,7 @@ export class CanvasLayoutEngine {
           }
         }
       }
-      
+
       return node;
     }
 
@@ -325,23 +386,30 @@ export class CanvasLayoutEngine {
 /**
  * 创建文本节点的辅助函数
  */
-export function createTextNode(content: string, style?: TextStyle, box?: BoxModel): LayoutNode {
+export function createTextNode(
+  content: string,
+  style?: TextStyle,
+  box?: BoxModel
+): LayoutNode {
   return {
-    type: 'text',
+    type: "text",
     content,
     style,
-    box
+    box,
   };
 }
 
 /**
  * 创建容器节点的辅助函数
  */
-export function createContainerNode(children: LayoutNode[], box?: BoxModel): LayoutNode {
+export function createContainerNode(
+  children: LayoutNode[],
+  box?: BoxModel
+): LayoutNode {
   return {
-    type: 'container',
+    type: "container",
     children,
-    box
+    box,
   };
 }
 

@@ -52,6 +52,31 @@ export function createExampleLayout() {
         padding: { top: 15, bottom: 15 }
       }),
 
+      // 字体样式示例
+      createTextNode('正常字体样式 (normal)', {
+        fontSize: 14,
+        fontStyle: 'normal',
+        color: '#333333'
+      }, {
+        padding: { top: 5, bottom: 5, left: 20, right: 20 }
+      }),
+
+      createTextNode('斜体字体样式 (italic)', {
+        fontSize: 14,
+        fontStyle: 'italic',
+        color: '#666666'
+      }, {
+        padding: { top: 5, bottom: 5, left: 20, right: 20 }
+      }),
+
+      createTextNode('倾斜字体样式 (oblique)', {
+        fontSize: 14,
+        fontStyle: 'oblique',
+        color: '#999999'
+      }, {
+        padding: { top: 15, bottom: 15 }
+      }),
+
       // 段落3 - 右对齐
       createTextNode('这段文字是右对齐的，展示了布局系统的灵活性。', {
         fontSize: 14,

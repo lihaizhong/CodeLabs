@@ -6,6 +6,7 @@ export interface TextStyle {
     fontSize?: number;
     fontFamily?: string;
     fontWeight?: string | number;
+    fontStyle?: 'normal' | 'italic' | 'oblique';
     color?: string;
     lineHeight?: number;
     textAlign?: 'left' | 'center' | 'right' | 'justify';
@@ -54,9 +55,10 @@ export interface LayoutOptions {
     defaultLineHeight?: number;
 }
 export declare class CanvasLayoutEngine {
+    private static DEFAULT_STYLE;
     private ctx;
     private options;
-    constructor(canvas: HTMLCanvasElement, options: LayoutOptions);
+    constructor(context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, options: LayoutOptions);
     /**
      * 计算文本尺寸
      */

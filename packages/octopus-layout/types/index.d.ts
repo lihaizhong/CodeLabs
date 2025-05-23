@@ -6,6 +6,7 @@ export interface TextStyle {
   fontSize?: number;
   fontFamily?: string;
   fontWeight?: string | number;
+  fontStyle?: 'normal' | 'italic' | 'oblique';
   color?: string;
   lineHeight?: number;
   textAlign?: 'left' | 'center' | 'right' | 'justify';

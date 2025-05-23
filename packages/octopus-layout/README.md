@@ -96,6 +96,7 @@ interface TextStyle {
   fontSize?: number;              // 字体大小
   fontFamily?: string;            // 字体族
   fontWeight?: string | number;   // 字体粗细
+  fontStyle?: 'normal' | 'italic' | 'oblique';  // 字体样式
   color?: string;                 // 文字颜色
   lineHeight?: number;            // 行高
   textAlign?: 'left' | 'center' | 'right' | 'justify';  // 文字对齐

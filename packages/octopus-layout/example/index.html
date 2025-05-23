@@ -458,6 +458,42 @@
                         textAlign: 'right'
                     }, {
                         padding: { top: 10, bottom: 10, left: 20, right: 20 }
+                    }),
+
+                    createTextNode('字体样式演示：', {
+                        fontSize: 16,
+                        fontWeight: 'bold',
+                        color: theme.primary,
+                        textAlign: 'left'
+                    }, {
+                        padding: { top: 20, bottom: 10, left: 20, right: 20 }
+                    }),
+
+                    createTextNode('正常字体 (normal) - 这是默认的字体样式', {
+                        fontSize: 14,
+                        fontStyle: 'normal',
+                        color: theme.primary,
+                        textAlign: 'left'
+                    }, {
+                        padding: { top: 5, bottom: 5, left: 40, right: 20 }
+                    }),
+
+                    createTextNode('斜体字体 (italic) - 这是斜体字体样式', {
+                        fontSize: 14,
+                        fontStyle: 'italic',
+                        color: theme.accent,
+                        textAlign: 'left'
+                    }, {
+                        padding: { top: 5, bottom: 5, left: 40, right: 20 }
+                    }),
+
+                    createTextNode('倾斜字体 (oblique) - 这是倾斜字体样式', {
+                        fontSize: 14,
+                        fontStyle: 'oblique',
+                        color: theme.secondary,
+                        textAlign: 'left'
+                    }, {
+                        padding: { top: 5, bottom: 15, left: 40, right: 20 }
                     })
                 ], {
                     border: { width: 1, color: theme.secondary, style: 'solid' },
