@@ -3,67 +3,10 @@
  * 基于 CSS 属性的文字布局系统
  */
 
-export interface TextStyle {
-  fontSize?: number;
-  fontFamily?: string;
-  fontWeight?: string | number;
-  fontStyle?: "normal" | "italic" | "oblique";
-  color?: string;
-  lineHeight?: number;
-  textAlign?: "left" | "center" | "right" | "justify";
-  textDecoration?: "none" | "underline" | "line-through";
-  letterSpacing?: number;
-  wordSpacing?: number;
-}
-
-export interface BoxModel {
-  width?: number;
-  height?: number;
-  padding?: {
-    top?: number;
-    right?: number;
-    bottom?: number;
-    left?: number;
-  };
-  margin?: {
-    top?: number;
-    right?: number;
-    bottom?: number;
-    left?: number;
-  };
-  border?: {
-    width?: number;
-    color?: string;
-    style?: "solid" | "dashed" | "dotted";
-  };
-}
-
-export interface LayoutNode {
-  id?: string;
-  type: "text" | "container";
-  content?: string;
-  style?: TextStyle;
-  box?: BoxModel;
-  children?: LayoutNode[];
-  x?: number;
-  y?: number;
-  computedWidth?: number;
-  computedHeight?: number;
-}
-
-export interface LayoutOptions {
-  containerWidth: number;
-  containerHeight: number;
-  defaultFontStyle: "normal" | "italic" | "oblique";
-  defaultFontWeight: string | number;
-  defaultFontSize?: number;
-  defaultFontFamily?: string;
-  defaultColor?: string;
-  defaultLineHeight?: number;
-}
-
 export class CanvasLayoutEngine {
-  private static DEFAULT_STYLE: Required<Omit<LayoutOptions, "containerWidth" | "containerHeight">> = {
+  private static DEFAULT_STYLE: Required<
+    Omit<OctopusLayout.LayoutOptions, "containerWidth" | "containerHeight">
+  > = {
     defaultFontStyle: "normal",
     defaultFontWeight: "normal",
     defaultFontSize: 14,
@@ -75,11 +18,11 @@ export class CanvasLayoutEngine {
   };
 
   private ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
-  private options: Required<LayoutOptions>;
+  private options: Required<OctopusLayout.LayoutOptions>;
 
   constructor(
     context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
-    options: LayoutOptions
+    options: OctopusLayout.LayoutOptions
   ) {
     this.ctx = context;
     this.options = {
@@ -93,7 +36,7 @@ export class CanvasLayoutEngine {
    */
   private measureText(
     text: string,
-    style: TextStyle = {}
+    style: OctopusLayout.TextStyle = {}
   ): { width: number; height: number } {
     const fontSize = style.fontSize || this.options.defaultFontSize!;
     const fontFamily = style.fontFamily || this.options.defaultFontFamily!;
@@ -113,7 +56,7 @@ export class CanvasLayoutEngine {
   /**
    * 计算盒模型尺寸
    */
-  private calculateBoxSize(node: LayoutNode): {
+  private calculateBoxSize(node: OctopusLayout.LayoutNode): {
     width: number;
     height: number;
   } {
@@ -153,7 +96,7 @@ export class CanvasLayoutEngine {
    * 布局计算
    */
   private layout(
-    node: LayoutNode,
+    node: OctopusLayout.LayoutNode,
     parentWidth: number,
     x: number = 0,
     y: number = 0
@@ -201,7 +144,7 @@ export class CanvasLayoutEngine {
   /**
    * 渲染文本
    */
-  private renderText(node: LayoutNode): void {
+  private renderText(node: OctopusLayout.LayoutNode): void {
     if (!node.content || node.type !== "text") return;
 
     const style = node.style || {};
@@ -291,7 +234,7 @@ export class CanvasLayoutEngine {
   /**
    * 渲染边框和背景
    */
-  private renderBox(node: LayoutNode): void {
+  private renderBox(node: OctopusLayout.LayoutNode): void {
     const box = node.box || {};
     const border = box.border || {};
 
@@ -319,7 +262,7 @@ export class CanvasLayoutEngine {
   /**
    * 渲染节点
    */
-  private renderNode(node: LayoutNode): void {
+  private renderNode(node: OctopusLayout.LayoutNode): void {
     this.renderBox(node);
 
     if (node.type === "text") {
@@ -336,7 +279,7 @@ export class CanvasLayoutEngine {
   /**
    * 渲染布局树
    */
-  public render(layoutTree: LayoutNode): void {
+  public render(layoutTree: OctopusLayout.LayoutNode): void {
     // 清空画布
     this.ctx.clearRect(
       0,
@@ -355,7 +298,11 @@ export class CanvasLayoutEngine {
   /**
    * 获取节点在指定位置的信息
    */
-  public getNodeAt(x: number, y: number, node: LayoutNode): LayoutNode | null {
+  public getNodeAt(
+    x: number,
+    y: number,
+    node: OctopusLayout.LayoutNode
+  ): OctopusLayout.LayoutNode | null {
     if (!node.x || !node.y || !node.computedWidth || !node.computedHeight) {
       return null;
     }
@@ -388,9 +335,9 @@ export class CanvasLayoutEngine {
  */
 export function createTextNode(
   content: string,
-  style?: TextStyle,
-  box?: BoxModel
-): LayoutNode {
+  style?: OctopusLayout.TextStyle,
+  box?: OctopusLayout.BoxModel
+): OctopusLayout.LayoutNode {
   return {
     type: "text",
     content,
@@ -403,9 +350,9 @@ export function createTextNode(
  * 创建容器节点的辅助函数
  */
 export function createContainerNode(
-  children: LayoutNode[],
-  box?: BoxModel
-): LayoutNode {
+  children: OctopusLayout.LayoutNode[],
+  box?: OctopusLayout.BoxModel
+): OctopusLayout.LayoutNode {
   return {
     type: "container",
     children,
