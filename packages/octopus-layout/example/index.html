@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Octopus Layout Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .demo-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .demo-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .demo-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: block;
+            margin: 10px 0;
+        }
+        .controls {
+            margin-top: 15px;
+        }
+        .controls button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .controls button:hover {
+            background: #0056b3;
+        }
+        .controls input, .controls select {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .responsive-demo {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .responsive-demo canvas {
+            flex: 1;
+            min-width: 300px;
+        }
+        @media (max-width: 768px) {
+            .responsive-demo {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Octopus Layout - Canvas 文字布局系统演示</h1>
+        
+        <!-- 基础演示 -->
+        <div class="demo-section">
+            <div class="demo-title">基础文字布局</div>
+            <div class="demo-description">
+                展示基本的文字渲染、样式设置和布局功能。包括不同字体大小、颜色、对齐方式等。
+            </div>
+            <canvas id="basicDemo" width="800" height="400"></canvas>
+            <div class="controls">
+                <button onclick="updateBasicDemo()">刷新演示</button>
+                <button onclick="changeTheme()">切换主题</button>
+            </div>
+        </div>
+
+        <!-- 响应式演示 -->
+        <div class="demo-section">
+            <div class="demo-title">响应式布局</div>
+            <div class="demo-description">
+                展示如何根据不同的容器尺寸调整布局和样式，实现响应式设计。
+            </div>
+            <div class="responsive-demo">
+                <canvas id="desktopDemo" width="600" height="300"></canvas>
+                <canvas id="mobileDemo" width="300" height="400"></canvas>
+            </div>
+            <div class="controls">
+                <button onclick="updateResponsiveDemo()">更新响应式布局</button>
+            </div>
+        </div>
+
+        <!-- 交互演示 -->
+        <div class="demo-section">
+            <div class="demo-title">交互功能</div>
+            <div class="demo-description">
+                点击画布上的文字区域，查看节点信息。演示位置检测和交互处理功能。
+            </div>
+            <canvas id="interactiveDemo" width="800" height="300"></canvas>
+            <div id="clickInfo" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; min-height: 20px;">
+                点击画布上的文字查看节点信息...
+            </div>
+        </div>
+
+        <!-- 动态更新演示 -->
+        <div class="demo-section">
+            <div class="demo-title">动态更新</div>
+            <div class="demo-description">
+                演示如何动态修改文字内容和样式，实时更新布局。
+            </div>
+            <canvas id="dynamicDemo" width="800" height="250"></canvas>
+            <div class="controls">
+                <input type="text" id="textInput" placeholder="输入新文字" value="动态更新的文字内容">
+                <button onclick="updateText()">更新文字</button>
+                <select id="fontSizeSelect">
+                    <option value="12">12px</option>
+                    <option value="16" selected>16px</option>
+                    <option value="20">20px</option>
+                    <option value="24">24px</option>
+                    <option value="32">32px</option>
+                </select>
+                <select id="colorSelect">
+                    <option value="#333333" selected>黑色</option>
+                    <option value="#007bff">蓝色</option>
+                    <option value="#28a745">绿色</option>
+                    <option value="#dc3545">红色</option>
+                    <option value="#fd7e14">橙色</option>
+                </select>
+                <select id="alignSelect">
+                    <option value="left" selected>左对齐</option>
+                    <option value="center">居中</option>
+                    <option value="right">右对齐</option>
+                </select>
+                <button onclick="updateStyle()">更新样式</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 模拟 octopus-layout 模块
+        class CanvasLayoutEngine {
+            constructor(canvas, options) {
+                this.ctx = canvas.getContext('2d');
+                this.options = {
+                    defaultFontSize: 14,
+                    defaultFontFamily: 'Arial, sans-serif',
+                    defaultLineHeight: 1.4,
+                    ...options
+                };
+            }
+
+            measureText(text, style = {}) {
+                const fontSize = style.fontSize || this.options.defaultFontSize;
+                const fontFamily = style.fontFamily || this.options.defaultFontFamily;
+                const fontWeight = style.fontWeight || 'normal';
+                const lineHeight = style.lineHeight || this.options.defaultLineHeight;
+
+                this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+                const metrics = this.ctx.measureText(text);
+                
+                return {
+                    width: metrics.width + (style.letterSpacing || 0) * (text.length - 1),
+                    height: fontSize * lineHeight
+                };
+            }
+
+            calculateBoxSize(node) {
+                const box = node.box || {};
+                const padding = box.padding || {};
+                const margin = box.margin || {};
+                const border = box.border || {};
+
+                const paddingHorizontal = (padding.left || 0) + (padding.right || 0);
+                const paddingVertical = (padding.top || 0) + (padding.bottom || 0);
+                const marginHorizontal = (margin.left || 0) + (margin.right || 0);
+                const marginVertical = (margin.top || 0) + (margin.bottom || 0);
+                const borderHorizontal = (border.width || 0) * 2;
+                const borderVertical = (border.width || 0) * 2;
+
+                let contentWidth = 0;
+                let contentHeight = 0;
+
+                if (node.type === 'text' && node.content) {
+                    const textSize = this.measureText(node.content, node.style);
+                    contentWidth = textSize.width;
+                    contentHeight = textSize.height;
+                }
+
+                if (box.width !== undefined) contentWidth = box.width;
+                if (box.height !== undefined) contentHeight = box.height;
+
+                return {
+                    width: contentWidth + paddingHorizontal + borderHorizontal + marginHorizontal,
+                    height: contentHeight + paddingVertical + borderVertical + marginVertical
+                };
+            }
+
+            layout(node, parentWidth, x = 0, y = 0) {
+                const size = this.calculateBoxSize(node);
+                node.computedWidth = Math.min(size.width, parentWidth);
+                node.computedHeight = size.height;
+                node.x = x;
+                node.y = y;
+
+                if (node.children && node.children.length > 0) {
+                    let currentY = y;
+                    const box = node.box || {};
+                    const padding = box.padding || {};
+                    const contentX = x + (padding.left || 0) + (box.border?.width || 0);
+                    const contentWidth = node.computedWidth - (padding.left || 0) - (padding.right || 0) - (box.border?.width || 0) * 2;
+
+                    for (const child of node.children) {
+                        this.layout(child, contentWidth, contentX, currentY + (padding.top || 0) + (box.border?.width || 0));
+                        currentY += child.computedHeight || 0;
+                    }
+
+                    const totalChildrenHeight = node.children.reduce((sum, child) => sum + (child.computedHeight || 0), 0);
+                    node.computedHeight = totalChildrenHeight + (padding.top || 0) + (padding.bottom || 0) + (box.border?.width || 0) * 2;
+                }
+            }
+
+            renderText(node) {
+                if (!node.content || node.type !== 'text') return;
+
+                const style = node.style || {};
+                const box = node.box || {};
+                const padding = box.padding || {};
+                const border = box.border || {};
+
+                const fontSize = style.fontSize || this.options.defaultFontSize;
+                const fontFamily = style.fontFamily || this.options.defaultFontFamily;
+                const fontWeight = style.fontWeight || 'normal';
+                const color = style.color || '#000000';
+                const textAlign = style.textAlign || 'left';
+
+                this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+                this.ctx.fillStyle = color;
+                this.ctx.textBaseline = 'top';
+
+                const contentX = (node.x || 0) + (padding.left || 0) + (border.width || 0);
+                const contentY = (node.y || 0) + (padding.top || 0) + (border.width || 0);
+                const contentWidth = (node.computedWidth || 0) - (padding.left || 0) - (padding.right || 0) - (border.width || 0) * 2;
+
+                let textX = contentX;
+                if (textAlign === 'center') {
+                    textX = contentX + contentWidth / 2;
+                    this.ctx.textAlign = 'center';
+                } else if (textAlign === 'right') {
+                    textX = contentX + contentWidth;
+                    this.ctx.textAlign = 'right';
+                } else {
+                    this.ctx.textAlign = 'left';
+                }
+
+                const words = node.content.split(' ');
+                const lines = [];
+                let currentLine = '';
+
+                for (const word of words) {
+                    const testLine = currentLine + (currentLine ? ' ' : '') + word;
+                    const metrics = this.ctx.measureText(testLine);
+                    
+                    if (metrics.width > contentWidth && currentLine) {
+                        lines.push(currentLine);
+                        currentLine = word;
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                if (currentLine) {
+                    lines.push(currentLine);
+                }
+
+                const lineHeight = fontSize * (style.lineHeight || this.options.defaultLineHeight);
+                lines.forEach((line, index) => {
+                    const lineY = contentY + index * lineHeight;
+                    this.ctx.fillText(line, textX, lineY);
+
+                    if (style.textDecoration === 'underline') {
+                        const lineWidth = this.ctx.measureText(line).width;
+                        const underlineY = lineY + fontSize;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(textAlign === 'center' ? textX - lineWidth / 2 : textX, underlineY);
+                        this.ctx.lineTo(textAlign === 'center' ? textX + lineWidth / 2 : textX + lineWidth, underlineY);
+                        this.ctx.strokeStyle = color;
+                        this.ctx.lineWidth = 1;
+                        this.ctx.stroke();
+                    }
+                });
+            }
+
+            renderBox(node) {
+                const box = node.box || {};
+                const border = box.border || {};
+                
+                if (border.width && border.width > 0) {
+                    this.ctx.strokeStyle = border.color || '#000000';
+                    this.ctx.lineWidth = border.width;
+                    
+                    if (border.style === 'dashed') {
+                        this.ctx.setLineDash([5, 5]);
+                    } else if (border.style === 'dotted') {
+                        this.ctx.setLineDash([2, 2]);
+                    } else {
+                        this.ctx.setLineDash([]);
+                    }
+                    
+                    this.ctx.strokeRect(
+                        (node.x || 0) + border.width / 2,
+                        (node.y || 0) + border.width / 2,
+                        (node.computedWidth || 0) - border.width,
+                        (node.computedHeight || 0) - border.width
+                    );
+                }
+            }
+
+            renderNode(node) {
+                this.renderBox(node);
+                
+                if (node.type === 'text') {
+                    this.renderText(node);
+                }
+
+                if (node.children) {
+                    for (const child of node.children) {
+                        this.renderNode(child);
+                    }
+                }
+            }
+
+            render(layoutTree) {
+                this.ctx.clearRect(0, 0, this.options.containerWidth, this.options.containerHeight);
+                this.layout(layoutTree, this.options.containerWidth);
+                this.renderNode(layoutTree);
+            }
+
+            getNodeAt(x, y, node) {
+                if (!node.x || !node.y || !node.computedWidth || !node.computedHeight) {
+                    return null;
+                }
+
+                if (x >= node.x && x <= node.x + node.computedWidth &&
+                    y >= node.y && y <= node.y + node.computedHeight) {
+                    
+                    if (node.children) {
+                        for (const child of node.children) {
+                            const childNode = this.getNodeAt(x, y, child);
+                            if (childNode) {
+                                return childNode;
+                            }
+                        }
+                    }
+                    
+                    return node;
+                }
+
+                return null;
+            }
+        }
+
+        function createTextNode(content, style, box) {
+            return { type: 'text', content, style, box };
+        }
+
+        function createContainerNode(children, box) {
+            return { type: 'container', children, box };
+        }
+
+        // 全局变量
+        let engines = {};
+        let layouts = {};
+        let currentTheme = 'light';
+
+        // 基础演示
+        function initBasicDemo() {
+            const canvas = document.getElementById('basicDemo');
+            engines.basic = new CanvasLayoutEngine(canvas, {
+                containerWidth: 800,
+                containerHeight: 400
+            });
+
+            updateBasicDemo();
+        }
+
+        function updateBasicDemo() {
+            const theme = currentTheme === 'light' ? {
+                bg: '#ffffff',
+                primary: '#333333',
+                secondary: '#666666',
+                accent: '#007bff'
+            } : {
+                bg: '#2d3748',
+                primary: '#ffffff',
+                secondary: '#cbd5e0',
+                accent: '#63b3ed'
+            };
+
+            layouts.basic = createContainerNode([
+                createTextNode('Octopus Layout 演示', {
+                    fontSize: 28,
+                    fontWeight: 'bold',
+                    color: theme.primary,
+                    textAlign: 'center'
+                }, {
+                    padding: { top: 20, bottom: 15 }
+                }),
+
+                createTextNode('基于 CSS 属性的 Canvas 2D 文字布局引擎', {
+                    fontSize: 16,
+                    color: theme.secondary,
+                    textAlign: 'center'
+                }, {
+                    padding: { bottom: 25 }
+                }),
+
+                createContainerNode([
+                    createTextNode('左对齐文本：这是一段左对齐的文本内容，展示了基本的文字渲染功能。', {
+                        fontSize: 14,
+                        color: theme.primary,
+                        textAlign: 'left'
+                    }, {
+                        padding: { top: 10, bottom: 10, left: 20, right: 20 }
+                    }),
+
+                    createTextNode('居中对齐文本：支持多种对齐方式', {
+                        fontSize: 16,
+                        fontWeight: 'bold',
+                        color: theme.accent,
+                        textAlign: 'center',
+                        textDecoration: 'underline'
+                    }, {
+                        padding: { top: 15, bottom: 15 }
+                    }),
+
+                    createTextNode('右对齐文本：这段文字演示右对齐效果', {
+                        fontSize: 14,
+                        color: theme.secondary,
+                        textAlign: 'right'
+                    }, {
+                        padding: { top: 10, bottom: 10, left: 20, right: 20 }
+                    })
+                ], {
+                    border: { width: 1, color: theme.secondary, style: 'solid' },
+                    padding: { top: 10, bottom: 10 }
+                })
+            ]);
+
+            engines.basic.render(layouts.basic);
+        }
+
+        function changeTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            updateBasicDemo();
+        }
+
+        // 响应式演示
+        function initResponsiveDemo() {
+            const desktopCanvas = document.getElementById('desktopDemo');
+            const mobileCanvas = document.getElementById('mobileDemo');
+
+            engines.desktop = new CanvasLayoutEngine(desktopCanvas, {
+                containerWidth: 600,
+                containerHeight: 300
+            });
+
+            engines.mobile = new CanvasLayoutEngine(mobileCanvas, {
+                containerWidth: 300,
+                containerHeight: 400
+            });
+
+            updateResponsiveDemo();
+        }
+
+        function updateResponsiveDemo() {
+            // 桌面版布局
+            layouts.desktop = createContainerNode([
+                createTextNode('桌面版布局', {
+                    fontSize: 24,
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    color: '#2c3e50'
+                }, {
+                    padding: { top: 20, bottom: 15 }
+                }),
+
+                createTextNode('较大的字体和宽松的间距，适合大屏幕显示。支持更丰富的内容展示和更好的视觉效果。', {
+                    fontSize: 16,
+                    lineHeight: 1.6,
+                    color: '#34495e'
+                }, {
+                    padding: { top: 10, bottom: 20, left: 30, right: 30 }
+                })
+            ]);
+
+            // 移动版布局
+            layouts.mobile = createContainerNode([
+                createTextNode('移动版布局', {
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    color: '#2c3e50'
+                }, {
+                    padding: { top: 15, bottom: 10 }
+                }),
+
+                createTextNode('紧凑的设计，较小的字体和间距，适合小屏幕阅读。优化了移动设备的显示效果。', {
+                    fontSize: 12,
+                    lineHeight: 1.4,
+                    color: '#34495e'
+                }, {
+                    padding: { top: 10, bottom: 15, left: 15, right: 15 }
+                }),
+
+                createTextNode('移动优先设计', {
+                    fontSize: 14,
+                    fontWeight: 'bold',
+                    color: '#e74c3c',
+                    textAlign: 'center'
+                }, {
+                    padding: { top: 10, bottom: 10 },
+                    border: { width: 1, color: '#e74c3c', style: 'dashed' }
+                })
+            ]);
+
+            engines.desktop.render(layouts.desktop);
+            engines.mobile.render(layouts.mobile);
+        }
+
+        // 交互演示
+        function initInteractiveDemo() {
+            const canvas = document.getElementById('interactiveDemo');
+            engines.interactive = new CanvasLayoutEngine(canvas, {
+                containerWidth: 800,
+                containerHeight: 300
+            });
+
+            layouts.interactive = createContainerNode([
+                createTextNode('交互演示 - 点击文字查看信息', {
+                    fontSize: 20,
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    color: '#2c3e50'
+                }, {
+                    padding: { top: 20, bottom: 15 }
+                }),
+
+                createContainerNode([
+                    createTextNode('可点击的文本块 1', {
+                        fontSize: 16,
+                        color: '#007bff',
+                        textAlign: 'left'
+                    }, {
+                        padding: { top: 10, bottom: 10, left: 20, right: 20 },
+                        border: { width: 1, color: '#007bff', style: 'solid' }
+                    }),
+
+                    createTextNode('可点击的文本块 2', {
+                        fontSize: 16,
+                        color: '#28a745',
+                        textAlign: 'center'
+                    }, {
+                        padding: { top: 10, bottom: 10, left: 20, right: 20 },
+                        border: { width: 1, color: '#28a745', style: 'solid' }
+                    }),
+
+                    createTextNode('可点击的文本块 3', {
+                        fontSize: 16,
+                        color: '#dc3545',
+                        textAlign: 'right'
+                    }, {
+                        padding: { top: 10, bottom: 10, left: 20, right: 20 },
+                        border: { width: 1, color: '#dc3545', style: 'solid' }
+                    })
+                ])
+            ]);
+
+            engines.interactive.render(layouts.interactive);
+
+            // 添加点击事件
+            canvas.addEventListener('click', (event) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                
+                const clickedNode = engines.interactive.getNodeAt(x, y, layouts.interactive);
+                const infoDiv = document.getElementById('clickInfo');
+                
+                if (clickedNode) {
+                    infoDiv.innerHTML = `
+                        <strong>节点信息：</strong><br>
+                        类型: ${clickedNode.type}<br>
+                        ${clickedNode.content ? `内容: "${clickedNode.content}"<br>` : ''}
+                        位置: (${Math.round(clickedNode.x || 0)}, ${Math.round(clickedNode.y || 0)})<br>
+                        尺寸: ${Math.round(clickedNode.computedWidth || 0)} × ${Math.round(clickedNode.computedHeight || 0)}<br>
+                        ${clickedNode.style ? `样式: ${JSON.stringify(clickedNode.style)}` : ''}
+                    `;
+                } else {
+                    infoDiv.innerHTML = '点击了空白区域';
+                }
+            });
+        }
+
+        // 动态更新演示
+        function initDynamicDemo() {
+            const canvas = document.getElementById('dynamicDemo');
+            engines.dynamic = new CanvasLayoutEngine(canvas, {
+                containerWidth: 800,
+                containerHeight: 250
+            });
+
+            layouts.dynamic = createContainerNode([
+                createTextNode('动态更新演示', {
+                    fontSize: 20,
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    color: '#2c3e50'
+                }, {
+                    padding: { top: 20, bottom: 15 }
+                }),
+
+                createTextNode('动态更新的文字内容', {
+                    fontSize: 16,
+                    color: '#333333',
+                    textAlign: 'left'
+                }, {
+                    padding: { top: 15, bottom: 15, left: 20, right: 20 },
+                    border: { width: 1, color: '#ddd', style: 'solid' }
+                })
+            ]);
+
+            engines.dynamic.render(layouts.dynamic);
+        }
+
+        function updateText() {
+            const newText = document.getElementById('textInput').value;
+            const textNode = layouts.dynamic.children[1]; // 第二个子节点是文本节点
+            textNode.content = newText;
+            engines.dynamic.render(layouts.dynamic);
+        }
+
+        function updateStyle() {
+            const fontSize = parseInt(document.getElementById('fontSizeSelect').value);
+            const color = document.getElementById('colorSelect').value;
+            const textAlign = document.getElementById('alignSelect').value;
+            
+            const textNode = layouts.dynamic.children[1];
+            textNode.style = {
+                ...textNode.style,
+                fontSize,
+                color,
+                textAlign
+            };
+            engines.dynamic.render(layouts.dynamic);
+        }
+
+        // 初始化所有演示
+        window.updateBasicDemo = updateBasicDemo;
+        window.changeTheme = changeTheme;
+        window.updateResponsiveDemo = updateResponsiveDemo;
+        window.updateText = updateText;
+        window.updateStyle = updateStyle;
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initBasicDemo();
+            initResponsiveDemo();
+            initInteractiveDemo();
+            initDynamicDemo();
+        });
+    </script>
+</body>
+</html>
