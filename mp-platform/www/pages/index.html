@@ -7,6 +7,7 @@
     <style>
       html,
       body {
+        height: 100vh;
         margin: 0;
         padding: 0;
         background-color: var(--weui-BG-0);
@@ -48,6 +49,16 @@
     </script>
   </head>
   <body>
-    <div id="cell-container" class="weui-cells"></div>
+    <div class="weui-bottom-fixed-opr-page">
+      <div class="weui-bottom-fixed-opr-page__content">
+        <div id="cell-container" class="weui-cells"></div>
+      </div>
+
+      <div class="weui-bottom-fixed-opr-page__tool">
+        <div class="weui-bottom-fixed-opr-page__tips weui-agree__text">
+          本网站仅供学习使用，其中的资源不可用于商业用途
+        </div>
+      </div>
+    </div>
   </body>
 </html>

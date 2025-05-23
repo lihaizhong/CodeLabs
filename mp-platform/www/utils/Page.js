@@ -72,6 +72,10 @@ export default function Page(options) {
             set(target, prop, value, receiver) {
               Reflect.set(target, prop, value, receiver);
               bindAll.apply(ENTITY, [prop, value]);
+
+              // 错误 "TypeError: 'set' on proxy: trap returned falsish for property 'current'" 在 JavaScript Proxy 的 set 陷阱在严格模式下返回一个假值时出现。
+              // set 陷阱应该返回 true 以指示成功分配。返回 false 表示分配失败，并且在严格模式下，这会导致一个 TypeError。
+              return true;
             },
           });
 
