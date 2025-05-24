@@ -38,13 +38,21 @@ export class CanvasLayoutEngine {
     text: string,
     style: OctopusLayout.TextStyle = {}
   ): { width: number; height: number } {
-    const fontSize = style.fontSize || this.options.defaultFontSize!;
-    const fontFamily = style.fontFamily || this.options.defaultFontFamily!;
-    const fontWeight = style.fontWeight || this.options.defaultFontWeight;
-    const fontStyle = style.fontStyle || this.options.defaultFontStyle;
-    const lineHeight = style.lineHeight || this.options.defaultLineHeight!;
+    const {
+      defaultFontSize,
+      defaultFontFamily,
+      defaultFontWeight,
+      defaultFontStyle,
+      defaultLineHeight,
+    } = this.options;
+    const fontSize = style.fontSize || defaultFontSize;
+    const fontFamily = style.fontFamily || defaultFontFamily;
+    const fontWeight = style.fontWeight || defaultFontWeight;
+    const fontStyle = style.fontStyle || defaultFontStyle;
+    const lineHeight = style.lineHeight || defaultLineHeight;
 
     this.ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+
     const metrics = this.ctx.measureText(text);
 
     return {
@@ -102,6 +110,7 @@ export class CanvasLayoutEngine {
     y: number = 0
   ): void {
     const size = this.calculateBoxSize(node);
+
     node.computedWidth = Math.min(size.width, parentWidth);
     node.computedHeight = size.height;
     node.x = x;
@@ -133,6 +142,7 @@ export class CanvasLayoutEngine {
         (sum, child) => sum + (child.computedHeight || 0),
         0
       );
+
       node.computedHeight =
         totalChildrenHeight +
         (padding.top || 0) +
@@ -147,19 +157,27 @@ export class CanvasLayoutEngine {
   private renderText(node: OctopusLayout.LayoutNode): void {
     if (!node.content || node.type !== "text") return;
 
+    const {
+      defaultFontSize,
+      defaultFontFamily,
+      defaultFontWeight,
+      defaultColor,
+      defaultFontStyle,
+      defaultLineHeight,
+    } = this.options;
     const style = node.style || {};
     const box = node.box || {};
     const padding = box.padding || {};
     const border = box.border || {};
 
-    const fontSize = style.fontSize || this.options.defaultFontSize!;
-    const fontFamily = style.fontFamily || this.options.defaultFontFamily!;
-    const fontWeight = style.fontWeight || this.options.defaultFontWeight;
-    const color = style.color || this.options.defaultColor;
+    const fontSize = style.fontSize || defaultFontSize;
+    const fontFamily = style.fontFamily || defaultFontFamily;
+    const fontWeight = style.fontWeight || defaultFontWeight;
+    const color = style.color || defaultColor;
     const textAlign = style.textAlign || "left";
 
     // 设置字体样式
-    const fontStyle = style.fontStyle || this.options.defaultFontStyle;
+    const fontStyle = style.fontStyle || defaultFontStyle;
     this.ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
     this.ctx.fillStyle = color;
     this.ctx.textBaseline = "top";
@@ -205,8 +223,7 @@ export class CanvasLayoutEngine {
     }
 
     // 渲染每一行
-    const lineHeight =
-      fontSize * (style.lineHeight || this.options.defaultLineHeight!);
+    const lineHeight = fontSize * (style.lineHeight || defaultLineHeight!);
     lines.forEach((line, index) => {
       const lineY = contentY + index * lineHeight;
       this.ctx.fillText(line, textX, lineY);
@@ -280,16 +297,13 @@ export class CanvasLayoutEngine {
    * 渲染布局树
    */
   public render(layoutTree: OctopusLayout.LayoutNode): void {
+    const { containerWidth, containerHeight } = this.options;
+
     // 清空画布
-    this.ctx.clearRect(
-      0,
-      0,
-      this.options.containerWidth,
-      this.options.containerHeight
-    );
+    this.ctx.clearRect(0, 0, containerWidth, containerHeight);
 
     // 计算布局
-    this.layout(layoutTree, this.options.containerWidth);
+    this.layout(layoutTree, containerWidth);
 
     // 渲染
     this.renderNode(layoutTree);
@@ -317,6 +331,7 @@ export class CanvasLayoutEngine {
       if (node.children) {
         for (const child of node.children) {
           const childNode = this.getNodeAt(x, y, child);
+
           if (childNode) {
             return childNode;
           }
