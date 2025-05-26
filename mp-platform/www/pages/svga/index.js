@@ -11,6 +11,7 @@ import {
 const files = [svgaSources, svgaLargeFiles, yyFiles][2];
 const parser = new Parser();
 const player = new Player();
+let videoItem;
 let lastStatus = "next";
 
 Page({
@@ -89,7 +90,7 @@ Page({
   async initialize() {
     try {
       showPopup("准备下载资源");
-      const videoItem = await parser.load(this.data.url);
+      videoItem = await parser.load(this.data.url);
       showPopup("下载资源成功");
 
       console.log(this.data.url, videoItem);
@@ -114,12 +115,36 @@ Page({
       contentMode: "aspect-fit",
       // contentMode: "center",
     });
+
+    let loopStartTime;
+    let startTime;
+    player.onStart = () => {
+      startTime = loopStartTime = performance.now();
+      console.log(
+        "---- START ----",
+        "每帧期望消耗时长",
+        1000 / videoItem.fps,
+        "预期总消耗时长",
+        (videoItem.frames / videoItem.fps) * 1000
+      );
+    };
     player.onProcess = (percent, frame) => {
-      console.log("当前进度", percent, frame);
+      let loopEndTime = performance.now();
+
+      console.log(
+        "当前进度",
+        percent,
+        "当前帧数",
+        frame,
+        "持续时间",
+        loopEndTime - loopStartTime
+      );
       console.log("---- UPDATE ----");
+
+      loopStartTime = loopEndTime;
     };
     player.onEnd = () => {
-      console.log("---- END ----");
+      console.log("---- END ----", "总消耗时间", performance.now() - startTime);
     };
     // this.handleSwitchAtRandom();
     this.setData({

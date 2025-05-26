@@ -1,5 +1,5 @@
 import { platform } from "../platform";
-import benchmark from "../benchmark";
+// import benchmark from "../benchmark";
 import render from "./render";
 import { ImagePool } from "./image-pool";
 
@@ -109,10 +109,10 @@ export class Painter {
       model.clear = "RE";
     }
 
-    benchmark.line(4);
-    benchmark.log("brush type", model.type);
-    benchmark.log("brush clear", model.clear);
-    benchmark.line(4);
+    // benchmark.line(4);
+    // benchmark.log("brush type", model.type);
+    // benchmark.log("brush clear", model.clear);
+    // benchmark.line(4);
   }
 
   /**

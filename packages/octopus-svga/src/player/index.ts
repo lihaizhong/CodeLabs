@@ -2,7 +2,7 @@ import { platform } from "../platform";
 import { Painter } from "../painter";
 import { Animator } from "./animator";
 import { Config } from "./config";
-import benchmark from "../benchmark";
+// import benchmark from "../benchmark";
 
 /**
  * SVGA 播放器
@@ -48,7 +48,8 @@ export class Player {
     options: string | PlayerConfigOptions,
     component?: WechatMiniprogram.Component.TrivialInstance | null
   ): Promise<void> {
-    const config: PlayerConfigOptions = typeof options === "string" ? { container: options } : options;
+    const config: PlayerConfigOptions =
+      typeof options === "string" ? { container: options } : options;
 
     this.config.register(config);
     this.animator = new Animator();
@@ -316,25 +317,25 @@ export class Player {
 
     // 动画绘制过程
     animator!.onUpdate = (timePercent: number) => {
-      benchmark.time("partial updated", () => {
-        patchDraw(() => {
-          percent = isReverseMode ? 1 - timePercent : timePercent;
-          exactFrame = percent * totalFrame;
+      // benchmark.time("partial updated", () => {
+      patchDraw(() => {
+        percent = isReverseMode ? 1 - timePercent : timePercent;
+        exactFrame = percent * totalFrame;
 
-          if (isReverseMode) {
-            nextFrame =
-              (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
-            // partialDrawPercent = Math.abs(1 - exactFrame + currentFrame);
-            // FIXME: 倒序会有一帧的偏差，需要校准当前帧
-            percent = currentFrame / totalFrame;
-          } else {
-            nextFrame = timePercent === 1 ? startFrame : Math.floor(exactFrame);
-            // partialDrawPercent = Math.abs(exactFrame - currentFrame);
-          }
+        if (isReverseMode) {
+          nextFrame =
+            (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
+          // partialDrawPercent = Math.abs(1 - exactFrame + currentFrame);
+          // FIXME: 倒序会有一帧的偏差，需要校准当前帧
+          percent = currentFrame / totalFrame;
+        } else {
+          nextFrame = timePercent === 1 ? startFrame : Math.floor(exactFrame);
+          // partialDrawPercent = Math.abs(exactFrame - currentFrame);
+        }
 
-          hasRemained = currentFrame === nextFrame;
-        });
+        hasRemained = currentFrame === nextFrame;
       });
+      // });
 
       if (hasRemained) return;
 

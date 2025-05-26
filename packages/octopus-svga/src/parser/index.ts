@@ -1,7 +1,7 @@
 import { unzlibSync } from "fflate";
 import { platform } from "../platform";
 import { SVGADecoder } from "../extensions/protobuf";
-import benchmark from "../benchmark";
+// import benchmark from "../benchmark";
 import { VideoEntity } from "./video-entity";
 
 /**
@@ -22,18 +22,26 @@ export class Parser {
       throw new Error("this parser only support version@2 of SVGA.");
     }
 
-    let entity: VideoEntity;
-    benchmark.time("unzlibSync", () => {
-      const inflateData = unzlibSync(u8a);
-      const movieData = SVGADecoder.decode(inflateData);
+    const inflateData = unzlibSync(u8a);
+    const movieData = SVGADecoder.decode(inflateData);
 
-      entity = new VideoEntity(
-        movieData!,
-        platform.path.filename(url)
-      );
-    });
+    return new VideoEntity(
+      movieData!,
+      platform.path.filename(url)
+    );
 
-    return entity!;
+    // let entity: VideoEntity;
+    // benchmark.time("unzlibSync", () => {
+    //   const inflateData = unzlibSync(u8a);
+    //   const movieData = SVGADecoder.decode(inflateData);
+
+    //   entity = new VideoEntity(
+    //     movieData!,
+    //     platform.path.filename(url)
+    //   );
+    // });
+
+    // return entity!;
   }
 
   /**
@@ -44,8 +52,8 @@ export class Parser {
   public download(url: string): Promise<ArrayBuffer | null> {
     const { remote, local, globals } = platform;
 
-    benchmark.label(url);
-    benchmark.line();
+    // benchmark.label(url);
+    // benchmark.line();
 
     // 读取远程文件
     if (remote.is(url)) {

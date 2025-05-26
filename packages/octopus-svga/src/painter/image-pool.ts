@@ -1,4 +1,4 @@
-import benchmark from "../benchmark";
+// import benchmark from "../benchmark";
 import { platform } from "../platform";
 
 export class ImagePool {
@@ -23,7 +23,7 @@ export class ImagePool {
    * @returns
    */
   public getReleaseImage(): OctopusPlatform.PlatformImage | undefined {
-    return this.images.shift()
+    return this.images.shift();
   }
 
   /**
@@ -36,31 +36,52 @@ export class ImagePool {
     images: RawImages | PlatformImages,
     filename: string
   ): Promise<void[]> {
-    return benchmark.time<void[]>("loadAll", () => {
-      const { load, isImage } = platform.image;
-      const imageAwaits: Promise<void>[] = [];
+    const { load, isImage } = platform.image;
+    const imageAwaits: Promise<void>[] = [];
 
-      Object.keys(images).forEach((key: string) => {
-        const image = images[key];
-  
-        if (isImage(image)) {
-          this.materials.set(key, image as OctopusPlatform.PlatformImage);
-        } else {
-          const p = load(image as OctopusPlatform.RawImage, filename, key).then((img) => {
-            this.materials.set(key, img)
-          });
-  
-          imageAwaits.push(p);
-        }
-      });
-  
-      return Promise.all<void>(imageAwaits);
+    Object.keys(images).forEach((key: string) => {
+      const image = images[key];
+
+      if (isImage(image)) {
+        this.materials.set(key, image as OctopusPlatform.PlatformImage);
+      } else {
+        const p = load(image as OctopusPlatform.RawImage, filename, key).then(
+          (img) => {
+            this.materials.set(key, img);
+          }
+        );
+
+        imageAwaits.push(p);
+      }
     });
+
+    return Promise.all<void>(imageAwaits);
+
+    // return benchmark.time<void[]>("loadAll", () => {
+    //   const { load, isImage } = platform.image;
+    //   const imageAwaits: Promise<void>[] = [];
+
+    //   Object.keys(images).forEach((key: string) => {
+    //     const image = images[key];
+
+    //     if (isImage(image)) {
+    //       this.materials.set(key, image as OctopusPlatform.PlatformImage);
+    //     } else {
+    //       const p = load(image as OctopusPlatform.RawImage, filename, key).then((img) => {
+    //         this.materials.set(key, img)
+    //       });
+
+    //       imageAwaits.push(p);
+    //     }
+    //   });
+
+    //   return Promise.all<void>(imageAwaits);
+    // });
   }
 
   /**
    * 更新动态素材
-   * @param images 
+   * @param images
    */
   public appendAll(images: PlatformImages) {
     this.dynamicMaterials = new Map(Object.entries(images));
@@ -85,7 +106,7 @@ export class ImagePool {
         } else if (isImageBitmap(image)) {
           (image as ImageBitmap).close();
         }
-      }
+      };
 
       this.materials.forEach(releaseOne);
       this.dynamicMaterials.forEach(releaseOne);
