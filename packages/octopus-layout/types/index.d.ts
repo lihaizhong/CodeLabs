@@ -12,8 +12,6 @@ declare namespace OctopusLayout {
     lineHeight?: number;
     textAlign?: "left" | "center" | "right" | "justify";
     textDecoration?: "none" | "underline" | "line-through";
-    letterSpacing?: number;
-    wordSpacing?: number;
   }
   
   export interface BoxModel {

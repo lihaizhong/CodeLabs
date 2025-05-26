@@ -56,8 +56,14 @@ export class CanvasLayoutEngine {
     const metrics = this.ctx.measureText(text);
 
     return {
-      width: metrics.width + (style.letterSpacing || 0) * (text.length - 1),
-      height: fontSize * lineHeight,
+      width:
+        metrics.width +
+        metrics.actualBoundingBoxLeft +
+        metrics.actualBoundingBoxRight,
+      height:
+        fontSize * lineHeight +
+        metrics.actualBoundingBoxAscent +
+        metrics.actualBoundingBoxDescent,
     };
   }
 
@@ -83,15 +89,14 @@ export class CanvasLayoutEngine {
     let contentWidth = 0;
     let contentHeight = 0;
 
-    if (node.type === "text" && node.content) {
+    if (box.width !== undefined || box.height !== undefined) {
+      contentWidth = box.width || 0;
+      contentHeight = box.height || 0;
+    } else if (node.type === "text" && node.content) {
       const textSize = this.measureText(node.content, node.style);
       contentWidth = textSize.width;
       contentHeight = textSize.height;
     }
-
-    // 如果指定了固定宽高，使用指定值
-    if (box.width !== undefined) contentWidth = box.width;
-    if (box.height !== undefined) contentHeight = box.height;
 
     return {
       width:
@@ -118,21 +123,20 @@ export class CanvasLayoutEngine {
 
     if (node.children && node.children.length > 0) {
       let currentY = y;
-      const box = node.box || {};
-      const padding = box.padding || {};
-      const contentX = x + (padding.left || 0) + (box.border?.width || 0);
+      const { padding = {}, margin = {}, border = {} } = node.box || {};
+      const contentX = x + (padding.left || 0) + (border.width || 0);
       const contentWidth =
         node.computedWidth -
         (padding.left || 0) -
         (padding.right || 0) -
-        (box.border?.width || 0) * 2;
+        (border?.width || 0) * 2;
 
       for (const child of node.children) {
         this.layout(
           child,
           contentWidth,
           contentX,
-          currentY + (padding.top || 0) + (box.border?.width || 0)
+          currentY + (margin.top || 0) + (padding.top || 0) + (border?.width || 0)
         );
         currentY += child.computedHeight || 0;
       }
@@ -147,7 +151,7 @@ export class CanvasLayoutEngine {
         totalChildrenHeight +
         (padding.top || 0) +
         (padding.bottom || 0) +
-        (box.border?.width || 0) * 2;
+        (border?.width || 0) * 2;
     }
   }
 
