@@ -8,7 +8,7 @@ export default definePlugin<"remote">({
   name: "remote",
   install() {
     const { env, br } = this.globals;
-    const isRemote = (url: string) => /^http(s)?:\/\//.test(url);
+    const isRemote = (url: string) => /^(blob:)?http(s)?:\/\//.test(url);
 
     if (env === "h5") {
       return {
