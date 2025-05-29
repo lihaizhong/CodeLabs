@@ -1,6 +1,6 @@
 import { platform } from "../platform";
 // import benchmark from "../benchmark";
-import render from "./render";
+import render from "../renderer";
 import { ImagePool } from "./image-pool";
 
 interface PaintModel {
