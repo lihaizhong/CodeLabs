@@ -31,10 +31,10 @@ export interface SpriteEntityProps {
 //     if (!writer) {
 //       writer = Writer.create();
 //     }
-//     if (message.imageKey != null && Object.hasOwn(message, "imageKey")) {
+//     if (message.imageKey !== null && Object.hasOwn(message, "imageKey")) {
 //       writer.uint32(/* id 1, wireType 2 =*/ 10).string(message.imageKey);
 //     }
-//     if (message.frames != null && message.frames.length) {
+//     if (message.frames !== null && message.frames.length) {
 //       for (let i = 0; i < message.frames.length; ++i) {
 //         FrameEntity.encode(
 //           message.frames[i],
@@ -42,7 +42,7 @@ export interface SpriteEntityProps {
 //         ).ldelim();
 //       }
 //     }
-//     if (message.matteKey != null && Object.hasOwn(message, "matteKey")) {
+//     if (message.matteKey !== null && Object.hasOwn(message, "matteKey")) {
 //       writer.uint32(/* id 3, wireType 2 =*/ 26).string(message.matteKey);
 //     }
 
@@ -77,7 +77,7 @@ export default class SpriteEntity {
    */
   static decode(reader: Reader | Uint8Array, length?: number): SpriteEntity {
     reader = Reader.create(reader);
-    const end = length == undefined ? reader.len : reader.pos + length;
+    const end = length === void 0 ? reader.len : reader.pos + length;
     const message = new SpriteEntity();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -130,15 +130,15 @@ export default class SpriteEntity {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message != "object" || message == null) {
+  //   if (typeof message !== "object" || message === null) {
   //     return "object expected";
   //   }
-  //   if (message.imageKey != null && message.hasOwnProperty("imageKey")) {
+  //   if (message.imageKey !== null && message.hasOwnProperty("imageKey")) {
   //     if (!isString(message.imageKey)) {
   //       return "imageKey: string expected";
   //     }
   //   }
-  //   if (message.frames != null && message.hasOwnProperty("frames")) {
+  //   if (message.frames !== null && message.hasOwnProperty("frames")) {
   //     if (!Array.isArray(message.frames)) {
   //       return "frames: array expected";
   //     }
@@ -149,7 +149,7 @@ export default class SpriteEntity {
   //       }
   //     }
   //   }
-  //   if (message.matteKey != null && message.hasOwnProperty("matteKey")) {
+  //   if (message.matteKey !== null && message.hasOwnProperty("matteKey")) {
   //     if (!isString(message.matteKey)) {
   //       return "matteKey: string expected";
   //     }
@@ -172,7 +172,7 @@ export default class SpriteEntity {
   //   }
 
   //   const message = new SpriteEntity();
-  //   if (object.imageKey != null) {
+  //   if (object.imageKey !== null) {
   //     message.imageKey = "" + object.imageKey;
   //   }
   //   if (object.frames) {
@@ -183,7 +183,7 @@ export default class SpriteEntity {
   //     }
   //     message.frames = [];
   //     for (let i = 0; i < object.frames.length; ++i) {
-  //       if (typeof object.frames[i] != "object") {
+  //       if (typeof object.frames[i] !== "object") {
   //         throw TypeError(
   //           ".com.opensource.svga.SpriteEntity.frames: object expected"
   //         );
@@ -191,7 +191,7 @@ export default class SpriteEntity {
   //       message.frames[i] = FrameEntity.fromObject(object.frames[i]);
   //     }
   //   }
-  //   if (object.matteKey != null) {
+  //   if (object.matteKey !== null) {
   //     message.matteKey = "" + object.matteKey;
   //   }
 
@@ -223,7 +223,7 @@ export default class SpriteEntity {
   //     object.imageKey = "";
   //     object.matteKey = "";
   //   }
-  //   if (message.imageKey != null && message.hasOwnProperty("imageKey")) {
+  //   if (message.imageKey !== null && message.hasOwnProperty("imageKey")) {
   //     object.imageKey = message.imageKey;
   //   }
   //   if (message.frames && message.frames.length) {
@@ -232,7 +232,7 @@ export default class SpriteEntity {
   //       object.frames[j] = FrameEntity.toObject(message.frames[j], options);
   //     }
   //   }
-  //   if (message.matteKey != null && message.hasOwnProperty("matteKey")) {
+  //   if (message.matteKey !== null && message.hasOwnProperty("matteKey")) {
   //     object.matteKey = message.matteKey;
   //   }
 
@@ -248,7 +248,7 @@ export default class SpriteEntity {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix == undefined) {
+  //   if (typeUrlPrefix === void 0) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 
@@ -287,15 +287,15 @@ export default class SpriteEntity {
    */
   constructor(properties?: SpriteEntityProps) {
     if (properties) {
-      if (properties.frames != null) {
+      if (properties.frames !== null) {
         this.frames = properties.frames
       }
 
-      if (properties.imageKey != null) {
+      if (properties.imageKey !== null) {
         this.imageKey = properties.imageKey
       }
 
-      if (properties.matteKey != null) {
+      if (properties.matteKey !== null) {
         this.matteKey = properties.matteKey
       }
     }

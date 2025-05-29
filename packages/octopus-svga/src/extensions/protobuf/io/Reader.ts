@@ -249,7 +249,7 @@ export default class Reader {
    * @returns {boolean} Value read
    */
   // bool() {
-  //   return this.uint32() != 0;
+  //   return this.uint32() !== 0;
   // }
 
   /**
@@ -365,7 +365,7 @@ export default class Reader {
    * @returns {Reader} `this`
    */
   skip(length?: number) {
-    if (typeof length == "number") {
+    if (typeof length === "number") {
       /* istanbul ignore if */
       if (this.pos + length > this.len) {
         throw this.indexOutOfRange(this, length);
@@ -406,7 +406,7 @@ export default class Reader {
         this.skip(this.uint32());
         break;
       case 3:
-        while ((wireType = this.uint32() & 7) != 4) {
+        while ((wireType = this.uint32() & 7) !== 4) {
           this.skipType(wireType);
         }
         break;

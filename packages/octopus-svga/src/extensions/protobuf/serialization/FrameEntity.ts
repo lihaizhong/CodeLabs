@@ -37,25 +37,25 @@ export interface FrameEntityProps {
 //     if (!writer) {
 //       writer = Writer.create();
 //     }
-//     if (message.alpha != null && Object.hasOwn(message, "alpha")) {
+//     if (message.alpha !== null && Object.hasOwn(message, "alpha")) {
 //       writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.alpha);
 //     }
-//     if (message.layout != null && Object.hasOwn(message, "layout")) {
+//     if (message.layout !== null && Object.hasOwn(message, "layout")) {
 //       Layout.encode(
 //         message.layout,
 //         writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
 //       ).ldelim();
 //     }
-//     if (message.transform != null && Object.hasOwn(message, "transform")) {
+//     if (message.transform !== null && Object.hasOwn(message, "transform")) {
 //       Transform.encode(
 //         message.transform,
 //         writer.uint32(/* id 3, wireType 2 =*/ 26).fork()
 //       ).ldelim();
 //     }
-//     if (message.clipPath != null && Object.hasOwn(message, "clipPath")) {
+//     if (message.clipPath !== null && Object.hasOwn(message, "clipPath")) {
 //       writer.uint32(/* id 4, wireType 2 =*/ 34).string(message.clipPath);
 //     }
-//     if (message.shapes != null && message.shapes.length) {
+//     if (message.shapes !== null && message.shapes.length) {
 //       for (let i = 0; i < message.shapes.length; ++i) {
 //         ShapeEntity.encode(
 //           message.shapes[i],
@@ -93,7 +93,7 @@ export default class FrameEntity {
    */
   static decode(reader: Reader | Uint8Array, length?: number): FrameEntity {
     reader = Reader.create(reader);
-    const end = length == undefined ? reader.len : reader.pos + length;
+    const end = length === void 0 ? reader.len : reader.pos + length;
     const message = new FrameEntity();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -155,32 +155,32 @@ export default class FrameEntity {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message != "object" || message == null) {
+  //   if (typeof message !== "object" || message === null) {
   //     return "object expected";
   //   }
-  //   if (message.alpha != null && message.hasOwnProperty("alpha")) {
-  //     if (typeof message.alpha != "number") {
+  //   if (message.alpha !== null && message.hasOwnProperty("alpha")) {
+  //     if (typeof message.alpha !== "number") {
   //       return "alpha: number expected";
   //     }
   //   }
-  //   if (message.layout != null && message.hasOwnProperty("layout")) {
+  //   if (message.layout !== null && message.hasOwnProperty("layout")) {
   //     const error = Layout.verify(message.layout);
   //     if (error) {
   //       return "layout." + error;
   //     }
   //   }
-  //   if (message.transform != null && message.hasOwnProperty("transform")) {
+  //   if (message.transform !== null && message.hasOwnProperty("transform")) {
   //     const error = Transform.verify(message.transform);
   //     if (error) {
   //       return "transform." + error;
   //     }
   //   }
-  //   if (message.clipPath != null && message.hasOwnProperty("clipPath")) {
+  //   if (message.clipPath !== null && message.hasOwnProperty("clipPath")) {
   //     if (!isString(message.clipPath)) {
   //       return "clipPath: string expected";
   //     }
   //   }
-  //   if (message.shapes != null && message.hasOwnProperty("shapes")) {
+  //   if (message.shapes !== null && message.hasOwnProperty("shapes")) {
   //     if (!Array.isArray(message.shapes)) {
   //       return "shapes: array expected";
   //     }
@@ -208,26 +208,26 @@ export default class FrameEntity {
   //     return object;
   //   }
   //   const message = new FrameEntity();
-  //   if (object.alpha != null) {
+  //   if (object.alpha !== null) {
   //     message.alpha = +object.alpha;
   //   }
-  //   if (object.layout != null) {
-  //     if (typeof object.layout != "object") {
+  //   if (object.layout !== null) {
+  //     if (typeof object.layout !== "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.FrameEntity.layout: object expected"
   //       );
   //     }
   //     message.layout = Layout.fromObject(object.layout);
   //   }
-  //   if (object.transform != null) {
-  //     if (typeof object.transform != "object") {
+  //   if (object.transform !== null) {
+  //     if (typeof object.transform !== "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.FrameEntity.transform: object expected"
   //       );
   //     }
   //     message.transform = Transform.fromObject(object.transform);
   //   }
-  //   if (object.clipPath != null) {
+  //   if (object.clipPath !== null) {
   //     message.clipPath = String(object.clipPath);
   //   }
   //   if (object.shapes) {
@@ -238,7 +238,7 @@ export default class FrameEntity {
   //     }
   //     message.shapes = [];
   //     for (let i = 0; i < object.shapes.length; ++i) {
-  //       if (typeof object.shapes[i] != "object") {
+  //       if (typeof object.shapes[i] !== "object") {
   //         throw TypeError(
   //           ".com.opensource.svga.FrameEntity.shapes: object expected"
   //         );
@@ -276,19 +276,19 @@ export default class FrameEntity {
   //     object.transform = null;
   //     object.clipPath = "";
   //   }
-  //   if (message.alpha != null && message.hasOwnProperty("alpha")) {
+  //   if (message.alpha !== null && message.hasOwnProperty("alpha")) {
   //     object.alpha =
   //       options.json && !isFinite(message.alpha)
   //         ? "" + message.alpha
   //         : message.alpha;
   //   }
-  //   if (message.layout != null && message.hasOwnProperty("layout")) {
+  //   if (message.layout !== null && message.hasOwnProperty("layout")) {
   //     object.layout = Layout.toObject(message.layout, options);
   //   }
-  //   if (message.transform != null && message.hasOwnProperty("transform")) {
+  //   if (message.transform !== null && message.hasOwnProperty("transform")) {
   //     object.transform = Transform.toObject(message.transform, options);
   //   }
-  //   if (message.clipPath != null && message.hasOwnProperty("clipPath")) {
+  //   if (message.clipPath !== null && message.hasOwnProperty("clipPath")) {
   //     object.clipPath = message.clipPath;
   //   }
   //   if (message.shapes && message.shapes.length) {
@@ -310,7 +310,7 @@ export default class FrameEntity {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix == undefined) {
+  //   if (typeUrlPrefix === void 0) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 
@@ -363,23 +363,23 @@ export default class FrameEntity {
    */
   constructor(properties?: FrameEntityProps) {
     if (properties) {
-      if (properties.alpha != null) {
+      if (properties.alpha !== null) {
         this.alpha = properties.alpha;
       }
 
-      if (properties.clipPath != null) {
+      if (properties.clipPath !== null) {
         this.clipPath = properties.clipPath;
       }
 
-      if (properties.layout != null) {
+      if (properties.layout !== null) {
         this.layout = properties.layout;
       }
 
-      if (properties.shapes != null) {
+      if (properties.shapes !== null) {
         this.shapes = properties.shapes;
       }
 
-      if (properties.transform != null) {
+      if (properties.transform !== null) {
         this.transform = properties.transform;
       }
     }

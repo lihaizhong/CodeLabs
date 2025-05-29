@@ -10,12 +10,12 @@ export class Polynomial {
   constructor(num: number[], shift: number) {
     const { length } = num;
 
-    if (typeof length == 'undefined') {
+    if (typeof length === 'undefined') {
       throw new Error(`${length}/${shift}`);
     }
 
     let offset = 0;
-    while (offset < length && num[offset] == 0) {
+    while (offset < length && num[offset] === 0) {
       offset++;
     }
     

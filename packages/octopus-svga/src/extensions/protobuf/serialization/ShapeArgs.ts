@@ -27,7 +27,7 @@ export interface ShapeArgsProps {
 //     if (!writer) {
 //       writer = Writer.create();
 //     }
-//     if (message.d != null && Object.hasOwn(message, "d")) {
+//     if (message.d !== null && Object.hasOwn(message, "d")) {
 //       writer.uint32(/* id 1, wireType 2 =*/ 10).string(message.d);
 //     }
 
@@ -61,7 +61,7 @@ export default class ShapeArgs {
    */
   static decode(reader: Reader | Uint8Array, length?: number): ShapeArgs {
     reader = Reader.create(reader);
-    const end = length == undefined ? reader.len : reader.pos + length;
+    const end = length === void 0 ? reader.len : reader.pos + length;
     const message = new ShapeArgs();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -104,10 +104,10 @@ export default class ShapeArgs {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message != "object" || message == null) {
+  //   if (typeof message !== "object" || message === null) {
   //     return "object expected";
   //   }
-  //   if (message.d != null && message.hasOwnProperty("d")) {
+  //   if (message.d !== null && message.hasOwnProperty("d")) {
   //     if (!isString(message.d)) {
   //       return "d: string expected";
   //     }
@@ -129,7 +129,7 @@ export default class ShapeArgs {
   //     return object;
   //   }
   //   const message = new ShapeEntity.ShapeArgs();
-  //   if (object.d != null) {
+  //   if (object.d !== null) {
   //     message.d = "" + object.d;
   //   }
 
@@ -156,7 +156,7 @@ export default class ShapeArgs {
   //   if (options.defaults) {
   //     object.d = "";
   //   }
-  //   if (message.d != null && message.hasOwnProperty("d")) {
+  //   if (message.d !== null && message.hasOwnProperty("d")) {
   //     object.d = message.d;
   //   }
 
@@ -172,7 +172,7 @@ export default class ShapeArgs {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix == undefined) {
+  //   if (typeUrlPrefix === void 0) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 
@@ -191,7 +191,7 @@ export default class ShapeArgs {
    */
   constructor(properties?: ShapeArgsProps) {
     if (properties) {
-      if (properties.d != null) {
+      if (properties.d !== null) {
         this.d = properties.d
       }
     }

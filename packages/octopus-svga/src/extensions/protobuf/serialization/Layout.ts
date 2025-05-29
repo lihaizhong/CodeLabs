@@ -32,16 +32,16 @@ export interface LayoutProps {
 //     if (!writer) {
 //       writer = Writer.create();
 //     }
-//     if (message.x != null && Object.hasOwn(message, "x")) {
+//     if (message.x !== null && Object.hasOwn(message, "x")) {
 //       writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.x);
 //     }
-//     if (message.y != null && Object.hasOwn(message, "y")) {
+//     if (message.y !== null && Object.hasOwn(message, "y")) {
 //       writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.y);
 //     }
-//     if (message.width != null && Object.hasOwn(message, "width")) {
+//     if (message.width !== null && Object.hasOwn(message, "width")) {
 //       writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.width);
 //     }
-//     if (message.height != null && Object.hasOwn(message, "height")) {
+//     if (message.height !== null && Object.hasOwn(message, "height")) {
 //       writer.uint32(/* id 4, wireType 5 =*/ 37).float(message.height);
 //     }
 
@@ -76,7 +76,7 @@ export default class Layout {
    */
   static decode(reader: Reader | Uint8Array, length?: number): Layout {
     reader = Reader.create(reader);
-    const end = length == undefined ? reader.len : reader.pos + length;
+    const end = length === void 0 ? reader.len : reader.pos + length;
     const message = new Layout();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -131,26 +131,26 @@ export default class Layout {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message != "object" || message == null) {
+  //   if (typeof message !== "object" || message === null) {
   //     return "object expected";
   //   }
-  //   if (message.x != null && message.hasOwnProperty("x")) {
-  //     if (typeof message.x != "number") {
+  //   if (message.x !== null && message.hasOwnProperty("x")) {
+  //     if (typeof message.x !== "number") {
   //       return "x: number expected";
   //     }
   //   }
-  //   if (message.y != null && message.hasOwnProperty("y")) {
-  //     if (typeof message.y != "number") {
+  //   if (message.y !== null && message.hasOwnProperty("y")) {
+  //     if (typeof message.y !== "number") {
   //       return "y: number expected";
   //     }
   //   }
-  //   if (message.width != null && message.hasOwnProperty("width")) {
-  //     if (typeof message.width != "number") {
+  //   if (message.width !== null && message.hasOwnProperty("width")) {
+  //     if (typeof message.width !== "number") {
   //       return "width: number expected";
   //     }
   //   }
-  //   if (message.height != null && message.hasOwnProperty("height")) {
-  //     if (typeof message.height != "number") {
+  //   if (message.height !== null && message.hasOwnProperty("height")) {
+  //     if (typeof message.height !== "number") {
   //       return "height: number expected";
   //     }
   //   }
@@ -171,16 +171,16 @@ export default class Layout {
   //     return object;
   //   }
   //   const message = new Layout();
-  //   if (object.x != null) {
+  //   if (object.x !== null) {
   //     message.x = +object.x;
   //   }
-  //   if (object.y != null) {
+  //   if (object.y !== null) {
   //     message.y = +object.y;
   //   }
-  //   if (object.width != null) {
+  //   if (object.width !== null) {
   //     message.width = +object.width;
   //   }
-  //   if (object.height != null) {
+  //   if (object.height !== null) {
   //     message.height = +object.height;
   //   }
 
@@ -210,21 +210,21 @@ export default class Layout {
   //     object.width = 0;
   //     object.height = 0;
   //   }
-  //   if (message.x != null && message.hasOwnProperty("x")) {
+  //   if (message.x !== null && message.hasOwnProperty("x")) {
   //     object.x =
   //       options.json && !isFinite(message.x) ? "" + message.x : message.x;
   //   }
-  //   if (message.y != null && message.hasOwnProperty("y")) {
+  //   if (message.y !== null && message.hasOwnProperty("y")) {
   //     object.y =
   //       options.json && !isFinite(message.y) ? "" + message.y : message.y;
   //   }
-  //   if (message.width != null && message.hasOwnProperty("width")) {
+  //   if (message.width !== null && message.hasOwnProperty("width")) {
   //     object.width =
   //       options.json && !isFinite(message.width)
   //         ? "" + message.width
   //         : message.width;
   //   }
-  //   if (message.height != null && message.hasOwnProperty("height")) {
+  //   if (message.height !== null && message.hasOwnProperty("height")) {
   //     object.height =
   //       options.json && !isFinite(message.height)
   //         ? "" + message.height
@@ -243,7 +243,7 @@ export default class Layout {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix == undefined) {
+  //   if (typeUrlPrefix === void 0) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 
@@ -289,19 +289,19 @@ export default class Layout {
    */
   constructor(properties?: LayoutProps) {
     if (properties) {
-      if (properties.x != null) {
+      if (properties.x !== null) {
         this.x = properties.x
       }
 
-      if (properties.y != null) {
+      if (properties.y !== null) {
         this.y = properties.y
       }
 
-      if (properties.width != null) {
+      if (properties.width !== null) {
         this.width = properties.width
       }
 
-      if (properties.height != null) {
+      if (properties.height !== null) {
         this.height = properties.height
       }
     }

@@ -123,7 +123,7 @@ export class VideoEntity implements PlatformVideo.Video {
         CP.length > 0
           ? {
               d: CP,
-              transform: undefined,
+              transform: void 0,
               styles: {
                 fill: "rgba(0, 0, 0, 0)" as PlatformVideo.RGBA<0, 0, 0, 0>,
                 stroke: null,

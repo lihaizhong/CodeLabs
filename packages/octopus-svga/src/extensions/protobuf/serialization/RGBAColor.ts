@@ -33,16 +33,16 @@ export interface RGBAColorProps {
 //     if (!writer) {
 //       writer = Writer.create();
 //     }
-//     if (message.r != null && Object.hasOwn(message, "r")) {
+//     if (message.r !== null && Object.hasOwn(message, "r")) {
 //       writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.r);
 //     }
-//     if (message.g != null && Object.hasOwn(message, "g")) {
+//     if (message.g !== null && Object.hasOwn(message, "g")) {
 //       writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.g);
 //     }
-//     if (message.b != null && Object.hasOwn(message, "b")) {
+//     if (message.b !== null && Object.hasOwn(message, "b")) {
 //       writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.b);
 //     }
-//     if (message.a != null && Object.hasOwn(message, "a")) {
+//     if (message.a !== null && Object.hasOwn(message, "a")) {
 //       writer.uint32(/* id 4, wireType 5 =*/ 37).float(message.a);
 //     }
 
@@ -76,7 +76,7 @@ export default class RGBAColor {
    */
   static decode(reader: Reader | Uint8Array, length?: number): RGBAColor {
     reader = Reader.create(reader);
-    const end = length == undefined ? reader.len : reader.pos + length;
+    const end = length === void 0 ? reader.len : reader.pos + length;
     const message = new RGBAColor();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -131,26 +131,26 @@ export default class RGBAColor {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message != "object" || message == null) {
+  //   if (typeof message !== "object" || message === null) {
   //     return "object expected";
   //   }
-  //   if (message.r != null && message.hasOwnProperty("r")) {
-  //     if (typeof message.r != "number") {
+  //   if (message.r !== null && message.hasOwnProperty("r")) {
+  //     if (typeof message.r !== "number") {
   //       return "r: number expected";
   //     }
   //   }
-  //   if (message.g != null && message.hasOwnProperty("g")) {
-  //     if (typeof message.g != "number") {
+  //   if (message.g !== null && message.hasOwnProperty("g")) {
+  //     if (typeof message.g !== "number") {
   //       return "g: number expected";
   //     }
   //   }
-  //   if (message.b != null && message.hasOwnProperty("b")) {
-  //     if (typeof message.b != "number") {
+  //   if (message.b !== null && message.hasOwnProperty("b")) {
+  //     if (typeof message.b !== "number") {
   //       return "b: number expected";
   //     }
   //   }
-  //   if (message.a != null && message.hasOwnProperty("a")) {
-  //     if (typeof message.a != "number") {
+  //   if (message.a !== null && message.hasOwnProperty("a")) {
+  //     if (typeof message.a !== "number") {
   //       return "a: number expected";
   //     }
   //   }
@@ -171,16 +171,16 @@ export default class RGBAColor {
   //     return object;
   //   }
   //   const message = new RGBAColor();
-  //   if (object.r != null) {
+  //   if (object.r !== null) {
   //     message.r = +object.r;
   //   }
-  //   if (object.g != null) {
+  //   if (object.g !== null) {
   //     message.g = +object.g;
   //   }
-  //   if (object.b != null) {
+  //   if (object.b !== null) {
   //     message.b = +object.b;
   //   }
-  //   if (object.a != null) {
+  //   if (object.a !== null) {
   //     message.a = +object.a;
   //   }
 
@@ -210,19 +210,19 @@ export default class RGBAColor {
   //     object.b = 0;
   //     object.a = 0;
   //   }
-  //   if (message.r != null && message.hasOwnProperty("r")) {
+  //   if (message.r !== null && message.hasOwnProperty("r")) {
   //     object.r =
   //       options.json && !isFinite(message.r) ? "" + message.r : message.r;
   //   }
-  //   if (message.g != null && message.hasOwnProperty("g")) {
+  //   if (message.g !== null && message.hasOwnProperty("g")) {
   //     object.g =
   //       options.json && !isFinite(message.g) ? "" + message.g : message.g;
   //   }
-  //   if (message.b != null && message.hasOwnProperty("b")) {
+  //   if (message.b !== null && message.hasOwnProperty("b")) {
   //     object.b =
   //       options.json && !isFinite(message.b) ? "" + message.b : message.b;
   //   }
-  //   if (message.a != null && message.hasOwnProperty("a")) {
+  //   if (message.a !== null && message.hasOwnProperty("a")) {
   //     object.a =
   //       options.json && !isFinite(message.a) ? "" + message.a : message.a;
   //   }
@@ -239,7 +239,7 @@ export default class RGBAColor {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix == undefined) {
+  //   if (typeUrlPrefix === void 0) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 
@@ -287,19 +287,19 @@ export default class RGBAColor {
    */
   constructor(properties?: RGBAColorProps) {
     if (properties) {
-      if (properties.r != null) {
+      if (properties.r !== null) {
         this.r = properties.r
       }
 
-      if (properties.g != null) {
+      if (properties.g !== null) {
         this.g = properties.g
       }
 
-      if (properties.b != null) {
+      if (properties.b !== null) {
         this.b = properties.b
       }
 
-      if (properties.a != null) {
+      if (properties.a !== null) {
         this.a = properties.a
       }
     }

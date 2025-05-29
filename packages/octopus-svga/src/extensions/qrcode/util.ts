@@ -57,7 +57,7 @@ const G18 =
   (1 << 2) |
   (1 << 0);
 const G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
-const genBCHDigit = (data: number) => data == 0 ? 0 : Math.log2(data);
+const genBCHDigit = (data: number) => data === 0 ? 0 : Math.log2(data);
 const BCH_G15 = genBCHDigit(G15);
 const BCH_G18 = genBCHDigit(G18);
 
@@ -104,23 +104,23 @@ export const Util = {
 
     switch (maskPattern) {
       case PATTERN000:
-        return (i: number, j: number) => (i + j) % 2 == 0;
+        return (i: number, j: number) => (i + j) % 2 === 0;
       case PATTERN001:
-        return (i: number) => i % 2 == 0;
+        return (i: number) => i % 2 === 0;
       case PATTERN010:
-        return (_i: number, j: number) => j % 3 == 0;
+        return (_i: number, j: number) => j % 3 === 0;
       case PATTERN011:
-        return (i: number, j: number) => (i + j) % 3 == 0;
+        return (i: number, j: number) => (i + j) % 3 === 0;
       case PATTERN100:
-        return (i: number, j: number) => (~~(i / 2) + ~~(j / 3)) % 2 == 0;
+        return (i: number, j: number) => (~~(i / 2) + ~~(j / 3)) % 2 === 0;
       case PATTERN101:
-        return (i: number, j: number) => ((i * j) % 2) + ((i * j) % 3) == 0;
+        return (i: number, j: number) => ((i * j) % 2) + ((i * j) % 3) === 0;
       case PATTERN110:
         return (i: number, j: number) =>
-          (((i * j) % 2) + ((i * j) % 3)) % 2 == 0;
+          (((i * j) % 2) + ((i * j) % 3)) % 2 === 0;
       case PATTERN111:
         return (i: number, j: number) =>
-          (((i * j) % 3) + ((i + j) % 2)) % 2 == 0;
+          (((i * j) % 3) + ((i + j) % 2)) % 2 === 0;
       default:
         throw new Error(`bad maskPattern: ${maskPattern}`);
     }
@@ -212,8 +212,8 @@ export const Util = {
           for (let c = -1; c <= 1; c++) {
             const nCol = col + c;
             if (nCol < 0 || moduleCount <= nCol) continue;
-            if (r == 0 && c == 0) continue;
-            if (dark == qr.isDark(nRow, nCol)) {
+            if (r === 0 && c === 0) continue;
+            if (dark === qr.isDark(nRow, nCol)) {
               sameCount++;
             }
           }
@@ -235,7 +235,7 @@ export const Util = {
         if (qr.isDark(row + 1, col)) count++;
         if (qr.isDark(row, col + 1)) count++;
         if (qr.isDark(row + 1, col + 1)) count++;
-        if (count == 0 || count == 4) {
+        if (count === 0 || count === 4) {
           lostPoint += 3;
         }
       }

@@ -33,21 +33,21 @@ export interface MovieParamsProps {
 //       writer = Writer.create();
 //     }
 //     if (
-//       message.viewBoxWidth != null &&
+//       message.viewBoxWidth !== null &&
 //       Object.hasOwn(message, "viewBoxWidth")
 //     ) {
 //       writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.viewBoxWidth);
 //     }
 //     if (
-//       message.viewBoxHeight != null &&
+//       message.viewBoxHeight !== null &&
 //       Object.hasOwn(message, "viewBoxHeight")
 //     ) {
 //       writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.viewBoxHeight);
 //     }
-//     if (message.fps != null && Object.hasOwn(message, "fps")) {
+//     if (message.fps !== null && Object.hasOwn(message, "fps")) {
 //       writer.uint32(/* id 3, wireType 0 =*/ 24).int32(message.fps);
 //     }
-//     if (message.frames != null && Object.hasOwn(message, "frames")) {
+//     if (message.frames !== null && Object.hasOwn(message, "frames")) {
 //       writer.uint32(/* id 4, wireType 0 =*/ 32).int32(message.frames);
 //     }
 //     return writer;
@@ -80,7 +80,7 @@ export default class MovieParams {
    */
   static decode(reader: Reader | Uint8Array, length?: number): MovieParams {
     reader = Reader.create(reader);
-    let end = length == undefined ? reader.len : reader.pos + length;
+    let end = length === void 0 ? reader.len : reader.pos + length;
     let message = new MovieParams();
     while (reader.pos < end) {
       let tag = reader.uint32();
@@ -135,31 +135,31 @@ export default class MovieParams {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message != "object" || message == null) {
+  //   if (typeof message !== "object" || message === null) {
   //     return "object expected";
   //   }
   //   if (
-  //     message.viewBoxWidth != null &&
+  //     message.viewBoxWidth !== null &&
   //     message.hasOwnProperty("viewBoxWidth")
   //   ) {
-  //     if (typeof message.viewBoxWidth != "number") {
+  //     if (typeof message.viewBoxWidth !== "number") {
   //       return "viewBoxWidth: number expected";
   //     }
   //   }
   //   if (
-  //     message.viewBoxHeight != null &&
+  //     message.viewBoxHeight !== null &&
   //     message.hasOwnProperty("viewBoxHeight")
   //   ) {
-  //     if (typeof message.viewBoxHeight != "number") {
+  //     if (typeof message.viewBoxHeight !== "number") {
   //       return "viewBoxHeight: number expected";
   //     }
   //   }
-  //   if (message.fps != null && message.hasOwnProperty("fps")) {
+  //   if (message.fps !== null && message.hasOwnProperty("fps")) {
   //     if (!isInteger(message.fps)) {
   //       return "fps: integer expected";
   //     }
   //   }
-  //   if (message.frames != null && message.hasOwnProperty("frames")) {
+  //   if (message.frames !== null && message.hasOwnProperty("frames")) {
   //     if (!isInteger(message.frames)) {
   //       return "frames: integer expected";
   //     }
@@ -182,16 +182,16 @@ export default class MovieParams {
   //   }
 
   //   const message = new MovieParams();
-  //   if (object.viewBoxWidth != null) {
+  //   if (object.viewBoxWidth !== null) {
   //     message.viewBoxWidth = +object.viewBoxWidth;
   //   }
-  //   if (object.viewBoxHeight != null) {
+  //   if (object.viewBoxHeight !== null) {
   //     message.viewBoxHeight = +object.viewBoxHeight;
   //   }
-  //   if (object.fps != null) {
+  //   if (object.fps !== null) {
   //     message.fps = object.fps | 0;
   //   }
-  //   if (object.frames != null) {
+  //   if (object.frames !== null) {
   //     message.frames = object.frames | 0;
   //   }
 
@@ -223,7 +223,7 @@ export default class MovieParams {
   //     object.frames = 0;
   //   }
   //   if (
-  //     message.viewBoxWidth != null &&
+  //     message.viewBoxWidth !== null &&
   //     message.hasOwnProperty("viewBoxWidth")
   //   ) {
   //     object.viewBoxWidth =
@@ -232,7 +232,7 @@ export default class MovieParams {
   //         : message.viewBoxWidth;
   //   }
   //   if (
-  //     message.viewBoxHeight != null &&
+  //     message.viewBoxHeight !== null &&
   //     message.hasOwnProperty("viewBoxHeight")
   //   ) {
   //     object.viewBoxHeight =
@@ -240,10 +240,10 @@ export default class MovieParams {
   //         ? "" + message.viewBoxHeight
   //         : message.viewBoxHeight;
   //   }
-  //   if (message.fps != null && message.hasOwnProperty("fps")) {
+  //   if (message.fps !== null && message.hasOwnProperty("fps")) {
   //     object.fps = message.fps;
   //   }
-  //   if (message.frames != null && message.hasOwnProperty("frames")) {
+  //   if (message.frames !== null && message.hasOwnProperty("frames")) {
   //     object.frames = message.frames;
   //   }
 
@@ -259,7 +259,7 @@ export default class MovieParams {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix == undefined) {
+  //   if (typeUrlPrefix === void 0) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 
@@ -304,19 +304,19 @@ export default class MovieParams {
    */
   constructor(properties?: MovieParamsProps) {
     if (properties) {
-      if (properties.viewBoxWidth != null) {
+      if (properties.viewBoxWidth !== null) {
         this.viewBoxWidth = properties.viewBoxWidth;
       }
 
-      if (properties.viewBoxHeight != null) {
+      if (properties.viewBoxHeight !== null) {
         this.viewBoxHeight = properties.viewBoxHeight;
       }
 
-      if (properties.fps != null) {
+      if (properties.fps !== null) {
         this.fps = properties.fps;
       }
 
-      if (properties.frames != null) {
+      if (properties.frames !== null) {
         this.frames = properties.frames;
       }
     }

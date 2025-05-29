@@ -12,7 +12,7 @@ export class Player {
    * SVGA 元数据
    * Video Entity
    */
-  private entity: PlatformVideo.Video | undefined = undefined;
+  private entity: PlatformVideo.Video | undefined;
 
   /**
    * 当前配置项
@@ -179,7 +179,7 @@ export class Player {
     this.animator!.stop();
     this.painter.destroy();
     this.animator = null;
-    this.entity = undefined;
+    this.entity = void 0;
   }
 
   /**

@@ -305,10 +305,10 @@ function drawBezierElement(
       break;
     case "S":
       if (
-        currentPoint.x1 !== undefined &&
-        currentPoint.y1 !== undefined &&
-        currentPoint.x2 !== undefined &&
-        currentPoint.y2 !== undefined
+        currentPoint.x1 !== void 0 &&
+        currentPoint.y1 !== void 0 &&
+        currentPoint.x2 !== void 0 &&
+        currentPoint.y2 !== void 0
       ) {
         currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
         currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;
@@ -339,10 +339,10 @@ function drawBezierElement(
       break;
     case "s":
       if (
-        currentPoint.x1 !== undefined &&
-        currentPoint.y1 !== undefined &&
-        currentPoint.x2 !== undefined &&
-        currentPoint.y2 !== undefined
+        currentPoint.x1 !== void 0 &&
+        currentPoint.y1 !== void 0 &&
+        currentPoint.x2 !== void 0 &&
+        currentPoint.y2 !== void 0
       ) {
         currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
         currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;

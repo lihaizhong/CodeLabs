@@ -113,9 +113,9 @@ export default definePlugin<"image">({
       isImage: (data: unknown) =>
         !!(
           data &&
-          (data as WechatMiniprogram.Image).src !== undefined &&
-          (data as WechatMiniprogram.Image).width !== undefined &&
-          (data as WechatMiniprogram.Image).height !== undefined
+          (data as WechatMiniprogram.Image).src !== void 0 &&
+          (data as WechatMiniprogram.Image).width !== void 0 &&
+          (data as WechatMiniprogram.Image).height !== void 0
         ),
       isImageBitmap: (_: unknown) => false,
       create: createImage,

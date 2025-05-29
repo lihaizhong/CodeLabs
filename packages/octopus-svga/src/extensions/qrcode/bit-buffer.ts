@@ -10,12 +10,12 @@ export class BitBuffer {
   public getAt(i: number): boolean {
     const bufIndex = ~~(i / 8);
 
-    return ((this.buffer[bufIndex] >>> (7 - (i % 8))) & 1) == 1;
+    return ((this.buffer[bufIndex] >>> (7 - (i % 8))) & 1) === 1;
   }
 
   public put(num: number, length: number): void {
     for (let i = 0; i < length; i++) {
-      this.putBit(((num >>> (length - i - 1)) & 1) == 1);
+      this.putBit(((num >>> (length - i - 1)) & 1) === 1);
     }
   }
 

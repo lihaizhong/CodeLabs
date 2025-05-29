@@ -6,7 +6,7 @@ export class Poster {
    * SVGA 元数据
    * Video Entity
    */
-  private entity: PlatformVideo.Video | undefined = undefined;
+  private entity: PlatformVideo.Video | undefined;
 
   /**
    * 当前的帧，默认值 0
@@ -42,11 +42,11 @@ export class Poster {
   ): Promise<void> {
     const config: PosterConfig = typeof options === "string" ? { container: options } : options;
 
-    if (config.container === undefined) {
+    if (config.container === void 0) {
       config.container = "";
     }
 
-    if (config.contentMode !== undefined) {
+    if (config.contentMode !== void 0) {
       this.contentMode = config.contentMode;
     }
 
@@ -123,6 +123,6 @@ export class Poster {
    */
   public destroy(): void {
     this.painter.destroy();
-    this.entity = undefined;
+    this.entity = void 0;
   }
 }

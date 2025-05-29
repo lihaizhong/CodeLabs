@@ -33,16 +33,16 @@ export interface EllipseArgsProps {
 //     if (!writer) {
 //       writer = Writer.create();
 //     }
-//     if (message.x != null && Object.hasOwn(message, "x")) {
+//     if (message.x !== null && Object.hasOwn(message, "x")) {
 //       writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.x);
 //     }
-//     if (message.y != null && Object.hasOwn(message, "y")) {
+//     if (message.y !== null && Object.hasOwn(message, "y")) {
 //       writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.y);
 //     }
-//     if (message.radiusX != null && Object.hasOwn(message, "radiusX")) {
+//     if (message.radiusX !== null && Object.hasOwn(message, "radiusX")) {
 //       writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.radiusX);
 //     }
-//     if (message.radiusY != null && Object.hasOwn(message, "radiusY")) {
+//     if (message.radiusY !== null && Object.hasOwn(message, "radiusY")) {
 //       writer.uint32(/* id 4, wireType 5 =*/ 37).float(message.radiusY);
 //     }
 //     return writer;
@@ -76,7 +76,7 @@ export default class EllipseArgs {
    */
   static decode(reader: Reader | Uint8Array, length?: number): EllipseArgs {
     reader = Reader.create(reader);
-    const end = length == undefined ? reader.len : reader.pos + length;
+    const end = length === void 0 ? reader.len : reader.pos + length;
     const message = new EllipseArgs();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -131,26 +131,26 @@ export default class EllipseArgs {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message != "object" || message == null) {
+  //   if (typeof message !== "object" || message === null) {
   //     return "object expected";
   //   }
-  //   if (message.x != null && message.hasOwnProperty("x")) {
-  //     if (typeof message.x != "number") {
+  //   if (message.x !== null && message.hasOwnProperty("x")) {
+  //     if (typeof message.x !== "number") {
   //       return "x: number expected";
   //     }
   //   }
-  //   if (message.y != null && message.hasOwnProperty("y")) {
-  //     if (typeof message.y != "number") {
+  //   if (message.y !== null && message.hasOwnProperty("y")) {
+  //     if (typeof message.y !== "number") {
   //       return "y: number expected";
   //     }
   //   }
-  //   if (message.radiusX != null && message.hasOwnProperty("radiusX")) {
-  //     if (typeof message.radiusX != "number") {
+  //   if (message.radiusX !== null && message.hasOwnProperty("radiusX")) {
+  //     if (typeof message.radiusX !== "number") {
   //       return "radiusX: number expected";
   //     }
   //   }
-  //   if (message.radiusY != null && message.hasOwnProperty("radiusY")) {
-  //     if (typeof message.radiusY != "number") {
+  //   if (message.radiusY !== null && message.hasOwnProperty("radiusY")) {
+  //     if (typeof message.radiusY !== "number") {
   //       return "radiusY: number expected";
   //     }
   //   }
@@ -171,16 +171,16 @@ export default class EllipseArgs {
   //     return object;
   //   }
   //   const message = new ShapeEntity.EllipseArgs();
-  //   if (object.x != null) {
+  //   if (object.x !== null) {
   //     message.x = +object.x;
   //   }
-  //   if (object.y != null) {
+  //   if (object.y !== null) {
   //     message.y = +object.y;
   //   }
-  //   if (object.radiusX != null) {
+  //   if (object.radiusX !== null) {
   //     message.radiusX = +object.radiusX;
   //   }
-  //   if (object.radiusY != null) {
+  //   if (object.radiusY !== null) {
   //     message.radiusY = +object.radiusY;
   //   }
 
@@ -210,21 +210,21 @@ export default class EllipseArgs {
   //     object.radiusX = 0;
   //     object.radiusY = 0;
   //   }
-  //   if (message.x != null && message.hasOwnProperty("x")) {
+  //   if (message.x !== null && message.hasOwnProperty("x")) {
   //     object.x =
   //       options.json && !isFinite(message.x) ? "" + message.x : message.x;
   //   }
-  //   if (message.y != null && message.hasOwnProperty("y")) {
+  //   if (message.y !== null && message.hasOwnProperty("y")) {
   //     object.y =
   //       options.json && !isFinite(message.y) ? "" + message.y : message.y;
   //   }
-  //   if (message.radiusX != null && message.hasOwnProperty("radiusX")) {
+  //   if (message.radiusX !== null && message.hasOwnProperty("radiusX")) {
   //     object.radiusX =
   //       options.json && !isFinite(message.radiusX)
   //         ? "" + message.radiusX
   //         : message.radiusX;
   //   }
-  //   if (message.radiusY != null && message.hasOwnProperty("radiusY")) {
+  //   if (message.radiusY !== null && message.hasOwnProperty("radiusY")) {
   //     object.radiusY =
   //       options.json && !isFinite(message.radiusY)
   //         ? "" + message.radiusY
@@ -243,7 +243,7 @@ export default class EllipseArgs {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix == undefined) {
+  //   if (typeUrlPrefix === void 0) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 
@@ -289,19 +289,19 @@ export default class EllipseArgs {
    */
   constructor(properties?: EllipseArgsProps) {
     if (properties) {
-      if (properties.x != null) {
+      if (properties.x !== null) {
         this.x = properties.x;
       }
 
-      if (properties.y != null) {
+      if (properties.y !== null) {
         this.y = properties.y;
       }
 
-      if (properties.radiusX != null) {
+      if (properties.radiusX !== null) {
         this.radiusX = properties.radiusX;
       }
 
-      if (properties.radiusY != null) {
+      if (properties.radiusY !== null) {
         this.radiusY = properties.radiusY;
       }
     }

@@ -36,22 +36,22 @@ export interface TransformProps {
 //     if (!writer) {
 //       writer = Writer.create();
 //     }
-//     if (message.a != null && Object.hasOwn(message, "a")) {
+//     if (message.a !== null && Object.hasOwn(message, "a")) {
 //       writer.uint32(/* id 1, wireType 5 =*/ 13).float(message.a);
 //     }
-//     if (message.b != null && Object.hasOwn(message, "b")) {
+//     if (message.b !== null && Object.hasOwn(message, "b")) {
 //       writer.uint32(/* id 2, wireType 5 =*/ 21).float(message.b);
 //     }
-//     if (message.c != null && Object.hasOwn(message, "c")) {
+//     if (message.c !== null && Object.hasOwn(message, "c")) {
 //       writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.c);
 //     }
-//     if (message.d != null && Object.hasOwn(message, "d")) {
+//     if (message.d !== null && Object.hasOwn(message, "d")) {
 //       writer.uint32(/* id 4, wireType 5 =*/ 37).float(message.d);
 //     }
-//     if (message.tx != null && Object.hasOwn(message, "tx")) {
+//     if (message.tx !== null && Object.hasOwn(message, "tx")) {
 //       writer.uint32(/* id 5, wireType 5 =*/ 45).float(message.tx);
 //     }
-//     if (message.ty != null && Object.hasOwn(message, "ty")) {
+//     if (message.ty !== null && Object.hasOwn(message, "ty")) {
 //       writer.uint32(/* id 6, wireType 5 =*/ 53).float(message.ty);
 //     }
 //     return writer;
@@ -84,7 +84,7 @@ export default class Transform {
    */
   static decode(reader: Reader | Uint8Array, length?: number): Transform {
     reader = Reader.create(reader);
-    let end = length == undefined ? reader.len : reader.pos + length;
+    let end = length === void 0 ? reader.len : reader.pos + length;
     let message = new Transform();
     while (reader.pos < end) {
       let tag = reader.uint32();
@@ -146,36 +146,36 @@ export default class Transform {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>) {
-  //   if (typeof message != "object" || message == null) {
+  //   if (typeof message !== "object" || message === null) {
   //     return "object expected";
   //   }
-  //   if (message.a != null && message.hasOwnProperty("a")) {
-  //     if (typeof message.a != "number") {
+  //   if (message.a !== null && message.hasOwnProperty("a")) {
+  //     if (typeof message.a !== "number") {
   //       return "a: number expected";
   //     }
   //   }
-  //   if (message.b != null && message.hasOwnProperty("b")) {
-  //     if (typeof message.b != "number") {
+  //   if (message.b !== null && message.hasOwnProperty("b")) {
+  //     if (typeof message.b !== "number") {
   //       return "b: number expected";
   //     }
   //   }
-  //   if (message.c != null && message.hasOwnProperty("c")) {
-  //     if (typeof message.c != "number") {
+  //   if (message.c !== null && message.hasOwnProperty("c")) {
+  //     if (typeof message.c !== "number") {
   //       return "c: number expected";
   //     }
   //   }
-  //   if (message.d != null && message.hasOwnProperty("d")) {
-  //     if (typeof message.d != "number") {
+  //   if (message.d !== null && message.hasOwnProperty("d")) {
+  //     if (typeof message.d !== "number") {
   //       return "d: number expected";
   //     }
   //   }
-  //   if (message.tx != null && message.hasOwnProperty("tx")) {
-  //     if (typeof message.tx != "number") {
+  //   if (message.tx !== null && message.hasOwnProperty("tx")) {
+  //     if (typeof message.tx !== "number") {
   //       return "tx: number expected";
   //     }
   //   }
-  //   if (message.ty != null && message.hasOwnProperty("ty")) {
-  //     if (typeof message.ty != "number") {
+  //   if (message.ty !== null && message.hasOwnProperty("ty")) {
+  //     if (typeof message.ty !== "number") {
   //       return "ty: number expected";
   //     }
   //   }
@@ -196,22 +196,22 @@ export default class Transform {
   //     return object;
   //   }
   //   let message = new Transform();
-  //   if (object.a != null) {
+  //   if (object.a !== null) {
   //     message.a = +object.a;
   //   }
-  //   if (object.b != null) {
+  //   if (object.b !== null) {
   //     message.b = +object.b;
   //   }
-  //   if (object.c != null) {
+  //   if (object.c !== null) {
   //     message.c = +object.c;
   //   }
-  //   if (object.d != null) {
+  //   if (object.d !== null) {
   //     message.d = +object.d;
   //   }
-  //   if (object.tx != null) {
+  //   if (object.tx !== null) {
   //     message.tx = +object.tx;
   //   }
-  //   if (object.ty != null) {
+  //   if (object.ty !== null) {
   //     message.ty = +object.ty;
   //   }
 
@@ -243,27 +243,27 @@ export default class Transform {
   //     object.tx = 0;
   //     object.ty = 0;
   //   }
-  //   if (message.a != null && message.hasOwnProperty("a")) {
+  //   if (message.a !== null && message.hasOwnProperty("a")) {
   //     object.a =
   //       options.json && !isFinite(message.a) ? "" + message.a : message.a;
   //   }
-  //   if (message.b != null && message.hasOwnProperty("b")) {
+  //   if (message.b !== null && message.hasOwnProperty("b")) {
   //     object.b =
   //       options.json && !isFinite(message.b) ? "" + message.b : message.b;
   //   }
-  //   if (message.c != null && message.hasOwnProperty("c")) {
+  //   if (message.c !== null && message.hasOwnProperty("c")) {
   //     object.c =
   //       options.json && !isFinite(message.c) ? "" + message.c : message.c;
   //   }
-  //   if (message.d != null && message.hasOwnProperty("d")) {
+  //   if (message.d !== null && message.hasOwnProperty("d")) {
   //     object.d =
   //       options.json && !isFinite(message.d) ? "" + message.d : message.d;
   //   }
-  //   if (message.tx != null && message.hasOwnProperty("tx")) {
+  //   if (message.tx !== null && message.hasOwnProperty("tx")) {
   //     object.tx =
   //       options.json && !isFinite(message.tx) ? "" + message.tx : message.tx;
   //   }
-  //   if (message.ty != null && message.hasOwnProperty("ty")) {
+  //   if (message.ty !== null && message.hasOwnProperty("ty")) {
   //     object.ty =
   //       options.json && !isFinite(message.ty) ? "" + message.ty : message.ty;
   //   }
@@ -280,7 +280,7 @@ export default class Transform {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix == undefined) {
+  //   if (typeUrlPrefix === void 0) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 
@@ -340,27 +340,27 @@ export default class Transform {
    */
   constructor(properties?: TransformProps) {
     if (properties) {
-      if (properties.a != null) {
+      if (properties.a !== null) {
         this.a = properties.a;
       }
 
-      if (properties.b != null) {
+      if (properties.b !== null) {
         this.b = properties.b;
       }
 
-      if (properties.c != null) {
+      if (properties.c !== null) {
         this.c = properties.c;
       }
 
-      if (properties.d != null) {
+      if (properties.d !== null) {
         this.d = properties.d;
       }
 
-      if (properties.tx != null) {
+      if (properties.tx !== null) {
         this.tx = properties.tx;
       }
 
-      if (properties.ty != null) {
+      if (properties.ty !== null) {
         this.ty = properties.ty;
       }
     }

@@ -46,37 +46,37 @@ export interface ShapeStyleProps {
 //     if (!writer) {
 //       writer = Writer.create();
 //     }
-//     if (message.fill != null && Object.hasOwn(message, "fill")) {
+//     if (message.fill !== null && Object.hasOwn(message, "fill")) {
 //       RGBAColor.encode(
 //         message.fill,
 //         writer.uint32(/* id 1, wireType 2 =*/ 10).fork()
 //       ).ldelim();
 //     }
-//     if (message.stroke != null && Object.hasOwn(message, "stroke")) {
+//     if (message.stroke !== null && Object.hasOwn(message, "stroke")) {
 //       RGBAColor.encode(
 //         message.stroke,
 //         writer.uint32(/* id 2, wireType 2 =*/ 18).fork()
 //       ).ldelim();
 //     }
-//     if (message.strokeWidth != null && Object.hasOwn(message, "strokeWidth")) {
+//     if (message.strokeWidth !== null && Object.hasOwn(message, "strokeWidth")) {
 //       writer.uint32(/* id 3, wireType 5 =*/ 29).float(message.strokeWidth);
 //     }
-//     if (message.lineCap != null && Object.hasOwn(message, "lineCap")) {
+//     if (message.lineCap !== null && Object.hasOwn(message, "lineCap")) {
 //       writer.uint32(/* id 4, wireType 0 =*/ 32).int32(message.lineCap);
 //     }
-//     if (message.lineJoin != null && Object.hasOwn(message, "lineJoin")) {
+//     if (message.lineJoin !== null && Object.hasOwn(message, "lineJoin")) {
 //       writer.uint32(/* id 5, wireType 0 =*/ 40).int32(message.lineJoin);
 //     }
-//     if (message.miterLimit != null && Object.hasOwn(message, "miterLimit")) {
+//     if (message.miterLimit !== null && Object.hasOwn(message, "miterLimit")) {
 //       writer.uint32(/* id 6, wireType 5 =*/ 53).float(message.miterLimit);
 //     }
-//     if (message.lineDashI != null && Object.hasOwn(message, "lineDashI")) {
+//     if (message.lineDashI !== null && Object.hasOwn(message, "lineDashI")) {
 //       writer.uint32(/* id 7, wireType 5 =*/ 61).float(message.lineDashI);
 //     }
-//     if (message.lineDashII != null && Object.hasOwn(message, "lineDashII")) {
+//     if (message.lineDashII !== null && Object.hasOwn(message, "lineDashII")) {
 //       writer.uint32(/* id 8, wireType 5 =*/ 69).float(message.lineDashII);
 //     }
-//     if (message.lineDashIII != null && Object.hasOwn(message, "lineDashIII")) {
+//     if (message.lineDashIII !== null && Object.hasOwn(message, "lineDashIII")) {
 //       writer.uint32(/* id 9, wireType 5 =*/ 77).float(message.lineDashIII);
 //     }
 
@@ -110,7 +110,7 @@ export default class ShapeStyle {
    */
   static decode(reader: Reader | Uint8Array, length?: number): ShapeStyle {
     reader = Reader.create(reader);
-    const end = length == undefined ? reader.len : reader.pos + length;
+    const end = length === void 0 ? reader.len : reader.pos + length;
     const message = new ShapeStyle();
     while (reader.pos < end) {
       const tag = reader.uint32();
@@ -191,27 +191,27 @@ export default class ShapeStyle {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message != "object" || message == null) {
+  //   if (typeof message !== "object" || message === null) {
   //     return "object expected";
   //   }
-  //   if (message.fill != null && message.hasOwnProperty("fill")) {
+  //   if (message.fill !== null && message.hasOwnProperty("fill")) {
   //     const error = RGBAColor.verify(message.fill);
   //     if (error) {
   //       return "fill." + error;
   //     }
   //   }
-  //   if (message.stroke != null && message.hasOwnProperty("stroke")) {
+  //   if (message.stroke !== null && message.hasOwnProperty("stroke")) {
   //     const error = RGBAColor.verify(message.stroke);
   //     if (error) {
   //       return "stroke." + error;
   //     }
   //   }
-  //   if (message.strokeWidth != null && message.hasOwnProperty("strokeWidth")) {
-  //     if (typeof message.strokeWidth != "number") {
+  //   if (message.strokeWidth !== null && message.hasOwnProperty("strokeWidth")) {
+  //     if (typeof message.strokeWidth !== "number") {
   //       return "strokeWidth: number expected";
   //     }
   //   }
-  //   if (message.lineCap != null && message.hasOwnProperty("lineCap"))
+  //   if (message.lineCap !== null && message.hasOwnProperty("lineCap"))
   //     switch (message.lineCap) {
   //       default:
   //         return "lineCap: enum value expected";
@@ -220,7 +220,7 @@ export default class ShapeStyle {
   //       case 2:
   //         break;
   //     }
-  //   if (message.lineJoin != null && message.hasOwnProperty("lineJoin"))
+  //   if (message.lineJoin !== null && message.hasOwnProperty("lineJoin"))
   //     switch (message.lineJoin) {
   //       default:
   //         return "lineJoin: enum value expected";
@@ -229,23 +229,23 @@ export default class ShapeStyle {
   //       case 2:
   //         break;
   //     }
-  //   if (message.miterLimit != null && message.hasOwnProperty("miterLimit")) {
-  //     if (typeof message.miterLimit != "number") {
+  //   if (message.miterLimit !== null && message.hasOwnProperty("miterLimit")) {
+  //     if (typeof message.miterLimit !== "number") {
   //       return "miterLimit: number expected";
   //     }
   //   }
-  //   if (message.lineDashI != null && message.hasOwnProperty("lineDashI")) {
-  //     if (typeof message.lineDashI != "number") {
+  //   if (message.lineDashI !== null && message.hasOwnProperty("lineDashI")) {
+  //     if (typeof message.lineDashI !== "number") {
   //       return "lineDashI: number expected";
   //     }
   //   }
-  //   if (message.lineDashII != null && message.hasOwnProperty("lineDashII")) {
-  //     if (typeof message.lineDashII != "number") {
+  //   if (message.lineDashII !== null && message.hasOwnProperty("lineDashII")) {
+  //     if (typeof message.lineDashII !== "number") {
   //       return "lineDashII: number expected";
   //     }
   //   }
-  //   if (message.lineDashIII != null && message.hasOwnProperty("lineDashIII")) {
-  //     if (typeof message.lineDashIII != "number") {
+  //   if (message.lineDashIII !== null && message.hasOwnProperty("lineDashIII")) {
+  //     if (typeof message.lineDashIII !== "number") {
   //       return "lineDashIII: number expected";
   //     }
   //   }
@@ -266,16 +266,16 @@ export default class ShapeStyle {
   //     return object;
   //   }
   //   const message = new ShapeEntity.ShapeStyle();
-  //   if (object.fill != null) {
-  //     if (typeof object.fill != "object") {
+  //   if (object.fill !== null) {
+  //     if (typeof object.fill !== "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.ShapeEntity.ShapeStyle.fill: object expected"
   //       );
   //     }
   //     message.fill = RGBAColor.fromObject(object.fill);
   //   }
-  //   if (object.stroke != null) {
-  //     if (typeof object.stroke != "object") {
+  //   if (object.stroke !== null) {
+  //     if (typeof object.stroke !== "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.ShapeEntity.ShapeStyle.stroke: object expected"
   //       );
@@ -284,12 +284,12 @@ export default class ShapeStyle {
   //       object.stroke
   //     );
   //   }
-  //   if (object.strokeWidth != null) {
+  //   if (object.strokeWidth !== null) {
   //     message.strokeWidth = Number(object.strokeWidth);
   //   }
   //   switch (object.lineCap) {
   //     default:
-  //       if (typeof object.lineCap == "number") {
+  //       if (typeof object.lineCap === "number") {
   //         message.lineCap = object.lineCap;
   //         break;
   //       }
@@ -309,7 +309,7 @@ export default class ShapeStyle {
   //   }
   //   switch (object.lineJoin) {
   //     default:
-  //       if (typeof object.lineJoin == "number") {
+  //       if (typeof object.lineJoin === "number") {
   //         message.lineJoin = object.lineJoin;
   //         break;
   //       }
@@ -327,16 +327,16 @@ export default class ShapeStyle {
   //       message.lineJoin = 2;
   //       break;
   //   }
-  //   if (object.miterLimit != null) {
+  //   if (object.miterLimit !== null) {
   //     message.miterLimit = +object.miterLimit;
   //   }
-  //   if (object.lineDashI != null) {
+  //   if (object.lineDashI !== null) {
   //     message.lineDashI = +object.lineDashI;
   //   }
-  //   if (object.lineDashII != null) {
+  //   if (object.lineDashII !== null) {
   //     message.lineDashII = +object.lineDashII;
   //   }
-  //   if (object.lineDashIII != null) {
+  //   if (object.lineDashIII !== null) {
   //     message.lineDashIII = +object.lineDashIII;
   //   }
 
@@ -364,66 +364,66 @@ export default class ShapeStyle {
   //     object.fill = null;
   //     object.stroke = null;
   //     object.strokeWidth = 0;
-  //     object.lineCap = options.enums == String ? "LineCap_BUTT" : 0;
-  //     object.lineJoin = options.enums == String ? "LineJoin_MITER" : 0;
+  //     object.lineCap = options.enums === String ? "LineCap_BUTT" : 0;
+  //     object.lineJoin = options.enums === String ? "LineJoin_MITER" : 0;
   //     object.miterLimit = 0;
   //     object.lineDashI = 0;
   //     object.lineDashII = 0;
   //     object.lineDashIII = 0;
   //   }
-  //   if (message.fill != null && message.hasOwnProperty("fill")) {
+  //   if (message.fill !== null && message.hasOwnProperty("fill")) {
   //     object.fill = RGBAColor.toObject(
   //       message.fill,
   //       options
   //     );
   //   }
-  //   if (message.stroke != null && message.hasOwnProperty("stroke")) {
+  //   if (message.stroke !== null && message.hasOwnProperty("stroke")) {
   //     object.stroke = RGBAColor.toObject(
   //       message.stroke,
   //       options
   //     );
   //   }
-  //   if (message.strokeWidth != null && message.hasOwnProperty("strokeWidth")) {
+  //   if (message.strokeWidth !== null && message.hasOwnProperty("strokeWidth")) {
   //     object.strokeWidth =
   //       options.json && !isFinite(message.strokeWidth)
   //         ? "" + message.strokeWidth
   //         : message.strokeWidth;
   //   }
-  //   if (message.lineCap != null && message.hasOwnProperty("lineCap")) {
+  //   if (message.lineCap !== null && message.hasOwnProperty("lineCap")) {
   //     object.lineCap =
-  //       options.enums == String
-  //         ? LineCap[message.lineCap] == undefined
+  //       options.enums === String
+  //         ? LineCap[message.lineCap] === void 0
   //           ? message.lineCap
   //           : LineCap[message.lineCap]
   //         : message.lineCap;
   //   }
-  //   if (message.lineJoin != null && message.hasOwnProperty("lineJoin")) {
+  //   if (message.lineJoin !== null && message.hasOwnProperty("lineJoin")) {
   //     object.lineJoin =
-  //       options.enums == String
-  //         ? LineJoin[message.lineJoin] == undefined
+  //       options.enums === String
+  //         ? LineJoin[message.lineJoin] === void 0
   //           ? message.lineJoin
   //           : LineJoin[message.lineJoin]
   //         : message.lineJoin;
   //   }
-  //   if (message.miterLimit != null && message.hasOwnProperty("miterLimit")) {
+  //   if (message.miterLimit !== null && message.hasOwnProperty("miterLimit")) {
   //     object.miterLimit =
   //       options.json && !isFinite(message.miterLimit)
   //         ? "" + message.miterLimit
   //         : message.miterLimit;
   //   }
-  //   if (message.lineDashI != null && message.hasOwnProperty("lineDashI")) {
+  //   if (message.lineDashI !== null && message.hasOwnProperty("lineDashI")) {
   //     object.lineDashI =
   //       options.json && !isFinite(message.lineDashI)
   //         ? "" + message.lineDashI
   //         : message.lineDashI;
   //   }
-  //   if (message.lineDashII != null && message.hasOwnProperty("lineDashII")) {
+  //   if (message.lineDashII !== null && message.hasOwnProperty("lineDashII")) {
   //     object.lineDashII =
   //       options.json && !isFinite(message.lineDashII)
   //         ? "" + message.lineDashII
   //         : message.lineDashII;
   //   }
-  //   if (message.lineDashIII != null && message.hasOwnProperty("lineDashIII")) {
+  //   if (message.lineDashIII !== null && message.hasOwnProperty("lineDashIII")) {
   //     object.lineDashIII =
   //       options.json && !isFinite(message.lineDashIII)
   //         ? "" + message.lineDashIII
@@ -442,7 +442,7 @@ export default class ShapeStyle {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string): string {
-  //   if (typeUrlPrefix == undefined) {
+  //   if (typeUrlPrefix === void 0) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 
@@ -523,39 +523,39 @@ export default class ShapeStyle {
    */
   constructor(properties?: ShapeStyleProps) {
     if (properties) {
-      if (properties.fill != null) {
+      if (properties.fill !== null) {
         this.fill = properties.fill
       }
 
-      if (properties.lineCap != null) {
+      if (properties.lineCap !== null) {
         this.lineCap = properties.lineCap
       }
 
-      if (properties.lineDashI != null) {
+      if (properties.lineDashI !== null) {
         this.lineDashI = properties.lineDashI
       }
 
-      if (properties.lineDashII != null) {
+      if (properties.lineDashII !== null) {
         this.lineDashII = properties.lineDashII
       }
 
-      if (properties.lineDashIII != null) {
+      if (properties.lineDashIII !== null) {
         this.lineDashIII = properties.lineDashIII
       }
 
-      if (properties.lineJoin != null) {
+      if (properties.lineJoin !== null) {
         this.lineJoin = properties.lineJoin
       }
 
-      if (properties.miterLimit != null) {
+      if (properties.miterLimit !== null) {
         this.miterLimit = properties.miterLimit
       }
 
-      if (properties.stroke != null) {
+      if (properties.stroke !== null) {
         this.stroke = properties.stroke
       }
 
-      if (properties.strokeWidth != null) {
+      if (properties.strokeWidth !== null) {
         this.strokeWidth = properties.strokeWidth
       }
     }

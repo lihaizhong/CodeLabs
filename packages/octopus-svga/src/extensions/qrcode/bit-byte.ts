@@ -39,7 +39,7 @@ export class BitByte {
     this.bytes = parsedData.flat(1);
 
     const { bytes } = this;
-    if (bytes.length != data.length) {
+    if (bytes.length !== data.length) {
       bytes.unshift(191);
       bytes.unshift(187);
       bytes.unshift(239);

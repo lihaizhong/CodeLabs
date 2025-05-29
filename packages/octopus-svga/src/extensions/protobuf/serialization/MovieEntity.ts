@@ -36,7 +36,7 @@ export default class MovieEntity {
    */
   static decode(reader: Reader | Uint8Array, length?: number): MovieEntity {
     reader = Reader.create(reader);
-    const end = length == undefined ? reader.len : reader.pos + length;
+    const end = length === void 0 ? reader.len : reader.pos + length;
     const message = new MovieEntity();
     let key;
     let value;
@@ -52,7 +52,7 @@ export default class MovieEntity {
           break;
         }
         case 3: {
-          if (message.images == MovieEntity.EMPTY_OBJECT) {
+          if (message.images === MovieEntity.EMPTY_OBJECT) {
             message.images = {};
           }
           const end2 = reader.uint32() + reader.pos;
@@ -115,21 +115,21 @@ export default class MovieEntity {
    * @returns {string|null} `null` if valid, otherwise the reason why it is not
    */
   // static verify(message: Record<string, any>): string | null {
-  //   if (typeof message != "object" || message == null) {
+  //   if (typeof message !== "object" || message === null) {
   //     return "object expected";
   //   }
-  //   if (message.version != null && message.hasOwnProperty("version")) {
+  //   if (message.version !== null && message.hasOwnProperty("version")) {
   //     if (!isString(message.version)) {
   //       return "version: string expected";
   //     }
   //   }
-  //   if (message.params != null && message.hasOwnProperty("params")) {
+  //   if (message.params !== null && message.hasOwnProperty("params")) {
   //     const error = MovieParams.verify(message.params);
   //     if (error) {
   //       return "params." + error;
   //     }
   //   }
-  //   if (message.images != null && message.hasOwnProperty("images")) {
+  //   if (message.images !== null && message.hasOwnProperty("images")) {
   //     if (!isObject(message.images)) {
   //       return "images: object expected";
   //     }
@@ -139,7 +139,7 @@ export default class MovieEntity {
   //       if (
   //         !(
   //           (message.images[key] &&
-  //             typeof message.images[key].length == "number") ||
+  //             typeof message.images[key].length === "number") ||
   //           isString(message.images[key])
   //         )
   //       ) {
@@ -147,7 +147,7 @@ export default class MovieEntity {
   //       }
   //     }
   //   }
-  //   if (message.sprites != null && message.hasOwnProperty("sprites")) {
+  //   if (message.sprites !== null && message.hasOwnProperty("sprites")) {
   //     if (!Array.isArray(message.sprites)) {
   //       return "sprites: array expected";
   //     }
@@ -175,11 +175,11 @@ export default class MovieEntity {
   //     return object;
   //   }
   //   const message = new MovieEntity();
-  //   if (object.version != null) {
+  //   if (object.version !== null) {
   //     message.version = "" + object.version;
   //   }
-  //   if (object.params != null) {
-  //     if (typeof object.params != "object") {
+  //   if (object.params !== null) {
+  //     if (typeof object.params !== "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.MovieEntity.params: object expected"
   //       );
@@ -187,7 +187,7 @@ export default class MovieEntity {
   //     message.params = MovieParams.fromObject(object.params);
   //   }
   //   if (object.images) {
-  //     if (typeof object.images != "object") {
+  //     if (typeof object.images !== "object") {
   //       throw TypeError(
   //         ".com.opensource.svga.MovieEntity.images: object expected"
   //       );
@@ -196,7 +196,7 @@ export default class MovieEntity {
   //     const keys = Object.keys(object.images);
   //     for (let i = 0; i < keys.length; ++i) {
   //       const key = keys[i];
-  //       if (typeof object.images[key] == "string") {
+  //       if (typeof object.images[key] === "string") {
   //         base64.decode(
   //           object.images[key],
   //           (message.images[key] = new Uint8Array(
@@ -217,7 +217,7 @@ export default class MovieEntity {
   //     }
   //     message.sprites = [];
   //     for (let i = 0; i < object.sprites.length; ++i) {
-  //       if (typeof object.sprites[i] != "object") {
+  //       if (typeof object.sprites[i] !== "object") {
   //         throw TypeError(
   //           ".com.opensource.svga.MovieEntity.sprites: object expected"
   //         );
@@ -256,10 +256,10 @@ export default class MovieEntity {
   //     object.version = "";
   //     object.params = null;
   //   }
-  //   if (message.version != null && message.hasOwnProperty("version")) {
+  //   if (message.version !== null && message.hasOwnProperty("version")) {
   //     object.version = message.version;
   //   }
-  //   if (message.params != null && message.hasOwnProperty("params")) {
+  //   if (message.params !== null && message.hasOwnProperty("params")) {
   //     object.params = MovieParams.toObject(message.params, options);
   //   }
   //   let keys2;
@@ -268,9 +268,9 @@ export default class MovieEntity {
   //     for (let j = 0; j < keys2.length; ++j) {
   //       const key = keys2[j];
   //       object.images[key] =
-  //         options.bytes == String
+  //         options.bytes === String
   //           ? base64.encode(message.images[key], 0, message.images[key].length)
-  //           : options.bytes == Array
+  //           : options.bytes === Array
   //           ? [...message.images[key]]
   //           : message.images[key];
   //     }
@@ -294,7 +294,7 @@ export default class MovieEntity {
    * @returns {string} The default type url
    */
   // static getTypeUrl(typeUrlPrefix?: string) {
-  //   if (typeUrlPrefix == undefined) {
+  //   if (typeUrlPrefix === void 0) {
   //     typeUrlPrefix = "type.googleapis.com";
   //   }
 
@@ -340,19 +340,19 @@ export default class MovieEntity {
    */
   constructor(properties?: MovieEntityProps) {
     if (properties) {
-      if (properties.version != null) {
+      if (properties.version !== null) {
         this.version = properties.version;
       }
 
-      if (properties.images != null) {
+      if (properties.images !== null) {
         this.images = properties.images;
       }
 
-      if (properties.params != null) {
+      if (properties.params !== null) {
         this.params = properties.params;
       }
 
-      if (properties.sprites != null) {
+      if (properties.sprites !== null) {
         this.sprites = properties.sprites;
       }
     }

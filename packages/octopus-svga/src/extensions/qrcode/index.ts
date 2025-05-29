@@ -78,7 +78,7 @@ export class QRCode {
       this.setupTypeNumber(test);
     }
 
-    if (this.dataCache == null) {
+    if (this.dataCache === null) {
       this.dataCache = this.createData(
         this.typeNumber,
         this.errorCorrectLevel,
@@ -101,8 +101,8 @@ export class QRCode {
         if (nc <= -1 || moduleCount <= nc) continue;
 
         modules[nr][nc] =
-          (r >= 0 && r <= 6 && (c == 0 || c == 6)) ||
-          (c >= 0 && c <= 6 && (r == 0 || r == 6)) ||
+          (r >= 0 && r <= 6 && (c === 0 || c === 6)) ||
+          (c >= 0 && c <= 6 && (r === 0 || r === 6)) ||
           (r >= 2 && r <= 4 && c >= 2 && c <= 4);
       }
     }
@@ -123,7 +123,7 @@ export class QRCode {
         for (let r = -2; r <= 2; r++) {
           for (let c = -2; c <= 2; c++) {
             modules[row + r][col + c] =
-              r == -2 || r == 2 || c == -2 || c == 2 || (r == 0 && c == 0);
+              r === -2 || r === 2 || c === -2 || c === 2 || (r === 0 && c === 0);
           }
         }
       }
@@ -137,13 +137,13 @@ export class QRCode {
     for (let r = 8; r < count; r++) {
       if (modules[r][6] != null) continue;
 
-      modules[r][6] = r % 2 == 0;
+      modules[r][6] = r % 2 === 0;
     }
 
     for (let c = 8; c < count; c++) {
       if (modules[6][c] != null) continue;
 
-      modules[6][c] = c % 2 == 0;
+      modules[6][c] = c % 2 === 0;
     }
   }
 
@@ -154,7 +154,7 @@ export class QRCode {
 
     // vertical
     for (let i = 0; i < 15; i++) {
-      const mod = !test && ((bits >> i) & 1) == 1;
+      const mod = !test && ((bits >> i) & 1) === 1;
 
       if (i < 6) {
         modules[i][8] = mod;
@@ -167,7 +167,7 @@ export class QRCode {
 
     // horizontal
     for (let i = 0; i < 15; i++) {
-      const mod = !test && ((bits >> i) & 1) == 1;
+      const mod = !test && ((bits >> i) & 1) === 1;
 
       if (i < 8) {
         modules[8][moduleCount - i - 1] = mod;
@@ -190,7 +190,7 @@ export class QRCode {
       this.makeImpl(true, i);
 
       const lostPoint = Util.getLostPoint(this);
-      if (i == 0 || minLostPoint > lostPoint) {
+      if (i === 0 || minLostPoint > lostPoint) {
         minLostPoint = lostPoint;
         pattern = i;
       }
@@ -204,7 +204,7 @@ export class QRCode {
     const bits = Util.getBCHTypeNumber(typeNumber);
 
     for (let i = 0; i < 18; i++) {
-      const mod = !test && ((bits >> i) & 1) == 1;
+      const mod = !test && ((bits >> i) & 1) === 1;
 
       modules[~~(i / 3)][(i % 3) + moduleCount - 8 - 3] = mod;
       modules[(i % 3) + moduleCount - 8 - 3][~~(i / 3)] = mod;
@@ -246,7 +246,7 @@ export class QRCode {
     }
 
     // padding
-    while (buffer.lengthInBits % 8 != 0) {
+    while (buffer.lengthInBits % 8 !== 0) {
       buffer.putBit(false);
     }
 
@@ -275,7 +275,7 @@ export class QRCode {
     let byteIndex = 0;
 
     for (let col = row; col > 0; col -= 2) {
-      if (col == 6) col -= 1;
+      if (col === 6) col -= 1;
 
       while (true) {
         for (let c = 0; c < 2; c++) {
@@ -283,7 +283,7 @@ export class QRCode {
             let dark = false;
 
             if (byteIndex < data.length) {
-              dark = ((data[byteIndex] >>> bitIndex) & 1) == 1;
+              dark = ((data[byteIndex] >>> bitIndex) & 1) === 1;
             }
 
             if (maskFunc(row, col - c)) {
@@ -293,7 +293,7 @@ export class QRCode {
             modules[row][col - c] = dark;
             bitIndex--;
 
-            if (bitIndex == -1) {
+            if (bitIndex === -1) {
               byteIndex++;
               bitIndex = 7;
             }
