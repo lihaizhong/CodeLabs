@@ -1,7 +1,5 @@
-// import { utf8 } from "./utf8"
 import { platform } from "../../../platform";
-import float from "./float";
-// import { LongBits } from "../dts";
+import { readFloatLE } from "./float";
 
 export default class Reader {
   // 添加静态缓存，用于常用的空数组
@@ -54,10 +52,6 @@ export default class Reader {
     this.len = buffer.length;
   }
 
-  private slice(buf: Uint8Array, begin: number, end: number) {
-    return buf.subarray(begin, end);
-  }
-
   private indexOutOfRange(reader: Reader, writeLength?: number) {
     return new RangeError(
       "index out of range: " +
@@ -68,91 +62,6 @@ export default class Reader {
         reader.len
     );
   }
-
-  // private readLongVarint() {
-  //   // tends to deopt with local vars for octet etc.
-  //   const bits = new LongBits(0, 0);
-  //   let i = 0;
-
-  //   if (this.len - this.pos > 4) {
-  //     // fast route (lo)
-  //     for (let i = 0; i < 4; ++i) {
-  //       // 1st..4th
-  //       bits.lo = (bits.lo | ((this.buf[this.pos] & 127) << (i * 7))) >>> 0;
-  //       if (this.buf[this.pos++] < 128) {
-  //         return bits;
-  //       }
-  //     }
-  //     // 5th
-  //     bits.lo = (bits.lo | ((this.buf[this.pos] & 127) << 28)) >>> 0;
-  //     bits.hi = (bits.hi | ((this.buf[this.pos] & 127) >> 4)) >>> 0;
-  //     if (this.buf[this.pos++] < 128) {
-  //       return bits;
-  //     }
-  //     i = 0;
-  //   } else {
-  //     for (; i < 3; ++i) {
-  //       /* istanbul ignore if */
-  //       if (this.pos >= this.len) {
-  //         throw this.indexOutOfRange(this);
-  //       }
-  //       // 1st..3th
-  //       bits.lo = (bits.lo | ((this.buf[this.pos] & 127) << (i * 7))) >>> 0;
-  //       if (this.buf[this.pos++] < 128) {
-  //         return bits;
-  //       }
-  //     }
-  //     // 4th
-  //     bits.lo = (bits.lo | ((this.buf[this.pos++] & 127) << (i * 7))) >>> 0;
-  //     return bits;
-  //   }
-  //   if (this.len - this.pos > 4) {
-  //     // fast route (hi)
-  //     for (; i < 5; ++i) {
-  //       // 6th..10th
-  //       bits.hi = (bits.hi | ((this.buf[this.pos] & 127) << (i * 7 + 3))) >>> 0;
-  //       if (this.buf[this.pos++] < 128) {
-  //         return bits;
-  //       }
-  //     }
-  //   } else {
-  //     for (; i < 5; ++i) {
-  //       /* istanbul ignore if */
-  //       if (this.pos >= this.len) {
-  //         throw this.indexOutOfRange(this);
-  //       }
-  //       // 6th..10th
-  //       bits.hi = (bits.hi | ((this.buf[this.pos] & 127) << (i * 7 + 3))) >>> 0;
-  //       if (this.buf[this.pos++] < 128) {
-  //         return bits;
-  //       }
-  //     }
-  //   }
-
-  //   /* istanbul ignore next */
-  //   throw Error("invalid varint encoding");
-  // }
-
-  // private readFixed32_end(buf: Uint8Array, end: number) {
-  //   // note that this uses `end`, not `pos`
-  //   return (
-  //     (buf[end - 4] |
-  //       (buf[end - 3] << 8) |
-  //       (buf[end - 2] << 16) |
-  //       (buf[end - 1] << 24)) >>>
-  //     0
-  //   );
-  // }
-
-  // private readFixed64(/* this: Reader */) {
-  //   /* istanbul ignore if */
-  //   if (this.pos + 8 > this.len) throw this.indexOutOfRange(this, 8);
-
-  //   return new LongBits(
-  //     this.readFixed32_end(this.buf, (this.pos += 4)),
-  //     this.readFixed32_end(this.buf, (this.pos += 4))
-  //   );
-  // }
 
   /**
    * 将复杂逻辑分离到单独方法
@@ -205,98 +114,6 @@ export default class Reader {
   }
 
   /**
-   * Reads a zig-zag encoded varint as a signed 32 bit value.
-   * @returns {number} Value read
-   */
-  // sint32() {
-  //   const value = this.uint32();
-
-  //   return ((value >>> 1) ^ -(value & 1)) | 0;
-  // }
-
-  /**
-   * Reads a varint as an unsigned 64 bit value.
-   * @name Reader#uint64
-   * @function
-   * @returns {Long} Value read
-   */
-  // uint64() {
-  //   return this.readLongVarint().toNumber(true);
-  // }
-
-  /**
-   * Reads a varint as a signed 64 bit value.
-   * @name Reader#int64
-   * @function
-   * @returns {Long} Value read
-   */
-  // int64() {
-  //   return this.readLongVarint().toNumber(false);
-  // }
-
-  /**
-   * Reads a zig-zag encoded varint as a signed 64 bit value.
-   * @name Reader#sint64
-   * @function
-   * @returns {Long} Value read
-   */
-  // sint64() {
-  //   return this.readLongVarint().zzDecode().toNumber(false);
-  // }
-
-  /**
-   * Reads a varint as a boolean.
-   * @returns {boolean} Value read
-   */
-  // bool() {
-  //   return this.uint32() !== 0;
-  // }
-
-  /**
-   * Reads fixed 32 bits as an unsigned 32 bit integer.
-   * @returns {number} Value read
-   */
-  // fixed32() {
-  //   if (this.pos + 4 > this.len) {
-  //     throw this.indexOutOfRange(this, 4);
-  //   }
-
-  //   return this.readFixed32_end(this.buf, (this.pos += 4));
-  // }
-
-  /**
-   * Reads fixed 32 bits as a signed 32 bit integer.
-   * @returns {number} Value read
-   */
-  // sfixed32() {
-  //   if (this.pos + 4 > this.len) {
-  //     throw this.indexOutOfRange(this, 4);
-  //   }
-
-  //   return this.readFixed32_end(this.buf, (this.pos += 4)) | 0;
-  // }
-
-  /**
-   * Reads fixed 64 bits.
-   * @name Reader#fixed64
-   * @function
-   * @returns {Long} Value read
-   */
-  // fixed64() {
-  //   return this.readFixed64().toNumber(true);
-  // }
-
-  /**
-   * Reads zig-zag encoded fixed 64 bits.
-   * @name Reader#sfixed64
-   * @function
-   * @returns {Long} Value read
-   */
-  // sfixed64() {
-  //   return this.readFixed64().zzDecode().toNumber(false);
-  // }
-
-  /**
    * Reads a float (32 bit) as a number.
    * @function
    * @returns {number} Value read
@@ -306,27 +123,11 @@ export default class Reader {
       throw this.indexOutOfRange(this, 4);
     }
 
-    const value = float.readFloatLE(this.buf, this.pos);
+    const value = readFloatLE(this.buf, this.pos);
     this.pos += 4;
 
     return value;
   }
-
-  /**
-   * Reads a double (64 bit float) as a number.
-   * @function
-   * @returns {number} Value read
-   */
-  // double() {
-  //   if (this.pos + 8 > this.len) {
-  //     throw this.indexOutOfRange(this, 4);
-  //   }
-
-  //   const value = float.readDoubleLE(this.buf, this.pos);
-  //   this.pos += 8;
-
-  //   return value;
-  // }
 
   private getBytesRange() {
     const length = this.uint32();
@@ -352,7 +153,7 @@ export default class Reader {
       return Reader.EMPTY_UINT8ARRAY;
     }
 
-    return this.slice(this.buf, start, end);
+    return this.buf.subarray(start, end);
   }
 
   /**

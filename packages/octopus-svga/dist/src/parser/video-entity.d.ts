@@ -1,4 +1,4 @@
-import type { MovieEntity } from "../extensions/protobuf";
+import type { MovieEntity } from "../extensions/svga-decoder";
 export declare class VideoEntity implements PlatformVideo.Video {
     /**
      * svga 版本号

@@ -3,7 +3,7 @@ import type {
   MovieEntity,
   ShapeEntity,
   SpriteEntity,
-} from "../extensions/protobuf";
+} from "../extensions/svga-decoder";
 
 export class VideoEntity implements PlatformVideo.Video {
   /**

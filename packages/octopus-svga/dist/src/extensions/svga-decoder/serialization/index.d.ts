@@ -1,5 +1,4 @@
-export { default as SVGADecoder } from "./MovieEntity";
-export type { default as MovieEntity } from "./MovieEntity";
+export { default as MovieEntity } from "./MovieEntity";
 export type { default as EllipseArgs } from "./EllipseArgs";
 export type { default as FrameEntity } from "./FrameEntity";
 export type { default as Layout } from "./Layout";

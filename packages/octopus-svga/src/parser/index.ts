@@ -1,6 +1,6 @@
 import { unzlibSync } from "fflate";
 import { platform } from "../platform";
-import { SVGADecoder } from "../extensions/protobuf";
+import { parseSvga } from "../extensions/svga-decoder";
 // import benchmark from "../benchmark";
 import { VideoEntity } from "./video-entity";
 
@@ -23,7 +23,7 @@ export class Parser {
     }
 
     const inflateData = unzlibSync(u8a);
-    const movieData = SVGADecoder.decode(inflateData);
+    const movieData = parseSvga(inflateData);
 
     return new VideoEntity(
       movieData!,
@@ -33,7 +33,7 @@ export class Parser {
     // let entity: VideoEntity;
     // benchmark.time("unzlibSync", () => {
     //   const inflateData = unzlibSync(u8a);
-    //   const movieData = SVGADecoder.decode(inflateData);
+    //   const movieData = parseSvga(inflateData);
 
     //   entity = new VideoEntity(
     //     movieData!,

@@ -30,7 +30,6 @@ export default class Reader {
      * @param {Uint8Array} buffer Buffer to read from
      */
     constructor(buffer: Uint8Array);
-    private slice;
     private indexOutOfRange;
     /**
      * 将复杂逻辑分离到单独方法
@@ -49,62 +48,11 @@ export default class Reader {
      */
     int32(): number;
     /**
-     * Reads a zig-zag encoded varint as a signed 32 bit value.
-     * @returns {number} Value read
-     */
-    /**
-     * Reads a varint as an unsigned 64 bit value.
-     * @name Reader#uint64
-     * @function
-     * @returns {Long} Value read
-     */
-    /**
-     * Reads a varint as a signed 64 bit value.
-     * @name Reader#int64
-     * @function
-     * @returns {Long} Value read
-     */
-    /**
-     * Reads a zig-zag encoded varint as a signed 64 bit value.
-     * @name Reader#sint64
-     * @function
-     * @returns {Long} Value read
-     */
-    /**
-     * Reads a varint as a boolean.
-     * @returns {boolean} Value read
-     */
-    /**
-     * Reads fixed 32 bits as an unsigned 32 bit integer.
-     * @returns {number} Value read
-     */
-    /**
-     * Reads fixed 32 bits as a signed 32 bit integer.
-     * @returns {number} Value read
-     */
-    /**
-     * Reads fixed 64 bits.
-     * @name Reader#fixed64
-     * @function
-     * @returns {Long} Value read
-     */
-    /**
-     * Reads zig-zag encoded fixed 64 bits.
-     * @name Reader#sfixed64
-     * @function
-     * @returns {Long} Value read
-     */
-    /**
      * Reads a float (32 bit) as a number.
      * @function
      * @returns {number} Value read
      */
     float(): number;
-    /**
-     * Reads a double (64 bit float) as a number.
-     * @function
-     * @returns {number} Value read
-     */
     private getBytesRange;
     /**
      * Reads a sequence of bytes preceeded by its length as a varint.

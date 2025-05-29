@@ -1,12 +1,12 @@
-// 使用静态DataView池
-const DATA_VIEW_POOL_SIZE = 4;
-const dataViewPool: DataView[] = Array(DATA_VIEW_POOL_SIZE)
-  .fill(0)
-  .map(() => new DataView(new ArrayBuffer(8))); // 使用8字节支持double
-let currentViewIndex = 0;
+function readFloatLEImpl() {
+  // 使用静态DataView池
+  const DATA_VIEW_POOL_SIZE = 4;
+  const dataViewPool: DataView[] = Array(DATA_VIEW_POOL_SIZE)
+    .fill(0)
+    .map(() => new DataView(new ArrayBuffer(8))); // 使用8字节支持double
+  let currentViewIndex = 0;
 
-export default {
-  readFloatLE(buf: Uint8Array, pos: number): number {
+  return function readFloatLE(buf: Uint8Array, pos: number): number {
     if (pos < 0 || pos + 4 > buf.length)
       throw new RangeError("Index out of range");
 
@@ -22,5 +22,7 @@ export default {
     u8[3] = buf[pos + 3];
 
     return view.getFloat32(0, true);
-  },
-};
+  };
+}
+
+export const readFloatLE = readFloatLEImpl();
