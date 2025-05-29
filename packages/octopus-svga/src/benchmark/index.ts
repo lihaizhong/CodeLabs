@@ -84,26 +84,29 @@ class Stopwatch {
   }
 }
 
+const stopwatch = new Stopwatch();
+
 export default {
-  label(label: string) {
+  label(label: string): void {
     console.log(badge, label);
   },
+
   async time<T extends any>(
     label: string,
     callback: () => Promise<T> | T
   ): Promise<T> {
-    const stopwatch = new Stopwatch();
-
     stopwatch.start(label);
     const result = await callback();
     stopwatch.stop(label);
 
     return result;
   },
-  line(size: number = 40) {
+
+  line(size: number = 40): void {
     console.log("-".repeat(size));
   },
-  log(...message: unknown[]) {
+
+  log(...message: unknown[]): void {
     console.log(badge, ...message);
   },
 };
