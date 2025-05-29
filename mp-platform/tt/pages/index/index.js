@@ -4,6 +4,10 @@ Page({
   data: {
     btnList: [
       {
+        text: "跳转SVGA动画(官方版)",
+        path: "/pages/svga2/index",
+      },
+      {
         text: "跳转SVGA动画(自研版)",
         path: "/pages/svga/index",
       },
