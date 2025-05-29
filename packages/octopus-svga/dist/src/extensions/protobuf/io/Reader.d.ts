@@ -33,6 +33,11 @@ export default class Reader {
     private slice;
     private indexOutOfRange;
     /**
+     * 将复杂逻辑分离到单独方法
+     * @returns
+     */
+    private readVarint32Slow;
+    /**
      * Reads a varint as an unsigned 32 bit value.
      * @function
      * @returns {number} Value read
@@ -100,6 +105,7 @@ export default class Reader {
      * @function
      * @returns {number} Value read
      */
+    private getBytesRange;
     /**
      * Reads a sequence of bytes preceeded by its length as a varint.
      * @returns {Uint8Array} Value read

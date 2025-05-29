@@ -1,5 +1,5 @@
 // import { utf8 } from "./utf8"
-import { platform } from "../../../platform"
+import { platform } from "../../../platform";
 import float from "./float";
 // import { LongBits } from "../dts";
 
@@ -155,45 +155,45 @@ export default class Reader {
   // }
 
   /**
+   * 将复杂逻辑分离到单独方法
+   * @returns
+   */
+  private readVarint32Slow() {
+    let byte = this.buf[this.pos++];
+    let value = byte & 0x7f;
+    let shift = 7;
+
+    // 使用do-while循环减少条件判断
+    do {
+      if (this.pos >= this.len) {
+        throw this.indexOutOfRange(this);
+      }
+
+      byte = this.buf[this.pos++];
+      value |= (byte & 0x7f) << shift;
+      shift += 7;
+    } while (byte >= 128 && shift < 32);
+
+    return value >>> 0; // 确保无符号
+  }
+
+  /**
    * Reads a varint as an unsigned 32 bit value.
    * @function
    * @returns {number} Value read
    */
   uint32() {
-    let value = 4294967295;
+    // 快速路径：大多数情况下是单字节
+    const byte = this.buf[this.pos];
 
-    value = (this.buf[this.pos] & 127) >>> 0;
-    if (this.buf[this.pos++] < 128) {
-      return value;
+    if (byte < 128) {
+      this.pos++;
+
+      return byte;
     }
 
-    value = (value | ((this.buf[this.pos] & 127) << 7)) >>> 0;
-    if (this.buf[this.pos++] < 128) {
-      return value;
-    }
-
-    value = (value | ((this.buf[this.pos] & 127) << 14)) >>> 0;
-    if (this.buf[this.pos++] < 128) {
-      return value;
-    }
-
-    value = (value | ((this.buf[this.pos] & 127) << 21)) >>> 0;
-    if (this.buf[this.pos++] < 128) {
-      return value;
-    }
-
-    value = (value | ((this.buf[this.pos] & 15) << 28)) >>> 0;
-    if (this.buf[this.pos++] < 128) {
-      return value;
-    }
-
-    if ((this.pos += 5) > this.len) {
-      this.pos = this.len;
-
-      throw this.indexOutOfRange(this, 10);
-    }
-
-    return value;
+    // 慢速路径：多字节处理
+    return this.readVarint32Slow();
   }
 
   /**
@@ -328,11 +328,7 @@ export default class Reader {
   //   return value;
   // }
 
-  /**
-   * Reads a sequence of bytes preceeded by its length as a varint.
-   * @returns {Uint8Array} Value read
-   */
-  bytes() {
+  private getBytesRange() {
     const length = this.uint32();
     const start = this.pos;
     const end = start + length;
@@ -340,6 +336,16 @@ export default class Reader {
     if (end > this.len) {
       throw this.indexOutOfRange(this, length);
     }
+
+    return [start, end, length];
+  }
+
+  /**
+   * Reads a sequence of bytes preceeded by its length as a varint.
+   * @returns {Uint8Array} Value read
+   */
+  bytes() {
+    const [start, end, length] = this.getBytesRange();
 
     this.pos += length;
     if (length === 0) {
@@ -354,9 +360,13 @@ export default class Reader {
    * @returns {string} Value read
    */
   string() {
-    const bytes = this.bytes();
+    const [start, end] = this.getBytesRange();
+    // 直接在原始buffer上解码，避免创建中间bytes对象
+    const result = platform.decode.utf8(this.buf, start, end);
 
-    return platform.decode.utf8(bytes, 0, bytes.length);
+    this.pos = end;
+
+    return result;
   }
 
   /**
@@ -366,27 +376,49 @@ export default class Reader {
    */
   skip(length?: number) {
     if (typeof length === "number") {
-      /* istanbul ignore if */
       if (this.pos + length > this.len) {
         throw this.indexOutOfRange(this, length);
       }
       this.pos += length;
-    } else {
-      // 优化变长整数跳过逻辑
-      const startPos = this.pos;
-
-      while (this.pos < this.len) {
-        if (this.buf[this.pos++] < 128) {
-          return this;
-        }
-        // 防止无限循环，最多读取10个字节
-        if (this.pos - startPos >= 10) {
-          throw Error("invalid varint encoding");
+      return this;
+    }
+    
+    // 变长整数跳过优化 - 使用位运算
+    const buf = this.buf;
+    let pos = this.pos;
+    const len = this.len;
+    
+    // 一次检查多个字节，减少循环次数
+    while (pos < len) {
+      const byte = buf[pos++];
+      if ((byte & 0x80) === 0) {
+        this.pos = pos;
+        return this;
+      }
+      // 快速检查连续的高位字节
+      if (pos < len && (buf[pos] & 0x80) !== 0) {
+        pos++;
+        if (pos < len && (buf[pos] & 0x80) !== 0) {
+          pos++;
+          if (pos < len && (buf[pos] & 0x80) !== 0) {
+            pos++;
+            // 继续检查剩余字节
+            while (pos < len && (buf[pos] & 0x80) !== 0) {
+              pos++;
+              if (pos - this.pos >= 10) {
+                throw Error("invalid varint encoding");
+              }
+            }
+            if (pos < len) {
+              this.pos = pos + 1;
+              return this;
+            }
+          }
         }
       }
-      throw this.indexOutOfRange(this);
     }
-    return this;
+    
+    throw this.indexOutOfRange(this);
   }
 
   /**
