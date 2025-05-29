@@ -1,3 +1,3 @@
 export * from "./svga-decoder";
 export * from "./png-encoder";
-export * from "./qrcode";
+export * from "./qrcode-encoder";
