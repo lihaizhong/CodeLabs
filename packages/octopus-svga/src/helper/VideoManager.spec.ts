@@ -1,4 +1,4 @@
-import { VideoManager } from "./video-manager";
+import { VideoManager } from "./VideoManager";
 
 describe("VideoManager", () => {
   it("VideoManager 定义", () => {

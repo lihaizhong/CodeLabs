@@ -1,4 +1,4 @@
-import { PointPool } from "./point-pool";
+import { PointPool } from "./PointPool";
 
 export class RendererGL implements PlatformRenderer {
   private pointPool: PointPool = new PointPool();

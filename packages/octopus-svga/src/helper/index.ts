@@ -1,4 +1,4 @@
-export { generateImageFromCode, generateImageBufferFromCode } from "./qrcode-helper";
-export { getDataURLFromImageData, getBufferFromImageData } from "./png-helper";
-export { VideoManager } from "./video-manager";
-export { VideoEditor } from "./video-editor";
+export { generateImageFromCode, generateImageBufferFromCode } from "./qrcode";
+export { getDataURLFromImageData, getBufferFromImageData } from "./png";
+export { VideoManager } from "./VideoManager";
+export { VideoEditor } from "./VideoEditor";

@@ -1,7 +1,7 @@
 import { platform } from "../platform";
 // import benchmark from "../benchmark";
 import { createRenderer } from "../renderer";
-import { ImagePool } from "./image-pool";
+import { ImagePool } from "./ImagePool";
 
 interface PaintModel {
   // canvas or offscreen

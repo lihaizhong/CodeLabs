@@ -104,7 +104,7 @@ export default definePlugin<"image">({
 
         return filePath;
       } catch (ex: any) {
-        console.warn(`图片缓存失败：${ex.message}`);
+        console.warn(`image cached fail: ${ex.message}`);
         return decode.toDataURL(data);
       }
     };

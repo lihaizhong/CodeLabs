@@ -1,4 +1,4 @@
-import { IQrCodeImgOptions } from "./qrcode-helper";
+import { IQrCodeImgOptions } from "./qrcode";
 interface VideoEditorOptions {
     mode?: "R" | "A";
     container?: string;

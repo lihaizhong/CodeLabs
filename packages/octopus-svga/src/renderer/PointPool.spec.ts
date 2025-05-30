@@ -1,4 +1,4 @@
-import { PointPool } from "./point-pool";
+import { PointPool } from "./PointPool";
 
 describe("PointPool 定义", () => {
   it("PointPool 是否被定义", () => {

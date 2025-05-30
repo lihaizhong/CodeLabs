@@ -1,4 +1,4 @@
-import { getDataURLFromImageData } from "./png-helper";
+import { getDataURLFromImageData } from "./png";
 
 describe("png-helper", () => {
   it("should be defined", () => {

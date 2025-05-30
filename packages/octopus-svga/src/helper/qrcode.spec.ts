@@ -1,4 +1,4 @@
-import { generateImageFromCode } from "./qrcode-helper";
+import { generateImageFromCode } from "./qrcode";
 
 describe("qrcode-helper", () => {
   it("should be defined", () => {

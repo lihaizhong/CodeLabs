@@ -2,7 +2,7 @@ import { unzlibSync } from "fflate";
 import { platform } from "../platform";
 import { parseSvga } from "../extensions/svga-decoder";
 // import benchmark from "../benchmark";
-import { VideoEntity } from "./video-entity";
+import { VideoEntity } from "./VideoEntity";
 
 /**
  * SVGA 下载解析器

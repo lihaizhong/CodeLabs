@@ -1,4 +1,4 @@
-import { Renderer2D } from "./2d-renderer";
+import { Renderer2D } from "./Renderer2D";
 // import { render } from "./renderer";
 
 export function createRenderer(context: PlatformRenderingContext2D): PlatformRenderer {

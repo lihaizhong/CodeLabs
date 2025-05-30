@@ -1,4 +1,4 @@
-import { PointPool, CurrentPoint } from "./point-pool";
+import { PointPool, CurrentPoint } from "./PointPool";
 
 /**
  * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Tutorial/Paths

@@ -2,8 +2,8 @@ import { platform } from "../platform";
 import {
   generateImageBufferFromCode,
   IQrCodeImgOptions,
-} from "./qrcode-helper";
-import { getBufferFromImageData } from "./png-helper";
+} from "./qrcode";
+import { getBufferFromImageData } from "./png";
 
 interface VideoEditorOptions {
   // 模式: R 替换, A 追加

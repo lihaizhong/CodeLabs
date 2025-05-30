@@ -1,4 +1,4 @@
-import { ObjectPool } from "../extensions/svga-decoder/io/ObjectPool";
+import { ObjectPool } from "./ObjectPool";
 
 export interface CurrentPoint {
   x: number;
