@@ -34,9 +34,8 @@ export declare class Painter {
      */
     private model;
     private IM;
+    private R?;
     private lastResizeKey;
-    private lastTransform?;
-    globalTransform?: PlatformVideo.Transform;
     /**
      *
      * @param mode

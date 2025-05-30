@@ -1,6 +1,6 @@
 import { platform } from "../platform";
 // import benchmark from "../benchmark";
-import render from "../renderer";
+import { createRenderer } from "../renderer";
 import { ImagePool } from "./image-pool";
 
 interface PaintModel {
@@ -63,10 +63,9 @@ export class Painter {
 
   private IM = new ImagePool();
 
-  private lastResizeKey = "";
-  private lastTransform?: PlatformVideo.Transform;
+  private R?: PlatformRenderer;
 
-  public globalTransform?: PlatformVideo.Transform;
+  private lastResizeKey = "";
 
   /**
    *
@@ -251,6 +250,8 @@ export class Painter {
       }
       // #endregion clear secondary screen implement
     }
+
+    this.R = createRenderer(this.YC!);
   }
 
   /**
@@ -328,9 +329,9 @@ export class Painter {
     const { width: canvasWidth, height: canvasHeight } = this.Y!;
     const { width: videoWidth, height: videoHeight } = videoSize;
     const resizeKey = `${contentMode}-${videoWidth}-${videoHeight}-${canvasWidth}-${canvasHeight}`;
+    const lastTransform = this.R!.getGlobalTransform();
 
-    if (this.lastResizeKey === resizeKey && this.lastTransform) {
-      this.globalTransform = this.lastTransform;
+    if (this.lastResizeKey === resizeKey && lastTransform) {
       return;
     }
 
@@ -349,14 +350,14 @@ export class Painter {
     }
 
     this.lastResizeKey = resizeKey;
-    this.globalTransform = this.lastTransform = {
+    this.R!.setGlobalTransform({
       a: scale.scaleX,
       b: 0.0,
       c: 0.0,
       d: scale.scaleY,
       tx: scale.translateX,
       ty: scale.translateY,
-    };
+    });
   }
 
   public clearContainer: () => void = noop;
@@ -383,17 +384,13 @@ export class Painter {
     start: number,
     end: number
   ) {
-    const { materials, dynamicMaterials } = this.IM;
-
-    render(
-      this.YC!,
-      materials,
-      dynamicMaterials,
+    this.R!.render(
       videoEntity,
+      this.IM.materials,
+      this.IM.dynamicMaterials,
       currentFrame,
       start,
-      end,
-      this.globalTransform
+      end
     );
   }
 

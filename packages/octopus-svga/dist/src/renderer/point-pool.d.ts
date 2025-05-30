@@ -1,3 +1,4 @@
+import { ObjectPool } from "../extensions/svga-decoder/io/ObjectPool";
 export interface CurrentPoint {
     x: number;
     y: number;
@@ -9,10 +10,6 @@ export interface CurrentPoint {
 /**
  * CurrentPoint对象池，用于减少对象创建和GC压力
  */
-export declare class PointPool {
-    private pool;
-    private static instance;
-    static getInstance(): PointPool;
-    acquire(): CurrentPoint;
-    release(point: CurrentPoint): void;
+export declare class PointPool extends ObjectPool<CurrentPoint> {
+    constructor();
 }

@@ -38,49 +38,6 @@ export default class ShapeEntity {
      */
     static decode(reader: Reader | Uint8Array, length?: number): ShapeEntity;
     /**
-     * Decodes a ShapeEntity message from the specified reader or buffer, length delimited.
-     * @function decodeDelimited
-     * @memberof com.opensource.svga.ShapeEntity
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {com.opensource.svga.ShapeEntity} ShapeEntity
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    /**
-     * Verifies a ShapeEntity message.
-     * @function verify
-     * @memberof com.opensource.svga.ShapeEntity
-     * @static
-     * @param {Object.<string,*>} message Plain object to verify
-     * @returns {string|null} `null` if valid, otherwise the reason why it is not
-     */
-    /**
-     * Creates a ShapeEntity message from a plain object. Also converts values to their respective internal types.
-     * @function fromObject
-     * @memberof com.opensource.svga.ShapeEntity
-     * @static
-     * @param {Object.<string,*>} object Plain object
-     * @returns {com.opensource.svga.ShapeEntity} ShapeEntity
-     */
-    /**
-     * Creates a plain object from a ShapeEntity message. Also converts values to other types if specified.
-     * @function toObject
-     * @memberof com.opensource.svga.ShapeEntity
-     * @static
-     * @param {com.opensource.svga.ShapeEntity} message ShapeEntity
-     * @param {$protobuf.IConversionOptions} [options] Conversion options
-     * @returns {Object.<string,*>} Plain object
-     */
-    /**
-     * Gets the default type url for ShapeEntity
-     * @function getTypeUrl
-     * @memberof com.opensource.svga.ShapeEntity
-     * @static
-     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-     * @returns {string} The default type url
-     */
-    /**
      * ShapeEntity type.
      * @member {com.opensource.svga.ShapeEntity.ShapeType} type
      * @memberof com.opensource.svga.ShapeEntity
