@@ -33,9 +33,9 @@ export default definePlugin<"rAF">({
       if (rAF === null) {
         // 检查canvas是否存在
         try {
-          const canvas = this.getGlobalCanvas() as WechatMiniprogram.Canvas;
+          const canvas = this.getGlobalCanvas() as OctopusPlatform.MiniProgramCanvas;
 
-          rAF = (canvas as WechatMiniprogram.Canvas).requestAnimationFrame.bind(
+          rAF = canvas.requestAnimationFrame.bind(
             canvas
           );
         } catch (error: any) {

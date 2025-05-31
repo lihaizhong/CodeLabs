@@ -46,7 +46,7 @@ export class Player {
    */
   public async setConfig(
     options: string | PlayerConfigOptions,
-    component?: WechatMiniprogram.Component.TrivialInstance | null
+    component?: any
   ): Promise<void> {
     const config: PlayerConfigOptions =
       typeof options === "string" ? { container: options } : options;

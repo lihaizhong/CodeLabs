@@ -21,7 +21,7 @@ export default definePlugin<"getCanvas">({
       }
 
       const MAX_SIZE = 1365;
-      const context = canvas!.getContext("2d");
+      const context = canvas!.getContext("2d")!;
       let virtualWidth = width * dpr;
       let virtualHeight = height * dpr;
 
@@ -62,12 +62,12 @@ export default definePlugin<"getCanvas">({
 
     return (
       selector: string,
-      component?: WechatMiniprogram.Component.TrivialInstance | null
+      component?: any
     ) =>
       retry<OctopusPlatform.GetCanvasResult>(
         () =>
           new Promise<OctopusPlatform.GetCanvasResult>((resolve, reject) => {
-            let query = (br as WechatMiniprogram.Wx).createSelectorQuery();
+            let query = br.createSelectorQuery();
 
             if (component) {
               query = query.in(component);
@@ -75,7 +75,7 @@ export default definePlugin<"getCanvas">({
 
             query
               .select(selector)
-              .fields({ node: true, size: true }, (res) => {
+              .fields({ node: true, size: true }, (res: any) => {
                 const { node, width, height } = res || {};
 
                 try {

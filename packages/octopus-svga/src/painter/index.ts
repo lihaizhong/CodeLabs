@@ -123,7 +123,7 @@ export class Painter {
   public async register(
     selector: string,
     ofsSelector?: string,
-    component?: WechatMiniprogram.Component.TrivialInstance | null
+    component?: any
   ) {
     const { model, mode } = this;
     const { getCanvas, getOfsCanvas } = platform;

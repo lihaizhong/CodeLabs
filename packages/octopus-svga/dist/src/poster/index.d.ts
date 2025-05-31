@@ -26,7 +26,7 @@ export declare class Poster {
      * 设置配置项
      * @param options 可配置项
      */
-    setConfig(options?: string | PosterConfig, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
+    setConfig(options?: string | PosterConfig, component?: any): Promise<void>;
     /**
      * 修改内容模式
      * @param contentMode

@@ -53,7 +53,7 @@ export declare class Painter {
      * @param ofsSelector
      * @param component
      */
-    register(selector: string, ofsSelector?: string, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
+    register(selector: string, ofsSelector?: string, component?: any): Promise<void>;
     /**
      * 更新动态图片集
      * @param images

@@ -77,7 +77,8 @@ export default definePlugin<"image">({
     }
 
     const createImage = () => {
-      const canvas = this.getGlobalCanvas() as OctopusPlatform.MiniProgramCanvas;
+      const canvas =
+        this.getGlobalCanvas() as OctopusPlatform.MiniProgramCanvas;
 
       return canvas.createImage();
     };
@@ -113,9 +114,9 @@ export default definePlugin<"image">({
       isImage: (data: unknown) =>
         !!(
           data &&
-          (data as WechatMiniprogram.Image).src !== void 0 &&
-          (data as WechatMiniprogram.Image).width !== void 0 &&
-          (data as WechatMiniprogram.Image).height !== void 0
+          (data as any).src !== void 0 &&
+          (data as any).width !== void 0 &&
+          (data as any).height !== void 0
         ),
       isImageBitmap: (_: unknown) => false,
       create: createImage,

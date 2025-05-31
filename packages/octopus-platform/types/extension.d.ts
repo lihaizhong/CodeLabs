@@ -1,13 +1,32 @@
 declare namespace OctopusPlatform {
-  export type MiniProgramCanvas = WechatMiniprogram.Canvas | WechatMiniprogram.OffscreenCanvas;
+  export interface MiniProgramCanvas extends HTMLCanvasElement {
+    createImage(): HTMLImageElement;
 
-  export type PlatformCanvas = WechatMiniprogram.Canvas | HTMLCanvasElement;
+    requestAnimationFrame(callback: () => void): number;
+  }
+
+  export type PlatformCanvas = MiniProgramCanvas | HTMLCanvasElement;
+
+  export interface MiniProgramOffscreenCanvas extends OffscreenCanvas {
+    createImage(): HTMLImageElement;
+  }
 
   export type PlatformOffscreenCanvas =
-    | WechatMiniprogram.OffscreenCanvas
+    | MiniProgramOffscreenCanvas
     | OffscreenCanvas;
 
-  export type PlatformImage = WechatMiniprogram.Image | HTMLImageElement;
+  export interface OffscreenCanvasOptions {
+    width: number;
+    height: number;
+    type?: "2d" | "webgl";
+  }
+
+  export interface MiniProgramImage extends HTMLImageElement {
+    width: number;
+    height: number;
+  }
+
+  export type PlatformImage = MiniProgramImage | HTMLImageElement;
 
   export type Bitmap =
     | PlatformImage

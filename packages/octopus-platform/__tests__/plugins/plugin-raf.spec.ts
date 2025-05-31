@@ -56,9 +56,9 @@ describe("pluginRaf 插件", () => {
           requestAnimationFrame(callback: FrameRequestCallback) {
             return globalThis.requestAnimationFrame(callback);
           }
-        } as WechatMiniprogram.Canvas;
+        };
       }
-    } as OctopusPlatform.Platform;
+    } as unknown as OctopusPlatform.Platform;
 
     it("检查插件是否正常安装", () => {
       expect(typeof pluginRaf.install.call(platform)).toBe("function");

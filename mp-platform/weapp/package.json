@@ -8,5 +8,8 @@
   "license": "ISC",
   "dependencies": {
     "@ungap/url-search-params": "^0.2.2"
+  },
+  "devDependencies": {
+    "@types/wechat-miniprogram": "^3.4.8"
   }
 }

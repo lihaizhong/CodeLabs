@@ -107,7 +107,7 @@ export abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty>
     }
 
     if ("getSystemInfoSync" in br) {
-      return (br as WechatMiniprogram.Wx).getSystemInfoSync().pixelRatio;
+      return br.getSystemInfoSync().pixelRatio;
     }
 
     return 1;

@@ -153,7 +153,7 @@ describe("pluginImage 插件", () => {
       getGlobalCanvas() {
         return {
           createImage: () => new Image(),
-        } as unknown as WechatMiniprogram.Canvas;
+        };
       },
     } as EnhancedPlatform;
 
@@ -249,7 +249,7 @@ describe("pluginImage 插件", () => {
       getGlobalCanvas() {
         return {
           createImage: () => new Image(),
-        } as unknown as WechatMiniprogram.Canvas;
+        };
       },
     } as EnhancedPlatform;
 

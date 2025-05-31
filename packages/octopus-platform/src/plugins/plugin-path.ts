@@ -21,7 +21,7 @@ export default definePlugin<"path">({
     const { USER_DATA_PATH } =
       env === "tt"
         ? tt.getEnvInfoSync().common
-        : (br as WechatMiniprogram.Wx).env;
+        : br.env;
 
     return {
       USER_DATA_PATH,

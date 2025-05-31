@@ -32,7 +32,7 @@ export declare class Player {
      * @property endFrame 单个循环周期内结束播放的帧数，默认值 0
      * @property loopStartFrame 循环播放的开始帧，仅影响第一个周期的开始帧，默认值 0
      */
-    setConfig(options: string | PlayerConfigOptions, component?: WechatMiniprogram.Component.TrivialInstance | null): Promise<void>;
+    setConfig(options: string | PlayerConfigOptions, component?: any): Promise<void>;
     /**
      * 更新配置
      * @param key

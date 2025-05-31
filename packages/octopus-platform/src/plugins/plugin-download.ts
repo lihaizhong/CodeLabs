@@ -23,12 +23,12 @@ export default definePlugin<"remote">({
               `HTTP error, status=${response.status}, statusText=${response.statusText}`
             );
           }),
-      } satisfies OctopusPlatform.PlatformPlugin['remote'];
+      } satisfies OctopusPlatform.PlatformPlugin["remote"];
     }
 
     function download(url: string, enableCache: boolean): Promise<ArrayBuffer> {
       return new Promise<ArrayBuffer>((resolve, reject) => {
-        (br as WechatMiniprogram.Wx).request({
+        br.request({
           url,
           // @ts-ignore 支付宝小程序必须有该字段
           dataType: "arraybuffer",
@@ -40,7 +40,10 @@ export default definePlugin<"remote">({
       }).catch((err) => {
         const errorMessage = err.errMsg || err.errorMessage || err.message;
         // FIXME: 可能存在写入网络缓存空间失败的情况，此时重新下载
-        if (errorMessage.includes("ERR_CACHE_WRITE_FAILURE") || errorMessage.includes("ERR_CACHE_WRITE_FAILED")) {
+        if (
+          errorMessage.includes("ERR_CACHE_WRITE_FAILURE") ||
+          errorMessage.includes("ERR_CACHE_WRITE_FAILED")
+        ) {
           return download(url, false);
         }
 
@@ -51,6 +54,6 @@ export default definePlugin<"remote">({
     return {
       is: isRemote,
       fetch: (url: string) => download(url, true),
-    } satisfies OctopusPlatform.PlatformPlugin['remote'];
+    } satisfies OctopusPlatform.PlatformPlugin["remote"];
   },
 });

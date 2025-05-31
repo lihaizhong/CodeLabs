@@ -38,7 +38,7 @@ export class Poster {
    */
   public setConfig(
     options: string | PosterConfig = {},
-    component?: WechatMiniprogram.Component.TrivialInstance | null
+    component?: any
   ): Promise<void> {
     const config: PosterConfig = typeof options === "string" ? { container: options } : options;
 

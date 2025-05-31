@@ -13,7 +13,7 @@ export default definePlugin<"local">({
       return null;
     }
 
-    const fsm = (br as WechatMiniprogram.Wx).getFileSystemManager();
+    const fsm = br.getFileSystemManager();
 
     return {
       write: (
