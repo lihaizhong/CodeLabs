@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebGL 入门与实战</title>
+    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.21/weui.min.css">
     <style>
       html,
       body {
@@ -13,11 +14,7 @@
         background-color: var(--weui-BG-0);
       }
     </style>
-    <!-- 引入 WeUI CDN 链接 https://weui.io/ -->
-    <!-- <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.3.0/weui.min.css"/> -->
     <script type="module">
-      import "weui";
-
       const createCell = (link, desc, parentNode) => {
         const $link = document.createElement("a");
         $link.classList.add("weui-cell", "weui-cell_access");

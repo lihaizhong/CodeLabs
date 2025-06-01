@@ -1,4 +1,3 @@
-import "weui";
 import { NodePoint, Journal } from "excelsior-channel";
 
 const journal = new Journal();

@@ -1,5 +1,3 @@
-import "weui";
-
 window.addEventListener("DOMContentLoaded", () => {
   const $btn1 = document.getElementById("navigate-to-miniprogram-btn");
   const $btn2 = document.getElementById(

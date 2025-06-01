@@ -1,4 +1,3 @@
-import "weui";
 import { initBatteryStatus } from "./utils/battery";
 import { initNetworkStatus } from "./utils/network";
 

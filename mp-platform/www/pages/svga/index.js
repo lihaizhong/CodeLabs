@@ -1,4 +1,3 @@
-import "weui";
 import { Parser, Player } from "octopus-svga";
 import Page from "../../utils/Page";
 import {

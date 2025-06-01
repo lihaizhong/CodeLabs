@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>MutationObserver</title>
+    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.21/weui.min.css">
     <style>
       html,
       body {
@@ -20,8 +21,6 @@
     <input type="text" id="moInput" />
 
     <script type="module">
-      import "weui";
-
       const $moInput = document.getElementById("moInput");
       const config = { attributes: true, childList: true, subtree: true };
 

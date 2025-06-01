@@ -1,4 +1,3 @@
-import "weui";
 import { MainPoint, Journal } from "excelsior-channel";
 
 const frame = document.body.getElementsByTagName('iframe')[0];

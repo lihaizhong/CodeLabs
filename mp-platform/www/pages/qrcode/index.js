@@ -1,4 +1,3 @@
-import "weui";
 import { generateImageFromCode } from "octopus-svga";
 import { createQrCodeImg } from "../../utils/qrcode";
 

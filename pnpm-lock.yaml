@@ -18,10 +18,13 @@ importers:
         specifier: ^29.7.0
         version: 29.7.0
       '@parcel/config-default':
-        specifier: ^2.15.2
+        specifier: 2.15.2
         version: 2.15.2(@parcel/core@2.15.2(@swc/helpers@0.5.17))(@swc/helpers@0.5.17)
       '@parcel/packager-raw-url':
         specifier: 2.15.2
+        version: 2.15.2(@parcel/core@2.15.2(@swc/helpers@0.5.17))
+      '@parcel/transformer-css':
+        specifier: ^2.15.2
         version: 2.15.2(@parcel/core@2.15.2(@swc/helpers@0.5.17))
       '@parcel/transformer-webmanifest':
         specifier: 2.15.2
@@ -42,10 +45,10 @@ importers:
         specifier: ^29.7.0
         version: 29.7.0
       parcel:
-        specifier: ^2.15.2
+        specifier: 2.15.2
         version: 2.15.2(@swc/helpers@0.5.17)
       parcel-reporter-static-files-copy:
-        specifier: ^1.5.3
+        specifier: 1.5.3
         version: 1.5.3(@parcel/core@2.15.2(@swc/helpers@0.5.17))
       serve:
         specifier: ^14.2.4

@@ -1,4 +1,3 @@
-import "weui";
 import { VideoManager, platform } from "octopus-svga";
 import { posterFiles, analyticsFiles } from "../../utils/constants";
 

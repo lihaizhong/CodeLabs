@@ -1,4 +1,3 @@
-import "weui";
 import { Parser, Player } from "../../utils/svga-lite";
 import Page from "../../utils/Page";
 import {

@@ -1,4 +1,3 @@
-import "weui";
 import { Parser, Poster } from "octopus-svga";
 import { posterFiles } from "../../utils/constants";
 
