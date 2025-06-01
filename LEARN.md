@@ -33,6 +33,14 @@
 - [2D Canvas 的渲染优化](https://www.cnblogs.com/tongbowen/articles/14925816.html)
 - [游戏编程模式](https://gpp.tkchu.me/)
 
+## WebGL
+
+- [GLSL 中文手册](https://github.com/wshxbqq/GLSL-Card)
+- [Web 中的 3D 游戏](https://developer.mozilla.org/zh-CN/docs/Games/Techniques/3D_on_the_web)
+- [一次搞懂應用Shader(著色器)時所需知道的GLSL基本知識](https://umasss.medium.com/%E4%B8%80%E6%AC%A1%E6%90%9E%E6%87%82%E6%87%89%E7%94%A8shader-%E8%91%97%E8%89%B2%E5%99%A8-%E6%99%82%E6%89%80%E9%9C%80%E7%9F%A5%E9%81%93%E7%9A%84glsl%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AD%98-fa1e4df6d33f)
+- [Learning WebGL](https://learningwebgl.com/blog/?page_id=1217)
+- [LearningWebGPU](https://github.com/hjlld/LearningWebGPU)
+
 ## 性能优化
 
 - [手把手教你排查Javascript内存泄漏](https://zhuanlan.zhihu.com/p/322356761)
