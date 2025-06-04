@@ -1,4 +1,4 @@
-import { PointPool, CurrentPoint } from "../utils/PointPool";
+import { PointPool, CurrentPoint } from "../../utils/PointPool";
 
 export class Renderer2D implements PlatformRenderer {
   /**
