@@ -252,6 +252,9 @@ importers:
       octopus-platform:
         specifier: workspace:^
         version: link:../octopus-platform
+      octopus-svga-renderer:
+        specifier: workspace:^
+        version: link:../octopus-svga-renderer
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^28.0.3

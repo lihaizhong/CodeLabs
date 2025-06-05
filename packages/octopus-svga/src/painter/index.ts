@@ -1,6 +1,6 @@
 import { platform } from "../platform";
 // import benchmark from "../benchmark";
-import { createRenderer } from "../renderer";
+import { Renderer2D } from "octopus-svga-renderer";
 import { ImagePool } from "./ImagePool";
 
 interface PaintModel {
@@ -251,7 +251,7 @@ export class Painter {
       // #endregion clear secondary screen implement
     }
 
-    this.R = createRenderer(this.YC!);
+    this.R = new Renderer2D(this.YC!);
   }
 
   /**

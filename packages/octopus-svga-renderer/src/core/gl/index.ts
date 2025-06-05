@@ -1,7 +1,7 @@
 export class RendererGL implements PlatformRenderer {
-
-
-  getGlobalTransform(): PlatformVideo.Transform | void {}
+  getGlobalTransform(): PlatformVideo.Transform | undefined {
+    return undefined;
+  }
 
   setGlobalTransform(transform?: PlatformVideo.Transform): void {}
 
@@ -12,6 +12,5 @@ export class RendererGL implements PlatformRenderer {
     currentFrame: number,
     head: number,
     tail: number
-  ): void {
-  }
+  ): void {}
 }

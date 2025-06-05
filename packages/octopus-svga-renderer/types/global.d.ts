@@ -1,4 +1,3 @@
-
 interface RawImages {
   [key: string]: OctopusPlatform.RawImage;
 }
