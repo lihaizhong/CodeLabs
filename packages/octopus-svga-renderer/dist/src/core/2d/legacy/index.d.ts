@@ -1,0 +1,1 @@
+export declare function render(context: PlatformRenderingContext2D, videoEntity: PlatformVideo.Video, materials: Map<string, OctopusPlatform.Bitmap>, dynamicMaterials: Map<string, OctopusPlatform.Bitmap>, currentFrame: number, head: number, tail: number, globalTransform?: PlatformVideo.Transform): void;

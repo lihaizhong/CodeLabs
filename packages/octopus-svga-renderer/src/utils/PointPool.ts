@@ -12,14 +12,6 @@ export interface CurrentPoint {
  */
 export class PointPool {
   private pool: CurrentPoint[] = [];
-  private static instance: PointPool;
-
-  static getInstance(): PointPool {
-    if (!PointPool.instance) {
-      PointPool.instance = new PointPool();
-    }
-    return PointPool.instance;
-  }
 
   public acquire(): CurrentPoint {
     const { pool } = this;

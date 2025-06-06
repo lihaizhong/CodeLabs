@@ -11,8 +11,6 @@ export interface CurrentPoint {
  */
 export declare class PointPool {
     private pool;
-    private static instance;
-    static getInstance(): PointPool;
     acquire(): CurrentPoint;
     release(point: CurrentPoint): void;
 }
