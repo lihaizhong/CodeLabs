@@ -1,7 +1,6 @@
 import { platform } from "../platform";
 // import benchmark from "../benchmark";
 import { Renderer2D } from "octopus-svga-renderer";
-import { ImagePool } from "./ImagePool";
 
 interface PaintModel {
   // canvas or offscreen
@@ -61,11 +60,19 @@ export class Painter {
    */
   private model: PaintModel = {} as PaintModel;
 
-  private IM = new ImagePool();
-
   private R?: PlatformRenderer;
 
   private lastResizeKey = "";
+
+  /**
+   * 动态素材
+   */
+  public dynamicMaterials: Map<string, OctopusPlatform.Bitmap> = new Map();
+
+  /**
+   * 素材
+   */
+  public materials: Map<string, OctopusPlatform.Bitmap> = new Map();
 
   /**
    *
@@ -164,19 +171,7 @@ export class Painter {
       }
     }
 
-    // 小程序环境下，重写 createImage 方法
-    if (env !== "h5") {
-      const { X, IM } = this;
-      const { createImage } = (X as OctopusPlatform.MiniProgramCanvas);
-
-      Object.defineProperty(X, "createImage", {
-        get() {
-          return () => IM.getReleaseImage() || createImage.call(X)
-        },
-      })
-
-      platform.setGlobalCanvas(X as OctopusPlatform.PlatformCanvas);
-    }
+    platform.setGlobalCanvas(this.X as OctopusPlatform.PlatformCanvas);
     // #endregion set main screen implement
 
     // #region set secondary screen implement
@@ -259,7 +254,7 @@ export class Painter {
    * @param images
    */
   public updateDynamicImages(images: PlatformImages) {
-    this.IM.appendAll(images);
+    this.dynamicMaterials = new Map(Object.entries(images));
   }
 
   /**
@@ -269,7 +264,22 @@ export class Painter {
    * @returns
    */
   public loadImages(images: RawImages, filename: string): Promise<void[]> {
-    return this.IM.loadAll(images, filename);
+    const { load } = platform.image;
+    const imageAwaits: Promise<void>[] = [];
+
+    Object.keys(images).forEach((key: string) => {
+      const image = images[key];
+
+      const p = load(image as OctopusPlatform.RawImage, filename, key).then(
+        (img) => {
+          this.materials.set(key, img);
+        }
+      );
+
+      imageAwaits.push(p);
+    });
+
+    return Promise.all<void>(imageAwaits);
   }
 
   /**
@@ -368,7 +378,9 @@ export class Painter {
    * 清理素材库
    */
   public clearMaterials() {
-    this.IM.release();
+    this.materials.clear();
+    this.dynamicMaterials.clear();
+    platform.image.release();
   }
 
   /**
@@ -386,8 +398,8 @@ export class Painter {
   ) {
     this.R!.render(
       videoEntity,
-      this.IM.materials,
-      this.IM.dynamicMaterials,
+      this.materials,
+      this.dynamicMaterials,
       currentFrame,
       start,
       end

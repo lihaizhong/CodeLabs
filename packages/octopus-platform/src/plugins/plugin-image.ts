@@ -18,7 +18,9 @@ export default definePlugin<"image">({
   install() {
     const { local, path, decode, noop } = this as EnhancedPlatform;
     const { env } = this.globals;
-    const loadedFiles: Set<string> = new Set();
+    // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
+    let caches: Array<ImageBitmap | OctopusPlatform.PlatformImage> = [];
+    let point: number = 0;
 
     /**
      * 加载图片
@@ -28,15 +30,7 @@ export default definePlugin<"image">({
      */
     function loadImage(img: OctopusPlatform.PlatformImage, src: string) {
       return new Promise<OctopusPlatform.PlatformImage>((resolve, reject) => {
-        img.onload = () => {
-          resolve(img);
-          if (loadedFiles.has(src)) {
-            local!
-              .remove(src)
-              .catch(noop)
-              .then(() => loadedFiles.delete(src));
-          }
-        };
+        img.onload = () => resolve(img);
         img.onerror = () =>
           reject(new Error(`SVGA LOADING FAILURE: ${img.src}`));
         img.src = src;
@@ -54,9 +48,8 @@ export default definePlugin<"image">({
       };
 
       return {
-        isImage: (data: unknown) => data instanceof Image,
-        isImageBitmap: (data: unknown) => data instanceof ImageBitmap,
-        create: createImage,
+        // isImage: (data: unknown) => data instanceof Image,
+        // isImageBitmap: (data: unknown) => data instanceof ImageBitmap,
         load: (
           data: ImageBitmap | Uint8Array | string,
           _filename: string,
@@ -64,23 +57,50 @@ export default definePlugin<"image">({
         ) => {
           // 由于ImageBitmap在图片渲染上有优势，故优先使用
           if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
-            return createImageBitmap(new Blob([decode.toBuffer(data)]));
+            return createImageBitmap(new Blob([decode.toBuffer(data)])).then(
+              (img) => {
+                caches.push(img);
+
+                return img;
+              }
+            );
           }
 
           if (data instanceof ImageBitmap) {
+            caches.push(data);
+
             return Promise.resolve(data);
           }
 
           return loadImage(createImage(), genImageSource(data));
         },
+        release: () => {
+          for (const img of caches) {
+            (img as unknown as ImageBitmap).close();
+          }
+
+          caches.length = 0;
+        },
       } satisfies OctopusPlatform.PlatformPlugin["image"];
     }
 
     const createImage = () => {
-      const canvas =
-        this.getGlobalCanvas() as OctopusPlatform.MiniProgramCanvas;
+      if (point > 0) {
+        point--;
 
-      return canvas.createImage();
+        return caches.shift() as OctopusPlatform.PlatformImage;
+      }
+
+      const img = (
+        this.getGlobalCanvas() as OctopusPlatform.MiniProgramCanvas
+      ).createImage();
+
+      // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
+      if (env !== "alipay") {
+        caches.push(img);
+      }
+
+      return img;
     };
     const genImageSource = async (
       data: Uint8Array | string,
@@ -100,10 +120,7 @@ export default definePlugin<"image">({
         // FIXME: IOS设备Uint8Array转base64时间较长，使用图片缓存形式速度会更快
         const filePath = path.resolve(filename, prefix);
 
-        await local!.write(decode.toBuffer(data), filePath);
-        loadedFiles.add(filePath);
-
-        return filePath;
+        return local!.write(decode.toBuffer(data), filePath);
       } catch (ex: any) {
         console.warn(`image cached fail: ${ex.message}`);
         return decode.toDataURL(data);
@@ -111,15 +128,14 @@ export default definePlugin<"image">({
     };
 
     return {
-      isImage: (data: unknown) =>
-        !!(
-          data &&
-          (data as any).src !== void 0 &&
-          (data as any).width !== void 0 &&
-          (data as any).height !== void 0
-        ),
-      isImageBitmap: (_: unknown) => false,
-      create: createImage,
+      // isImage: (data: unknown) =>
+      //   !!(
+      //     data &&
+      //     (data as any).src !== void 0 &&
+      //     (data as any).width !== void 0 &&
+      //     (data as any).height !== void 0
+      //   ),
+      // isImageBitmap: (_: unknown) => false,
       load: async (
         data: ImageBitmap | Uint8Array | string,
         filename: string,
@@ -132,6 +148,26 @@ export default definePlugin<"image">({
         );
 
         return loadImage(createImage(), src);
+      },
+      release: () => {
+        for (const img of caches) {
+          if (
+            (img as OctopusPlatform.PlatformImage).src.includes(
+              path.USER_DATA_PATH
+            )
+          ) {
+            local!
+              .remove((img as OctopusPlatform.PlatformImage).src)
+              .catch(noop);
+          }
+
+          (img as OctopusPlatform.PlatformImage).onload = null;
+          (img as OctopusPlatform.PlatformImage).onerror = null;
+          (img as OctopusPlatform.PlatformImage).src = "";
+        }
+
+        caches = Array.from(new Set(caches));
+        point = caches.length;
       },
     } satisfies OctopusPlatform.PlatformPlugin["image"];
   },

@@ -43,14 +43,14 @@ declare namespace OctopusPlatform {
     };
 
     image: {
-      isImage: (data: unknown) => boolean;
-      isImageBitmap: (data: unknown) => boolean;
-      create: () => PlatformImage;
+      // isImage: (data: unknown) => boolean;
+      // isImageBitmap: (data: unknown) => boolean;
       load: (
         data: ImageBitmap | Uint8Array | string,
         filename: string,
         prefix?: string
       ) => Promise<ImageBitmap | PlatformImage>;
+      release: () => void;
     };
   }
 }

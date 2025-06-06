@@ -33,9 +33,16 @@ export declare class Painter {
      * 粉刷模式
      */
     private model;
-    private IM;
     private R?;
     private lastResizeKey;
+    /**
+     * 动态素材
+     */
+    dynamicMaterials: Map<string, OctopusPlatform.Bitmap>;
+    /**
+     * 素材
+     */
+    materials: Map<string, OctopusPlatform.Bitmap>;
     /**
      *
      * @param mode
