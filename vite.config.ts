@@ -34,6 +34,10 @@ const findAllEntries = () => {
   return inputEntries;
 }
 
+/**
+ * vite 配置
+ * https://cn.vite.dev/config/
+ */
 export default defineConfig({
   root: __root,
 
