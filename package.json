@@ -5,27 +5,13 @@
   "private": true,
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
-    "dev": "rm -rf dist .parcel-cache && parcel serve --no-cache",
-    "build": "rm -rf dist .parcel-cache && parcel build --no-cache",
+    "dev": "vite dev",
+    "build": "vite build",
     "minio": "serve -p 3536 -c serve.json",
     "test": "jest",
     "zx:sync": "zx .scripts/sync.mjs",
     "zx:clear": "zx .scripts/clear.mjs"
   },
-  "targets": {
-    "frontend": {
-      "source": [
-        "./mp-platform/www/pages/index.html",
-        "./mp-platform/www/pages/**/*.html",
-        "./mp-platform/www/sub-pages/**/*.html"
-      ]
-    }
-  },
-  "staticFiles": {
-    "staticPath": "public",
-    "staticOutPath": "public"
-  },
-  "browserslist": "> 0.5%, last 2 versions, not dead",
   "keywords": [
     "snippet",
     "code snippet"
