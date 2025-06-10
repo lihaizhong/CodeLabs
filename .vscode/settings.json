@@ -27,8 +27,11 @@
     "weapp",
     "wechat"
   ],
-  "marscode.codeCompletionPro": {
-    "enableCodeCompletionPro": true
-  },
-  "marscode.chatLanguage": "cn"
+  "debug.javascript.terminalOptions": {
+    "resolveSourceMapLocations": [
+      "${workspaceFolder}/**",
+      "!**/node_modules/**",
+      "**/node_modules/.vite-temp/**"
+    ]
+  }
 }

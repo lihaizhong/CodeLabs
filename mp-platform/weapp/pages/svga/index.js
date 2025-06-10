@@ -1,23 +1,23 @@
-import { svgaSources, getOneAtRandom } from "../../utils/constants";
+import { svgaReplaceSources, svgaSources, getOneAtRandom } from "../../utils/constants";
 
 // const sources = [
 //   'http://10.1.133.197:5151/svga/序列1.svga',
 //   'http://10.1.133.197:5151/svga/序列2.svga',
 //   'http://10.1.133.197:5151/svga/序列3.svga'
 // ]
-const sources = svgaSources
+const sources = svgaReplaceSources
 
 Page({
   data: {
-    url: "",
+    source: "",
     current: 0,
   },
 
   handleSwitchAtRandom() {
-    const { ranIndex, url } = getOneAtRandom();
+    const { ranIndex, source } = getOneAtRandom();
 
     this.setData({
-      url,
+      source,
       current: ranIndex,
     });
   },
@@ -27,11 +27,11 @@ Page({
     let prev = current - 1;
 
     if (prev < 0) {
-      prev = svgaSources.length - 1;
+      prev = sources.length - 1;
     }
 
     this.setData({
-      url: sources[prev],
+      source: sources[prev],
       current: prev,
     });
   },
@@ -45,7 +45,7 @@ Page({
     }
 
     this.setData({
-      url: sources[next],
+      source: sources[next],
       current: next,
     });
   },
@@ -56,7 +56,7 @@ Page({
 
     this.setData({
       current,
-      url: sources[current]
+      source: sources[current]
     })
   },
 });

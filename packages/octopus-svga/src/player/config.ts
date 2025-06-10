@@ -104,25 +104,19 @@ export class Config {
       frames -= start;
     }
 
-    let currFrame = loopStartFrame;
+    let currFrame = 0;
     let extFrame = 0;
 
     // 顺序播放/倒叙播放
     if (playMode === PLAYER_PLAY_MODE.FORWARDS) {
-      // 如果开始动画的当前帧是最后一帧，重置为开始帧
-      if (currFrame === end - 1) {
-        currFrame = start;
-      }
-
+      // 重置为开始帧
+      currFrame = Math.max(loopStartFrame, startFrame)
       if (fillMode === PLAYER_FILL_MODE.FORWARDS) {
         extFrame = 1;
       }
     } else {
-      // 如果开始动画的当前帧是最后一帧，重置为开始帧
-      if (currFrame === 0) {
-        currFrame = end - 1;
-      }
-
+      // 重置为开始帧
+      currFrame = Math.min(loopStartFrame, end - 1)
       if (fillMode === PLAYER_FILL_MODE.BACKWARDS) {
         extFrame = 1;
       }

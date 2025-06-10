@@ -1,4 +1,4 @@
-import { Parser, Player } from "../../utils/fuck-svga";
+import { Parser, Player, VideoEditor } from "../../utils/fuck-svga";
 import ReadyGo from "../../utils/ReadyGo";
 
 let player;
@@ -8,15 +8,17 @@ const cache = new Map();
 
 Component({
   properties: {
-    url: {
-      type: String,
+    source: {
+      type: [String, Object],
       value: "",
     },
   },
 
   observers: {
-    url(value) {
-      if (value !== "") {
+    source(value) {
+      const url = typeof value === "string" ? value : value?.url;
+
+      if (url !== "") {
         readyGo.ready(this.initialize.bind(this));
       }
     },
@@ -32,16 +34,16 @@ Component({
           // secondary: "#secondary",
           loop: 1,
           playMode: "fallbacks",
-          fillMode: "forwards"
+          fillMode: "forwards",
         },
         this
       );
       player.onProcess = (percent, frame) => {
-        console.log('当前进度', percent, frame)
-        console.log('---- UPDATE ----')
+        console.log("当前进度", percent, frame);
+        console.log("---- UPDATE ----");
       };
       player.onEnd = () => {
-        console.log('---- END ----')
+        console.log("---- END ----");
       };
       readyGo.go();
     },
@@ -60,19 +62,36 @@ Component({
   methods: {
     async initialize() {
       try {
-        let videoItem
+        const { source } = this.properties;
+        let videoItem;
 
-        if (cache.has(this.properties.url)) {
-          this.setData({ message: "匹配到缓存" })
-          videoItem = cache.get(this.properties.url);
+        if (cache.has(source)) {
+          this.setData({ message: "匹配到缓存" });
+          videoItem = cache.get(source);
         } else {
           this.setData({ message: "准备下载资源" });
-          videoItem = await parser.load(this.properties.url);
-          cache.set(this.properties.url, videoItem);
+          if (typeof source === "string") {
+            videoItem = await parser.load(source);
+          } else {
+            videoItem = await parser.load(source.url);
+
+            // 替换元素
+            if (source.replace) {
+              const editor = new VideoEditor(videoItem);
+
+              await Promise.all(
+                Object.entries(source.replace).map(([key, value]) =>
+                  editor.setImage(key, value)
+                )
+              );
+            }
+          }
+
+          cache.set(source, videoItem);
           this.setData({ message: "下载资源成功" });
         }
 
-        console.log(this.properties.url, videoItem);
+        console.log(source, videoItem);
         await player.mount(videoItem);
         this.setData({ message: "资源装载成功" });
         // player.stepToPercentage(0.3);
@@ -84,16 +103,16 @@ Component({
       }
     },
     handlePlay() {
-      player?.start()
+      player?.start();
     },
     handleResume() {
-      player?.resume()
+      player?.resume();
     },
     handlePause() {
-      player?.pause()
+      player?.pause();
     },
     handleStop() {
-      player?.stop()
-    }
+      player?.stop();
+    },
   },
 });
