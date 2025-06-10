@@ -7,7 +7,7 @@
     "preinstall": "npx -y only-allow pnpm",
     "dev": "rm -rf dist .parcel-cache && parcel serve --no-cache",
     "build": "rm -rf dist .parcel-cache && parcel build --no-cache",
-    "static": "serve -p 3536 -c serve.json",
+    "minio": "serve -p 3536 -c serve.json",
     "test": "jest",
     "zx:sync": "zx .scripts/sync.mjs",
     "zx:clear": "zx .scripts/clear.mjs"

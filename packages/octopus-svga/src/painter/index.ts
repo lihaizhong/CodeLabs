@@ -25,7 +25,10 @@ export class Painter {
    * 主屏的 Canvas 元素
    * Main Screen
    */
-  private X: OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas | null = null;
+  private X:
+    | OctopusPlatform.PlatformCanvas
+    | OctopusPlatform.PlatformOffscreenCanvas
+    | null = null;
   /**
    * 主屏的 Context 对象
    * Main Context
@@ -38,7 +41,10 @@ export class Painter {
    * 副屏的 Canvas 元素
    * Secondary Screen
    */
-  private Y: OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas | null = null;
+  private Y:
+    | OctopusPlatform.PlatformCanvas
+    | OctopusPlatform.PlatformOffscreenCanvas
+    | null = null;
   /**
    * 副屏的 Context 对象
    * Secondary Context
@@ -335,7 +341,10 @@ export class Painter {
    * @param videoSize
    * @returns
    */
-  public resize(contentMode: PLAYER_CONTENT_MODE, videoSize: PlatformVideo.VideoSize): void {
+  public resize(
+    contentMode: PLAYER_CONTENT_MODE,
+    videoSize: PlatformVideo.VideoSize
+  ): void {
     const { width: canvasWidth, height: canvasHeight } = this.Y!;
     const { width: videoWidth, height: videoHeight } = videoSize;
     const resizeKey = `${contentMode}-${videoWidth}-${videoHeight}-${canvasWidth}-${canvasHeight}`;
@@ -411,7 +420,7 @@ export class Painter {
 
     if (mode !== "poster") {
       this.XC!.drawImage(
-        this.YC!.canvas || (this.Y as CanvasImageSource),
+        this.YC!.canvas,
         0,
         0,
         W,

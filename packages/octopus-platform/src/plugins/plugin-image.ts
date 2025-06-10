@@ -17,7 +17,7 @@ export default definePlugin<"image">({
   dependencies: ["local", "path", "decode"],
   install() {
     const { local, path, decode, noop } = this as EnhancedPlatform;
-    const { env } = this.globals;
+    const { env, br } = this.globals;
     // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
     let caches: Array<ImageBitmap | OctopusPlatform.PlatformImage> = [];
     let point: number = 0;
@@ -112,7 +112,7 @@ export default definePlugin<"image">({
       }
 
       // FIXME: 支付宝小程序IDE保存临时文件会失败;抖音最大用户文件大小为10M
-      if (env === "tt" || env === "alipay") {
+      if (env === "tt" || (env === "alipay" && br.isIDE)) {
         return decode.toDataURL(data);
       }
 
