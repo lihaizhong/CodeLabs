@@ -30,9 +30,9 @@ export default definePlugin<"rAF">({
     return (callback: () => void) => {
       // 检查canvas是否存在
       try {
-        const canvas = this.getGlobalCanvas() as OctopusPlatform.MiniProgramCanvas;
-
-        return canvas.requestAnimationFrame(callback);
+        return (
+          this.getGlobalCanvas() as OctopusPlatform.MiniProgramCanvas
+        ).requestAnimationFrame(callback);
       } catch (error: any) {
         console.warn(error.message);
         return requestAnimationFrameImpl()(callback);
