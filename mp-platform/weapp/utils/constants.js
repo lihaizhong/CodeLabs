@@ -62,6 +62,12 @@ export const svgaReplaceSources = [
     replace: {
       "qrcode_001": "http://localhost:3536/svga/replace/qrcode_001.png"
     }
+  },
+  {
+    url: "http://localhost:3536/svga/replace/replace_002.svga",
+    replace: {
+      "qrcode_001": "http://localhost:3536/svga/replace/qrcode_002.png"
+    }
   }
 ]
 
