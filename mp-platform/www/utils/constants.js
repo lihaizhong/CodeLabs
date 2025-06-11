@@ -65,7 +65,13 @@ export const svgaLargeFiles = [
   "frame01.svga",
   "frame02.svga",
   "frame03.svga",
-].map((url) => `${REPLACE_SVGA_URL}/large/${url}`);
+].map((filename) => `${REPLACE_SVGA_URL}/large/${filename}`);
+
+export const svgaHugeSources = [
+  "frame01.svga",
+  "frame02.svga",
+  "frame03.svga",
+].map((filename) => `${REPLACE_SVGA_URL}/huge/${filename}`);
 
 export const yyFiles = [
   "angel.svga",

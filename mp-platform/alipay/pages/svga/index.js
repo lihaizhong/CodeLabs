@@ -1,6 +1,6 @@
-import { svgaSources, getOneAtRandom } from "../../utils/constants";
+import { svgaSources, svgaReplaceSources, svgaHugeSources, getOneAtRandom } from "../../utils/constants";
 
-const sources = svgaSources
+const sources = svgaHugeSources
 
 Page({
   data: {
@@ -19,10 +19,10 @@ Page({
   },
 
   handleSwitchAtRandom() {
-    const { ranIndex, url } = getOneAtRandom();
+    const { ranIndex, source } = getOneAtRandom();
 
     this.setData({
-      url,
+      source,
       current: ranIndex,
     });
   },

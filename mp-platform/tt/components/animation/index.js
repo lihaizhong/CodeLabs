@@ -8,15 +8,17 @@ const cache = new Map();
 
 Component({
   properties: {
-    url: {
-      type: String,
+    source: {
+      type: [String, Object],
       value: "",
     },
   },
 
   observers: {
-    url(value) {
-      if (value !== "") {
+    source(value) {
+      const url = typeof value === "string" ? value : value?.url;
+
+      if (url !== "") {
         readyGo.ready(this.initialize.bind(this));
         // this.initialize();
       }
@@ -61,19 +63,36 @@ Component({
   methods: {
     async initialize() {
       try {
+        const { source } = this.properties;
         let videoItem
 
-        if (cache.has(this.properties.url)) {
+        if (cache.has(source)) {
           this.setData({ message: "匹配到缓存" })
-          videoItem = cache.get(this.properties.url);
+          videoItem = cache.get(source);
         } else {
           this.setData({ message: "准备下载资源" });
-          videoItem = await parser.load(this.properties.url);
-          cache.set(this.properties.url, videoItem);
+          if (typeof source === "string") {
+            videoItem = await parser.load(source);
+          } else {
+            videoItem = await parser.load(source.url);
+
+            // 替换元素
+            if (source.replace) {
+              const editor = new VideoEditor(videoItem);
+
+              await Promise.all(
+                Object.entries(source.replace).map(([key, value]) =>
+                  editor.setImage(key, value)
+                )
+              );
+            }
+          }
+
+          cache.set(source, videoItem);
           this.setData({ message: "下载资源成功" });
         }
 
-        console.log(this.properties.url, videoItem);
+        console.log(source, videoItem);
         await player.mount(videoItem);
         this.setData({ message: "资源装载成功" });
         // player.stepToPercentage(0.3);

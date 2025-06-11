@@ -1,3 +1,5 @@
+const LOCAL_SVGA_URL = "http://192.168.1.23:3536/svga";
+
 export const svgaSources = [
   "https://assets.2dfire.com/frontend/9ce0cce7205fbebba380ed44879e5660.svga",
   "https://assets.2dfire.com/frontend/1ddb590515d196f07c411794633e4406.svga",
@@ -58,18 +60,24 @@ export const svgaSources = [
 
 export const svgaReplaceSources = [
   {
-    url: "http://localhost:3536/svga/replace/replace_001.svga",
+    url: `${LOCAL_SVGA_URL}/replace/replace_001.svga`,
     replace: {
-      "qrcode_001": "http://localhost:3536/svga/replace/qrcode_001.png"
-    }
+      qrcode_001: `${LOCAL_SVGA_URL}/replace/replace_001.png`,
+    },
   },
   {
-    url: "http://localhost:3536/svga/replace/replace_002.svga",
+    url: `${LOCAL_SVGA_URL}/replace/replace_002.svga`,
     replace: {
-      "qrcode_001": "http://localhost:3536/svga/replace/qrcode_002.png"
-    }
-  }
-]
+      qrcode_001: `${LOCAL_SVGA_URL}/replace/replace_002.png`,
+    },
+  },
+];
+
+export const svgaHugeSources = [
+  `${LOCAL_SVGA_URL}/huge/frame01.svga`,
+  `${LOCAL_SVGA_URL}/huge/frame02.svga`,
+  `${LOCAL_SVGA_URL}/huge/frame03.svga`,
+];
 
 export function getOneAtRandom() {
   const ranIndex = Math.floor(Math.random() * svgaSources.length);
