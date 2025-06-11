@@ -26,6 +26,6 @@ export declare abstract class Platform<P extends OctopusPlatform.PlatformPluginP
     private usePlugins;
     abstract installPlugin(plugin: OctopusPlatform.PlatformPluginOptions<P>): void;
     setGlobalCanvas(canvas: OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas | null): void;
-    getGlobalCanvas(): OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas;
+    getGlobalCanvas(): OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas | null;
     switch(env: OctopusPlatform.SupportedPlatform): void;
 }
