@@ -4,7 +4,7 @@ const sources = svgaSources
 
 Page({
   data: {
-    url: "",
+    source: "",
     current: 0,
   },
 
@@ -14,7 +14,7 @@ Page({
 
     this.setData({
       current,
-      url: sources[current]
+      source: sources[current]
     })
   },
 
@@ -35,7 +35,7 @@ Page({
     }
 
     this.setData({
-      url: sources[prev],
+      source: sources[prev],
       current: prev,
     });
   },
@@ -48,7 +48,7 @@ Page({
     }
 
     this.setData({
-      url: sources[next],
+      source: sources[next],
       current: next,
     });
   },

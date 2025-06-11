@@ -1,9 +1,9 @@
 <canvas type="2d" id="palette" class="svga-palette"></canvas>
 <!-- <canvas type="2d" id="secondary" class="svga-palette svga-secondary"></canvas> -->
 <view a:if="{{ message }}" class="svga-error-popup">{{ message }}</view>
-<view class="svga-settings">
+<!-- <view class="svga-settings">
   <button class="svga-setting" onTap="handlePlay">播放</button>
   <button class="svga-setting" onTap="handlePause">暂停</button>
   <button class="svga-setting" onTap="handleResume">重播</button>
   <button class="svga-setting" onTap="handleStop">停止</button>
-</view>
+</view> -->

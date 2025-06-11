@@ -33,6 +33,7 @@ declare namespace OctopusPlatform {
       canvas:
         | OctopusPlatform.PlatformCanvas
         | OctopusPlatform.PlatformOffscreenCanvas
+        | null
     ) => void;
 
     getGlobalCanvas: () =>

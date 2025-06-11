@@ -1,4 +1,4 @@
-import { Parser, Player } from "../../utils/fuck-svga";
+import { Parser, Player, VideoEditor } from "../../utils/fuck-svga";
 import ReadyGo from "../../utils/ReadyGo";
 
 let player;
@@ -14,15 +14,17 @@ Component({
   },
 
   props: {
-    url: {
-      type: String,
+    source: {
+      type: [String, Object],
       value: "",
     },
   },
 
   observers: {
-    url(value) {
-      if (value !== "") {
+    source(value) {
+      const url = typeof value === "string" ? value : value?.url;
+
+      if (url !== "") {
         readyGo.ready(this.initialize.bind(this));
       }
     },
@@ -65,19 +67,36 @@ Component({
   methods: {
     async initialize() {
       try {
+        const { source } = this.props;
         let videoItem
 
-        if (cache.has(this.props.url)) {
+        if (cache.has(source)) {
           this.setData({ message: "匹配到缓存" })
-          videoItem = cache.get(this.props.url);
+          videoItem = cache.get(source);
         } else {
           this.setData({ message: "准备下载资源" });
-          videoItem = await parser.load(this.props.url);
-          cache.set(this.props.url, videoItem);
+          if (typeof source === "string") {
+            videoItem = await parser.load(source);            
+          } else {
+            videoItem = await parser.load(source.url);
+
+            // 替换元素
+            if (source.replace) {
+              const editor = new VideoEditor(videoItem);
+
+              await Promise.all(
+                Object.entries(source.replace).map(([key, value]) =>
+                  editor.setImage(key, value)
+                )
+              );
+            }
+          }
+
+          cache.set(source, videoItem);
           this.setData({ message: "下载资源成功" });
         }
 
-        console.log(this.props.url, videoItem);
+        console.log(source, videoItem);
         await player.mount(videoItem);
         this.setData({ message: "资源装载成功" });
         // player.stepToPercentage(0.3);

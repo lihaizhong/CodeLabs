@@ -12,6 +12,7 @@
     }
   },
   "developOptions": {
-    "skipTranspile": true
+    "skipTranspile": true,
+    "hotReload": true
   }
 }

@@ -436,6 +436,7 @@ export class Painter {
     this.clearContainer();
     this.clearSecondary();
     this.clearMaterials();
+    platform.setGlobalCanvas(null);
     this.X = this.XC = this.Y = this.YC = null;
     this.clearContainer = this.clearSecondary = this.stick = noop;
   }

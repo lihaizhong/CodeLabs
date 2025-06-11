@@ -9,7 +9,10 @@ export abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty>
    */
   private plugins: OctopusPlatform.PlatformPluginOptions<P>[] = [];
 
-  private globalCanvas: OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas | null = null;
+  private globalCanvas:
+    | OctopusPlatform.PlatformCanvas
+    | OctopusPlatform.PlatformOffscreenCanvas
+    | null = null;
 
   /**
    * 平台版本
@@ -34,7 +37,10 @@ export abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty>
 
   public retry = retry;
 
-  constructor(plugins: OctopusPlatform.PlatformPluginOptions<P>[], version?: string) {
+  constructor(
+    plugins: OctopusPlatform.PlatformPluginOptions<P>[],
+    version?: string
+  ) {
     this.version = version || "";
     this.plugins = plugins;
     this.globals.env = this.autoEnv();
@@ -44,14 +50,14 @@ export abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty>
     this.globals.br = this.useBridge();
     this.globals.dpr = this.usePixelRatio();
 
-    const plugins: Record<P, OctopusPlatform.PlatformPluginOptions<P>> = this.plugins.reduce(
-      (acc, plugin) => {
-        acc[plugin.name] = plugin;
+    const plugins: Record<
+      P,
+      OctopusPlatform.PlatformPluginOptions<P>
+    > = this.plugins.reduce((acc, plugin) => {
+      acc[plugin.name] = plugin;
 
-        return acc;
-      },
-      {} as Record<P, OctopusPlatform.PlatformPluginOptions<P>>
-    );
+      return acc;
+    }, {} as Record<P, OctopusPlatform.PlatformPluginOptions<P>>);
     const pluginNames = this.plugins.map((plugin) => plugin.name);
     const installedPlugins: Record<string, boolean> = {};
 
@@ -146,9 +152,16 @@ export abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty>
     });
   }
 
-  abstract installPlugin(plugin: OctopusPlatform.PlatformPluginOptions<P>): void;
+  abstract installPlugin(
+    plugin: OctopusPlatform.PlatformPluginOptions<P>
+  ): void;
 
-  public setGlobalCanvas(canvas: OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas) {
+  public setGlobalCanvas(
+    canvas:
+      | OctopusPlatform.PlatformCanvas
+      | OctopusPlatform.PlatformOffscreenCanvas
+      | null
+  ): void {
     this.globalCanvas = canvas;
   }
 
