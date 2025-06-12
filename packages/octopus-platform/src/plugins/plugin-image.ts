@@ -95,10 +95,7 @@ export default definePlugin<"image">({
         this.getGlobalCanvas() as OctopusPlatform.MiniProgramCanvas
       ).createImage();
 
-      // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
-      if (env !== "alipay") {
-        caches.push(img);
-      }
+      caches.push(img);
 
       return img;
     };
@@ -166,7 +163,8 @@ export default definePlugin<"image">({
           (img as OctopusPlatform.PlatformImage).src = "";
         }
 
-        caches = Array.from(new Set(caches));
+        // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
+        caches = env === 'alipay' ? [] : Array.from(new Set(caches))
         point = caches.length;
       },
     } satisfies OctopusPlatform.PlatformPlugin["image"];
