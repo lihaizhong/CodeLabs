@@ -1,4 +1,4 @@
-import { svgaSources, svgaReplaceSources, svgaHugeSources, getOneAtRandom } from "../../utils/constants";
+import { svgaSources, svgaReplaceSources, svgaLargeSources, svgaHugeSources, getOneAtRandom } from "../../utils/constants";
 
 // const sources = [
 //   'http://10.1.133.197:5151/svga/序列1.svga',

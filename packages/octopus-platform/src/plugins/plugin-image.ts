@@ -113,15 +113,13 @@ export default definePlugin<"image">({
         return decode.toDataURL(data);
       }
 
-      try {
-        // FIXME: IOS设备Uint8Array转base64时间较长，使用图片缓存形式速度会更快
-        const filePath = path.resolve(filename, prefix);
+      // FIXME: IOS设备Uint8Array转base64时间较长，使用图片缓存形式速度会更快
+      const filePath = path.resolve(filename, prefix);
 
-        return local!.write(decode.toBuffer(data), filePath);
-      } catch (ex: any) {
-        console.warn(`image cached fail: ${ex.message}`);
+      return local!.write(decode.toBuffer(data), filePath).catch((ex: any) => {
+        console.warn(`image write fail: ${ex.errorMessage || ex.errMsg || ex.message}`);
         return decode.toDataURL(data);
-      }
+      });
     };
 
     return {
@@ -165,7 +163,7 @@ export default definePlugin<"image">({
         }
 
         // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
-        caches = env === 'alipay' ? [] : Array.from(new Set(caches))
+        caches = env === "alipay" ? [] : Array.from(new Set(caches));
         point = caches.length;
       },
     } satisfies OctopusPlatform.PlatformPlugin["image"];

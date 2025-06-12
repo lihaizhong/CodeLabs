@@ -1,4 +1,4 @@
-import { Parser, Player, VideoEditor } from "../../utils/fuck-svga";
+import { Parser, Player, VideoEditor, benchmark } from "../../utils/fuck-svga";
 import ReadyGo from "../../utils/ReadyGo";
 
 let player;
@@ -70,29 +70,31 @@ Component({
           videoItem = cache.get(source);
         } else {
           this.setData({ message: "准备下载资源" });
-          if (typeof source === "string") {
-            videoItem = await parser.load(source);
-          } else {
-            videoItem = await parser.load(source.url);
-
-            // 替换元素
-            if (source.replace) {
-              const editor = new VideoEditor(videoItem);
-
-              await Promise.all(
-                Object.entries(source.replace).map(([key, value]) =>
-                  editor.setImage(key, value)
-                )
-              );
+          await benchmark.time('load', async () => {
+            if (typeof source === "string") {
+              videoItem = await parser.load(source);
+            } else {
+              videoItem = await parser.load(source.url);
+  
+              // 替换元素
+              if (source.replace) {
+                const editor = new VideoEditor(videoItem);
+  
+                await Promise.all(
+                  Object.entries(source.replace).map(([key, value]) =>
+                    editor.setImage(key, value)
+                  )
+                );
+              }
             }
-          }
+          });
 
           cache.set(source, videoItem);
           this.setData({ message: "下载资源成功" });
         }
 
         console.log(source, videoItem);
-        await player.mount(videoItem);
+        await benchmark.time('mount', () => player.mount(videoItem));
         this.setData({ message: "资源装载成功" });
         // player.stepToPercentage(0.3);
         player.start();

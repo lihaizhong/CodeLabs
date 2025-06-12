@@ -73,6 +73,14 @@ export const svgaReplaceSources = [
   },
 ];
 
+export const svgaLargeSources = [
+  "frame00.svga",
+  "frame01.svga",
+  "frame02.svga",
+  "frame03.svga",
+].map((filename) => `${LOCAL_SVGA_URL}/large/${filename}`);
+
+
 export const svgaHugeSources = [
   `${LOCAL_SVGA_URL}/huge/frame01.svga`,
   `${LOCAL_SVGA_URL}/huge/frame02.svga`,
