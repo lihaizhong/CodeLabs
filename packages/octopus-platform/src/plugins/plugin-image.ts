@@ -147,6 +147,7 @@ export default definePlugin<"image">({
         return loadImage(createImage(), src);
       },
       release: () => {
+        // FIXME: 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
         for (const img of caches) {
           if (
             (img as OctopusPlatform.PlatformImage).src.includes(
