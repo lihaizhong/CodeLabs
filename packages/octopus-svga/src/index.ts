@@ -5,3 +5,4 @@ export { platform } from "./platform";
 
 export * from "./helper";
 export * from "./extensions";
+export { default as benchmark } from "./benchmark";

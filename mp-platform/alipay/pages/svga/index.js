@@ -1,6 +1,6 @@
-import { svgaSources, svgaReplaceSources, svgaHugeSources, getOneAtRandom } from "../../utils/constants";
+import { svgaSources, svgaReplaceSources, svgaLargeSources, svgaHugeSources, getOneAtRandom } from "../../utils/constants";
 
-const sources = svgaHugeSources
+const sources = svgaLargeSources
 
 Page({
   data: {

@@ -2,12 +2,12 @@ import { Parser, Player } from "octopus-svga";
 import Page from "../../utils/Page";
 import {
   svgaSources,
-  svgaLargeFiles,
-  yyFiles,
+  svgaLargeSources,
+  yySources,
   getOneAtRandom,
 } from "../../utils/constants";
 
-const files = [svgaSources, svgaLargeFiles, yyFiles][2];
+const files = [svgaSources, svgaLargeSources, yySources][2];
 const parser = new Parser();
 const player = new Player();
 let videoItem;

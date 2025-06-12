@@ -1,4 +1,4 @@
-const REPLACE_SVGA_URL = `${window.location.origin}/svga`;
+const LOCAL_SVGA_URL = `${window.location.origin}/svga`;
 
 export const svgaSources = [
   "https://assets.2dfire.com/frontend/9ce0cce7205fbebba380ed44879e5660.svga",
@@ -57,23 +57,23 @@ export const svgaSources = [
   "https://assets.2dfire.com/frontend/ad6d6a788bb88520f908bb0fe04a75ca.svga",
   "https://assets.2dfire.com/frontend/45eadf03bee2013daa407fd4b91e29f5.svga",
 ].map((url) =>
-  url.replace("https://assets.2dfire.com/frontend", REPLACE_SVGA_URL)
+  url.replace("https://assets.2dfire.com/frontend", LOCAL_SVGA_URL)
 );
 
-export const svgaLargeFiles = [
+export const svgaLargeSources = [
   "frame00.svga",
   "frame01.svga",
   "frame02.svga",
   "frame03.svga",
-].map((filename) => `${REPLACE_SVGA_URL}/large/${filename}`);
+].map((filename) => `${LOCAL_SVGA_URL}/large/${filename}`);
 
 export const svgaHugeSources = [
   "frame01.svga",
   "frame02.svga",
   "frame03.svga",
-].map((filename) => `${REPLACE_SVGA_URL}/huge/${filename}`);
+].map((filename) => `${LOCAL_SVGA_URL}/huge/${filename}`);
 
-export const yyFiles = [
+export const yySources = [
   "angel.svga",
   "EmptyState.svga",
   "halloween.svga",
@@ -86,7 +86,7 @@ export const yyFiles = [
   "rose.svga",
   "TwitterHeart.svga",
   "Walkthrough.svga",
-].map((url) => `${REPLACE_SVGA_URL}/yy/${url}`);
+].map((url) => `${LOCAL_SVGA_URL}/yy/${url}`);
 
 export const posterFiles = [
   {
@@ -107,7 +107,7 @@ export const posterFiles = [
   },
 ].map((item) => ({
   ...item,
-  src: `${REPLACE_SVGA_URL}/poster/${item.src}`,
+  src: `${LOCAL_SVGA_URL}/poster/${item.src}`,
 }));
 
 export const analyticsFiles = [
