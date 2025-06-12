@@ -22,7 +22,7 @@ export class Player {
   /**
    * 动画实例
    */
-  private animator: Animator | null = null;
+  private animator: Animator = new Animator();
 
   /**
    * 刷头实例
@@ -52,7 +52,6 @@ export class Player {
       typeof options === "string" ? { container: options } : options;
 
     this.config.register(config);
-    this.animator = new Animator();
     // 监听容器是否处于浏览器视窗内
     // this.setIntersectionObserver()
     await this.painter.register(config.container, config.secondary, component);
@@ -178,7 +177,6 @@ export class Player {
   public destroy(): void {
     this.animator!.stop();
     this.painter.destroy();
-    this.animator = null;
     this.entity = void 0;
   }
 
