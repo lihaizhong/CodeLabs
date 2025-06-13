@@ -9,11 +9,6 @@ export abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty>
    */
   private plugins: OctopusPlatform.PlatformPluginOptions<P>[] = [];
 
-  private globalCanvas:
-    | OctopusPlatform.PlatformCanvas
-    | OctopusPlatform.PlatformOffscreenCanvas
-    | null = null;
-
   /**
    * 平台版本
    */
@@ -155,19 +150,6 @@ export abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty>
   abstract installPlugin(
     plugin: OctopusPlatform.PlatformPluginOptions<P>
   ): void;
-
-  public setGlobalCanvas(
-    canvas:
-      | OctopusPlatform.PlatformCanvas
-      | OctopusPlatform.PlatformOffscreenCanvas
-      | null
-  ): void {
-    this.globalCanvas = canvas;
-  }
-
-  public getGlobalCanvas() {
-    return this.globalCanvas;
-  }
 
   public switch(env: OctopusPlatform.SupportedPlatform) {
     this.globals.env = env;

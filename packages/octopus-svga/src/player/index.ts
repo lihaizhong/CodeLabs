@@ -55,6 +55,10 @@ export class Player {
     // 监听容器是否处于浏览器视窗内
     // this.setIntersectionObserver()
     await this.painter.register(config.container, config.secondary, component);
+    this.animator.onAnimate = platform.rAF.bind(
+      null,
+      this.painter.X as OctopusPlatform.PlatformCanvas
+    );
   }
 
   /**

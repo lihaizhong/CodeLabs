@@ -59,45 +59,7 @@ describe("pluginImage 插件", () => {
       const image = pluginImage.install.call(platform);
 
       expect(typeof image).toBe("object");
-      expect(typeof image.isImage).toBe("function");
-      expect(typeof image.isImageBitmap).toBe("function");
-      expect(typeof image.create).toBe("function");
       expect(typeof image.load).toBe("function");
-    });
-
-    it("检查 isImage 是否正常工作", () => {
-      const image = pluginImage.install.call(platform);
-
-      expect(new Image()).toBeInstanceOf(Image);
-      expect(image.isImage(new Image())).toBeTruthy();
-      expect(image.isImage({ src: "", width: 0, height: 0 })).toBeFalsy();
-    });
-
-    it("检查 isImageBitmap 是否正常工作", async () => {
-      const image = pluginImage.install.call(platform);
-      const u8a = new Uint8Array([
-        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
-        0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02,
-        0x08, 0x06, 0x00, 0x00, 0x00, 0x72, 0xb6, 0x0d, 0x24, 0x00, 0x00, 0x00,
-        0x11, 0x49, 0x44, 0x41, 0x54, 0x78, 0xda, 0x63, 0xf8, 0xcf, 0xc0, 0xf0,
-        0x1f, 0x84, 0x19, 0x60, 0x0c, 0x00, 0x47, 0xca, 0x07, 0xf9, 0x1a, 0xb6,
-        0xf1, 0xa9, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42,
-        0x60, 0x82,
-      ]);
-      const bitmap = await globalThis.createImageBitmap(new Blob([u8a]));
-
-      expect(bitmap).toBeInstanceOf(ImageBitmap);
-      expect(image.isImageBitmap(bitmap)).toBeTruthy();
-      expect(image.isImageBitmap(new Image())).toBeFalsy();
-      expect(
-        image.isImageBitmap({ width: 0, height: 0, close: () => {} })
-      ).toBeFalsy();
-    });
-
-    it("检查 create 是否正常工作", () => {
-      const image = pluginImage.install.call(platform);
-
-      expect(image.create()).toBeInstanceOf(Image);
     });
 
     it("检查 load 是否正常工作", async () => {
@@ -165,41 +127,7 @@ describe("pluginImage 插件", () => {
       const image = pluginImage.install.call(platform);
 
       expect(typeof image).toBe("object");
-      expect(typeof image.isImage).toBe("function");
-      expect(typeof image.isImageBitmap).toBe("function");
-      expect(typeof image.create).toBe("function");
       expect(typeof image.load).toBe("function");
-    });
-
-    it("检查 isImage 是否正常工作", () => {
-      const image = pluginImage.install.call(platform);
-
-      expect(image.isImage("")).toBeFalsy();
-      expect(image.isImage({ src: "", width: 0, height: 0 })).toBeTruthy();
-    });
-
-    it("检查 isImageBitmap 是否正常工作", async () => {
-      const image = pluginImage.install.call(platform);
-      const u8a = new Uint8Array([
-        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
-        0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02,
-        0x08, 0x06, 0x00, 0x00, 0x00, 0x72, 0xb6, 0x0d, 0x24, 0x00, 0x00, 0x00,
-        0x11, 0x49, 0x44, 0x41, 0x54, 0x78, 0xda, 0x63, 0xf8, 0xcf, 0xc0, 0xf0,
-        0x1f, 0x84, 0x19, 0x60, 0x0c, 0x00, 0x47, 0xca, 0x07, 0xf9, 0x1a, 0xb6,
-        0xf1, 0xa9, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42,
-        0x60, 0x82,
-      ]);
-      const bitmap = await globalThis.createImageBitmap(new Blob([u8a]));
-
-      expect(bitmap).toBeInstanceOf(ImageBitmap);
-      expect(image.isImageBitmap(bitmap)).toBeFalsy();
-      expect(image.isImageBitmap(new Image())).toBeFalsy();
-    });
-
-    it("检查 create 是否正常工作", () => {
-      const image = pluginImage.install.call(platform);
-
-      expect(image.create()).toBeInstanceOf(Image);
     });
 
     it("检查 load 是否正常工作", async () => {

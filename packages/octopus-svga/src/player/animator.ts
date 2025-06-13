@@ -1,6 +1,5 @@
 import { platform } from "../platform";
 
-const { noop } = platform;
 /**
  * 动画控制器
  */
@@ -26,10 +25,12 @@ export class Animator {
    */
   private loopDuration: number = 0;
 
+  public onAnimate: (callback: () => void) => number = platform.noop;
+
   /* ---- 事件钩子 ---- */
-  public onStart: () => void = noop;
-  public onUpdate: (timePercent: number) => void = noop;
-  public onEnd: () => void = noop;
+  public onStart: () => void = platform.noop;
+  public onUpdate: (timePercent: number) => void = platform.noop;
+  public onEnd: () => void = platform.noop;
 
   /**
    * 设置动画的必要参数
@@ -77,7 +78,7 @@ export class Animator {
     if (this.isRunning) {
       this.doDeltaTime(platform.now() - this.startTime);
       if (this.isRunning) {
-        platform.rAF(() => this.doFrame());
+        this.onAnimate(() => this.doFrame());
       }
     }
   }

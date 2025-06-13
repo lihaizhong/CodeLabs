@@ -24,14 +24,15 @@ export default definePlugin<"rAF">({
           ? requestAnimationFrame
           : requestAnimationFrameImpl();
 
-      return (callback: () => void) => rAF(callback);
+      return (_: OctopusPlatform.PlatformCanvas, callback: () => void) =>
+        rAF(callback);
     }
 
-    return (callback: () => void) => {
+    return (canvas: OctopusPlatform.PlatformCanvas, callback: () => void) => {
       // 检查canvas是否存在
       try {
         return (
-          this.getGlobalCanvas() as OctopusPlatform.MiniProgramCanvas
+          canvas as OctopusPlatform.MiniProgramCanvas
         ).requestAnimationFrame(callback);
       } catch (error: any) {
         console.warn(error.message);

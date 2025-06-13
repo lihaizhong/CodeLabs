@@ -18,9 +18,6 @@ export default definePlugin<"image">({
   install() {
     const { local, path, decode, noop } = this as EnhancedPlatform;
     const { env } = this.globals;
-    // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
-    let caches: Array<ImageBitmap | OctopusPlatform.PlatformImage> = [];
-    let point: number = 0;
 
     /**
      * 加载图片
@@ -38,7 +35,6 @@ export default definePlugin<"image">({
     }
 
     if (env === "h5") {
-      const createImage = () => new Image();
       const genImageSource = (data: Uint8Array | string) => {
         if (typeof data === "string") {
           return data;
@@ -48,12 +44,13 @@ export default definePlugin<"image">({
       };
 
       return {
-        // isImage: (data: unknown) => data instanceof Image,
-        // isImageBitmap: (data: unknown) => data instanceof ImageBitmap,
         load: (
+          _canvas:
+            | OctopusPlatform.PlatformCanvas
+            | OctopusPlatform.PlatformOffscreenCanvas,
           data: ImageBitmap | Uint8Array | string,
-          _filename: string,
-          _prefix?: string
+          _filepath: string,
+          caches: OctopusPlatform.ImageCaches
         ) => {
           // 由于ImageBitmap在图片渲染上有优势，故优先使用
           if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
@@ -72,37 +69,23 @@ export default definePlugin<"image">({
             return Promise.resolve(data);
           }
 
-          return loadImage(createImage(), genImageSource(data));
+          return loadImage(new Image(), genImageSource(data));
         },
-        release: () => {
-          for (const img of caches) {
-            (img as unknown as ImageBitmap).close();
+        release: (caches: OctopusPlatform.ImageCaches) => {
+          const imgs = caches.getCaches() as ImageBitmap[];
+
+          for (const img of imgs) {
+            img.close();
           }
 
-          caches.length = 0;
+          caches.cleanup();
         },
       } satisfies OctopusPlatform.PlatformPlugin["image"];
     }
 
-    const createImage = () => {
-      if (point > 0) {
-        point--;
-
-        return caches.shift() as OctopusPlatform.PlatformImage;
-      }
-
-      const img = (
-        this.getGlobalCanvas() as OctopusPlatform.MiniProgramCanvas
-      ).createImage();
-
-      caches.push(img);
-
-      return img;
-    };
     const genImageSource = async (
       data: Uint8Array | string,
-      filename: string,
-      prefix?: string
+      filepath: string
     ) => {
       if (typeof data === "string") {
         return data;
@@ -113,58 +96,50 @@ export default definePlugin<"image">({
         return decode.toDataURL(data);
       }
 
-      // FIXME: IOS设备Uint8Array转base64时间较长，使用图片缓存形式速度会更快
-      const filePath = path.resolve(filename, prefix);
-
-      return local!.write(decode.toBuffer(data), filePath).catch((ex: any) => {
-        console.warn(`image write fail: ${ex.errorMessage || ex.errMsg || ex.message}`);
+      // FIXME: IOS设备 微信小程序 Uint8Array转base64 时间较长，使用图片缓存形式速度会更快
+      return local!.write(decode.toBuffer(data), filepath).catch((ex: any) => {
+        console.warn(
+          `image write fail: ${ex.errorMessage || ex.errMsg || ex.message}`
+        );
         return decode.toDataURL(data);
       });
     };
 
     return {
-      // isImage: (data: unknown) =>
-      //   !!(
-      //     data &&
-      //     (data as any).src !== void 0 &&
-      //     (data as any).width !== void 0 &&
-      //     (data as any).height !== void 0
-      //   ),
-      // isImageBitmap: (_: unknown) => false,
       load: async (
+        canvas:
+          | OctopusPlatform.PlatformCanvas
+          | OctopusPlatform.PlatformOffscreenCanvas,
         data: ImageBitmap | Uint8Array | string,
-        filename: string,
-        prefix?: string
+        filepath: string,
+        caches: OctopusPlatform.ImageCaches
       ) => {
-        const src = await genImageSource(
-          data as Uint8Array | string,
-          filename,
-          prefix
-        );
+        const src = await genImageSource(data as Uint8Array | string, filepath);
 
-        return loadImage(createImage(), src);
+        const img: OctopusPlatform.PlatformImage =
+          caches.getImage() ||
+          (canvas as OctopusPlatform.MiniProgramCanvas).createImage();
+
+        caches.push(img);
+
+        return loadImage(img, src);
       },
-      release: () => {
+      release: (caches: OctopusPlatform.ImageCaches) => {
+        const imgs = caches.getCaches() as OctopusPlatform.PlatformImage[];
+
         // FIXME: 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
-        for (const img of caches) {
-          if (
-            (img as OctopusPlatform.PlatformImage).src.includes(
-              path.USER_DATA_PATH
-            )
-          ) {
-            local!
-              .remove((img as OctopusPlatform.PlatformImage).src)
-              .catch(noop);
+        for (const img of imgs) {
+          if (img.src.includes(path.USER_DATA_PATH)) {
+            local!.remove(img.src).catch(noop);
           }
 
-          (img as OctopusPlatform.PlatformImage).onload = null;
-          (img as OctopusPlatform.PlatformImage).onerror = null;
-          (img as OctopusPlatform.PlatformImage).src = "";
+          img.onload = null;
+          img.onerror = null;
+          img.src = "";
         }
 
         // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
-        caches = env === "alipay" ? [] : Array.from(new Set(caches));
-        point = caches.length;
+        env === "alipay" ? caches.cleanup() : caches.tidy();
       },
     } satisfies OctopusPlatform.PlatformPlugin["image"];
   },

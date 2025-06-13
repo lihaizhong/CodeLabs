@@ -1,3 +1,4 @@
+import { ImageCaches } from "octopus-platform";
 type PaintMode = "poster" | "animation";
 export declare class Painter {
     private readonly mode;
@@ -5,7 +6,7 @@ export declare class Painter {
      * 主屏的 Canvas 元素
      * Main Screen
      */
-    private X;
+    X: OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas | null;
     /**
      * 主屏的 Context 对象
      * Main Context
@@ -35,14 +36,15 @@ export declare class Painter {
     private model;
     private R?;
     private lastResizeKey;
+    caches: ImageCaches;
     /**
      * 动态素材
      */
-    dynamicMaterials: Map<string, OctopusPlatform.Bitmap>;
+    private dynamicMaterials;
     /**
      * 素材
      */
-    materials: Map<string, OctopusPlatform.Bitmap>;
+    private materials;
     /**
      *
      * @param mode

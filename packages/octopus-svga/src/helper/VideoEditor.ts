@@ -1,4 +1,5 @@
 import { platform } from "../platform";
+import { Painter } from "../painter";
 import {
   generateImageBufferFromCode,
   IQrCodeImgOptions,
@@ -14,6 +15,7 @@ interface VideoEditorOptions {
 
 export class VideoEditor {
   constructor(
+    private readonly painter: Painter,
     private readonly entity: PlatformVideo.Video,
     private readonly options: Omit<VideoEditorOptions, "mode"> = {}
   ) {}
@@ -25,9 +27,10 @@ export class VideoEditor {
   ) {
     if (mode === "A") {
       this.entity.dynamicElements[key] = await platform.image.load(
+        this.painter.X as OctopusPlatform.PlatformCanvas,
         value,
-        this.entity.filename,
-        `dynamic.${key}`
+        platform.path.resolve(this.entity.filename, `dynamic.${key}`),
+        this.painter.caches
       );
     } else {
       this.entity.images[key] = value;

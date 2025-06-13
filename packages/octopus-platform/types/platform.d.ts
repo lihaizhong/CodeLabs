@@ -29,18 +29,6 @@ declare namespace OctopusPlatform {
       times?: number
     ) => Promise<T>;
 
-    setGlobalCanvas: (
-      canvas:
-        | OctopusPlatform.PlatformCanvas
-        | OctopusPlatform.PlatformOffscreenCanvas
-        | null
-    ) => void;
-
-    getGlobalCanvas: () =>
-      | OctopusPlatform.PlatformCanvas
-      | OctopusPlatform.PlatformOffscreenCanvas
-      | null;
-
     switch: (env: SupportedPlatform) => void;
   }
 }

@@ -22,6 +22,7 @@ export declare class Animator {
      * 循环持续时间
      */
     private loopDuration;
+    onAnimate: (callback: () => void) => number;
     onStart: () => void;
     onUpdate: (timePercent: number) => void;
     onEnd: () => void;

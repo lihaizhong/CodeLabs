@@ -1,3 +1,4 @@
+import { ImageCaches } from "octopus-platform";
 import { platform } from "../platform";
 // import benchmark from "../benchmark";
 import { Renderer2D } from "octopus-svga-renderer";
@@ -25,7 +26,7 @@ export class Painter {
    * 主屏的 Canvas 元素
    * Main Screen
    */
-  private X:
+  public X:
     | OctopusPlatform.PlatformCanvas
     | OctopusPlatform.PlatformOffscreenCanvas
     | null = null;
@@ -70,15 +71,17 @@ export class Painter {
 
   private lastResizeKey = "";
 
+  public caches: ImageCaches = new ImageCaches();
+
   /**
    * 动态素材
    */
-  public dynamicMaterials: Map<string, OctopusPlatform.Bitmap> = new Map();
+  private dynamicMaterials: Map<string, OctopusPlatform.Bitmap> = new Map();
 
   /**
    * 素材
    */
-  public materials: Map<string, OctopusPlatform.Bitmap> = new Map();
+  private materials: Map<string, OctopusPlatform.Bitmap> = new Map();
 
   /**
    *
@@ -176,8 +179,6 @@ export class Painter {
         this.H = height;
       }
     }
-
-    platform.setGlobalCanvas(this.X as OctopusPlatform.PlatformCanvas);
     // #endregion set main screen implement
 
     // #region set secondary screen implement
@@ -276,11 +277,14 @@ export class Painter {
     Object.keys(images).forEach((key: string) => {
       const image = images[key];
 
-      const p = load(image as OctopusPlatform.RawImage, filename, key).then(
-        (img) => {
-          this.materials.set(key, img);
-        }
-      );
+      const p = load(
+        this.X!,
+        image as OctopusPlatform.RawImage,
+        platform.path.resolve(filename, key),
+        this.caches
+      ).then((img) => {
+        this.materials.set(key, img);
+      });
 
       imageAwaits.push(p);
     });
@@ -389,7 +393,7 @@ export class Painter {
   public clearMaterials() {
     this.materials.clear();
     this.dynamicMaterials.clear();
-    platform.image.release();
+    platform.image.release(this.caches);
   }
 
   /**
@@ -419,13 +423,7 @@ export class Painter {
     const { W, H, mode } = this;
 
     if (mode !== "poster") {
-      this.XC!.drawImage(
-        this.YC!.canvas,
-        0,
-        0,
-        W,
-        H
-      );
+      this.XC!.drawImage(this.YC!.canvas, 0, 0, W, H);
     }
   }
 
@@ -436,7 +434,7 @@ export class Painter {
     this.clearContainer();
     this.clearSecondary();
     this.clearMaterials();
-    platform.setGlobalCanvas(null);
+    this.caches.cleanup();
     this.X = this.XC = this.Y = this.YC = null;
     this.clearContainer = this.clearSecondary = this.stick = noop;
   }

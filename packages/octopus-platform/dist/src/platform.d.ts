@@ -3,7 +3,6 @@ export declare abstract class Platform<P extends OctopusPlatform.PlatformPluginP
      * 插件列表
      */
     private plugins;
-    private globalCanvas;
     /**
      * 平台版本
      */
@@ -25,7 +24,5 @@ export declare abstract class Platform<P extends OctopusPlatform.PlatformPluginP
     private usePixelRatio;
     private usePlugins;
     abstract installPlugin(plugin: OctopusPlatform.PlatformPluginOptions<P>): void;
-    setGlobalCanvas(canvas: OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas | null): void;
-    getGlobalCanvas(): OctopusPlatform.PlatformCanvas | OctopusPlatform.PlatformOffscreenCanvas | null;
     switch(env: OctopusPlatform.SupportedPlatform): void;
 }
