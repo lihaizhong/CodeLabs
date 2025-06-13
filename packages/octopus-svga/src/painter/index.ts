@@ -271,20 +271,19 @@ export class Painter {
    * @returns
    */
   public loadImages(images: RawImages, filename: string): Promise<void[]> {
-    const { load } = platform.image;
     const imageAwaits: Promise<void>[] = [];
 
-    Object.keys(images).forEach((key: string) => {
-      const image = images[key];
-
-      const p = load(
-        this.X!,
-        image as OctopusPlatform.RawImage,
-        platform.path.resolve(filename, key),
-        this.caches
-      ).then((img) => {
-        this.materials.set(key, img);
-      });
+    Object.entries(images).forEach(([name, image]) => {
+      const p = platform.image
+        .load(
+          this.X!,
+          image as OctopusPlatform.RawImage,
+          platform.path.resolve(filename, name),
+          this.caches
+        )
+        .then((img) => {
+          this.materials.set(name, img);
+        });
 
       imageAwaits.push(p);
     });
@@ -317,26 +316,30 @@ export class Painter {
     const shouldUseWidth =
       (imageRatio >= viewRatio && isAspectFit) ||
       (imageRatio <= viewRatio && !isAspectFit);
+    const createTransform = (
+      scale: number,
+      translateX: number,
+      translateY: number
+    ) => ({
+      scaleX: scale,
+      scaleY: scale,
+      translateX,
+      translateY,
+    });
 
     if (shouldUseWidth) {
       const scale = Y!.width / videoSize.width;
 
-      return {
-        scaleX: scale,
-        scaleY: scale,
-        translateX: 0,
-        translateY: (Y!.height - videoSize.height * scale) / 2,
-      };
+      return createTransform(
+        scale,
+        0,
+        (Y!.height - videoSize.height * scale) / 2
+      );
     }
 
     const scale = Y!.height / videoSize.height;
 
-    return {
-      scaleX: scale,
-      scaleY: scale,
-      translateX: (Y!.width - videoSize.width * scale) / 2,
-      translateY: 0,
-    };
+    return createTransform(scale, (Y!.width - videoSize.width * scale) / 2, 0);
   }
 
   /**
