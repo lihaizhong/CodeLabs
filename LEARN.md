@@ -69,10 +69,6 @@
 - [protobuf优缺点及编码原理](https://www.cnblogs.com/niuben/p/14212711.html)
 - [SVGA文件优化指南：打造直播卡顿的终结者](https://wenku.csdn.net/column/8c0fbae9wi#1.%20SVGA%E6%96%87%E4%BB%B6%E4%BC%98%E5%8C%96%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5)
 
-## 海报绘制思路
-
-- [小程序canvas绘制海报全流程](https://developer.aliyun.com/article/1259392)
-
 ## VIDEO
 
 - [如何一步步抽出双端通用Video组件(Taro小程序/h5)](https://juejin.cn/post/7413541435331084351)

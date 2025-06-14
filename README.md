@@ -23,6 +23,10 @@ git submodule update --init --recursive
 3. 框架不能满足业务需求，需要写一个适应业务的精简框架，但却不知从何处下手。
 4. 性能出现问题时，不知道从何处下手进行优化。
 
+## 动画文件压缩工具
+
+- [佳维动效文件处理工具](https://eff-tools.17ae.com/)
+
 ### changeset
 
 [changeset文档](https://github.com/changesets/changesets/tree/main)
