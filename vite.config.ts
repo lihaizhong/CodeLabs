@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
+import commonjs from "vite-plugin-commonjs";
 import { globSync } from "tinyglobby";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -42,6 +43,10 @@ export default defineConfig({
   root: __root,
 
   publicDir: path.resolve(__dirname, "public"),
+
+  plugins: [
+    commonjs()
+  ],
 
   resolve: {
     alias: {
