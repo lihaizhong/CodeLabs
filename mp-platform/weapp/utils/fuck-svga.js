@@ -5498,6 +5498,11 @@ class Poster {
     constructor(width, height) {
         this.painter = new Painter("poster", width, height);
     }
+    async register(selector = "", component) {
+        await this.painter.register(selector, "", component);
+        this.renderer = new Renderer2D(this.painter.YC);
+        this.resource = new ResourceManager(this.painter);
+    }
     /**
      * 设置配置项
      * @param options 可配置项
@@ -5512,9 +5517,7 @@ class Poster {
         }
         this.frame = typeof config.frame === "number" ? config.frame : 0;
         this.isConfigured = true;
-        await this.painter.register(config.container, "", component);
-        this.renderer = new Renderer2D(this.painter.YC);
-        this.resource = new ResourceManager(this.painter);
+        await this.register(config.container, component);
     }
     /**
      * 修改内容模式
@@ -5541,7 +5544,7 @@ class Poster {
             throw new Error("videoEntity undefined");
         }
         if (!this.isConfigured) {
-            await this.painter.register("", "", null);
+            await this.register();
             this.isConfigured = true;
         }
         const { images, filename } = videoEntity;

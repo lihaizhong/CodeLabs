@@ -38,6 +38,12 @@ export class Poster {
     this.painter = new Painter("poster", width, height);
   }
 
+  private async register(selector: string = "", component?: any): Promise<void> {
+    await this.painter.register(selector, "", component);
+    this.renderer = new Renderer2D(this.painter.YC!);
+    this.resource = new ResourceManager(this.painter);
+  }
+
   /**
    * 设置配置项
    * @param options 可配置项
@@ -58,11 +64,8 @@ export class Poster {
     }
 
     this.frame = typeof config.frame === "number" ? config.frame : 0;
-
     this.isConfigured = true;
-    await this.painter.register(config.container, "", component);
-    this.renderer = new Renderer2D(this.painter.YC!);
-    this.resource = new ResourceManager(this.painter);
+    await this.register(config.container, component);
   }
 
   /**
@@ -95,7 +98,7 @@ export class Poster {
     }
 
     if (!this.isConfigured) {
-      await this.painter.register("", "", null);
+      await this.register();
       this.isConfigured = true;
     }
 

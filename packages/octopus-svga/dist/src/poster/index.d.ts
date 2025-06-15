@@ -25,6 +25,7 @@ export declare class Poster {
     resource: ResourceManager | null;
     private renderer;
     constructor(width: number, height: number);
+    private register;
     /**
      * 设置配置项
      * @param options 可配置项
