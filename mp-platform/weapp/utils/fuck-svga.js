@@ -4730,7 +4730,6 @@ class ResourceManager {
         }
     }
     cleanup() {
-        this.release();
         this.caches.length = 0;
         this.point = 0;
     }
@@ -4893,6 +4892,7 @@ class Player {
         this.animator.stop();
         this.painter.destroy();
         this.renderer?.destroy();
+        this.resource?.release();
         this.resource?.cleanup();
         this.entity = void 0;
     }
@@ -5574,6 +5574,7 @@ class Poster {
     destroy() {
         this.painter.destroy();
         this.renderer?.destroy();
+        this.resource?.release();
         this.resource?.cleanup();
         this.entity = void 0;
     }
