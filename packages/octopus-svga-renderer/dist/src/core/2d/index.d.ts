@@ -1,3 +1,7 @@
+export interface ICommand {
+    command: string;
+    args: string;
+}
 export declare class Renderer2D implements PlatformRenderer {
     private readonly context;
     /**
@@ -18,6 +22,8 @@ export declare class Renderer2D implements PlatformRenderer {
      * - A: arcTo，从起始点绘制一条弧线到指定点。
      */
     private static SVG_PATH;
+    private static SVG_LETTER_REGEXP;
+    private static parseSVGPath;
     private pointPool;
     private globalTransform?;
     constructor(context: PlatformRenderingContext2D);

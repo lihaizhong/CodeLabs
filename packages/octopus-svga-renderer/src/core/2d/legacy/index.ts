@@ -35,6 +35,7 @@ const SVG_PATH = new Set([
   "s",
   "q",
 ]);
+const SVG_PATH_REGEXP = /[a-zA-Z][^a-zA-Z]*/g;
 const pointPool = new PointPool();
 
 export function render(
@@ -226,7 +227,7 @@ function drawBezier(
   context.beginPath();
   if (d) {
     // 优化字符串处理逻辑，减少正则表达式使用
-    const commands = d.match(/[a-zA-Z][^a-zA-Z]*/g) || [];
+    const commands = d.match(SVG_PATH_REGEXP) || [];
 
     for (const command of commands) {
       const firstLetter = command[0];

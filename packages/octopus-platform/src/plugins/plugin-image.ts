@@ -18,6 +18,19 @@ export default definePlugin<"image">({
   install() {
     const { local, path, decode, noop } = this as EnhancedPlatform;
     const { env } = this.globals;
+    let genImageSource: (
+      data: Uint8Array | string,
+      filepath: string
+    ) => Promise<string> | string = (
+      data: Uint8Array | string,
+      _filepath: string
+    ) => {
+      if (typeof data === "string") {
+        return data;
+      }
+
+      return decode.toDataURL(data);
+    };
 
     /**
      * 加载图片
@@ -35,21 +48,13 @@ export default definePlugin<"image">({
     }
 
     if (env === "h5") {
-      const genImageSource = (data: Uint8Array | string) => {
-        if (typeof data === "string") {
-          return data;
-        }
-
-        return decode.toDataURL(data);
-      };
-
       return {
         load: (
           _canvas:
             | OctopusPlatform.PlatformCanvas
             | OctopusPlatform.PlatformOffscreenCanvas,
           data: ImageBitmap | Uint8Array | string,
-          _filepath: string,
+          filepath: string,
           caches: OctopusPlatform.ImageCaches
         ) => {
           // 由于ImageBitmap在图片渲染上有优势，故优先使用
@@ -69,7 +74,10 @@ export default definePlugin<"image">({
             return Promise.resolve(data);
           }
 
-          return loadImage(new Image(), genImageSource(data));
+          return loadImage(
+            new Image(),
+            genImageSource(data as Uint8Array | string, filepath) as string
+          );
         },
         release: (caches: OctopusPlatform.ImageCaches) => {
           const imgs = caches.getCaches() as ImageBitmap[];
@@ -83,27 +91,24 @@ export default definePlugin<"image">({
       } satisfies OctopusPlatform.PlatformPlugin["image"];
     }
 
-    const genImageSource = async (
-      data: Uint8Array | string,
-      filepath: string
-    ) => {
-      if (typeof data === "string") {
-        return data;
-      }
+    // FIXME: 支付宝小程序IDE保存临时文件会失败;抖音最大用户文件大小为10M
+    if (env === "weapp") {
+      genImageSource = async (data: Uint8Array | string, filepath: string) => {
+        if (typeof data === "string") {
+          return data;
+        }
 
-      // FIXME: 支付宝小程序IDE保存临时文件会失败;抖音最大用户文件大小为10M
-      if (env === "tt" || env === "alipay") {
-        return decode.toDataURL(data);
-      }
-
-      // FIXME: IOS设备 微信小程序 Uint8Array转base64 时间较长，使用图片缓存形式速度会更快
-      return local!.write(decode.toBuffer(data), filepath).catch((ex: any) => {
-        console.warn(
-          `image write fail: ${ex.errorMessage || ex.errMsg || ex.message}`
-        );
-        return decode.toDataURL(data);
-      });
-    };
+        // FIXME: IOS设备 微信小程序 Uint8Array转base64 时间较长，使用图片缓存形式速度会更快
+        return local!
+          .write(decode.toBuffer(data), filepath)
+          .catch((ex: any) => {
+            console.warn(
+              `image write fail: ${ex.errorMessage || ex.errMsg || ex.message}`
+            );
+            return decode.toDataURL(data);
+          });
+      };
+    }
 
     return {
       load: async (

@@ -1,5 +1,10 @@
 import { PointPool, CurrentPoint } from "../../utils/PointPool";
 
+export interface ICommand {
+  command: string;
+  args: string;
+}
+
 export class Renderer2D implements PlatformRenderer {
   /**
    * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Tutorial/Paths
@@ -36,6 +41,58 @@ export class Renderer2D implements PlatformRenderer {
     "s",
     "q",
   ]);
+
+  private static SVG_LETTER_REGEXP = /[a-zA-Z]/;
+
+  // 在Renderer2D类中添加新的解析方法
+  private static parseSVGPath(d: string): ICommand[] {
+    const { SVG_LETTER_REGEXP } = Renderer2D;
+    const result: ICommand[] = [];
+    let currentIndex = 0;
+
+    // 状态：0 - 等待命令，1 - 读取参数
+    let state = 0;
+    let currentCommand = "";
+    let currentArgs = "";
+
+    while (currentIndex < d.length) {
+      const char = d[currentIndex];
+
+      switch (state) {
+        case 0: // 等待命令
+          if (SVG_LETTER_REGEXP.test(char)) {
+            currentCommand = char;
+            state = 1;
+          }
+          break;
+        case 1: // 读取参数
+          if (SVG_LETTER_REGEXP.test(char)) {
+            // 遇到新命令，保存当前命令和参数
+            result.push({
+              command: currentCommand,
+              args: currentArgs.trim(),
+            });
+            currentCommand = char;
+            currentArgs = "";
+          } else {
+            currentArgs += char;
+          }
+          break;
+      }
+
+      currentIndex++;
+    }
+
+    // 处理最后一个命令
+    if (currentCommand && state === 1) {
+      result.push({
+        command: currentCommand,
+        args: currentArgs.trim(),
+      });
+    }
+
+    return result;
+  }
 
   private pointPool: PointPool = new PointPool();
 
@@ -107,31 +164,27 @@ export class Renderer2D implements PlatformRenderer {
   ): void {
     const { context, pointPool } = this;
     const currentPoint = pointPool.acquire();
-
+  
     context.save();
     this.resetShapeStyles(styles);
     this.setTransform(transform);
     context.beginPath();
-
+  
     if (d) {
-      // 优化字符串处理逻辑，减少正则表达式使用
-      const commands = d.match(/[a-zA-Z][^a-zA-Z]*/g) || [];
-
-      for (const command of commands) {
-        const firstLetter = command[0];
-
-        if (Renderer2D.SVG_PATH.has(firstLetter)) {
-          const args = command
-            .substring(1)
-            .trim()
-            .split(/[\s,]+/)
-            .filter(Boolean);
-
-          this.drawBezierElement(currentPoint, firstLetter, args);
+      // 使用状态机解析器替代正则表达式
+      const commands = Renderer2D.parseSVGPath(d);
+  
+      for (const { command, args } of commands) {
+        if (Renderer2D.SVG_PATH.has(command)) {
+          this.drawBezierElement(
+            currentPoint,
+            command,
+            args.split(/[\s,]+/).filter(Boolean)
+          );
         }
       }
     }
-
+  
     this.fillOrStroke(styles);
     pointPool.release(currentPoint);
     context.restore();
@@ -370,11 +423,11 @@ export class Renderer2D implements PlatformRenderer {
     if (width < 2 * radius) {
       radius = width / 2;
     }
-    
+
     if (height < 2 * radius) {
       radius = height / 2;
     }
-    
+
     context.beginPath();
     context.moveTo(x + radius, y);
     context.arcTo(x + width, y, x + width, y + height, radius);
