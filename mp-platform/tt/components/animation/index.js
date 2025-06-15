@@ -79,7 +79,7 @@ Component({
   
               // 替换元素
               if (source.replace) {
-                const editor = new VideoEditor(player.painter, videoItem);
+                const editor = new VideoEditor(player.resource, videoItem);
   
                 await Promise.all(
                   Object.entries(source.replace).map(([key, value]) =>

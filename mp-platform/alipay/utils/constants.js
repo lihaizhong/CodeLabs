@@ -1,4 +1,4 @@
-const LOCAL_SVGA_URL = "http://10.1.133.118:3536/svga";
+const LOCAL_SVGA_URL = "http://192.168.1.23:3536/svga";
 
 export const svgaSources = [
   "https://assets.2dfire.com/frontend/9ce0cce7205fbebba380ed44879e5660.svga",

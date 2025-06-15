@@ -103,6 +103,10 @@ export class ResourceManager {
         img !== null &&
         (img as OctopusPlatform.PlatformImage).src !== ""
       ) {
+        if (env !== "h5" && (img as OctopusPlatform.PlatformImage).src.includes(platform.path.USER_DATA_PATH)) {
+          platform.local?.remove((img as OctopusPlatform.PlatformImage).src)
+        }
+
         (img as OctopusPlatform.PlatformImage).src = "";
         (img as OctopusPlatform.PlatformImage).onload = null;
         (img as OctopusPlatform.PlatformImage).onerror = null;
