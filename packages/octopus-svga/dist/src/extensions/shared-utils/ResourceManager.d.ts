@@ -15,6 +15,7 @@ export declare class ResourceManager {
      */
     private point;
     constructor(painter: Painter);
+    private createImage;
     /**
      * 加载图片集
      * @param images 图片数据

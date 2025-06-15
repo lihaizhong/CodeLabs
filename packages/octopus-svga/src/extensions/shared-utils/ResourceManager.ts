@@ -23,6 +23,31 @@ export class ResourceManager {
 
   constructor(private readonly painter: Painter) {}
 
+  private createImage(): OctopusPlatform.PlatformImage {
+    let img: OctopusPlatform.PlatformImage | null = null;
+
+    if (this.point > 0) {
+      this.point--;
+
+      img = this.caches.shift() as OctopusPlatform.PlatformImage;
+    }
+
+    if (!img) {
+      img =
+        platform.globals.env === "h5"
+          ? new Image()
+          : (
+              this.painter.X as
+                | OctopusPlatform.MiniProgramCanvas
+                | OctopusPlatform.MiniProgramOffscreenCanvas
+            ).createImage();
+    }
+
+    this.caches.push(img);
+
+    return img;
+  }
+
   /**
    * 加载图片集
    * @param images 图片数据
@@ -38,34 +63,10 @@ export class ResourceManager {
     const { env } = platform.globals;
     const imageAwaits: Promise<void>[] =
       [];
-    const createImage = () => {
-      let img: OctopusPlatform.PlatformImage | null = null;
-
-      if (this.point > 0) {
-        this.point--;
-
-        img = this.caches.shift() as OctopusPlatform.PlatformImage;
-      }
-
-      if (!img) {
-        img =
-          env === "h5"
-            ? new Image()
-            : (
-                this.painter.X as
-                  | OctopusPlatform.MiniProgramCanvas
-                  | OctopusPlatform.MiniProgramOffscreenCanvas
-              ).createImage();
-      }
-
-      this.caches.push(img);
-
-      return img;
-    };
 
     Object.entries(images).forEach(([name, image]) => {
       const p = platform.image.load(
-        createImage,
+        () => this.createImage(),
         image as OctopusPlatform.RawImage,
         platform.path.resolve(filename, prefix ? `${prefix}_${name}` : name)
       ).then((img) => {
