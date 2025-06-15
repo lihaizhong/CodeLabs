@@ -1,6 +1,7 @@
 import { Painter } from "../../painter";
 export declare class ResourceManager {
     private readonly painter;
+    private static isBitmap;
     private caches;
     /**
      * 动态素材

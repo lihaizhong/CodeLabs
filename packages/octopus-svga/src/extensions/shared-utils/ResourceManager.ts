@@ -2,6 +2,10 @@ import { Painter } from "../../painter";
 import { platform } from "../../platform";
 
 export class ResourceManager {
+  private static isBitmap(img: any): boolean {
+    return platform.globals.env === "h5" && img instanceof ImageBitmap;
+  }
+
   // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
   private caches: Array<OctopusPlatform.PlatformImage | ImageBitmap> = [];
 
@@ -70,7 +74,7 @@ export class ResourceManager {
         image as OctopusPlatform.RawImage,
         platform.path.resolve(filename, prefix ? `${prefix}_${name}` : name)
       ).then((img) => {
-        if (env === "h5" && img instanceof ImageBitmap) {
+        if (ResourceManager.isBitmap(img)) {
           this.caches.push(img);
         }
 
@@ -92,8 +96,8 @@ export class ResourceManager {
 
     // FIXME: 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
     for (const img of this.caches) {
-      if (env === "h5" && img instanceof ImageBitmap) {
-        img.close();
+      if (ResourceManager.isBitmap(img)) {
+        (img as ImageBitmap).close();
       } else if (
         typeof img === "object" &&
         img !== null &&
