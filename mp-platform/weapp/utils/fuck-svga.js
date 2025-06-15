@@ -4691,7 +4691,7 @@ class ResourceManager {
         };
         Object.entries(images).forEach(([name, image]) => {
             const p = platform.image.load(createImage, image, platform.path.resolve(filename, prefix ? `${prefix}_${name}` : name)).then((img) => {
-                if (img instanceof ImageBitmap) {
+                if (env === "h5" && img instanceof ImageBitmap) {
                     this.caches.push(img);
                 }
                 if (type === "dynamic") {

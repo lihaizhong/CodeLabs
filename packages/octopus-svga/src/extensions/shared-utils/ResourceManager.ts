@@ -69,7 +69,7 @@ export class ResourceManager {
         image as OctopusPlatform.RawImage,
         platform.path.resolve(filename, prefix ? `${prefix}_${name}` : name)
       ).then((img) => {
-        if (img instanceof ImageBitmap) {
+        if (env === "h5" && img instanceof ImageBitmap) {
           this.caches.push(img);
         }
 
