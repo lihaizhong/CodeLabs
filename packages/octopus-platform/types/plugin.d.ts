@@ -9,14 +9,6 @@ declare namespace OctopusPlatform {
     context: OffscreenCanvasRenderingContext2D;
   }
 
-  export interface ImageCaches {
-    getImage: () => PlatformImage | null;
-    getCaches: () => (ImageBitmap | PlatformImage)[];
-    push: (img: ImageBitmap | PlatformImage) => void;
-    tidy: () => void;
-    cleanup: () => void;
-  }
-
   export interface PlatformPlugin {
     getCanvas: (selector: string, component?: any) => Promise<GetCanvasResult>;
 
@@ -52,12 +44,10 @@ declare namespace OctopusPlatform {
 
     image: {
       load: (
-        canvas: PlatformCanvas | PlatformOffscreenCanvas,
+        createImage: () => HTMLImageElement,
         data: ImageBitmap | Uint8Array | string,
         filepath: string,
-        caches: ImageCaches
       ) => Promise<ImageBitmap | PlatformImage>;
-      release: (caches: ImageCaches) => void;
     };
   }
 }

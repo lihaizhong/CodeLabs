@@ -33,7 +33,6 @@
   },
   "dependencies": {
     "fflate": "^0.8.2",
-    "octopus-platform": "workspace:^",
-    "octopus-svga-renderer": "workspace:^"
+    "octopus-platform": "workspace:^"
   }
 }

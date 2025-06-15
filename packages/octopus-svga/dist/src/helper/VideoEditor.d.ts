@@ -1,15 +1,15 @@
-import { Painter } from "../painter";
 import { IQrCodeImgOptions } from "./qrcode";
+import { ResourceManager } from "src/extensions";
 interface VideoEditorOptions {
     mode?: "R" | "A";
     container?: string;
     component?: any;
 }
 export declare class VideoEditor {
-    private readonly painter;
+    private readonly resource;
     private readonly entity;
     private readonly options;
-    constructor(painter: Painter, entity: PlatformVideo.Video, options?: Omit<VideoEditorOptions, "mode">);
+    constructor(resource: ResourceManager, entity: PlatformVideo.Video, options?: Omit<VideoEditorOptions, "mode">);
     private set;
     /**
      * 创建自定义编辑器

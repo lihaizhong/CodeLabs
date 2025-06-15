@@ -1,3 +1,4 @@
+import { ResourceManager } from "../extensions";
 import { Painter } from "../painter";
 export declare class Poster {
     /**
@@ -21,6 +22,8 @@ export declare class Poster {
      * 刷头实例
      */
     readonly painter: Painter;
+    resource: ResourceManager | null;
+    private renderer;
     constructor(width: number, height: number);
     /**
      * 设置配置项
@@ -43,7 +46,7 @@ export declare class Poster {
      * @param currFrame
      * @returns
      */
-    mount(videoEntity: PlatformVideo.Video): Promise<void[]>;
+    mount(videoEntity: PlatformVideo.Video): Promise<void>;
     /**
      * 绘制海报
      */

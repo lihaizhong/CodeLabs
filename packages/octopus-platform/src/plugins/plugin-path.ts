@@ -14,7 +14,7 @@ export default definePlugin<"path">({
       return {
         USER_DATA_PATH: "",
         filename,
-        resolve: (_filename: string, _prefix?: string) => "",
+        resolve: (filename: string, prefix?: string) => `${prefix ? `${prefix}__` : ""}${filename}`,
       } satisfies OctopusPlatform.PlatformPlugin['path'];
     }
 
@@ -27,7 +27,7 @@ export default definePlugin<"path">({
       USER_DATA_PATH,
       filename,
       resolve: (filename: string, prefix?: string) =>
-        `${USER_DATA_PATH}/${prefix ? `${prefix}.` : ""}${filename}`,
+        `${USER_DATA_PATH}/${prefix ? `${prefix}__` : ""}${filename}`,
     } satisfies OctopusPlatform.PlatformPlugin['path'];
   },
 });

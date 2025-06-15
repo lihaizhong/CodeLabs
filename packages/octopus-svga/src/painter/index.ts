@@ -1,23 +1,4 @@
-import { ImageCaches } from "octopus-platform";
 import { platform } from "../platform";
-// import benchmark from "../benchmark";
-import { Renderer2D } from "octopus-svga-renderer";
-
-interface PaintModel {
-  // canvas or offscreen
-  type: "C" | "O";
-  // clear or resize or create
-  clear: "CL" | "RE" | "CR";
-}
-
-type PaintMode = "poster" | "animation";
-
-interface TransformScale {
-  scaleX: number;
-  scaleY: number;
-  translateX: number;
-  translateY: number;
-}
 
 const { noop } = platform;
 
@@ -34,7 +15,7 @@ export class Painter {
    * 主屏的 Context 对象
    * Main Context
    */
-  private XC:
+  public XC:
     | CanvasRenderingContext2D
     | OffscreenCanvasRenderingContext2D
     | null = null;
@@ -42,7 +23,7 @@ export class Painter {
    * 副屏的 Canvas 元素
    * Secondary Screen
    */
-  private Y:
+  public Y:
     | OctopusPlatform.PlatformCanvas
     | OctopusPlatform.PlatformOffscreenCanvas
     | null = null;
@@ -50,38 +31,22 @@ export class Painter {
    * 副屏的 Context 对象
    * Secondary Context
    */
-  private YC:
+  public YC:
     | CanvasRenderingContext2D
     | OffscreenCanvasRenderingContext2D
     | null = null;
   /**
    * 画布的宽度
    */
-  private W: number;
+  public W: number;
   /**
    * 画布的高度
    */
-  private H: number;
+  public H: number;
   /**
    * 粉刷模式
    */
   private model: PaintModel = {} as PaintModel;
-
-  private R?: PlatformRenderer;
-
-  private lastResizeKey = "";
-
-  public caches: ImageCaches = new ImageCaches();
-
-  /**
-   * 动态素材
-   */
-  private dynamicMaterials: Map<string, OctopusPlatform.Bitmap> = new Map();
-
-  /**
-   * 素材
-   */
-  private materials: Map<string, OctopusPlatform.Bitmap> = new Map();
 
   /**
    *
@@ -123,11 +88,6 @@ export class Painter {
     } else {
       model.clear = "RE";
     }
-
-    // benchmark.line(4);
-    // benchmark.log("brush type", model.type);
-    // benchmark.log("brush clear", model.clear);
-    // benchmark.line(4);
   }
 
   /**
@@ -252,175 +212,11 @@ export class Painter {
       }
       // #endregion clear secondary screen implement
     }
-
-    this.R = new Renderer2D(this.YC!);
-  }
-
-  /**
-   * 更新动态图片集
-   * @param images
-   */
-  public updateDynamicImages(images: PlatformImages) {
-    this.dynamicMaterials = new Map(Object.entries(images));
-  }
-
-  /**
-   * 加载图片集
-   * @param images 图片数据
-   * @param filename 文件名称
-   * @returns
-   */
-  public loadImages(images: RawImages, filename: string): Promise<void[]> {
-    const imageAwaits: Promise<void>[] = [];
-
-    Object.entries(images).forEach(([name, image]) => {
-      const p = platform.image
-        .load(
-          this.X!,
-          image as OctopusPlatform.RawImage,
-          platform.path.resolve(filename, name),
-          this.caches
-        )
-        .then((img) => {
-          this.materials.set(name, img);
-        });
-
-      imageAwaits.push(p);
-    });
-
-    return Promise.all<void>(imageAwaits);
-  }
-
-  /**
-   * 生成图片
-   * @returns
-   */
-  public getImageData() {
-    return this.XC!.getImageData(0, 0, this.W, this.H);
-  }
-
-  /**
-   * 计算缩放比例
-   * @param contentMode
-   * @param videoSize
-   * @returns
-   */
-  private calculateScale(
-    contentMode: PLAYER_CONTENT_MODE,
-    videoSize: PlatformVideo.VideoSize
-  ): TransformScale {
-    const { Y } = this;
-    const imageRatio = videoSize.width / videoSize.height;
-    const viewRatio = Y!.width / Y!.height;
-    const isAspectFit = contentMode === PLAYER_CONTENT_MODE.ASPECT_FIT;
-    const shouldUseWidth =
-      (imageRatio >= viewRatio && isAspectFit) ||
-      (imageRatio <= viewRatio && !isAspectFit);
-    const createTransform = (
-      scale: number,
-      translateX: number,
-      translateY: number
-    ) => ({
-      scaleX: scale,
-      scaleY: scale,
-      translateX,
-      translateY,
-    });
-
-    if (shouldUseWidth) {
-      const scale = Y!.width / videoSize.width;
-
-      return createTransform(
-        scale,
-        0,
-        (Y!.height - videoSize.height * scale) / 2
-      );
-    }
-
-    const scale = Y!.height / videoSize.height;
-
-    return createTransform(scale, (Y!.width - videoSize.width * scale) / 2, 0);
-  }
-
-  /**
-   * 调整画布尺寸
-   * @param contentMode
-   * @param videoSize
-   * @returns
-   */
-  public resize(
-    contentMode: PLAYER_CONTENT_MODE,
-    videoSize: PlatformVideo.VideoSize
-  ): void {
-    const { width: canvasWidth, height: canvasHeight } = this.Y!;
-    const { width: videoWidth, height: videoHeight } = videoSize;
-    const resizeKey = `${contentMode}-${videoWidth}-${videoHeight}-${canvasWidth}-${canvasHeight}`;
-    const lastTransform = this.R!.getGlobalTransform();
-
-    if (this.lastResizeKey === resizeKey && lastTransform) {
-      return;
-    }
-
-    let scale: TransformScale = {
-      scaleX: 1,
-      scaleY: 1,
-      translateX: 0,
-      translateY: 0,
-    };
-
-    if (contentMode === PLAYER_CONTENT_MODE.FILL) {
-      scale.scaleX = canvasWidth / videoWidth;
-      scale.scaleY = canvasHeight / videoHeight;
-    } else {
-      scale = this.calculateScale(contentMode, videoSize);
-    }
-
-    this.lastResizeKey = resizeKey;
-    this.R!.setGlobalTransform({
-      a: scale.scaleX,
-      b: 0.0,
-      c: 0.0,
-      d: scale.scaleY,
-      tx: scale.translateX,
-      ty: scale.translateY,
-    });
   }
 
   public clearContainer: () => void = noop;
 
   public clearSecondary: () => void = noop;
-
-  /**
-   * 清理素材库
-   */
-  public clearMaterials() {
-    this.materials.clear();
-    this.dynamicMaterials.clear();
-    platform.image.release(this.caches);
-  }
-
-  /**
-   * 绘制图片片段
-   * @param videoEntity
-   * @param currentFrame
-   * @param start
-   * @param end
-   */
-  public draw(
-    videoEntity: PlatformVideo.Video,
-    currentFrame: number,
-    start: number,
-    end: number
-  ) {
-    this.R!.render(
-      videoEntity,
-      this.materials,
-      this.dynamicMaterials,
-      currentFrame,
-      start,
-      end
-    );
-  }
 
   public stick() {
     const { W, H, mode } = this;
@@ -436,8 +232,6 @@ export class Painter {
   public destroy() {
     this.clearContainer();
     this.clearSecondary();
-    this.clearMaterials();
-    this.caches.cleanup();
     this.X = this.XC = this.Y = this.YC = null;
     this.clearContainer = this.clearSecondary = this.stick = noop;
   }

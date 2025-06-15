@@ -1,10 +1,7 @@
 import { platform } from "../platform";
-import { Painter } from "../painter";
-import {
-  generateImageBufferFromCode,
-  IQrCodeImgOptions,
-} from "./qrcode";
+import { generateImageBufferFromCode, IQrCodeImgOptions } from "./qrcode";
 import { getBufferFromImageData } from "./png";
+import { ResourceManager } from "src/extensions";
 
 interface VideoEditorOptions {
   // 模式: R 替换, A 追加
@@ -15,7 +12,7 @@ interface VideoEditorOptions {
 
 export class VideoEditor {
   constructor(
-    private readonly painter: Painter,
+    private readonly resource: ResourceManager,
     private readonly entity: PlatformVideo.Video,
     private readonly options: Omit<VideoEditorOptions, "mode"> = {}
   ) {}
@@ -26,11 +23,11 @@ export class VideoEditor {
     mode: VideoEditorOptions["mode"] = "R"
   ) {
     if (mode === "A") {
-      this.entity.dynamicElements[key] = await platform.image.load(
-        this.painter.X as OctopusPlatform.PlatformCanvas,
-        value,
-        platform.path.resolve(this.entity.filename, `dynamic.${key}`),
-        this.painter.caches
+      await this.resource.loadImages(
+        { [key]: value },
+        this.entity.filename,
+        "dynamic",
+        "dynamic"
       );
     } else {
       this.entity.images[key] = value;
@@ -94,12 +91,12 @@ export class VideoEditor {
   async setImage(key: string, url: string, options?: VideoEditorOptions) {
     if (this.entity.locked) return;
 
-    if (url.startsWith('data:image')) {
-      await this.set(key, url, options?.mode)
+    if (url.startsWith("data:image")) {
+      await this.set(key, url, options?.mode);
     } else {
-      const buff = await platform.remote.fetch(url)
+      const buff = await platform.remote.fetch(url);
 
-      await this.set(key, new Uint8Array(buff), options?.mode)
+      await this.set(key, new Uint8Array(buff), options?.mode);
     }
   }
 

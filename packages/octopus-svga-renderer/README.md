@@ -1,1 +1,0 @@
-# Octopus SVGA Renderer

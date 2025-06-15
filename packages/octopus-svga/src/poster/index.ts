@@ -1,3 +1,5 @@
+import { Renderer2D } from "../extensions";
+import { ResourceManager } from "../extensions";
 import { getDataURLFromImageData } from "../helper";
 import { Painter } from "../painter";
 
@@ -28,6 +30,10 @@ export class Poster {
    */
   public readonly painter: Painter;
 
+  public resource: ResourceManager | null = null;
+
+  private renderer: Renderer2D | null = null;
+
   constructor(width: number, height: number) {
     this.painter = new Painter("poster", width, height);
   }
@@ -36,11 +42,12 @@ export class Poster {
    * 设置配置项
    * @param options 可配置项
    */
-  public setConfig(
+  public async setConfig(
     options: string | PosterConfig = {},
     component?: any
   ): Promise<void> {
-    const config: PosterConfig = typeof options === "string" ? { container: options } : options;
+    const config: PosterConfig =
+      typeof options === "string" ? { container: options } : options;
 
     if (config.container === void 0) {
       config.container = "";
@@ -50,17 +57,21 @@ export class Poster {
       this.contentMode = config.contentMode;
     }
 
-    this.frame = typeof config.frame === 'number' ? config.frame : 0;
+    this.frame = typeof config.frame === "number" ? config.frame : 0;
 
     this.isConfigured = true;
-    return this.painter.register(config.container, '', component);
+    await this.painter.register(config.container, "", component);
+    this.renderer = new Renderer2D(this.painter.YC!);
+    this.resource = new ResourceManager(this.painter);
   }
 
   /**
    * 修改内容模式
-   * @param contentMode 
+   * @param contentMode
    */
-  public setContentMode(contentMode: PLAYER_CONTENT_MODE): void {
+  public setContentMode(
+    contentMode: PLAYER_CONTENT_MODE
+  ): void {
     this.contentMode = contentMode;
   }
 
@@ -78,24 +89,23 @@ export class Poster {
    * @param currFrame
    * @returns
    */
-  public async mount(videoEntity: PlatformVideo.Video): Promise<void[]> {
+  public async mount(videoEntity: PlatformVideo.Video): Promise<void> {
     if (!videoEntity) {
       throw new Error("videoEntity undefined");
     }
 
     if (!this.isConfigured) {
-      await this.painter.register('', '', null);
+      await this.painter.register("", "", null);
       this.isConfigured = true;
     }
 
     const { images, filename } = videoEntity;
 
     this.painter.clearContainer();
-    this.painter.clearMaterials();
-    this.painter.updateDynamicImages(videoEntity.dynamicElements);
+    this.resource!.release();
     this.entity = videoEntity;
 
-    return this.painter.loadImages(images, filename);
+    await this.resource!.loadImages(images, filename);
   }
 
   /**
@@ -104,18 +114,27 @@ export class Poster {
   public draw(): void {
     if (!this.entity) return;
 
-    const { painter, entity, contentMode, frame } = this;
+    const { painter, renderer, resource, entity, contentMode, frame } = this;
 
-    painter.resize(contentMode, entity!.size);
-    painter.draw(entity!, frame, 0, entity!.sprites.length);
+    renderer!.resize(contentMode, entity!.size, painter.X!);
+    renderer!.render(
+      entity!,
+      resource!.materials,
+      resource!.dynamicMaterials,
+      frame,
+      0,
+      entity!.sprites.length
+    );
   }
 
   /**
    * 获取海报元数据
-   * @returns 
+   * @returns
    */
   public toDataURL(): string {
-    return getDataURLFromImageData(this.painter.getImageData());
+    const { XC, W, H } = this.painter
+
+    return getDataURLFromImageData(XC!.getImageData(0, 0, W, H));
   }
 
   /**
@@ -123,6 +142,8 @@ export class Poster {
    */
   public destroy(): void {
     this.painter.destroy();
+    this.renderer?.destroy();
+    this.resource?.cleanup();
     this.entity = void 0;
   }
 }

@@ -1,8 +1,7 @@
 import { platform } from "../platform";
 import { Painter } from "../painter";
-import { Animator } from "./animator";
 import { Config } from "./config";
-// import benchmark from "../benchmark";
+import { Animator, Renderer2D, ResourceManager } from "../extensions";
 
 /**
  * SVGA 播放器
@@ -20,14 +19,21 @@ export class Player {
   private readonly config = new Config();
 
   /**
-   * 动画实例
+   * 资源管理器
    */
-  private animator: Animator = new Animator();
+  public resource: ResourceManager | null = null;
 
   /**
    * 刷头实例
    */
   public readonly painter = new Painter();
+
+  /**
+   * 动画实例
+   */
+  private readonly animator: Animator = new Animator();
+
+  private renderer: Renderer2D | null = null;
 
   // private isBeIntersection = true;
   // private intersectionObserver: IntersectionObserver | null = null
@@ -55,6 +61,8 @@ export class Player {
     // 监听容器是否处于浏览器视窗内
     // this.setIntersectionObserver()
     await this.painter.register(config.container, config.secondary, component);
+    this.renderer = new Renderer2D(this.painter.YC!);
+    this.resource = new ResourceManager(this.painter);
     this.animator.onAnimate = platform.rAF.bind(
       null,
       this.painter.X as OctopusPlatform.PlatformCanvas
@@ -94,18 +102,17 @@ export class Player {
    * @param videoEntity SVGA 数据源
    * @returns Promise<void>
    */
-  public mount(videoEntity: PlatformVideo.Video): Promise<void[]> {
+  public async mount(videoEntity: PlatformVideo.Video): Promise<void> {
     if (!videoEntity) throw new Error("videoEntity undefined");
 
     const { images, filename } = videoEntity;
 
     this.animator!.stop();
     this.painter.clearSecondary();
-    this.painter.clearMaterials();
-    this.painter.updateDynamicImages(videoEntity.dynamicElements);
+    this.resource!.release();
     this.entity = videoEntity;
 
-    return this.painter.loadImages(images, filename);
+    await this.resource!.loadImages(images, filename);
   }
 
   /**
@@ -153,7 +160,7 @@ export class Player {
    * 重新播放
    */
   public resume(): void {
-    this.animator!.resume();
+    this.animator.resume();
     this.onResume?.();
   }
 
@@ -161,7 +168,7 @@ export class Player {
    * 暂停播放
    */
   public pause(): void {
-    this.animator!.pause();
+    this.animator.pause();
     this.onPause?.();
   }
 
@@ -169,7 +176,7 @@ export class Player {
    * 停止播放
    */
   public stop(): void {
-    this.animator!.stop();
+    this.animator.stop();
     this.painter.clearContainer();
     this.painter.clearSecondary();
     this.onStop?.();
@@ -179,8 +186,10 @@ export class Player {
    * 销毁实例
    */
   public destroy(): void {
-    this.animator!.stop();
+    this.animator.stop();
     this.painter.destroy();
+    this.renderer?.destroy();
+    this.resource?.cleanup();
     this.entity = void 0;
   }
 
@@ -219,8 +228,8 @@ export class Player {
    * 开始绘制动画
    */
   private startAnimation(): void {
-    const { entity, config, animator, painter } = this;
-    const { now } = platform;
+    const { entity, config, animator, painter, renderer, resource } = this;
+    const { W, H } = painter;
     const { fillMode, playMode, contentMode } = config;
     const {
       currFrame,
@@ -246,14 +255,12 @@ export class Player {
     let exactFrame: number;
     // 当前已完成的百分比
     let percent: number;
-    // 当前需要绘制的百分比
-    // let partialDrawPercent: number;
     // 是否还有剩余时间
     let hasRemained: boolean;
 
     // 更新动画基础信息
-    animator!.setConfig(duration, loopStart, loop, fillValue);
-    painter.resize(contentMode, entity!.size);
+    animator.setConfig(duration, loopStart, loop, fillValue);
+    renderer!.resize(contentMode, entity!.size, { width: W, height: H });
 
     // 分段渲染函数
     const MAX_DRAW_TIME_PER_FRAME = 8;
@@ -267,17 +274,24 @@ export class Player {
     let elapsed: number;
     // 使用`指数退避算法`平衡渲染速度和流畅度
     const patchDraw = (before: () => void) => {
-      startTime = now();
+      startTime = platform.now();
       before();
 
       while (tail < spriteCount) {
         // 根据当前块大小计算nextTail
         chunk = Math.min(dynamicChunkSize, spriteCount - tail);
         nextTail = (tail + chunk) | 0;
-        painter.draw(entity!, currentFrame, tail, nextTail);
+        renderer!.render(
+          entity!,
+          resource!.materials,
+          resource!.dynamicMaterials,
+          currentFrame,
+          tail,
+          nextTail
+        );
         tail = nextTail;
         // 动态调整块大小
-        elapsed = now() - startTime;
+        elapsed = platform.now() - startTime;
 
         if (elapsed < MAX_ACCELERATE_DRAW_TIME_PER_FRAME) {
           dynamicChunkSize = Math.min(
@@ -294,32 +308,8 @@ export class Player {
       }
     };
 
-    // const TAIL_THRESHOLD_FACTOR = 1.05;
-    // const TAIL_OFFSET = 2;
-    // let partialDrawPercent = 0;
-    // // 普通模式
-    // const patchDraw = (before: () => void) => {
-    //   before();
-    //   if (tail < spriteCount) {
-    //     // 1.15 和 2 均为阔值，保证渲染尽快完成
-    //     nextTail = hasRemained
-    //       ? Math.min(
-    //           (spriteCount * partialDrawPercent * TAIL_THRESHOLD_FACTOR +
-    //             TAIL_OFFSET) | 0,
-    //           spriteCount
-    //         )
-    //       : spriteCount;
-
-    //     if (nextTail > tail) {
-    //       painter.draw(entity!, currentFrame, tail, nextTail);
-    //       tail = nextTail;
-    //     }
-    //   }
-    // };
-
     // 动画绘制过程
-    animator!.onUpdate = (timePercent: number) => {
-      // benchmark.time("partial updated", () => {
+    animator.onUpdate = (timePercent: number) => {
       patchDraw(() => {
         percent = isReverseMode ? 1 - timePercent : timePercent;
         exactFrame = percent * totalFrame;
@@ -327,17 +317,14 @@ export class Player {
         if (isReverseMode) {
           nextFrame =
             (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
-          // partialDrawPercent = Math.abs(1 - exactFrame + currentFrame);
           // FIXME: 倒序会有一帧的偏差，需要校准当前帧
           percent = currentFrame / totalFrame;
         } else {
           nextFrame = timePercent === 1 ? startFrame : Math.floor(exactFrame);
-          // partialDrawPercent = Math.abs(exactFrame - currentFrame);
         }
 
         hasRemained = currentFrame === nextFrame;
       });
-      // });
 
       if (hasRemained) return;
 
@@ -349,10 +336,10 @@ export class Player {
       tail = 0;
       this.onProcess?.(~~(percent * 100) / 100, latestFrame);
     };
-    animator!.onStart = () => {
+    animator.onStart = () => {
       entity!.locked = true;
     };
-    animator!.onEnd = () => {
+    animator.onEnd = () => {
       entity!.locked = false;
       // 如果不保留最后一帧渲染，则清空画布
       if (fillMode === PLAYER_FILL_MODE.NONE) {
@@ -361,6 +348,6 @@ export class Player {
 
       this.onEnd?.();
     };
-    animator!.start();
+    animator.start();
   }
 }

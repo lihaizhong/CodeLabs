@@ -16,7 +16,7 @@ export default definePlugin<"image">({
   name: "image",
   dependencies: ["local", "path", "decode"],
   install() {
-    const { local, path, decode, noop } = this as EnhancedPlatform;
+    const { local, decode } = this as EnhancedPlatform;
     const { env } = this.globals;
     let genImageSource: (
       data: Uint8Array | string,
@@ -50,43 +50,23 @@ export default definePlugin<"image">({
     if (env === "h5") {
       return {
         load: (
-          _canvas:
-            | OctopusPlatform.PlatformCanvas
-            | OctopusPlatform.PlatformOffscreenCanvas,
+          createImage: () => HTMLImageElement,
           data: ImageBitmap | Uint8Array | string,
-          filepath: string,
-          caches: OctopusPlatform.ImageCaches
+          filepath: string
         ) => {
           // 由于ImageBitmap在图片渲染上有优势，故优先使用
           if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
-            return createImageBitmap(new Blob([decode.toBuffer(data)])).then(
-              (img) => {
-                caches.push(img);
-
-                return img;
-              }
-            );
+            return createImageBitmap(new Blob([decode.toBuffer(data)]));
           }
 
           if (data instanceof ImageBitmap) {
-            caches.push(data);
-
             return Promise.resolve(data);
           }
 
           return loadImage(
-            new Image(),
+            createImage(),
             genImageSource(data as Uint8Array | string, filepath) as string
           );
-        },
-        release: (caches: OctopusPlatform.ImageCaches) => {
-          const imgs = caches.getCaches() as ImageBitmap[];
-
-          for (const img of imgs) {
-            img.close();
-          }
-
-          caches.cleanup();
         },
       } satisfies OctopusPlatform.PlatformPlugin["image"];
     }
@@ -112,39 +92,13 @@ export default definePlugin<"image">({
 
     return {
       load: async (
-        canvas:
-          | OctopusPlatform.PlatformCanvas
-          | OctopusPlatform.PlatformOffscreenCanvas,
+        createImage: () => HTMLImageElement,
         data: ImageBitmap | Uint8Array | string,
-        filepath: string,
-        caches: OctopusPlatform.ImageCaches
+        filepath: string
       ) => {
         const src = await genImageSource(data as Uint8Array | string, filepath);
 
-        const img: OctopusPlatform.PlatformImage =
-          caches.getImage() ||
-          (canvas as OctopusPlatform.MiniProgramCanvas).createImage();
-
-        caches.push(img);
-
-        return loadImage(img, src);
-      },
-      release: (caches: OctopusPlatform.ImageCaches) => {
-        const imgs = caches.getCaches() as OctopusPlatform.PlatformImage[];
-
-        // FIXME: 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
-        for (const img of imgs) {
-          if (img.src.includes(path.USER_DATA_PATH)) {
-            local!.remove(img.src).catch(noop);
-          }
-
-          img.onload = null;
-          img.onerror = null;
-          img.src = "";
-        }
-
-        // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
-        env === "alipay" ? caches.cleanup() : caches.tidy();
+        return loadImage(createImage(), src);
       },
     } satisfies OctopusPlatform.PlatformPlugin["image"];
   },
