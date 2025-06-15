@@ -114,7 +114,6 @@ export class ResourceManager {
   }
 
   cleanup(): void {
-    this.release();
     this.caches.length = 0;
     this.point = 0;
   }

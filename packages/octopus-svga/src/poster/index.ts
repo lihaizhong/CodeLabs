@@ -143,6 +143,7 @@ export class Poster {
   public destroy(): void {
     this.painter.destroy();
     this.renderer?.destroy();
+    this.resource?.release();
     this.resource?.cleanup();
     this.entity = void 0;
   }
