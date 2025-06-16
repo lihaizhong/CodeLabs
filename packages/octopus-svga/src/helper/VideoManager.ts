@@ -49,10 +49,6 @@ export class VideoManager {
    * 视频池的所有数据
    */
   private buckets: Bucket[] = [];
-  /**
-   * SVGA解析器
-   */
-  private readonly parser = new Parser();
 
   /**
    * 获取视频池大小
@@ -152,7 +148,7 @@ export class VideoManager {
    * @returns
    */
   private async getBucket(point: number): Promise<Bucket> {
-    const { length, buckets, parser, loadMode } = this;
+    const { length, buckets, loadMode } = this;
 
     if (point < 0 || point >= length) {
       return buckets[point];
@@ -170,7 +166,7 @@ export class VideoManager {
             bucket.entity = null;
           } else if (action === "add") {
             if (bucket.entity === null) {
-              bucket.promise = parser.load(bucket.local || bucket.origin);
+              bucket.promise = Parser.load(bucket.local || bucket.origin);
               if (loadMode === "whole" || point === i) {
                 waitings.push(bucket.promise);
               }
@@ -196,7 +192,6 @@ export class VideoManager {
     inRemainRange: boolean = true,
     needDownloadAndParse: boolean = true
   ): Promise<Bucket> {
-    const { parser } = this;
     const { globals, path, local } = platform;
     const { env } = globals;
     const bucket: Bucket = {
@@ -211,9 +206,9 @@ export class VideoManager {
       bucket.local = url;
       if (inRemainRange) {
         if (needDownloadAndParse) {
-          bucket.entity = await parser.load(url);
+          bucket.entity = await Parser.load(url);
         } else {
-          bucket.promise = parser.load(url);
+          bucket.promise = Parser.load(url);
         }
       }
 
@@ -221,7 +216,7 @@ export class VideoManager {
     }
 
     const filePath = path.resolve(path.filename(url), "full");
-    const downloadAwait = parser.download(bucket.origin);
+    const downloadAwait = Parser.download(bucket.origin);
     const parseVideoAwait = async (buff: ArrayBuffer | null) => {
       if (buff) {
         try {
@@ -312,7 +307,7 @@ export class VideoManager {
     }
 
     if (bucket.entity === null) {
-      bucket.entity = await this.parser.load(bucket.local || bucket.origin);
+      bucket.entity = await Parser.load(bucket.local || bucket.origin);
 
       return bucket;
     }

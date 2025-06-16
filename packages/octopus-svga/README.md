@@ -48,8 +48,7 @@ await player.setConfig({
 });
 
 // 加载并解析svga文件
-const parser = new Parser();
-const videoItem = await parser.load("xx.svga");
+const videoItem = await Parser.load("xx.svga");
 
 await player.mount(videoItem);
 
@@ -155,9 +154,9 @@ player.stepToPercentage(0.5, true);
 可通过修改解析后的数据元，从而实现修改元素、插入动态元素功能
 
 ```js
-import { platform } from "fuck-svga";
+import { platform } from "octopus-svga";
 
-const videoItem = await parser.load("xx.svga");
+const videoItem = await Parser.load("xx.svga");
 const { canvas, context } = platform.getCanvas("#container", this);
 
 // 替换元素

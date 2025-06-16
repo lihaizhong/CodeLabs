@@ -8,7 +8,6 @@ import {
 } from "../../utils/constants";
 
 const files = [svgaSources, svgaLargeSources, yySources][2];
-const parser = new Parser();
 const player = new Player();
 let videoItem;
 let lastStatus = "next";
@@ -89,7 +88,7 @@ Page({
   async initialize() {
     try {
       showPopup("准备下载资源");
-      videoItem = await parser.load(this.data.url);
+      videoItem = await Parser.load(this.data.url);
       showPopup("下载资源成功");
 
       console.log(this.data.url, videoItem);

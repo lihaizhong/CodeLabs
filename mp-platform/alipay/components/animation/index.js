@@ -2,7 +2,6 @@ import { Parser, Player, VideoEditor, benchmark } from "../../utils/fuck-svga";
 import ReadyGo from "../../utils/ReadyGo";
 
 let player;
-let parser;
 const readyGo = new ReadyGo();
 const cache = new Map();
 
@@ -32,7 +31,6 @@ Component({
 
   lifetimes: {
     async ready() {
-      parser = new Parser();
       player = new Player();
       await player.setConfig(
         {
@@ -56,7 +54,6 @@ Component({
       readyGo.reset();
       player?.destroy();
       player = null;
-      parser = null;
     },
   },
 
@@ -77,9 +74,9 @@ Component({
           this.setData({ message: "准备下载资源" });
           await benchmark.time('load', async () => {
             if (typeof source === "string") {
-              videoItem = await parser.load(source);            
+              videoItem = await Parser.load(source);            
             } else {
-              videoItem = await parser.load(source.url);
+              videoItem = await Parser.load(source.url);
   
               // 替换元素
               if (source.replace) {

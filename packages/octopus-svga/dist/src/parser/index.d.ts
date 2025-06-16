@@ -14,11 +14,11 @@ export declare class Parser {
      * @param url 文件资源地址
      * @returns
      */
-    download(url: string): Promise<ArrayBuffer | null>;
+    static download(url: string): Promise<ArrayBuffer | null>;
     /**
      * 通过 url 下载并解析 SVGA 文件
      * @param url SVGA 文件的下载链接
      * @returns Promise<SVGA 数据源
      */
-    load(url: string): Promise<PlatformVideo.Video>;
+    static load(url: string): Promise<PlatformVideo.Video>;
 }

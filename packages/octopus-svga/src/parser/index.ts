@@ -35,7 +35,7 @@ export class Parser {
    * @param url 文件资源地址
    * @returns
    */
-  public download(url: string): Promise<ArrayBuffer | null> {
+  static download(url: string): Promise<ArrayBuffer | null> {
     const { remote, local, globals } = platform;
 
     // 读取远程文件
@@ -56,7 +56,7 @@ export class Parser {
    * @param url SVGA 文件的下载链接
    * @returns Promise<SVGA 数据源
    */
-  public async load(url: string): Promise<PlatformVideo.Video> {
-    return Parser.parseVideo((await this.download(url))!, url);
+  static async load(url: string): Promise<PlatformVideo.Video> {
+    return Parser.parseVideo((await Parser.download(url))!, url);
   }
 }

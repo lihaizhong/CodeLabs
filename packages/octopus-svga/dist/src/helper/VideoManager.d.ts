@@ -38,10 +38,6 @@ export declare class VideoManager {
      */
     private buckets;
     /**
-     * SVGA解析器
-     */
-    private readonly parser;
-    /**
      * 获取视频池大小
      */
     get length(): number;
