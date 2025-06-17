@@ -26,7 +26,6 @@ export class VideoEditor {
       await this.resource.loadImages(
         { [key]: value },
         this.entity.filename,
-        "dynamic",
         "dynamic"
       );
     } else {

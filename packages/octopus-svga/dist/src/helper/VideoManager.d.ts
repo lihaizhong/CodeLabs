@@ -42,6 +42,11 @@ export declare class VideoManager {
      */
     get length(): number;
     /**
+     * 获取当前指针位置
+     * @returns
+     */
+    get current(): number;
+    /**
      * 更新留存指针位置
      */
     private updateRemainPoints;
@@ -88,11 +93,6 @@ export declare class VideoManager {
      * @returns
      */
     go(pos: number): Promise<Bucket>;
-    /**
-     * 获取当前指针位置
-     * @returns
-     */
-    getPoint(): number;
     /**
      * 清理所有的bucket
      * @returns

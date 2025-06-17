@@ -43,11 +43,13 @@ declare namespace OctopusPlatform {
     };
 
     image: {
+      create: (_: PlatformCanvas | PlatformOffscreenCanvas) => PlatformImage;
       load: (
         createImage: () => HTMLImageElement,
         data: ImageBitmap | Uint8Array | string,
         filepath: string,
       ) => Promise<ImageBitmap | PlatformImage>;
+      release: (img: PlatformImage) => void;
     };
   }
 }

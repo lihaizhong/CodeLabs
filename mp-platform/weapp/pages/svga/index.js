@@ -5,7 +5,7 @@ import { svgaSources, svgaReplaceSources, svgaLargeSources, svgaHugeSources, get
 //   'http://10.1.133.197:5151/svga/序列2.svga',
 //   'http://10.1.133.197:5151/svga/序列3.svga'
 // ]
-const sources = svgaHugeSources
+const sources = svgaReplaceSources
 
 Page({
   data: {

@@ -58,6 +58,14 @@ export class VideoManager {
   }
 
   /**
+   * 获取当前指针位置
+   * @returns
+   */
+  get current(): number {
+    return this.point;
+  }
+
+  /**
    * 更新留存指针位置
    */
   private updateRemainPoints() {
@@ -166,7 +174,10 @@ export class VideoManager {
             bucket.entity = null;
           } else if (action === "add") {
             if (bucket.entity === null) {
-              bucket.promise = Parser.load(bucket.local || bucket.origin);
+              if (bucket.promise === null) {
+                bucket.promise = Parser.load(bucket.local || bucket.origin);
+              }
+
               if (loadMode === "whole" || point === i) {
                 waitings.push(bucket.promise);
               }
@@ -248,7 +259,7 @@ export class VideoManager {
    * 视频加载模式
    * @param loadMode
    */
-  setLoadMode(loadMode: LoadMode): void {
+  public setLoadMode(loadMode: LoadMode): void {
     this.loadMode = loadMode;
   }
 
@@ -258,7 +269,7 @@ export class VideoManager {
    * @param point 当前指针位置
    * @param maxRemain 最大留存数量
    */
-  async prepare(
+  public async prepare(
     urls: string[],
     point?: number,
     maxRemain?: number
@@ -296,7 +307,7 @@ export class VideoManager {
    * 获取当前帧的bucket
    * @returns
    */
-  async get(): Promise<Bucket> {
+  public async get(): Promise<Bucket> {
     const bucket = this.buckets[this.point];
 
     if (bucket.promise) {
@@ -320,16 +331,8 @@ export class VideoManager {
    * @param pos
    * @returns
    */
-  go(pos: number): Promise<Bucket> {
+  public go(pos: number): Promise<Bucket> {
     return this.getBucket(pos);
-  }
-
-  /**
-   * 获取当前指针位置
-   * @returns
-   */
-  getPoint() {
-    return this.point;
   }
 
   /**

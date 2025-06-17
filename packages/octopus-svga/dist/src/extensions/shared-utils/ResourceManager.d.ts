@@ -23,7 +23,8 @@ export declare class ResourceManager {
      * @param filename 文件名称
      * @returns
      */
-    loadImages(images: RawImages, filename: string, prefix?: string, type?: "normal" | "dynamic"): Promise<void>;
+    loadImages(images: RawImages, filename: string, type?: "normal" | "dynamic"): Promise<void>;
     release(): void;
+    private tidyUp;
     cleanup(): void;
 }

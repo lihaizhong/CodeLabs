@@ -47,8 +47,19 @@ export default definePlugin<"image">({
       });
     }
 
+    function releaseImage(img: OctopusPlatform.PlatformImage) {
+      img.onload = null;
+      img.onerror = null;
+      img.src = "";
+    }
+
     if (env === "h5") {
       return {
+        create: (
+          _:
+            | OctopusPlatform.PlatformCanvas
+            | OctopusPlatform.PlatformOffscreenCanvas
+        ) => new Image(),
         load: (
           createImage: () => HTMLImageElement,
           data: ImageBitmap | Uint8Array | string,
@@ -68,6 +79,7 @@ export default definePlugin<"image">({
             genImageSource(data as Uint8Array | string, filepath) as string
           );
         },
+        release: releaseImage,
       } satisfies OctopusPlatform.PlatformPlugin["image"];
     }
 
@@ -91,6 +103,16 @@ export default definePlugin<"image">({
     }
 
     return {
+      create: (
+        canvas:
+          | OctopusPlatform.PlatformCanvas
+          | OctopusPlatform.PlatformOffscreenCanvas
+      ) =>
+        (
+          canvas as
+            | OctopusPlatform.MiniProgramCanvas
+            | OctopusPlatform.MiniProgramOffscreenCanvas
+        ).createImage(),
       load: async (
         createImage: () => HTMLImageElement,
         data: ImageBitmap | Uint8Array | string,
@@ -100,6 +122,7 @@ export default definePlugin<"image">({
 
         return loadImage(createImage(), src);
       },
+      release: releaseImage,
     } satisfies OctopusPlatform.PlatformPlugin["image"];
   },
 });

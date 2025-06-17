@@ -32,19 +32,11 @@ export class ResourceManager {
 
     if (this.point > 0) {
       this.point--;
-
       img = this.caches.shift() as OctopusPlatform.PlatformImage;
     }
 
     if (!img) {
-      img =
-        platform.globals.env === "h5"
-          ? new Image()
-          : (
-              this.painter.X as
-                | OctopusPlatform.MiniProgramCanvas
-                | OctopusPlatform.MiniProgramOffscreenCanvas
-            ).createImage();
+      img = platform.image.create(this.painter.X!);
     }
 
     this.caches.push(img);
@@ -58,32 +50,34 @@ export class ResourceManager {
    * @param filename 文件名称
    * @returns
    */
-  async loadImages(
+  public async loadImages(
     images: RawImages,
     filename: string,
-    prefix: string = "",
     type: "normal" | "dynamic" = "normal"
   ): Promise<void> {
-    const { env } = platform.globals;
-    const imageAwaits: Promise<void>[] =
-      [];
+    const imageAwaits: Promise<void>[] = [];
 
     Object.entries(images).forEach(([name, image]) => {
-      const p = platform.image.load(
-        () => this.createImage(),
-        image as OctopusPlatform.RawImage,
-        platform.path.resolve(filename, prefix ? `${prefix}_${name}` : name)
-      ).then((img) => {
-        if (ResourceManager.isBitmap(img)) {
-          this.caches.push(img);
-        }
+      const p = platform.image
+        .load(
+          () => this.createImage(),
+          image as OctopusPlatform.RawImage,
+          platform.path.resolve(
+            filename,
+            type === "dynamic" ? `dynamic_${name}` : name
+          )
+        )
+        .then((img) => {
+          if (ResourceManager.isBitmap(img)) {
+            this.caches.push(img);
+          }
 
-        if (type === "dynamic") {
-          this.dynamicMaterials.set(name, img);
-        } else {
-          this.materials.set(name, img);
-        }
-      });
+          if (type === "dynamic") {
+            this.dynamicMaterials.set(name, img);
+          } else {
+            this.materials.set(name, img);
+          }
+        });
 
       imageAwaits.push(p);
     });
@@ -91,38 +85,41 @@ export class ResourceManager {
     await Promise.all(imageAwaits);
   }
 
-  release(): void {
+  public release(): void {
     const { env } = platform.globals;
 
     // FIXME: 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
     for (const img of this.caches) {
       if (ResourceManager.isBitmap(img)) {
         (img as ImageBitmap).close();
-      } else if (
-        typeof img === "object" &&
-        img !== null &&
-        (img as OctopusPlatform.PlatformImage).src !== ""
-      ) {
-        if (env !== "h5" && (img as OctopusPlatform.PlatformImage).src.includes(platform.path.USER_DATA_PATH)) {
-          platform.local?.remove((img as OctopusPlatform.PlatformImage).src)
+      } else if ((img as OctopusPlatform.PlatformImage).src !== "") {
+        // 【微信】将存在本地的文件删除，防止用户空间被占满
+        if (
+          env === "weapp" &&
+          (img as OctopusPlatform.PlatformImage).src.includes(
+            platform.path.USER_DATA_PATH
+          )
+        ) {
+          platform.local!.remove((img as OctopusPlatform.PlatformImage).src);
         }
 
-        (img as OctopusPlatform.PlatformImage).src = "";
-        (img as OctopusPlatform.PlatformImage).onload = null;
-        (img as OctopusPlatform.PlatformImage).onerror = null;
+        platform.image.release(img as OctopusPlatform.PlatformImage);
       }
     }
 
+    this.materials.clear();
+    this.dynamicMaterials.clear();
     // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
-    if (env === "alipay" || env === "h5") {
-      this.cleanup();
-    } else {
-      this.caches = Array.from(new Set(this.caches));
-      this.point = this.caches.length;
-    }
+    env === "alipay" || env === "h5" ? this.cleanup() : this.tidyUp();
   }
 
-  cleanup(): void {
+  private tidyUp() {
+    // 通过 Set 的去重特性，保持 caches 元素的唯一性
+    this.caches = Array.from(new Set(this.caches));
+    this.point = this.caches.length;
+  }
+
+  public cleanup(): void {
     this.caches.length = 0;
     this.point = 0;
   }
