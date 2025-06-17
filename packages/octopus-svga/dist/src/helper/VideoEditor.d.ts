@@ -24,7 +24,10 @@ export declare class VideoEditor {
      * @param options
      * @returns
      */
-    setCanvas(key: string, context: PlatformRenderingContext2D, options?: VideoEditorOptions): Promise<void>;
+    setCanvas(key: string, context: PlatformRenderingContext2D, options?: VideoEditorOptions & {
+        width?: number;
+        height?: number;
+    }): Promise<void>;
     /**
      * 创建二进制图片
      * @param key

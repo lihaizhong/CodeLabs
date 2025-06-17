@@ -70,11 +70,13 @@ export class VideoEditor {
   async setCanvas(
     key: string,
     context: PlatformRenderingContext2D,
-    options?: VideoEditorOptions
+    options?: VideoEditorOptions & { width?: number, height?: number }
   ) {
     if (this.entity.locked) return;
 
-    const { width, height } = context.canvas;
+    const { canvas } = context;
+    const width = options?.width ?? canvas.width;
+    const height = options?.height ?? canvas.height;
     const imageData = context.getImageData(0, 0, width, height);
     const buff = getBufferFromImageData(imageData);
 
