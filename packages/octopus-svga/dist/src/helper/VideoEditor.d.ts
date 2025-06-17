@@ -11,10 +11,10 @@ export declare class VideoEditor {
     constructor(painter: Painter, resource: ResourceManager, entity: PlatformVideo.Video);
     private set;
     /**
-     * 创建自定义编辑器
+     * 获取自定义编辑器
      * @returns
      */
-    createContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
+    getContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
     /**
      * 创建画布图片
      * @param key

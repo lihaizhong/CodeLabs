@@ -33,10 +33,10 @@ export class VideoEditor {
   }
 
   /**
-   * 创建自定义编辑器
+   * 获取自定义编辑器
    * @returns
    */
-  createContext() {
+  getContext() {
     return this.painter.YC;
   }
 
