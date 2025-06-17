@@ -1,20 +1,19 @@
 import { platform } from "../platform";
 import { generateImageBufferFromCode, IQrCodeImgOptions } from "./qrcode";
 import { getBufferFromImageData } from "./png";
-import { ResourceManager } from "src/extensions";
+import type { ResourceManager } from "src/extensions";
+import type { Painter } from "src/painter";
 
 interface VideoEditorOptions {
   // 模式: R 替换, A 追加
   mode?: "R" | "A";
-  container?: string;
-  component?: any;
 }
 
 export class VideoEditor {
   constructor(
+    private readonly painter: Painter,
     private readonly resource: ResourceManager,
-    private readonly entity: PlatformVideo.Video,
-    private readonly options: Omit<VideoEditorOptions, "mode"> = {}
+    private readonly entity: PlatformVideo.Video
   ) {}
 
   private async set(
@@ -35,33 +34,15 @@ export class VideoEditor {
 
   /**
    * 创建自定义编辑器
-   * @param width
-   * @param height
    * @returns
    */
-  async createContext(width: number, height: number) {
-    if (platform.globals.env !== "h5" || "OffscreenCanvas" in globalThis) {
-      return platform.getOfsCanvas({ width, height });
-    }
-
-    const { container, component } = this.options;
-    if (container) {
-      const result = await platform.getCanvas(container, component);
-      if (result.context) {
-        result.canvas.width = width;
-        result.canvas.height = height;
-      }
-
-      return result;
-    }
-
-    throw new Error(
-      "Don't support OffscreenCanvas, and please provide a container"
-    );
+  createContext() {
+    return this.painter.YC;
   }
 
   /**
    * 创建画布图片
+   * @param key
    * @param context
    * @param options
    * @returns

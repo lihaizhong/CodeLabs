@@ -1,25 +1,23 @@
 import { IQrCodeImgOptions } from "./qrcode";
-import { ResourceManager } from "src/extensions";
+import type { ResourceManager } from "src/extensions";
+import type { Painter } from "src/painter";
 interface VideoEditorOptions {
     mode?: "R" | "A";
-    container?: string;
-    component?: any;
 }
 export declare class VideoEditor {
+    private readonly painter;
     private readonly resource;
     private readonly entity;
-    private readonly options;
-    constructor(resource: ResourceManager, entity: PlatformVideo.Video, options?: Omit<VideoEditorOptions, "mode">);
+    constructor(painter: Painter, resource: ResourceManager, entity: PlatformVideo.Video);
     private set;
     /**
      * 创建自定义编辑器
-     * @param width
-     * @param height
      * @returns
      */
-    createContext(width: number, height: number): Promise<OctopusPlatform.GetOffscreenCanvasResult | OctopusPlatform.GetCanvasResult>;
+    createContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
     /**
      * 创建画布图片
+     * @param key
      * @param context
      * @param options
      * @returns
