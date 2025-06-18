@@ -40,9 +40,11 @@ export class Config {
 
     if (
       config.fillMode &&
-      [PLAYER_FILL_MODE.FORWARDS, PLAYER_FILL_MODE.BACKWARDS, PLAYER_FILL_MODE.NONE].includes(
-        config.fillMode
-      )
+      [
+        PLAYER_FILL_MODE.FORWARDS,
+        PLAYER_FILL_MODE.BACKWARDS,
+        PLAYER_FILL_MODE.NONE,
+      ].includes(config.fillMode)
     ) {
       this.fillMode = config.fillMode;
     }
@@ -92,6 +94,8 @@ export class Config {
     const spriteCount = sprites.length;
     const start = startFrame > 0 ? startFrame : 0;
     const end = endFrame > 0 && endFrame < frames ? endFrame : frames;
+    // 每帧持续的时间
+    const frameDuration = 1000 / fps;
 
     if (start > end) {
       throw new Error("StartFrame should greater than EndFrame");
@@ -104,26 +108,29 @@ export class Config {
       frames -= start;
     }
 
+    const duration = Math.floor(frames * frameDuration * 10 ** 6) / 10 ** 6;
     let currFrame = 0;
     let extFrame = 0;
+    let loopStart: number;
 
     // 顺序播放/倒叙播放
     if (playMode === PLAYER_PLAY_MODE.FORWARDS) {
       // 重置为开始帧
-      currFrame = Math.max(loopStartFrame, startFrame)
+      currFrame = Math.max(loopStartFrame, startFrame);
       if (fillMode === PLAYER_FILL_MODE.FORWARDS) {
         extFrame = 1;
       }
+      loopStart =
+        loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0;
     } else {
       // 重置为开始帧
-      currFrame = Math.min(loopStartFrame, end - 1)
+      currFrame = Math.min(loopStartFrame, end - 1);
       if (fillMode === PLAYER_FILL_MODE.BACKWARDS) {
         extFrame = 1;
       }
+      loopStart =
+        loopStartFrame < end ? (end - loopStartFrame) * frameDuration : 0;
     }
-
-    // 每帧持续的时间
-    const frameDuration = 1000 / fps;
 
     return {
       currFrame,
@@ -133,10 +140,9 @@ export class Config {
       spriteCount,
       aniConfig: {
         // 单个周期的运行时长
-        duration: Math.floor(frames * frameDuration * 10 ** 6) / 10 ** 6,
+        duration,
         // 第一个周期开始时间偏移量
-        loopStart:
-          loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0,
+        loopStart,
         // 循环次数
         loop: loop === 0 ? Infinity : loop,
         // 最后一帧不在周期内，需要单独计算

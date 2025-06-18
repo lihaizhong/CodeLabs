@@ -94,7 +94,8 @@ Page({
       console.log(this.data.url, videoItem);
       await player.mount(videoItem);
       showPopup("资源装载成功");
-      player.start();
+      // player.start();
+      player.stepToPercentage(1, true);
       showPopup("");
     } catch (ex) {
       console.error("svga初始化失败！", ex);
@@ -106,8 +107,8 @@ Page({
     await player.setConfig({
       container: "#palette",
       loop: 1,
-      // playMode: "fallbacks",
-      // fillMode: "forwards",
+      playMode: "fallbacks",
+      fillMode: "forwards",
       // contentMode: "aspect-fill",
       // contentMode: "fill",
       contentMode: "aspect-fit",

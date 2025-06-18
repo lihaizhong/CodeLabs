@@ -218,11 +218,14 @@ export class Player {
     if (!this.entity) return;
 
     const { frames } = this.entity;
+    let frame = percent < 0 ? 0 : Math.round(percent * frames);
 
-    this.stepToFrame(
-      Math.round((percent < 0 ? 0 : percent) * frames) % frames,
-      andPlay
-    );
+    if (frame >= frames) {
+      frame = frames - 1;
+    }
+
+    debugger
+    this.stepToFrame(frame, andPlay);
   }
 
   /**
