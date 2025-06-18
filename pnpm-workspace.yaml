@@ -2,6 +2,7 @@ packages:
   - experiments/**
   - mp-platform/**
   - packages/**
+
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - '@swc/core'
@@ -9,3 +10,4 @@ onlyBuiltDependencies:
   - lmdb
   - msgpackr-extract
   - re2
+  - unrs-resolver
