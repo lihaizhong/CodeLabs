@@ -10,6 +10,6 @@
   "author": "LiHZSky",
   "license": "ISC",
   "dependencies": {
-    "re2": "^1.21.4"
+    "re2": "^1.22.1"
   }
 }

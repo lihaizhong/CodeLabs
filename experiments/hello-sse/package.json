@@ -13,6 +13,6 @@
   "author": "LiHZSky",
   "license": "MIT",
   "dependencies": {
-    "find-my-way": "^9.1.0"
+    "find-my-way": "^9.3.0"
   }
 }

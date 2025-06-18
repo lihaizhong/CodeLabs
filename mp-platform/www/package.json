@@ -12,6 +12,6 @@
     "fflate": "^0.8.2",
     "jsqr": "^1.4.0",
     "octopus-svga": "workspace:^",
-    "weui": "^2.6.21"
+    "weui": "^2.6.22"
   }
 }
