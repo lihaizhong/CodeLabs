@@ -2614,7 +2614,7 @@ class VideoEntity {
             };
             if (mShape.type === 0 && shape) {
                 shapes.push({
-                    type: "shape" /* PlatformVideo.SHAPE_TYPE.SHAPE */,
+                    type: PlatformVideo.SHAPE_TYPE.SHAPE,
                     path: shape,
                     styles: SS,
                     transform: ST,
@@ -2622,7 +2622,7 @@ class VideoEntity {
             }
             else if (mShape.type === 1 && rect) {
                 shapes.push({
-                    type: "rect" /* PlatformVideo.SHAPE_TYPE.RECT */,
+                    type: PlatformVideo.SHAPE_TYPE.RECT,
                     path: rect,
                     styles: SS,
                     transform: ST,
@@ -2630,7 +2630,7 @@ class VideoEntity {
             }
             else if (mShape.type === 2 && ellipse) {
                 shapes.push({
-                    type: "ellipse" /* PlatformVideo.SHAPE_TYPE.ELLIPSE */,
+                    type: PlatformVideo.SHAPE_TYPE.ELLIPSE,
                     path: ellipse,
                     styles: SS,
                     transform: ST,
@@ -2892,15 +2892,15 @@ class Config {
     /**
      * 最后停留的目标模式，类似于 animation-fill-mode，默认值 forwards。
      */
-    fillMode = "backwards" /* PLAYER_FILL_MODE.BACKWARDS */;
+    fillMode = PLAYER_FILL_MODE.BACKWARDS;
     /**
      * 播放模式，默认值 forwards
      */
-    playMode = "forwards" /* PLAYER_PLAY_MODE.FORWARDS */;
+    playMode = PLAYER_PLAY_MODE.FORWARDS;
     /**
      * 填充模式，类似于 content-mode。
      */
-    contentMode = "fill" /* PLAYER_CONTENT_MODE.FILL */;
+    contentMode = PLAYER_CONTENT_MODE.FILL;
     /**
      * 开始播放的帧，默认值 0
      */
@@ -2928,14 +2928,14 @@ class Config {
         }
         if (config.fillMode &&
             [
-                "forwards" /* PLAYER_FILL_MODE.FORWARDS */,
-                "backwards" /* PLAYER_FILL_MODE.BACKWARDS */,
-                "none" /* PLAYER_FILL_MODE.NONE */,
+                PLAYER_FILL_MODE.FORWARDS,
+                PLAYER_FILL_MODE.BACKWARDS,
+                PLAYER_FILL_MODE.NONE,
             ].includes(config.fillMode)) {
             this.fillMode = config.fillMode;
         }
         if (config.playMode &&
-            ["forwards" /* PLAYER_PLAY_MODE.FORWARDS */, "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */].includes(config.playMode)) {
+            [PLAYER_PLAY_MODE.FORWARDS, PLAYER_PLAY_MODE.FALLBACKS].includes(config.playMode)) {
             this.playMode = config.playMode;
         }
         if (typeof config.startFrame === "number" && config.startFrame >= 0) {
@@ -2967,7 +2967,6 @@ class Config {
         const end = endFrame > 0 && endFrame < frames ? endFrame : frames;
         // 每帧持续的时间
         const frameDuration = 1000 / fps;
-        let loopStart;
         if (start > end) {
             throw new Error("StartFrame should greater than EndFrame");
         }
@@ -2981,11 +2980,12 @@ class Config {
         const duration = Math.floor(frames * frameDuration * 10 ** 6) / 10 ** 6;
         let currFrame = 0;
         let extFrame = 0;
+        let loopStart;
         // 顺序播放/倒叙播放
-        if (playMode === "forwards" /* PLAYER_PLAY_MODE.FORWARDS */) {
+        if (playMode === PLAYER_PLAY_MODE.FORWARDS) {
             // 重置为开始帧
             currFrame = Math.max(loopStartFrame, startFrame);
-            if (fillMode === "forwards" /* PLAYER_FILL_MODE.FORWARDS */) {
+            if (fillMode === PLAYER_FILL_MODE.FORWARDS) {
                 extFrame = 1;
             }
             loopStart =
@@ -2994,7 +2994,7 @@ class Config {
         else {
             // 重置为开始帧
             currFrame = Math.min(loopStartFrame, end - 1);
-            if (fillMode === "backwards" /* PLAYER_FILL_MODE.BACKWARDS */) {
+            if (fillMode === PLAYER_FILL_MODE.BACKWARDS) {
                 extFrame = 1;
             }
             loopStart =
@@ -3161,7 +3161,7 @@ class Renderer2D {
     static calculateScale(contentMode, videoSize, canvasSize) {
         const imageRatio = videoSize.width / videoSize.height;
         const viewRatio = canvasSize.width / canvasSize.height;
-        const isAspectFit = contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */;
+        const isAspectFit = contentMode === PLAYER_CONTENT_MODE.ASPECT_FIT;
         const shouldUseWidth = (imageRatio >= viewRatio && isAspectFit) ||
             (imageRatio <= viewRatio && !isAspectFit);
         const createTransform = (scale, translateX, translateY) => ({
@@ -3377,13 +3377,13 @@ class Renderer2D {
     drawShape(shape) {
         const { type, path, transform, styles } = shape;
         switch (type) {
-            case "shape" /* PlatformVideo.SHAPE_TYPE.SHAPE */:
+            case PlatformVideo.SHAPE_TYPE.SHAPE:
                 this.drawBezier(path.d, transform, styles);
                 break;
-            case "ellipse" /* PlatformVideo.SHAPE_TYPE.ELLIPSE */:
+            case PlatformVideo.SHAPE_TYPE.ELLIPSE:
                 this.drawEllipse(path.x ?? 0, path.y ?? 0, path.radiusX ?? 0, path.radiusY ?? 0, transform, styles);
                 break;
-            case "rect" /* PlatformVideo.SHAPE_TYPE.RECT */:
+            case PlatformVideo.SHAPE_TYPE.RECT:
                 this.drawRect(path.x ?? 0, path.y ?? 0, path.width ?? 0, path.height ?? 0, path.cornerRadius ?? 0, transform, styles);
                 break;
         }
@@ -3434,7 +3434,7 @@ class Renderer2D {
             translateX: 0,
             translateY: 0,
         };
-        if (contentMode === "fill" /* PLAYER_CONTENT_MODE.FILL */) {
+        if (contentMode === PLAYER_CONTENT_MODE.FILL) {
             scale.scaleX = canvasWidth / videoWidth;
             scale.scaleY = canvasHeight / videoHeight;
         }
@@ -4658,8 +4658,30 @@ class QRCode {
 
 class ResourceManager {
     painter;
+    /**
+     * 判断是否是 ImageBitmap
+     * @param img
+     * @returns
+     */
     static isBitmap(img) {
         return platform.globals.env === "h5" && img instanceof ImageBitmap;
+    }
+    /**
+     * 释放内存资源（图片）
+     * @param img
+     */
+    static releaseOne(img) {
+        if (ResourceManager.isBitmap(img)) {
+            img.close();
+        }
+        else if (img.src !== "") {
+            // 【微信】将存在本地的文件删除，防止用户空间被占满
+            if (platform.globals.env === "weapp" &&
+                img.src.includes(platform.path.USER_DATA_PATH)) {
+                platform.local.remove(img.src);
+            }
+            platform.image.release(img);
+        }
     }
     // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
     caches = [];
@@ -4678,6 +4700,10 @@ class ResourceManager {
     constructor(painter) {
         this.painter = painter;
     }
+    /**
+     * 创建图片标签
+     * @returns
+     */
     createImage() {
         let img = null;
         if (this.point > 0) {
@@ -4691,6 +4717,27 @@ class ResourceManager {
         return img;
     }
     /**
+     * 将 ImageBitmap 插入到 caches
+     * @param img
+     */
+    appendBitmap(img) {
+        if (ResourceManager.isBitmap(img)) {
+            this.caches.push(img);
+        }
+    }
+    /**
+     * 加载额外的图片资源
+     * @param source 资源内容/地址
+     * @param filename 文件名称
+     * @returns
+     */
+    loadExtImage(source, filename) {
+        return platform.image.load(() => this.createImage(), source, platform.path.resolve(filename, "ext")).then((img) => {
+            this.appendBitmap(img);
+            return img;
+        });
+    }
+    /**
      * 加载图片集
      * @param images 图片数据
      * @param filename 文件名称
@@ -4702,9 +4749,7 @@ class ResourceManager {
             const p = platform.image
                 .load(() => this.createImage(), image, platform.path.resolve(filename, type === "dynamic" ? `dynamic_${name}` : name))
                 .then((img) => {
-                if (ResourceManager.isBitmap(img)) {
-                    this.caches.push(img);
-                }
+                this.appendBitmap(img);
                 if (type === "dynamic") {
                     this.dynamicMaterials.set(name, img);
                 }
@@ -4716,32 +4761,30 @@ class ResourceManager {
         });
         await Promise.all(imageAwaits);
     }
+    /**
+     * 释放图片资源
+     */
     release() {
-        const { env } = platform.globals;
         // FIXME: 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
         for (const img of this.caches) {
-            if (ResourceManager.isBitmap(img)) {
-                img.close();
-            }
-            else if (img.src !== "") {
-                // 【微信】将存在本地的文件删除，防止用户空间被占满
-                if (env === "weapp" &&
-                    img.src.includes(platform.path.USER_DATA_PATH)) {
-                    platform.local.remove(img.src);
-                }
-                platform.image.release(img);
-            }
+            ResourceManager.releaseOne(img);
         }
         this.materials.clear();
         this.dynamicMaterials.clear();
         // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
-        env === "alipay" || env === "h5" ? this.cleanup() : this.tidyUp();
+        ["alipay", "h5"].includes(platform.globals.env) ? this.cleanup() : this.tidyUp();
     }
+    /**
+     * 整理图片资源，将重复的图片资源移除
+     */
     tidyUp() {
         // 通过 Set 的去重特性，保持 caches 元素的唯一性
         this.caches = Array.from(new Set(this.caches));
         this.point = this.caches.length;
     }
+    /**
+     * 清理图片资源
+     */
     cleanup() {
         this.caches.length = 0;
         this.point = 0;
@@ -4948,7 +4991,7 @@ class Player {
         const { fillMode, playMode, contentMode } = config;
         const { currFrame, startFrame, endFrame, totalFrame, spriteCount, aniConfig, } = config.getConfig(entity);
         const { duration, loopStart, loop, fillValue } = aniConfig;
-        const isReverseMode = playMode === "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */;
+        const isReverseMode = playMode === PLAYER_PLAY_MODE.FALLBACKS;
         // 当前帧
         let currentFrame = currFrame;
         // 片段绘制结束位置
@@ -5030,7 +5073,7 @@ class Player {
         animator.onEnd = () => {
             entity.locked = false;
             // 如果不保留最后一帧渲染，则清空画布
-            if (fillMode === "none" /* PLAYER_FILL_MODE.NONE */) {
+            if (fillMode === PLAYER_FILL_MODE.NONE) {
                 painter.clearContainer();
             }
             this.onEnd?.();
@@ -5411,11 +5454,15 @@ class VideoEditor {
         this.entity = entity;
     }
     async set(key, value, mode = "R") {
+        const { images, filename } = this.entity;
+        if (!(key in images)) {
+            return;
+        }
         if (mode === "A") {
-            await this.resource.loadImages({ [key]: value }, this.entity.filename, "dynamic");
+            await this.resource.loadImages({ [key]: value }, filename, "dynamic");
         }
         else {
-            this.entity.images[key] = value;
+            images[key] = value;
         }
     }
     /**
@@ -5424,6 +5471,15 @@ class VideoEditor {
      */
     getContext() {
         return this.painter.YC;
+    }
+    /**
+     * 加载并缓存图片
+     * @param source
+     * @param url
+     * @returns
+     */
+    loadImage(source, url) {
+        return this.resource.loadExtImage(source, platform.path.filename(url));
     }
     /**
      * 创建画布图片
@@ -5440,6 +5496,7 @@ class VideoEditor {
         const height = options?.height ?? canvas.height;
         const imageData = context.getImageData(0, 0, width, height);
         const buff = getBufferFromImageData(imageData);
+        context.reset();
         await this.set(key, new Uint8Array(buff), options?.mode);
     }
     /**
@@ -5488,7 +5545,7 @@ class Poster {
     /**
      * 填充模式，类似于 content-mode。
      */
-    contentMode = "fill" /* PLAYER_CONTENT_MODE.FILL */;
+    contentMode = PLAYER_CONTENT_MODE.FILL;
     /**
      * 是否配置完成
      */

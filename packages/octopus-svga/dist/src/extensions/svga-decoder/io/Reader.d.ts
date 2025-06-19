@@ -63,7 +63,7 @@ export default class Reader {
      * Reads a string preceeded by its byte length as a varint.
      * @returns {string} Value read
      */
-    string(): string;
+    string(): any;
     /**
      * Skips the specified number of bytes if specified, otherwise skips a varint.
      * @param {number} [length] Length if known, otherwise a varint is assumed

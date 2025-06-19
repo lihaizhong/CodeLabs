@@ -9,5 +9,5 @@ export interface EnhancedPlatform extends OctopusPlatform.Platform {
  * @package plugin-path 路径处理能力
  * @package plugin-decode 解码能力
  */
-declare const _default: OctopusPlatform.PlatformPluginOptions<"image">;
+declare const _default: OctopusPlatform.PlatformPluginOptions<T>;
 export default _default;

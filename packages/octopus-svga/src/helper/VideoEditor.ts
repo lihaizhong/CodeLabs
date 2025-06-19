@@ -21,14 +21,16 @@ export class VideoEditor {
     value: OctopusPlatform.RawImage,
     mode: VideoEditorOptions["mode"] = "R"
   ) {
+    const { images, filename } = this.entity;
+
+    if (!(key in images)) {
+      return;
+    }
+
     if (mode === "A") {
-      await this.resource.loadImages(
-        { [key]: value },
-        this.entity.filename,
-        "dynamic"
-      );
+      await this.resource.loadImages({ [key]: value }, filename, "dynamic");
     } else {
-      this.entity.images[key] = value;
+      images[key] = value;
     }
   }
 
@@ -41,6 +43,19 @@ export class VideoEditor {
   }
 
   /**
+   * 加载并缓存图片
+   * @param source
+   * @param url
+   * @returns
+   */
+  loadImage(
+    source: Uint8Array | string,
+    url: string
+  ): Promise<OctopusPlatform.PlatformImage | ImageBitmap> {
+    return this.resource.loadExtImage(source, platform.path.filename(url));
+  }
+
+  /**
    * 创建画布图片
    * @param key
    * @param context
@@ -50,7 +65,7 @@ export class VideoEditor {
   async setCanvas(
     key: string,
     context: PlatformRenderingContext2D,
-    options?: VideoEditorOptions & { width?: number, height?: number }
+    options?: VideoEditorOptions & { width?: number; height?: number }
   ) {
     if (this.entity.locked) return;
 
@@ -60,6 +75,7 @@ export class VideoEditor {
     const imageData = context.getImageData(0, 0, width, height);
     const buff = getBufferFromImageData(imageData);
 
+    context.reset();
     await this.set(key, new Uint8Array(buff), options?.mode);
   }
 

@@ -16,6 +16,13 @@ export declare class VideoEditor {
      */
     getContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
     /**
+     * 加载并缓存图片
+     * @param source
+     * @param url
+     * @returns
+     */
+    loadImage(source: Uint8Array | string, url: string): Promise<OctopusPlatform.PlatformImage | ImageBitmap>;
+    /**
      * 创建画布图片
      * @param key
      * @param context

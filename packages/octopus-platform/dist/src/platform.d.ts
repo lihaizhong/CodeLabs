@@ -16,7 +16,7 @@ export declare abstract class Platform<P extends OctopusPlatform.PlatformPluginP
      */
     globals: OctopusPlatform.PlatformGlobals;
     noop: () => any;
-    retry: <T>(fn: () => T | Promise<T>, intervals?: number[], times?: number) => Promise<T>;
+    retry: OctopusPlatform.Platform;
     constructor(plugins: OctopusPlatform.PlatformPluginOptions<P>[], version?: string);
     protected init(): void;
     private autoEnv;
