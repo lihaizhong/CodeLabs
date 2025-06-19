@@ -20,27 +20,30 @@ export default definePlugin<"getCanvas">({
         throw new Error("canvas not found.");
       }
 
-      const MAX_SIZE = 1365;
+      // const MAX_SIZE = 1365;
       const context = canvas!.getContext("2d")!;
-      let virtualWidth = width * dpr;
-      let virtualHeight = height * dpr;
+      // let virtualWidth = width * dpr;
+      // let virtualHeight = height * dpr;
 
-      // 微信小程序限制canvas最大尺寸为 1365 * 1365
-      if (
-        env === "weapp" &&
-        (virtualWidth > MAX_SIZE || virtualHeight > MAX_SIZE)
-      ) {
-        if (virtualWidth > virtualHeight) {
-          virtualHeight = (virtualHeight / virtualWidth) * MAX_SIZE;
-          virtualWidth = MAX_SIZE;
-        } else {
-          virtualWidth = (virtualWidth / virtualHeight) * MAX_SIZE;
-          virtualHeight = MAX_SIZE;
-        }
-      }
+      // // 微信小程序限制canvas最大尺寸为 1365 * 1365
+      // if (
+      //   env === "weapp" &&
+      //   (virtualWidth > MAX_SIZE || virtualHeight > MAX_SIZE)
+      // ) {
+      //   if (virtualWidth > virtualHeight) {
+      //     virtualHeight = (virtualHeight / virtualWidth) * MAX_SIZE;
+      //     virtualWidth = MAX_SIZE;
+      //   } else {
+      //     virtualWidth = (virtualWidth / virtualHeight) * MAX_SIZE;
+      //     virtualHeight = MAX_SIZE;
+      //   }
+      // }
 
-      canvas!.width = virtualWidth;
-      canvas!.height = virtualHeight;
+      // canvas!.width = virtualWidth;
+      // canvas!.height = virtualHeight;
+
+      canvas!.width = width * dpr;
+      canvas!.height = height * dpr;
 
       return { canvas, context };
     }

@@ -2,15 +2,15 @@ export declare class Config {
     /**
      * 最后停留的目标模式，类似于 animation-fill-mode，默认值 forwards。
      */
-    fillMode: any;
+    fillMode: PLAYER_FILL_MODE;
     /**
      * 播放模式，默认值 forwards
      */
-    playMode: any;
+    playMode: PLAYER_PLAY_MODE;
     /**
      * 填充模式，类似于 content-mode。
      */
-    contentMode: any;
+    contentMode: PLAYER_CONTENT_MODE;
     /**
      * 开始播放的帧，默认值 0
      */
@@ -36,9 +36,9 @@ export declare class Config {
     getConfig(entity: PlatformVideo.Video): {
         currFrame: number;
         startFrame: number;
-        endFrame: any;
-        totalFrame: PlatformVideo.Video;
-        spriteCount: any;
+        endFrame: number;
+        totalFrame: number;
+        spriteCount: number;
         aniConfig: {
             duration: number;
             loopStart: number;
