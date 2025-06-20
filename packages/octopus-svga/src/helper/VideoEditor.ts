@@ -21,14 +21,16 @@ export class VideoEditor {
     value: OctopusPlatform.RawImage,
     mode: VideoEditorOptions["mode"] = "R"
   ) {
-    const { images, filename } = this.entity;
+    const { entity, resource } = this;
 
-    if (this.hasValidKey(key)) {
-      if (mode === "A") {
-        await this.resource.loadImagesWithRecord({ [key]: value }, filename, "dynamic");
-      } else {
-        images[key] = value;
-      }
+    if (mode === "A") {
+      await resource.loadImagesWithRecord(
+        { [key]: value },
+        entity.filename,
+        "dynamic"
+      );
+    } else {
+      entity.images[key] = value;
     }
   }
 
@@ -42,11 +44,17 @@ export class VideoEditor {
 
   /**
    * 是否是有效的Key
-   * @param key 
-   * @returns 
+   * @param key
+   * @returns
    */
   hasValidKey(key: string): boolean {
-    return Object.prototype.hasOwnProperty.call(this.entity.images, key);
+    const { images } = this.entity;
+
+    if (typeof Object.hasOwn === "function") {
+      return Object.hasOwn(images, key);
+    }
+
+    return Object.prototype.hasOwnProperty.call(images, key);
   }
 
   /**
