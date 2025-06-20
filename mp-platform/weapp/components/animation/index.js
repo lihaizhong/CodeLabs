@@ -31,8 +31,8 @@ Component({
           container: "#palette",
           // secondary: "#secondary",
           loop: 1,
-          playMode: "fallbacks",
-          fillMode: "forwards",
+          playMode: "forwards",
+          fillMode: "backwards",
         },
         this
       );
@@ -49,7 +49,6 @@ Component({
       readyGo.reset();
       player?.destroy();
       player = null;
-      parser = null;
     },
   },
 
@@ -68,19 +67,23 @@ Component({
           videoItem = cache.get(source);
         } else {
           this.setData({ message: "准备下载资源" });
-          await benchmark.time('load', async () => {
+          await benchmark.time("load", async () => {
             if (typeof source === "string") {
               videoItem = await Parser.load(source);
             } else {
               videoItem = await Parser.load(source.url);
-  
+
               // 替换元素
               if (source.replace) {
-                const editor = new VideoEditor(player.resource, videoItem);
-  
+                const editor = new VideoEditor(
+                  player.painter,
+                  player.resource,
+                  videoItem
+                );
+
                 await Promise.all(
-                  Object.entries(source.replace).map(([key, value]) =>
-                    editor.setImage(key, value)
+                  Object.keys(source.replace).map((key) =>
+                    editor.setImage(key, source.replace[key])
                   )
                 );
               }
@@ -92,7 +95,7 @@ Component({
         }
 
         console.log(source, videoItem);
-        await benchmark.time('mount', () => player.mount(videoItem));
+        await benchmark.time("mount", () => player.mount(videoItem));
         this.setData({ message: "资源装载成功" });
         // player.stepToPercentage(0.3);
         player.start();

@@ -32,17 +32,17 @@ Component({
           container: "#palette",
           // secondary: "#secondary",
           loop: 1,
-          playMode: "fallbacks",
-          fillMode: "forwards"
+          playMode: "forwards",
+          fillMode: "backwards",
         },
         this
       );
       player.onProcess = (percent, frame) => {
-        console.log('当前进度', percent, frame)
-        console.log('---- UPDATE ----')
+        console.log("当前进度", percent, frame);
+        console.log("---- UPDATE ----");
       };
       player.onEnd = () => {
-        console.log('---- END ----')
+        console.log("---- END ----");
       };
       readyGo.go();
     },
@@ -62,26 +62,30 @@ Component({
     async initialize() {
       try {
         const { source } = this.properties;
-        let videoItem
+        let videoItem;
 
         if (cache.has(source)) {
-          this.setData({ message: "匹配到缓存" })
+          this.setData({ message: "匹配到缓存" });
           videoItem = cache.get(source);
         } else {
           this.setData({ message: "准备下载资源" });
-          await benchmark.time('load', async () => {
+          await benchmark.time("load", async () => {
             if (typeof source === "string") {
               videoItem = await Parser.load(source);
             } else {
               videoItem = await Parser.load(source.url);
-  
+
               // 替换元素
               if (source.replace) {
-                const editor = new VideoEditor(player.resource, videoItem);
-  
+                const editor = new VideoEditor(
+                  player.painter,
+                  player.resource,
+                  videoItem
+                );
+
                 await Promise.all(
-                  Object.entries(source.replace).map(([key, value]) =>
-                    editor.setImage(key, value)
+                  Object.keys(source.replace).map((key) =>
+                    editor.setImage(key, source.replace[key])
                   )
                 );
               }
@@ -93,7 +97,7 @@ Component({
         }
 
         console.log(source, videoItem);
-        await benchmark.time('mount', () => player.mount(videoItem));
+        await benchmark.time("mount", () => player.mount(videoItem));
         this.setData({ message: "资源装载成功" });
         // player.stepToPercentage(0.3);
         player.start();
@@ -104,16 +108,16 @@ Component({
       }
     },
     handlePlay() {
-      player?.start()
+      player?.start();
     },
     handleResume() {
-      player?.resume()
+      player?.resume();
     },
     handlePause() {
-      player?.pause()
+      player?.pause();
     },
     handleStop() {
-      player?.stop()
-    }
+      player?.stop();
+    },
   },
 });

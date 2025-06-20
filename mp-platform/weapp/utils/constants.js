@@ -58,7 +58,16 @@ export const svgaSources = [
   "https://assets.2dfire.com/frontend/45eadf03bee2013daa407fd4b91e29f5.svga",
 ];
 
-export const svgaReplaceSources = [
+export const svgaCustomSources = [
+  {
+    url: `${LOCAL_SVGA_URL}/custom/custom.svga`,
+    replace: {
+      qrcode_001: `${LOCAL_SVGA_URL}/custom/qrcode_001.png`,
+      qrcode_002: `${LOCAL_SVGA_URL}/custom/qrcode_002.png`,
+      bj_001: `${LOCAL_SVGA_URL}/custom/bj_001.png`,
+      bj_002: `${LOCAL_SVGA_URL}/custom/bj_002.png`,
+    },
+  },
   {
     url: `${LOCAL_SVGA_URL}/replace/replace_001.svga`,
     replace: {

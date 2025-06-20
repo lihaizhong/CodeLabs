@@ -23,7 +23,7 @@ export class VideoEditor {
   ) {
     const { images, filename } = this.entity;
 
-    if (!(key in images)) {
+    if (!Object.prototype.hasOwnProperty.call(images, key)) {
       return;
     }
 
@@ -75,7 +75,6 @@ export class VideoEditor {
     const imageData = context.getImageData(0, 0, width, height);
     const buff = getBufferFromImageData(imageData);
 
-    context.reset();
     await this.set(key, new Uint8Array(buff), options?.mode);
   }
 
