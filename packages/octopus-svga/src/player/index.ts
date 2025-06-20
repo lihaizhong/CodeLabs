@@ -112,7 +112,7 @@ export class Player {
     this.resource!.release();
     this.entity = videoEntity;
 
-    await this.resource!.loadImages(images, filename);
+    await this.resource!.loadImagesWithRecord(images, filename);
   }
 
   /**

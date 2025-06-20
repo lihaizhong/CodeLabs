@@ -79,7 +79,7 @@ export class ResourceManager {
    * 将 ImageBitmap 插入到 caches
    * @param img 
    */
-  private appendBitmap(img: OctopusPlatform.PlatformImage | ImageBitmap) {
+  private inertBitmapIntoCaches(img: OctopusPlatform.PlatformImage | ImageBitmap) {
     if (ResourceManager.isBitmap(img)) {
       this.caches.push(img);
     }
@@ -97,7 +97,7 @@ export class ResourceManager {
       source,
       platform.path.resolve(filename, "ext")
     ).then((img) => {
-      this.appendBitmap(img);
+      this.inertBitmapIntoCaches(img);
 
       return img;
     });
@@ -109,7 +109,7 @@ export class ResourceManager {
    * @param filename 文件名称
    * @returns
    */
-  public async loadImages(
+  public async loadImagesWithRecord(
     images: RawImages,
     filename: string,
     type: "normal" | "dynamic" = "normal"
@@ -127,7 +127,7 @@ export class ResourceManager {
           )
         )
         .then((img) => {
-          this.appendBitmap(img);
+          this.inertBitmapIntoCaches(img);
           if (type === "dynamic") {
             this.dynamicMaterials.set(name, img);
           } else {

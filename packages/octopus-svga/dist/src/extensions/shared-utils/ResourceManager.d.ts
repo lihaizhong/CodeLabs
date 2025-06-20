@@ -35,7 +35,7 @@ export declare class ResourceManager {
      * 将 ImageBitmap 插入到 caches
      * @param img
      */
-    private appendBitmap;
+    private inertBitmapIntoCaches;
     /**
      * 加载额外的图片资源
      * @param source 资源内容/地址
@@ -49,7 +49,7 @@ export declare class ResourceManager {
      * @param filename 文件名称
      * @returns
      */
-    loadImages(images: RawImages, filename: string, type?: "normal" | "dynamic"): Promise<void>;
+    loadImagesWithRecord(images: RawImages, filename: string, type?: "normal" | "dynamic"): Promise<void>;
     /**
      * 释放图片资源
      */

@@ -23,14 +23,12 @@ export class VideoEditor {
   ) {
     const { images, filename } = this.entity;
 
-    if (!Object.prototype.hasOwnProperty.call(images, key)) {
-      return;
-    }
-
-    if (mode === "A") {
-      await this.resource.loadImages({ [key]: value }, filename, "dynamic");
-    } else {
-      images[key] = value;
+    if (this.hasValidKey(key)) {
+      if (mode === "A") {
+        await this.resource.loadImagesWithRecord({ [key]: value }, filename, "dynamic");
+      } else {
+        images[key] = value;
+      }
     }
   }
 
@@ -40,6 +38,15 @@ export class VideoEditor {
    */
   getContext() {
     return this.painter.YC;
+  }
+
+  /**
+   * 是否是有效的Key
+   * @param key 
+   * @returns 
+   */
+  hasValidKey(key: string): boolean {
+    return Object.prototype.hasOwnProperty.call(this.entity.images, key);
   }
 
   /**

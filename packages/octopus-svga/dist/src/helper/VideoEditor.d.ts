@@ -16,6 +16,12 @@ export declare class VideoEditor {
      */
     getContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
     /**
+     * 是否是有效的Key
+     * @param key
+     * @returns
+     */
+    hasValidKey(key: string): boolean;
+    /**
      * 加载并缓存图片
      * @param source
      * @param url

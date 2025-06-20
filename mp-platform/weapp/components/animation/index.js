@@ -29,8 +29,7 @@ Component({
       await player.setConfig(
         {
           container: "#palette",
-          // secondary: "#secondary",
-          loop: 1,
+          // loop: 1,
           playMode: "forwards",
           fillMode: "backwards",
         },
