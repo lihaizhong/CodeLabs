@@ -1,32 +1,4 @@
 import Reader from "../io/Reader";
-import LineCap from "./LineCap";
-import LineJoin from "./LineJoin";
-import RGBAColor from "./RGBAColor";
-/**
- * Properties of a ShapeStyle.
- * @memberof com.opensource.svga.ShapeEntity
- * @interface IShapeStyle
- * @property {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor|null} [fill] ShapeStyle fill
- * @property {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor|null} [stroke] ShapeStyle stroke
- * @property {number|null} [strokeWidth] ShapeStyle strokeWidth
- * @property {com.opensource.svga.ShapeEntity.ShapeStyle.LineCap|null} [lineCap] ShapeStyle lineCap
- * @property {com.opensource.svga.ShapeEntity.ShapeStyle.LineJoin|null} [lineJoin] ShapeStyle lineJoin
- * @property {number|null} [miterLimit] ShapeStyle miterLimit
- * @property {number|null} [lineDashI] ShapeStyle lineDashI
- * @property {number|null} [lineDashII] ShapeStyle lineDashII
- * @property {number|null} [lineDashIII] ShapeStyle lineDashIII
- */
-export interface ShapeStyleProps {
-    fill: RGBAColor | null;
-    stroke: RGBAColor | null;
-    strokeWidth: number | null;
-    lineCap: LineCap | null;
-    lineJoin: LineJoin | null;
-    miterLimit: number | null;
-    lineDashI: number | null;
-    lineDashII: number | null;
-    lineDashIII: number | null;
-}
 export default class ShapeStyle {
     /**
      * Decodes a ShapeStyle message from the specified reader or buffer.
@@ -39,21 +11,22 @@ export default class ShapeStyle {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decode(reader: Reader | Uint8Array, length?: number): ShapeStyle;
+    static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.VideoStyles;
+    static format(message: ShapeStyle): PlatformVideo.VideoStyles;
     /**
      * ShapeStyle fill.
      * @member {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor|null|undefined} fill
      * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
      * @instance
      */
-    fill: RGBAColor | null;
+    fill: PlatformVideo.RGBA<number, number, number, number> | null;
     /**
      * ShapeStyle stroke.
      * @member {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor|null|undefined} stroke
      * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
      * @instance
      */
-    stroke: RGBAColor | null;
+    stroke: PlatformVideo.RGBA<number, number, number, number> | null;
     /**
      * ShapeStyle strokeWidth.
      * @member {number} strokeWidth
@@ -67,14 +40,14 @@ export default class ShapeStyle {
      * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
      * @instance
      */
-    lineCap: LineCap;
+    lineCap: PlatformVideo.LINE_CAP_CODE;
     /**
      * ShapeStyle lineJoin.
      * @member {com.opensource.svga.ShapeEntity.ShapeStyle.LineJoin} lineJoin
      * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
      * @instance
      */
-    lineJoin: LineJoin;
+    lineJoin: PlatformVideo.LINE_JOIN_CODE;
     /**
      * ShapeStyle miterLimit.
      * @member {number} miterLimit
@@ -103,13 +76,4 @@ export default class ShapeStyle {
      * @instance
      */
     lineDashIII: number;
-    /**
-     * Constructs a new ShapeStyle.
-     * @memberof com.opensource.svga.ShapeEntity
-     * @classdesc Represents a ShapeStyle.
-     * @implements IShapeStyle
-     * @constructor
-     * @param {com.opensource.svga.ShapeEntity.IShapeStyle=} [properties] Properties to set
-     */
-    constructor(properties?: ShapeStyleProps);
 }

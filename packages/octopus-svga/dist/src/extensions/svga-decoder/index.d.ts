@@ -1,3 +1,2 @@
-import { MovieEntity } from "./serialization";
 export * from "./serialization";
-export declare function parseSvga(data: Uint8Array): MovieEntity;
+export declare function createVideoEntity(data: Uint8Array, filename: string): PlatformVideo.Video;

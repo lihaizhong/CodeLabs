@@ -2,10 +2,14 @@ import { MovieEntity } from "./serialization";
 
 export * from "./serialization";
 
-export function parseSvga(data: Uint8Array): MovieEntity {
-  if (!(data instanceof Uint8Array)) {
-    throw new Error("Invalid data type");
+export function createVideoEntity(data: Uint8Array, filename: string) {
+  if (data instanceof Uint8Array) {
+    const video = MovieEntity.decode(data);
+
+    video.filename = filename;
+
+    return video;
   }
 
-  return MovieEntity.decode(data);
+  throw new Error("Invalid data type");
 }

@@ -1,4 +1,4 @@
-import { Parser, Player } from "octopus-svga";
+import { benchmark, Parser, Player } from "octopus-svga";
 import Page from "../../utils/Page";
 import {
   svgaSources,
@@ -54,8 +54,8 @@ Page({
       }
     }
 
-    player.setItem("playMode", "fallbacks");
-    player.setItem("fillMode", "forwards");
+    // player.setItem("playMode", "fallbacks");
+    // player.setItem("fillMode", "forwards");
     this.setData({
       url: files[prev],
       current: prev,
@@ -77,8 +77,8 @@ Page({
       }
     }
 
-    player.setItem("playMode", "forwards");
-    player.setItem("fillMode", "backwards");
+    // player.setItem("playMode", "forwards");
+    // player.setItem("fillMode", "backwards");
     this.setData({
       url: files[next],
       current: next,
@@ -88,14 +88,17 @@ Page({
   async initialize() {
     try {
       showPopup("准备下载资源");
-      videoItem = await Parser.load(this.data.url);
+      const rawVideoItem = await Parser.download(this.data.url);
+      videoItem = await benchmark.time("parse video", () =>
+        Parser.parseVideo(rawVideoItem, this.data.url)
+      );
       showPopup("下载资源成功");
 
       console.log(this.data.url, videoItem);
-      await player.mount(videoItem);
+      await benchmark.time("mount video", () => player.mount(videoItem));
       showPopup("资源装载成功");
-      // player.start();
-      player.stepToPercentage(1, true);
+      player.start();
+      // player.stepToPercentage(1, true);
       showPopup("");
     } catch (ex) {
       console.error("svga初始化失败！", ex);
@@ -107,8 +110,8 @@ Page({
     await player.setConfig({
       container: "#palette",
       loop: 1,
-      playMode: "fallbacks",
-      fillMode: "forwards",
+      playMode: "forwards",
+      fillMode: "backwards",
       // contentMode: "aspect-fill",
       // contentMode: "fill",
       contentMode: "aspect-fit",

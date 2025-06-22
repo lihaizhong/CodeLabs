@@ -1,19 +1,4 @@
 import Reader from "../io/Reader";
-/**
- * Properties of a Layout.
- * @memberof com.opensource.svga
- * @interface ILayout
- * @property {number|null} [x] Layout x
- * @property {number|null} [y] Layout y
- * @property {number|null} [width] Layout width
- * @property {number|null} [height] Layout height
- */
-export interface LayoutProps {
-    x: number | null;
-    y: number | null;
-    width: number | null;
-    height: number | null;
-}
 export default class Layout {
     /**
      * Decodes a Layout message from the specified reader or buffer.
@@ -26,7 +11,8 @@ export default class Layout {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decode(reader: Reader | Uint8Array, length?: number): Layout;
+    static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.Rect;
+    static format(message: Layout): PlatformVideo.Rect;
     /**
      * Layout x.
      * @member {number} x
@@ -55,13 +41,4 @@ export default class Layout {
      * @instance
      */
     height: number;
-    /**
-     * Constructs a new Layout.
-     * @memberof com.opensource.svga
-     * @classdesc Represents a Layout.
-     * @implements ILayout
-     * @constructor
-     * @param {com.opensource.svga.ILayout=} [properties] Properties to set
-     */
-    constructor(properties?: LayoutProps);
 }

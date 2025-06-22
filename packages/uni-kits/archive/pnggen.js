@@ -1,7 +1,7 @@
-const fs = require('fs');
-const { deflateSync, crc32 } = require('zlib');
+import fs from "node:fs";
+import { deflateSync, crc32 } from "node:zlib";
+import { Buffer } from "node:buffer";
 // const { zlibSync: deflateSync } = require('fflate');
-const { Buffer } = require('buffer');
 // const { crc32 } = require('./crc.js');
 
 // --------------------------
@@ -87,16 +87,16 @@ function generatePNG(width, height, pixelDataRGBA) {
 // 示例生成一个红色 2x2 的 PNG
 // --------------------------
 function main() {
-  const width = 2;
-  const height = 2;
+  const width = 1000;
+  const height = 1000;
   const pixels = Buffer.alloc(width * height * 4);
 
-  // 填充像素为红色（RGB=255,0,0），不透明（A=255）
+  // 填充像素为透明（RGB=0,0,0），不透明（A=0）
   for (let i = 0; i < pixels.length; i += 4) {
-    pixels[i] = 255;     // R
+    pixels[i] = 0;     // R
     pixels[i + 1] = 0;   // G
     pixels[i + 2] = 0;   // B
-    pixels[i + 3] = 255; // A
+    pixels[i + 3] = 0; // A
   }
 
   const pngData = generatePNG(width, height, pixels);

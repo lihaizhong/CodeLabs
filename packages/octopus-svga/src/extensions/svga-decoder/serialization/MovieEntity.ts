@@ -2,25 +2,7 @@ import Reader from "../io/Reader";
 import SpriteEntity from "./SpriteEntity";
 import MovieParams from "./MovieParams";
 
-/**
- * Properties of a MovieEntity.
- * @memberof com.opensource.svga
- * @interface IMovieEntity
- * @property {string|null} [version] MovieEntity version
- * @property {com.opensource.svga.IMovieParams|null} [params] MovieEntity params
- * @property {Object.<string,Uint8Array>|null} [images] MovieEntity images
- * @property {Array.<com.opensource.svga.ISpriteEntity>|null} [sprites] MovieEntity sprites
- */
-export interface MovieEntityProps {
-  version: string | null;
-  params: MovieParams | null;
-  images: Record<string, Uint8Array> | null;
-  sprites: SpriteEntity[] | null;
-}
-
 export default class MovieEntity {
-  static EMPTY_OBJECT = Object.freeze({});
-
   /**
    * Decodes a MovieEntity message from the specified reader or buffer.
    * @function decode
@@ -32,14 +14,17 @@ export default class MovieEntity {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(reader: Reader | Uint8Array, length?: number): MovieEntity {
+  static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.Video {
     reader = Reader.create(reader);
-    const end = length === void 0 ? reader.len : reader.pos + length;
+
+    const end = length === undefined ? reader.len : reader.pos + length;
     const message = new MovieEntity();
-    let key;
-    let value;
+    let key: string;
+    let value: Uint8Array;
+    let tag: number;
+
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
           message.version = reader.string();
@@ -50,12 +35,9 @@ export default class MovieEntity {
           break;
         }
         case 3: {
-          if (message.images === MovieEntity.EMPTY_OBJECT) {
-            message.images = {};
-          }
           const end2 = reader.uint32() + reader.pos;
           key = "";
-          value = [];
+          value = new Uint8Array(0);
           while (reader.pos < end2) {
             let tag2 = reader.uint32();
             switch (tag2 >>> 3) {
@@ -70,13 +52,14 @@ export default class MovieEntity {
                 break;
             }
           }
-          message.images[key] = value as Uint8Array;
+          message.images[key] = value;
           break;
         }
         case 4: {
           if (!(message.sprites && message.sprites.length)) {
             message.sprites = [];
           }
+
           message.sprites.push(SpriteEntity.decode(reader, reader.uint32()));
           break;
         }
@@ -85,7 +68,28 @@ export default class MovieEntity {
           break;
       }
     }
-    return message;
+
+    return MovieEntity.format(message);
+  }
+
+  static format(message: MovieEntity): PlatformVideo.Video {
+    const { version, images, sprites } = message;
+    const { fps, frames, viewBoxWidth, viewBoxHeight } = message.params!;
+
+    return {
+      version,
+      filename: '',
+      locked: false,
+      dynamicElements: {},
+      size: {
+        width: viewBoxWidth,
+        height: viewBoxHeight,
+      },
+      fps,
+      frames,
+      images,
+      sprites,
+    };
   }
 
   /**
@@ -108,40 +112,12 @@ export default class MovieEntity {
    * @memberof com.opensource.svga.MovieEntity
    * @instance
    */
-  images: Record<string, Uint8Array> = MovieEntity.EMPTY_OBJECT;
+  images: Record<string, Uint8Array> = {};
   /**
    * MovieEntity sprites.
    * @member {Array.<com.opensource.svga.ISpriteEntity>} sprites
    * @memberof com.opensource.svga.MovieEntity
    * @instance
    */
-  sprites: SpriteEntity[] = [];
-
-  /**
-   * Constructs a new MovieEntity.
-   * @memberof com.opensource.svga
-   * @classdesc Represents a MovieEntity.
-   * @implements IMovieEntity
-   * @constructor
-   * @param {com.opensource.svga.IMovieEntity=} [properties] Properties to set
-   */
-  constructor(properties?: MovieEntityProps) {
-    if (properties) {
-      if (properties.version !== null) {
-        this.version = properties.version;
-      }
-
-      if (properties.images !== null) {
-        this.images = properties.images;
-      }
-
-      if (properties.params !== null) {
-        this.params = properties.params;
-      }
-
-      if (properties.sprites !== null) {
-        this.sprites = properties.sprites;
-      }
-    }
-  }
+  sprites: PlatformVideo.VideoSprite[] = [];
 }

@@ -1,23 +1,4 @@
 import Reader from "../io/Reader";
-/**
- * Properties of a Transform.
- * @memberof com.opensource.svga
- * @interface ITransform
- * @property {number|null} [a] Transform a
- * @property {number|null} [b] Transform b
- * @property {number|null} [c] Transform c
- * @property {number|null} [d] Transform d
- * @property {number|null} [tx] Transform tx
- * @property {number|null} [ty] Transform ty
- */
-export interface TransformProps {
-    a: number | null;
-    b: number | null;
-    c: number | null;
-    d: number | null;
-    tx: number | null;
-    ty: number | null;
-}
 export default class Transform {
     /**
      * Decodes a Transform message from the specified reader or buffer.
@@ -30,7 +11,7 @@ export default class Transform {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decode(reader: Reader | Uint8Array, length?: number): Transform;
+    static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.Transform;
     /**
      * Transform a.
      * @member {number} a
@@ -73,13 +54,4 @@ export default class Transform {
      * @instance
      */
     ty: number;
-    /**
-     * Constructs a new Transform.
-     * @memberof com.opensource.svga
-     * @classdesc Represents a Transform.
-     * @implements ITransform
-     * @constructor
-     * @param {com.opensource.svga.ITransform=} [properties] Properties to set
-     */
-    constructor(properties?: TransformProps);
 }

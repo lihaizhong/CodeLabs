@@ -26,7 +26,8 @@ export default class RGBAColor {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decode(reader: Reader | Uint8Array, length?: number): RGBAColor;
+    static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.RGBA<number, number, number, number>;
+    static format(message: RGBAColor): PlatformVideo.RGBA<number, number, number, number>;
     /**
      * RGBAColor r.
      * @member {number} r
@@ -55,13 +56,4 @@ export default class RGBAColor {
      * @instance
      */
     a: number;
-    /**
-     * Constructs a new RGBAColor.
-     * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
-     * @classdesc Represents a RGBAColor.
-     * @implements IRGBAColor
-     * @constructor
-     * @param {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor=} [properties] Properties to set
-     */
-    constructor(properties?: RGBAColorProps);
 }

@@ -191,7 +191,7 @@ export class Player {
     this.renderer?.destroy();
     this.resource?.release();
     this.resource?.cleanup();
-    this.entity = void 0;
+    this.entity = undefined;
   }
 
   /**

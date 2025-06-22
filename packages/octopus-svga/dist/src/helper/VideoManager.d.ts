@@ -3,6 +3,7 @@ export interface Bucket {
     local: string;
     entity: PlatformVideo.Video | ArrayBuffer | null;
     promise: Promise<PlatformVideo.Video | null> | null;
+    status: number;
 }
 export interface NeedUpdatePoint {
     action: "remove" | "add";

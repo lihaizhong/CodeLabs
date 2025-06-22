@@ -3,24 +3,6 @@ import Layout from "./Layout";
 import Transform from "./Transform";
 import ShapeEntity from "./ShapeEntity";
 
-/**
- * Properties of a FrameEntity.
- * @memberof com.opensource.svga
- * @interface IFrameEntity
- * @property {number|null} [alpha] FrameEntity alpha
- * @property {com.opensource.svga.ILayout|null} [layout] FrameEntity layout
- * @property {com.opensource.svga.ITransform|null} [transform] FrameEntity transform
- * @property {string|null} [clipPath] FrameEntity clipPath
- * @property {Array.<com.opensource.svga.IShapeEntity>|null} [shapes] FrameEntity shapes
- */
-export interface FrameEntityProps {
-  alpha: number | null;
-  layout: Layout | null;
-  transform: Transform | null;
-  clipPath: string | null;
-  shapes: ShapeEntity[] | null;
-}
-
 export default class FrameEntity {
   /**
    * Decodes a FrameEntity message from the specified reader or buffer.
@@ -33,12 +15,15 @@ export default class FrameEntity {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(reader: Reader | Uint8Array, length?: number): FrameEntity {
+  static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.VideoFrame | PlatformVideo.HiddenVideoFrame {
     reader = Reader.create(reader);
-    const end = length === void 0 ? reader.len : reader.pos + length;
+
+    const end = length === undefined ? reader.len : reader.pos + length;
     const message = new FrameEntity();
+    let tag: number;
+
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
           message.alpha = reader.float();
@@ -60,7 +45,11 @@ export default class FrameEntity {
           if (!(message.shapes && message.shapes.length)) {
             message.shapes = [];
           }
-          message.shapes.push(ShapeEntity.decode(reader, reader.uint32()));
+          const shape = ShapeEntity.decode(reader, reader.uint32())
+
+          if (shape !== null) {
+            message.shapes.push(shape);
+          }
           break;
         }
         default:
@@ -69,7 +58,23 @@ export default class FrameEntity {
       }
     }
 
-    return message;
+    return FrameEntity.format(message);
+  }
+
+  private static format(message: FrameEntity): PlatformVideo.VideoFrame | PlatformVideo.HiddenVideoFrame {
+    // alpha值小于 0.05 将不展示，所以不做解析处理
+    if (message.alpha < 0.05) {
+      return { alpha: 0 };
+    }
+
+    const { alpha, layout, transform, shapes } = message;
+
+    return {
+      alpha,
+      layout: layout!,
+      transform,
+      shapes,
+    };
   }
 
   /**
@@ -78,7 +83,7 @@ export default class FrameEntity {
    * @memberof com.opensource.svga.FrameEntity
    * @instance
    */
-  shapes: ShapeEntity[] = [];
+  shapes: PlatformVideo.VideoFrameShape[] = [];
   /**
    * FrameEntity alpha.
    * @member {number} alpha
@@ -92,14 +97,14 @@ export default class FrameEntity {
    * @memberof com.opensource.svga.FrameEntity
    * @instance
    */
-  layout: Layout | null = null;
+  layout: PlatformVideo.Rect | null = null;
   /**
    * FrameEntity transform.
    * @member {com.opensource.svga.ITransform|null|undefined} transform
    * @memberof com.opensource.svga.FrameEntity
    * @instance
    */
-  transform: Transform | null = null;
+  transform: PlatformVideo.Transform | null = null;
   /**
    * FrameEntity clipPath.
    * @member {string} clipPath
@@ -107,36 +112,4 @@ export default class FrameEntity {
    * @instance
    */
   clipPath: string = "";
-
-  /**
-   * Constructs a new FrameEntity.
-   * @memberof com.opensource.svga
-   * @classdesc Represents a FrameEntity.
-   * @implements IFrameEntity
-   * @constructor
-   * @param {com.opensource.svga.IFrameEntity=} [properties] Properties to set
-   */
-  constructor(properties?: FrameEntityProps) {
-    if (properties) {
-      if (properties.alpha !== null) {
-        this.alpha = properties.alpha;
-      }
-
-      if (properties.clipPath !== null) {
-        this.clipPath = properties.clipPath;
-      }
-
-      if (properties.layout !== null) {
-        this.layout = properties.layout;
-      }
-
-      if (properties.shapes !== null) {
-        this.shapes = properties.shapes;
-      }
-
-      if (properties.transform !== null) {
-        this.transform = properties.transform;
-      }
-    }
-  }
 }

@@ -55,11 +55,11 @@ export class Poster {
     const config: PosterConfig =
       typeof options === "string" ? { container: options } : options;
 
-    if (config.container === void 0) {
+    if (config.container === undefined) {
       config.container = "";
     }
 
-    if (config.contentMode !== void 0) {
+    if (config.contentMode !== undefined) {
       this.contentMode = config.contentMode;
     }
 
@@ -148,6 +148,6 @@ export class Poster {
     this.renderer?.destroy();
     this.resource?.release();
     this.resource?.cleanup();
-    this.entity = void 0;
+    this.entity = undefined;
   }
 }

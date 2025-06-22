@@ -89,6 +89,20 @@ export const svgaLargeSources = [
   "frame03.svga",
 ].map((filename) => `${LOCAL_SVGA_URL}/large/${filename}`);
 
+export const yySources = [
+  "angel.svga",
+  "EmptyState.svga",
+  "halloween.svga",
+  "HamburgerArrow.svga",
+  "kingset.svga",
+  "matteBitmap.svga",
+  "matteRect.svga",
+  "PinJump.svga",
+  "posche.svga",
+  "rose.svga",
+  "TwitterHeart.svga",
+  "Walkthrough.svga",
+].map((url) => `${LOCAL_SVGA_URL}/yy/${url}`);
 
 export const svgaHugeSources = [
   `${LOCAL_SVGA_URL}/huge/frame01.svga`,

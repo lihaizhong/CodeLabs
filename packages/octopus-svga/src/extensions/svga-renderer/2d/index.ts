@@ -191,17 +191,21 @@ export class Renderer2D {
 
   private readonly pointPool: PointPool = new PointPool();
 
+  private currentPoint: CurrentPoint;
+
   private lastResizeKey = "";
 
-  private globalTransform?: PlatformVideo.Transform = void 0;
+  private globalTransform?: PlatformVideo.Transform = undefined;
 
   constructor(
-    private readonly context: PlatformRenderingContext2D
-  ) {}
+    private context: PlatformRenderingContext2D | null
+  ) {
+    this.currentPoint = this.pointPool.acquire();
+  }
 
   private setTransform(transform?: PlatformVideo.Transform): void {
-    if (transform) {
-      this.context.transform(
+    if (transform && this.context) {
+      this.context!.transform(
         transform.a,
         transform.b,
         transform.c,
@@ -218,12 +222,12 @@ export class Renderer2D {
     styles?: PlatformVideo.VideoStyles
   ): void {
     const { context, pointPool } = this;
-    const currentPoint = pointPool.acquire();
+    this.currentPoint = pointPool.acquire();
 
-    context.save();
-    Renderer2D.resetShapeStyles(context, styles);
+    context!.save();
+    Renderer2D.resetShapeStyles(context!, styles);
     this.setTransform(transform);
-    context.beginPath();
+    context!.beginPath();
 
     if (d) {
       // 使用状态机解析器替代正则表达式
@@ -232,7 +236,7 @@ export class Renderer2D {
       for (const { command, args } of commands) {
         if (Renderer2D.SVG_PATH.has(command)) {
           this.drawBezierElement(
-            currentPoint,
+            this.currentPoint,
             command,
             args.split(/[\s,]+/).filter(Boolean)
           );
@@ -240,9 +244,9 @@ export class Renderer2D {
       }
     }
 
-    Renderer2D.fillOrStroke(context, styles);
-    pointPool.release(currentPoint);
-    context.restore();
+    Renderer2D.fillOrStroke(context!, styles);
+    pointPool.release(this.currentPoint);
+    context!.restore();
   }
 
   private drawBezierElement(
@@ -256,38 +260,38 @@ export class Renderer2D {
       case "M":
         currentPoint.x = +args[0];
         currentPoint.y = +args[1];
-        context.moveTo(currentPoint.x, currentPoint.y);
+        context!.moveTo(currentPoint.x, currentPoint.y);
         break;
       case "m":
         currentPoint.x += +args[0];
         currentPoint.y += +args[1];
-        context.moveTo(currentPoint.x, currentPoint.y);
+        context!.moveTo(currentPoint.x, currentPoint.y);
         break;
       case "L":
         currentPoint.x = +args[0];
         currentPoint.y = +args[1];
-        context.lineTo(currentPoint.x, currentPoint.y);
+        context!.lineTo(currentPoint.x, currentPoint.y);
         break;
       case "l":
         currentPoint.x += +args[0];
         currentPoint.y += +args[1];
-        context.lineTo(currentPoint.x, currentPoint.y);
+        context!.lineTo(currentPoint.x, currentPoint.y);
         break;
       case "H":
         currentPoint.x = +args[0];
-        context.lineTo(currentPoint.x, currentPoint.y);
+        context!.lineTo(currentPoint.x, currentPoint.y);
         break;
       case "h":
         currentPoint.x += +args[0];
-        context.lineTo(currentPoint.x, currentPoint.y);
+        context!.lineTo(currentPoint.x, currentPoint.y);
         break;
       case "V":
         currentPoint.y = +args[0];
-        context.lineTo(currentPoint.x, currentPoint.y);
+        context!.lineTo(currentPoint.x, currentPoint.y);
         break;
       case "v":
         currentPoint.y += +args[0];
-        context.lineTo(currentPoint.x, currentPoint.y);
+        context!.lineTo(currentPoint.x, currentPoint.y);
         break;
       case "C":
         currentPoint.x1 = +args[0];
@@ -296,7 +300,7 @@ export class Renderer2D {
         currentPoint.y2 = +args[3];
         currentPoint.x = +args[4];
         currentPoint.y = +args[5];
-        context.bezierCurveTo(
+        context!.bezierCurveTo(
           currentPoint.x1,
           currentPoint.y1,
           currentPoint.x2,
@@ -312,7 +316,7 @@ export class Renderer2D {
         currentPoint.y2 = currentPoint.y + +args[3];
         currentPoint.x += +args[4];
         currentPoint.y += +args[5];
-        context.bezierCurveTo(
+        context!.bezierCurveTo(
           currentPoint.x1,
           currentPoint.y1,
           currentPoint.x2,
@@ -323,10 +327,10 @@ export class Renderer2D {
         break;
       case "S":
         if (
-          currentPoint.x1 !== void 0 &&
-          currentPoint.y1 !== void 0 &&
-          currentPoint.x2 !== void 0 &&
-          currentPoint.y2 !== void 0
+          currentPoint.x1 !== undefined &&
+          currentPoint.y1 !== undefined &&
+          currentPoint.x2 !== undefined &&
+          currentPoint.y2 !== undefined
         ) {
           currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
           currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;
@@ -334,7 +338,7 @@ export class Renderer2D {
           currentPoint.y2 = +args[1];
           currentPoint.x = +args[2];
           currentPoint.y = +args[3];
-          context.bezierCurveTo(
+          context!.bezierCurveTo(
             currentPoint.x1,
             currentPoint.y1,
             currentPoint.x2,
@@ -347,7 +351,7 @@ export class Renderer2D {
           currentPoint.y1 = +args[1];
           currentPoint.x = +args[2];
           currentPoint.y = +args[3];
-          context.quadraticCurveTo(
+          context!.quadraticCurveTo(
             currentPoint.x1,
             currentPoint.y1,
             currentPoint.x,
@@ -357,10 +361,10 @@ export class Renderer2D {
         break;
       case "s":
         if (
-          currentPoint.x1 !== void 0 &&
-          currentPoint.y1 !== void 0 &&
-          currentPoint.x2 !== void 0 &&
-          currentPoint.y2 !== void 0
+          currentPoint.x1 !== undefined &&
+          currentPoint.y1 !== undefined &&
+          currentPoint.x2 !== undefined &&
+          currentPoint.y2 !== undefined
         ) {
           currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
           currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;
@@ -368,7 +372,7 @@ export class Renderer2D {
           currentPoint.y2 = currentPoint.y + +args[1];
           currentPoint.x += +args[2];
           currentPoint.y += +args[3];
-          context.bezierCurveTo(
+          context!.bezierCurveTo(
             currentPoint.x1,
             currentPoint.y1,
             currentPoint.x2,
@@ -381,7 +385,7 @@ export class Renderer2D {
           currentPoint.y1 = currentPoint.y + +args[1];
           currentPoint.x += +args[2];
           currentPoint.y += +args[3];
-          context.quadraticCurveTo(
+          context!.quadraticCurveTo(
             currentPoint.x1,
             currentPoint.y1,
             currentPoint.x,
@@ -394,7 +398,7 @@ export class Renderer2D {
         currentPoint.y1 = +args[1];
         currentPoint.x = +args[2];
         currentPoint.y = +args[3];
-        context.quadraticCurveTo(
+        context!.quadraticCurveTo(
           currentPoint.x1,
           currentPoint.y1,
           currentPoint.x,
@@ -406,7 +410,7 @@ export class Renderer2D {
         currentPoint.y1 = currentPoint.y + +args[1];
         currentPoint.x += +args[2];
         currentPoint.y += +args[3];
-        context.quadraticCurveTo(
+        context!.quadraticCurveTo(
           currentPoint.x1,
           currentPoint.y1,
           currentPoint.x,
@@ -415,7 +419,7 @@ export class Renderer2D {
         break;
       case "Z":
       case "z":
-        context.closePath();
+        context!.closePath();
         break;
     }
   }
@@ -430,8 +434,8 @@ export class Renderer2D {
   ): void {
     const { context } = this;
 
-    context.save();
-    Renderer2D.resetShapeStyles(context, styles);
+    context!.save();
+    Renderer2D.resetShapeStyles(context!, styles);
     this.setTransform(transform);
 
     x -= radiusX;
@@ -447,15 +451,15 @@ export class Renderer2D {
     const xm = x + w / 2;
     const ym = y + h / 2;
 
-    context.beginPath();
-    context.moveTo(x, ym);
-    context.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
-    context.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
-    context.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-    context.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+    context!.beginPath();
+    context!.moveTo(x, ym);
+    context!.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+    context!.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+    context!.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+    context!.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
 
-    Renderer2D.fillOrStroke(context, styles);
-    context.restore();
+    Renderer2D.fillOrStroke(context!, styles);
+    context!.restore();
   }
 
   private drawRect(
@@ -469,8 +473,8 @@ export class Renderer2D {
   ): void {
     const { context } = this;
 
-    context.save();
-    Renderer2D.resetShapeStyles(context, styles);
+    context!.save();
+    Renderer2D.resetShapeStyles(context!, styles);
     this.setTransform(transform);
 
     let radius = cornerRadius;
@@ -483,16 +487,16 @@ export class Renderer2D {
       radius = height / 2;
     }
 
-    context.beginPath();
-    context.moveTo(x + radius, y);
-    context.arcTo(x + width, y, x + width, y + height, radius);
-    context.arcTo(x + width, y + height, x, y + height, radius);
-    context.arcTo(x, y + height, x, y, radius);
-    context.arcTo(x, y, x + width, y, radius);
-    context.closePath();
+    context!.beginPath();
+    context!.moveTo(x + radius, y);
+    context!.arcTo(x + width, y, x + width, y + height, radius);
+    context!.arcTo(x + width, y + height, x, y + height, radius);
+    context!.arcTo(x, y + height, x, y, radius);
+    context!.arcTo(x, y, x + width, y, radius);
+    context!.closePath();
 
-    Renderer2D.fillOrStroke(context, styles);
-    context.restore();
+    Renderer2D.fillOrStroke(context!, styles);
+    context!.restore();
   }
 
   private drawShape(shape: PlatformVideo.VideoFrameShape): void {
@@ -527,28 +531,23 @@ export class Renderer2D {
   }
 
   private drawSprite(
-    frame: PlatformVideo.VideoFrame,
+    frame: PlatformVideo.VideoFrame | PlatformVideo.HiddenVideoFrame,
     bitmap?: OctopusPlatform.Bitmap,
     dynamicElement?: OctopusPlatform.Bitmap
   ): void {
-    if (frame.alpha < 0.05) return;
+    if (frame.alpha === 0) return;
 
     const { context } = this;
-    const { alpha, transform, layout, shapes, maskPath } = frame;
+    const { alpha, transform, layout, shapes } = frame as PlatformVideo.VideoFrame;
     const { a = 1, b = 0, c = 0, d = 1, tx = 0, ty = 0 } = transform ?? {};
 
-    context.save();
+    context!.save();
     this.setTransform(this.globalTransform);
-    context.globalAlpha = alpha;
-    context.transform(a, b, c, d, tx, ty);
+    context!.globalAlpha = alpha;
+    context!.transform(a, b, c, d, tx, ty);
 
     if (bitmap) {
-      if (maskPath) {
-        this.drawBezier(maskPath.d, maskPath.transform, maskPath.styles);
-        context.clip();
-      }
-
-      context.drawImage(
+      context!.drawImage(
         bitmap as CanvasImageSource,
         0,
         0,
@@ -558,7 +557,7 @@ export class Renderer2D {
     }
 
     if (dynamicElement) {
-      context.drawImage(
+      context!.drawImage(
         dynamicElement as CanvasImageSource,
         (layout.width - dynamicElement.width) / 2,
         (layout.height - dynamicElement.height) / 2
@@ -569,7 +568,7 @@ export class Renderer2D {
       this.drawShape(shapes[i]);
     }
 
-    context.restore();
+    context!.restore();
   }
 
   /**
@@ -626,14 +625,13 @@ export class Renderer2D {
     head: number,
     tail: number
   ): void {
-    const { sprites } = videoEntity;
     let sprite: PlatformVideo.VideoSprite;
     let imageKey: string;
     let bitmap: OctopusPlatform.Bitmap | undefined;
     let dynamicElement: OctopusPlatform.Bitmap | undefined;
 
     for (let i = head; i < tail; i++) {
-      sprite = sprites[i];
+      sprite = videoEntity.sprites[i];
       imageKey = sprite.imageKey;
       bitmap = materials.get(imageKey);
       dynamicElement = dynamicMaterials.get(imageKey);
@@ -643,7 +641,8 @@ export class Renderer2D {
   }
 
   public destroy() {
-    this.globalTransform = void 0;
+    this.globalTransform = undefined;
     this.lastResizeKey = "";
+    this.context = null;
   }
 }

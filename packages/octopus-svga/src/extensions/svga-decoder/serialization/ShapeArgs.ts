@@ -22,12 +22,15 @@ export default class ShapeArgs {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(reader: Reader | Uint8Array, length?: number): ShapeArgs {
+  static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.ShapePath {
     reader = Reader.create(reader);
-    const end = length === void 0 ? reader.len : reader.pos + length;
+
+    const end = length === undefined ? reader.len : reader.pos + length;
     const message = new ShapeArgs();
+    let tag: number;
+
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
           message.d = reader.string();
@@ -42,21 +45,11 @@ export default class ShapeArgs {
     return message;
   }
 
-  d: string = "";
-
   /**
-   * Constructs a new ShapeArgs.
-   * @memberof com.opensource.svga.ShapeEntity
-   * @classdesc Represents a ShapeArgs.
-   * @implements IShapeArgs
-   * @constructor
-   * @param {com.opensource.svga.ShapeEntity.IShapeArgs=} [properties] Properties to set
+   * ShapeArgs d.
+   * @member {string} d
+   * @memberof com.opensource.svga.ShapeEntity.ShapeArgs
+   * @instance
    */
-  constructor(properties?: ShapeArgsProps) {
-    if (properties) {
-      if (properties.d !== null) {
-        this.d = properties.d
-      }
-    }
-  }
+  d: string = "";
 }

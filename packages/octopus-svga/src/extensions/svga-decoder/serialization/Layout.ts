@@ -1,21 +1,5 @@
 import Reader from "../io/Reader";
 
-/**
- * Properties of a Layout.
- * @memberof com.opensource.svga
- * @interface ILayout
- * @property {number|null} [x] Layout x
- * @property {number|null} [y] Layout y
- * @property {number|null} [width] Layout width
- * @property {number|null} [height] Layout height
- */
-export interface LayoutProps {
-  x: number | null;
-  y: number | null;
-  width: number | null;
-  height: number | null;
-}
-
 export default class Layout {
   /**
    * Decodes a Layout message from the specified reader or buffer.
@@ -28,12 +12,15 @@ export default class Layout {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(reader: Reader | Uint8Array, length?: number): Layout {
+  static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.Rect {
     reader = Reader.create(reader);
-    const end = length === void 0 ? reader.len : reader.pos + length;
+
+    const end = length === undefined ? reader.len : reader.pos + length;
     const message = new Layout();
+    let tag: number;
+
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
           message.x = reader.float();
@@ -57,7 +44,18 @@ export default class Layout {
       }
     }
 
-    return message;
+    return Layout.format(message);
+  }
+
+  static format(message: Layout): PlatformVideo.Rect {
+    const { x, y, width, height } = message;
+
+    return {
+      x: (x + 0.5) || 0,
+      y: (y + 0.5) || 0,
+      width: (width + 0.5) || 0,
+      height: (height + 0.5) || 0,
+    };
   }
 
   /**
@@ -88,32 +86,4 @@ export default class Layout {
    * @instance
    */
   height: number = 0;
-
-  /**
-   * Constructs a new Layout.
-   * @memberof com.opensource.svga
-   * @classdesc Represents a Layout.
-   * @implements ILayout
-   * @constructor
-   * @param {com.opensource.svga.ILayout=} [properties] Properties to set
-   */
-  constructor(properties?: LayoutProps) {
-    if (properties) {
-      if (properties.x !== null) {
-        this.x = properties.x
-      }
-
-      if (properties.y !== null) {
-        this.y = properties.y
-      }
-
-      if (properties.width !== null) {
-        this.width = properties.width
-      }
-
-      if (properties.height !== null) {
-        this.height = properties.height
-      }
-    }
-  }
 }

@@ -3,4 +3,5 @@ export * from "./svga-renderer";
 export * from "./svga-animator";
 export * from "./png-encoder";
 export * from "./qrcode-encoder";
-export * from "./shared-utils/ResourceManager";
+export * from "./shared-utils";
+export * from "./zlib";

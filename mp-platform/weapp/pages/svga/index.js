@@ -1,11 +1,11 @@
-import { svgaSources, svgaCustomSources, svgaLargeSources, svgaHugeSources, getOneAtRandom } from "../../utils/constants";
+import { svgaSources, svgaCustomSources, yySources, svgaLargeSources, svgaHugeSources, getOneAtRandom } from "../../utils/constants";
 
 // const sources = [
 //   'http://10.1.133.197:5151/svga/序列1.svga',
 //   'http://10.1.133.197:5151/svga/序列2.svga',
 //   'http://10.1.133.197:5151/svga/序列3.svga'
 // ]
-const sources = svgaCustomSources
+const sources = yySources
 
 Page({
   data: {

@@ -1,19 +1,4 @@
 import Reader from "../io/Reader";
-/**
- * Properties of an EllipseArgs.
- * @memberof com.opensource.svga.ShapeEntity
- * @interface IEllipseArgs
- * @property {number|null} [x] EllipseArgs x
- * @property {number|null} [y] EllipseArgs y
- * @property {number|null} [radiusX] EllipseArgs radiusX
- * @property {number|null} [radiusY] EllipseArgs radiusY
- */
-export interface EllipseArgsProps {
-    x: number | null;
-    y: number | null;
-    radiusX: number | null;
-    radiusY: number | null;
-}
 export default class EllipseArgs {
     /**
      * Decodes an EllipseArgs message from the specified reader or buffer.
@@ -26,7 +11,7 @@ export default class EllipseArgs {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decode(reader: Reader | Uint8Array, length?: number): EllipseArgs;
+    static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.EllipsePath;
     /**
      * EllipseArgs x.
      * @member {number} x
@@ -55,13 +40,4 @@ export default class EllipseArgs {
      * @instance
      */
     radiusY: number;
-    /**
-     * Constructs a new EllipseArgs.
-     * @memberof com.opensource.svga.ShapeEntity
-     * @classdesc Represents an EllipseArgs.
-     * @implements IEllipseArgs
-     * @constructor
-     * @param {com.opensource.svga.ShapeEntity.IEllipseArgs=} [properties] Properties to set
-     */
-    constructor(properties?: EllipseArgsProps);
 }

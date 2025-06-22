@@ -1,7 +1,6 @@
-import { unzlibSync } from "fflate";
+// import { unzlibSync } from "fflate";
+import { unzlibSync, createVideoEntity } from "../extensions";
 import { platform } from "../platform";
-import { parseSvga } from "../extensions/svga-decoder";
-import { VideoEntity } from "./VideoEntity";
 
 /**
  * SVGA 下载解析器
@@ -14,20 +13,13 @@ export class Parser {
    * @returns
    */
   static parseVideo(data: ArrayBuffer, url: string): PlatformVideo.Video {
-    const header = new Uint8Array(data, 0, 4);
     const u8a = new Uint8Array(data);
 
-    if (header.toString() === "80,75,3,4") {
+    if (u8a.subarray(0, 4).toString() === "80,75,3,4") {
       throw new Error("this parser only support version@2 of SVGA.");
     }
 
-    const inflateData = unzlibSync(u8a);
-    const movieData = parseSvga(inflateData);
-
-    return new VideoEntity(
-      movieData!,
-      platform.path.filename(url)
-    );
+    return createVideoEntity(unzlibSync(u8a), platform.path.filename(url));
   }
 
   /**

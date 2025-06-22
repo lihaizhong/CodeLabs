@@ -34,6 +34,7 @@ Component({
           loop: 1,
           playMode: "forwards",
           fillMode: "backwards",
+          contentMode: "aspect-fit",
         },
         this
       );

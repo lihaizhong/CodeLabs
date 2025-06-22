@@ -3,7 +3,7 @@ export interface ICommand {
     args: string;
 }
 export declare class Renderer2D {
-    private readonly context;
+    private context;
     /**
      * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Tutorial/Paths
      * 绘制路径的不同指令：
@@ -35,9 +35,10 @@ export declare class Renderer2D {
      */
     private static calculateScale;
     private readonly pointPool;
+    private currentPoint;
     private lastResizeKey;
     private globalTransform?;
-    constructor(context: PlatformRenderingContext2D);
+    constructor(context: PlatformRenderingContext2D | null);
     private setTransform;
     private drawBezier;
     private drawBezierElement;

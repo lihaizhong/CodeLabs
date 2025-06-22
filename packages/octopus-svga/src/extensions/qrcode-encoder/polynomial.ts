@@ -10,7 +10,7 @@ export class Polynomial {
   constructor(num: number[], shift: number) {
     const { length } = num;
 
-    if (length === void 0) {
+    if (length === undefined) {
       throw new Error(`${length}/${shift}`);
     }
 

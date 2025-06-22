@@ -1,33 +1,5 @@
 import Reader from "../io/Reader";
-import LineCap from "./LineCap";
-import LineJoin from "./LineJoin";
 import RGBAColor from "./RGBAColor";
-
-/**
- * Properties of a ShapeStyle.
- * @memberof com.opensource.svga.ShapeEntity
- * @interface IShapeStyle
- * @property {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor|null} [fill] ShapeStyle fill
- * @property {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor|null} [stroke] ShapeStyle stroke
- * @property {number|null} [strokeWidth] ShapeStyle strokeWidth
- * @property {com.opensource.svga.ShapeEntity.ShapeStyle.LineCap|null} [lineCap] ShapeStyle lineCap
- * @property {com.opensource.svga.ShapeEntity.ShapeStyle.LineJoin|null} [lineJoin] ShapeStyle lineJoin
- * @property {number|null} [miterLimit] ShapeStyle miterLimit
- * @property {number|null} [lineDashI] ShapeStyle lineDashI
- * @property {number|null} [lineDashII] ShapeStyle lineDashII
- * @property {number|null} [lineDashIII] ShapeStyle lineDashIII
- */
-export interface ShapeStyleProps {
-  fill: RGBAColor | null;
-  stroke: RGBAColor | null;
-  strokeWidth: number | null;
-  lineCap: LineCap | null;
-  lineJoin: LineJoin | null;
-  miterLimit: number | null;
-  lineDashI: number | null;
-  lineDashII: number | null;
-  lineDashIII: number | null;
-}
 
 export default class ShapeStyle {
   /**
@@ -41,12 +13,15 @@ export default class ShapeStyle {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(reader: Reader | Uint8Array, length?: number): ShapeStyle {
+  static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.VideoStyles {
     reader = Reader.create(reader);
-    const end = length === void 0 ? reader.len : reader.pos + length;
+
+    const end = length === undefined ? reader.len : reader.pos + length;
     const message = new ShapeStyle();
+    let tag: number;
+
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
           message.fill = RGBAColor.decode(
@@ -96,7 +71,68 @@ export default class ShapeStyle {
       }
     }
 
-    return message;
+    return ShapeStyle.format(message);
+  }
+
+  static format(message: ShapeStyle): PlatformVideo.VideoStyles {
+    const { fill, stroke, strokeWidth, miterLimit, lineDashI, lineDashII, lineDashIII } = message;
+    const lineDash: number[] = [];
+    let lineCap: CanvasLineCap;
+    let lineJoin: CanvasLineJoin;
+
+    if (lineDashI > 0) {
+      lineDash.push(lineDashI);
+    }
+
+    if (lineDashII > 0) {
+      if (lineDash.length < 1) {
+        lineDash.push(0);
+      }
+
+      lineDash.push(lineDashII);
+    }
+
+    if (lineDashIII > 0) {
+      if (lineDash.length < 2) {
+        lineDash.push(0, 0);
+      }
+
+      lineDash.push(lineDashIII);
+    }
+
+    switch (message.lineCap) {
+      case PlatformVideo.LINE_CAP_CODE.BUTT:
+        lineCap = PlatformVideo.LINE_CAP.BUTT;
+        break;
+      case PlatformVideo.LINE_CAP_CODE.ROUND:
+        lineCap = PlatformVideo.LINE_CAP.ROUND;
+        break;
+      case PlatformVideo.LINE_CAP_CODE.SQUARE:
+        lineCap = PlatformVideo.LINE_CAP.SQUARE;
+        break;
+    }
+
+    switch (message.lineJoin) {
+      case PlatformVideo.LINE_JOIN_CODE.MITER:
+        lineJoin = PlatformVideo.LINE_JOIN.MITER;
+        break;
+      case PlatformVideo.LINE_JOIN_CODE.ROUND:
+        lineJoin = PlatformVideo.LINE_JOIN.ROUND;
+        break;
+      case PlatformVideo.LINE_JOIN_CODE.BEVEL:
+        lineJoin = PlatformVideo.LINE_JOIN.BEVEL;
+        break;
+    }
+
+    return {
+      lineDash,
+      fill: fill ? fill : null,
+      stroke: stroke ? stroke : null,
+      lineCap,
+      lineJoin,
+      strokeWidth,
+      miterLimit
+    }
   }
 
   /**
@@ -105,14 +141,14 @@ export default class ShapeStyle {
    * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
    * @instance
    */
-  fill: RGBAColor | null = null;
+  fill: PlatformVideo.RGBA<number, number, number, number> | null = null;
   /**
    * ShapeStyle stroke.
    * @member {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor|null|undefined} stroke
    * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
    * @instance
    */
-  stroke: RGBAColor | null = null;
+  stroke: PlatformVideo.RGBA<number, number, number, number> | null = null;
   /**
    * ShapeStyle strokeWidth.
    * @member {number} strokeWidth
@@ -126,14 +162,14 @@ export default class ShapeStyle {
    * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
    * @instance
    */
-  lineCap: LineCap = 0;
+  lineCap: PlatformVideo.LINE_CAP_CODE = 0;
   /**
    * ShapeStyle lineJoin.
    * @member {com.opensource.svga.ShapeEntity.ShapeStyle.LineJoin} lineJoin
    * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
    * @instance
    */
-  lineJoin: LineJoin = 0;
+  lineJoin: PlatformVideo.LINE_JOIN_CODE = 0;
   /**
    * ShapeStyle miterLimit.
    * @member {number} miterLimit
@@ -162,52 +198,4 @@ export default class ShapeStyle {
    * @instance
    */
   lineDashIII: number = 0;
-
-  /**
-   * Constructs a new ShapeStyle.
-   * @memberof com.opensource.svga.ShapeEntity
-   * @classdesc Represents a ShapeStyle.
-   * @implements IShapeStyle
-   * @constructor
-   * @param {com.opensource.svga.ShapeEntity.IShapeStyle=} [properties] Properties to set
-   */
-  constructor(properties?: ShapeStyleProps) {
-    if (properties) {
-      if (properties.fill !== null) {
-        this.fill = properties.fill
-      }
-
-      if (properties.lineCap !== null) {
-        this.lineCap = properties.lineCap
-      }
-
-      if (properties.lineDashI !== null) {
-        this.lineDashI = properties.lineDashI
-      }
-
-      if (properties.lineDashII !== null) {
-        this.lineDashII = properties.lineDashII
-      }
-
-      if (properties.lineDashIII !== null) {
-        this.lineDashIII = properties.lineDashIII
-      }
-
-      if (properties.lineJoin !== null) {
-        this.lineJoin = properties.lineJoin
-      }
-
-      if (properties.miterLimit !== null) {
-        this.miterLimit = properties.miterLimit
-      }
-
-      if (properties.stroke !== null) {
-        this.stroke = properties.stroke
-      }
-
-      if (properties.strokeWidth !== null) {
-        this.strokeWidth = properties.strokeWidth
-      }
-    }
-  }
 }

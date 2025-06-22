@@ -30,12 +30,15 @@ export default class RectArgs {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(reader: Reader | Uint8Array, length?: number): RectArgs {
+  static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.RectPath {
     reader = Reader.create(reader);
-    const end = length === void 0 ? reader.len : reader.pos + length;
+
+    const end = length === undefined ? reader.len : reader.pos + length;
     const message = new RectArgs();
+    let tag: number;
+
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
           message.x = reader.float();
@@ -101,36 +104,4 @@ export default class RectArgs {
    * @instance
    */
   cornerRadius: number = 0;
-
-  /**
-   * Constructs a new RectArgs.
-   * @memberof com.opensource.svga.ShapeEntity
-   * @classdesc Represents a RectArgs.
-   * @implements IRectArgs
-   * @constructor
-   * @param {com.opensource.svga.ShapeEntity.IRectArgs=} [properties] Properties to set
-   */
-  constructor(properties?: RectArgsProps) {
-    if (properties) {
-      if (properties.x !== null) {
-        this.x = properties.x
-      }
-
-      if (properties.y !== null) {
-        this.y = properties.y
-      }
-
-      if (properties.width !== null) {
-        this.width = properties.width
-      }
-
-      if (properties.height !== null) {
-        this.height = properties.height
-      }
-
-      if (properties.cornerRadius !== null) {
-        this.cornerRadius = properties.cornerRadius
-      }
-    }
-  }
 }

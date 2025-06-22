@@ -1,4 +1,5 @@
-import { zlibSync } from "fflate";
+// import { zlibSync } from "fflate";
+import { zlibSync } from "../zlib";
 import { CRC32 } from "./crc";
 
 export class PNGEncoder {

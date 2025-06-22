@@ -28,12 +28,15 @@ export default class RGBAColor {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(reader: Reader | Uint8Array, length?: number): RGBAColor {
+  static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.RGBA<number, number, number, number> {
     reader = Reader.create(reader);
-    const end = length === void 0 ? reader.len : reader.pos + length;
+
+    const end = length === undefined ? reader.len : reader.pos + length;
     const message = new RGBAColor();
+    let tag: number;
+
     while (reader.pos < end) {
-      const tag = reader.uint32();
+      tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
           message.r = reader.float();
@@ -57,7 +60,17 @@ export default class RGBAColor {
       }
     }
 
-    return message;
+    return RGBAColor.format(message);
+  }
+
+  static format(
+    message: RGBAColor
+  ): PlatformVideo.RGBA<number, number, number, number> {
+    const { r, g, b, a } = message;
+
+    return `rgba(${(r * 255) | 0}, ${(g * 255) | 0}, ${(b * 255) | 0}, ${
+      (a * 1) | 0
+    })`;
   }
 
   /**
@@ -88,32 +101,4 @@ export default class RGBAColor {
    * @instance
    */
   a: number = 0;
-
-  /**
-   * Constructs a new RGBAColor.
-   * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
-   * @classdesc Represents a RGBAColor.
-   * @implements IRGBAColor
-   * @constructor
-   * @param {com.opensource.svga.ShapeEntity.ShapeStyle.IRGBAColor=} [properties] Properties to set
-   */
-  constructor(properties?: RGBAColorProps) {
-    if (properties) {
-      if (properties.r !== null) {
-        this.r = properties.r
-      }
-
-      if (properties.g !== null) {
-        this.g = properties.g
-      }
-
-      if (properties.b !== null) {
-        this.b = properties.b
-      }
-
-      if (properties.a !== null) {
-        this.a = properties.a
-      }
-    }
-  }
 }

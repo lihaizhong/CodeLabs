@@ -1,4 +1,9 @@
-import { Parser, Player, VideoEditor, benchmark } from "../../utils/fuck-svga";
+import {
+  Parser,
+  Player,
+  VideoEditor,
+  benchmark,
+} from "../../utils/fuck-svga";
 import ReadyGo from "../../utils/ReadyGo";
 
 let player;
@@ -29,9 +34,10 @@ Component({
       await player.setConfig(
         {
           container: "#palette",
-          // loop: 1,
+          loop: 1,
           playMode: "forwards",
           fillMode: "backwards",
+          contentMode: "aspect-fit",
         },
         this
       );
@@ -59,6 +65,7 @@ Component({
     async initialize() {
       try {
         const { source } = this.properties;
+        let rawVideoItem;
         let videoItem;
 
         if (cache.has(source)) {
@@ -66,28 +73,38 @@ Component({
           videoItem = cache.get(source);
         } else {
           this.setData({ message: "准备下载资源" });
-          await benchmark.time("load", async () => {
-            if (typeof source === "string") {
-              videoItem = await Parser.load(source);
-            } else {
-              videoItem = await Parser.load(source.url);
+          if (typeof source === "string") {
+            rawVideoItem = await benchmark.time("download", () =>
+              Parser.download(source)
+            );
+            videoItem = await benchmark.time("parse video", () =>
+              Parser.parseVideo(rawVideoItem, source)
+            );
+          } else {
+            rawVideoItem = await benchmark.time("download", () =>
+              Parser.download(source.url)
+            );
+            videoItem = await benchmark.time("parse video", () =>
+              Parser.parseVideo(rawVideoItem, source.url)
+            );
 
-              // 替换元素
-              if (source.replace) {
-                const editor = new VideoEditor(
-                  player.painter,
-                  player.resource,
-                  videoItem
-                );
+            // 替换元素
+            if (source.replace) {
+              const editor = new VideoEditor(
+                player.painter,
+                player.resource,
+                videoItem
+              );
 
-                await Promise.all(
+              await benchmark.time("replace images", () =>
+                Promise.all(
                   Object.keys(source.replace).map((key) =>
                     editor.setImage(key, source.replace[key])
                   )
-                );
-              }
+                )
+              );
             }
-          });
+          }
 
           cache.set(source, videoItem);
           this.setData({ message: "下载资源成功" });

@@ -14,7 +14,7 @@ export declare class VideoEditor {
      * 获取自定义编辑器
      * @returns
      */
-    getContext(): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
+    getContext(): OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D | null;
     /**
      * 是否是有效的Key
      * @param key

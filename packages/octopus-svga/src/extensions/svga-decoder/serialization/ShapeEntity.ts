@@ -1,30 +1,9 @@
 import Reader from "../io/Reader";
 import Transform from "./Transform";
-import ShapeType from "./ShapeType";
 import ShapeArgs from "./ShapeArgs";
 import RectArgs from "./RectArgs";
 import EllipseArgs from "./EllipseArgs";
 import ShapeStyle from "./ShapeStyle";
-
-/**
- * Properties of a ShapeEntity.
- * @memberof com.opensource.svga
- * @interface IShapeEntity
- * @property {com.opensource.svga.ShapeEntity.ShapeType|null} [type] ShapeEntity type
- * @property {com.opensource.svga.ShapeEntity.IShapeArgs|null} [shape] ShapeEntity shape
- * @property {com.opensource.svga.ShapeEntity.IRectArgs|null} [rect] ShapeEntity rect
- * @property {com.opensource.svga.ShapeEntity.IEllipseArgs|null} [ellipse] ShapeEntity ellipse
- * @property {com.opensource.svga.ShapeEntity.IShapeStyle|null} [styles] ShapeEntity styles
- * @property {com.opensource.svga.ITransform|null} [transform] ShapeEntity transform
- */
-export interface ShapeEntityProps {
-  type: ShapeType | null;
-  shape: ShapeArgs | null;
-  rect: RectArgs | null;
-  ellipse: EllipseArgs | null;
-  styles: ShapeStyle | null;
-  transform: Transform | null;
-}
 
 export default class ShapeEntity {
   /**
@@ -38,12 +17,15 @@ export default class ShapeEntity {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(reader: Reader | Uint8Array, length?: number): ShapeEntity {
+  static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.VideoFrameShape | null {
     reader = Reader.create(reader);
-    const end = length === void 0 ? reader.len : reader.pos + length;
+
+    const end = length === undefined ? reader.len : reader.pos + length;
     const message = new ShapeEntity();
+    let tag: number;
+
     while (reader.pos < end) {
-      let tag = reader.uint32();
+      tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
           message.type = reader.int32();
@@ -81,7 +63,38 @@ export default class ShapeEntity {
       }
     }
 
-    return message;
+    return ShapeEntity.format(message);
+  }
+
+  static format(message: ShapeEntity): PlatformVideo.VideoFrameShape | null {
+    const { type, shape, rect, ellipse, styles, transform } = message;
+
+    switch (type) {
+      case PlatformVideo.SHAPE_TYPE_CODE.SHAPE:
+        return {
+          type: PlatformVideo.SHAPE_TYPE.SHAPE,
+          path: shape!,
+          styles: styles!,
+          transform: transform!,
+        };
+      case PlatformVideo.SHAPE_TYPE_CODE.RECT:
+        return {
+          type: PlatformVideo.SHAPE_TYPE.RECT,
+          path: rect!,
+          styles: styles!,
+          transform: transform!,
+        };
+      case PlatformVideo.SHAPE_TYPE_CODE.ELLIPSE:
+        return {
+          type: PlatformVideo.SHAPE_TYPE.ELLIPSE,
+          path: ellipse!,
+          styles: styles!,
+          transform: transform!,
+        };
+      default:
+    }
+
+    return null;
   }
 
   /**
@@ -90,110 +103,40 @@ export default class ShapeEntity {
    * @memberof com.opensource.svga.ShapeEntity
    * @instance
    */
-  type: ShapeType = 0;
+  type: PlatformVideo.SHAPE_TYPE_CODE = 0;
   /**
    * ShapeEntity shape.
    * @member {com.opensource.svga.ShapeEntity.IShapeArgs|null|undefined} shape
    * @memberof com.opensource.svga.ShapeEntity
    * @instance
    */
-  shape: ShapeArgs | null = null;
+  shape: PlatformVideo.ShapePath | null = null;
   /**
    * ShapeEntity rect.
    * @member {com.opensource.svga.ShapeEntity.IRectArgs|null|undefined} rect
    * @memberof com.opensource.svga.ShapeEntity
    * @instance
    */
-  rect: RectArgs | null = null;
+  rect: PlatformVideo.RectPath | null = null;
   /**
    * ShapeEntity ellipse.
    * @member {com.opensource.svga.ShapeEntity.IEllipseArgs|null|undefined} ellipse
    * @memberof com.opensource.svga.ShapeEntity
    * @instance
    */
-  ellipse: EllipseArgs | null = null;
+  ellipse: PlatformVideo.EllipsePath | null = null;
   /**
    * ShapeEntity styles.
    * @member {com.opensource.svga.ShapeEntity.IShapeStyle|null|undefined} styles
    * @memberof com.opensource.svga.ShapeEntity
    * @instance
    */
-  styles: ShapeStyle | null = null;
+  styles: PlatformVideo.VideoStyles | null = null;
   /**
    * ShapeEntity transform.
    * @member {com.opensource.svga.ITransform|null|undefined} transform
    * @memberof com.opensource.svga.ShapeEntity
    * @instance
    */
-  transform: Transform | null = null;
-
-  private $oneOfFields: ["shape", "rect", "ellipse"] = [
-    "shape",
-    "rect",
-    "ellipse",
-  ];
-
-  private $fieldMap: Record<string, number> = {};
-
-  get args() {
-    const keys = Object.keys(this) as ["shape", "rect", "ellipse"];
-    for (let i = keys.length - 1; i > -1; --i) {
-      const key = keys[i];
-      const value = this[key];
-      if (this.$fieldMap[key] === 1 && value !== null) {
-        return key;
-      }
-    }
-
-    return "" as "shape" | "rect" | "ellipse";
-  }
-
-  set args(name: "shape" | "rect" | "ellipse") {
-    for (var i = 0; i < this.$oneOfFields.length; ++i) {
-      const key = this.$oneOfFields[i];
-      if (key !== name) {
-        delete this[key];
-      }
-    }
-  }
-
-  /**
-   * Constructs a new ShapeEntity.
-   * @memberof com.opensource.svga
-   * @classdesc Represents a ShapeEntity.
-   * @implements IShapeEntity
-   * @constructor
-   * @param {com.opensource.svga.IShapeEntity=} [properties] Properties to set
-   */
-  constructor(properties?: ShapeEntityProps) {
-    if (properties) {
-      if (properties.type !== null) {
-        this.type = properties.type;
-      }
-
-      if (properties.ellipse !== null) {
-        this.ellipse = properties.ellipse;
-      }
-
-      if (properties.rect !== null) {
-        this.rect = properties.rect;
-      }
-
-      if (properties.shape !== null) {
-        this.shape = properties.shape;
-      }
-
-      if (properties.styles !== null) {
-        this.styles = properties.styles;
-      }
-
-      if (properties.transform !== null) {
-        this.transform = properties.transform;
-      }
-    }
-
-    for (var i = 0; i < this.$oneOfFields.length; ++i) {
-      this.$fieldMap[this.$oneOfFields[i]] = 1;
-    }
-  }
+  transform: PlatformVideo.Transform | null = null;
 }

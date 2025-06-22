@@ -28,7 +28,7 @@ export default class RectArgs {
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decode(reader: Reader | Uint8Array, length?: number): RectArgs;
+    static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.RectPath;
     /**
      * RectArgs x.
      * @member {number} x
@@ -64,13 +64,4 @@ export default class RectArgs {
      * @instance
      */
     cornerRadius: number;
-    /**
-     * Constructs a new RectArgs.
-     * @memberof com.opensource.svga.ShapeEntity
-     * @classdesc Represents a RectArgs.
-     * @implements IRectArgs
-     * @constructor
-     * @param {com.opensource.svga.ShapeEntity.IRectArgs=} [properties] Properties to set
-     */
-    constructor(properties?: RectArgsProps);
 }

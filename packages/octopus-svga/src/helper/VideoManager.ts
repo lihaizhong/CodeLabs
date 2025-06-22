@@ -12,6 +12,11 @@ export interface Bucket {
   // filesize: number;
   // 下载实例中
   promise: Promise<PlatformVideo.Video | null> | null;
+  // 状态
+  // 0: 未加载
+  // 1: 加载完成
+  // 2: 解析完成
+  status: number;
 }
 
 export interface NeedUpdatePoint {
@@ -87,12 +92,12 @@ export class VideoManager {
    * @returns
    */
   private updateBucketOperators(point: number): NeedUpdatePoint[] {
-    const { remainStart, remainEnd } = this;
+    const { remainStart: latestRemainStart, remainEnd: latestRemainEnd } = this;
 
     this.point = point;
     this.updateRemainPoints();
 
-    if (remainStart === remainEnd) {
+    if (latestRemainStart === latestRemainEnd) {
       return [
         {
           action: "add",
@@ -102,12 +107,12 @@ export class VideoManager {
       ];
     }
 
-    if (this.remainStart > remainEnd || this.remainEnd < remainStart) {
+    if (this.remainStart > latestRemainEnd || this.remainEnd < latestRemainStart) {
       return [
         {
           action: "remove",
-          start: remainStart,
-          end: remainEnd,
+          start: latestRemainStart,
+          end: latestRemainEnd,
         },
         {
           action: "add",
@@ -117,32 +122,32 @@ export class VideoManager {
       ];
     }
 
-    if (this.remainStart > remainStart && this.remainEnd > remainEnd) {
+    if (this.remainStart > latestRemainStart && this.remainEnd > latestRemainEnd) {
       return [
         {
           action: "remove",
-          start: remainStart,
+          start: latestRemainStart,
           end: this.remainStart,
         },
         {
           action: "add",
-          start: remainEnd,
+          start: latestRemainEnd,
           end: this.remainEnd,
         },
       ];
     }
 
-    if (this.remainStart < remainStart && this.remainEnd < remainEnd) {
+    if (this.remainStart < latestRemainStart && this.remainEnd < latestRemainEnd) {
       return [
         {
           action: "remove",
           start: this.remainEnd,
-          end: remainEnd,
+          end: latestRemainEnd,
         },
         {
           action: "add",
           start: this.remainStart,
-          end: remainStart,
+          end: latestRemainStart,
         },
       ];
     }
@@ -210,6 +215,7 @@ export class VideoManager {
       local: "",
       entity: null,
       promise: null,
+      status: 0,
     };
 
     if (env === "h5" || env === "tt") {
@@ -237,7 +243,6 @@ export class VideoManager {
           console.error(ex);
         }
 
-        // bucket.filesize = buff.byteLength / 8;
         if (inRemainRange) {
           return Parser.parseVideo(buff, url);
         }
