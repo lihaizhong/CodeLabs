@@ -1,7 +1,7 @@
 import { VideoManager, platform } from "octopus-svga";
 import { posterFiles } from "../../utils/constants";
 
-const files = posterFiles.map((item) => item.src);
+const files = posterFiles.map((item) => item.url);
 const videoManager = new VideoManager();
 
 async function render(current) {

@@ -4,10 +4,11 @@ import {
   svgaSources,
   svgaLargeSources,
   yySources,
+  svgaHugeSources,
   getOneAtRandom,
 } from "../../utils/constants";
 
-const files = [svgaSources, svgaLargeSources, yySources][2];
+const files = [svgaSources, svgaLargeSources, svgaHugeSources, yySources][2];
 const player = new Player();
 let videoItem;
 let lastStatus = "next";
