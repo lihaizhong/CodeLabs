@@ -4,7 +4,7 @@ import Transform from "./Transform";
 import ShapeEntity from "./ShapeEntity";
 
 export default class FrameEntity {
-  private static EMPTY_FRAME: PlatformVideo.HiddenVideoFrame = {
+  private static HIDDEN_FRAME: PlatformVideo.HiddenVideoFrame = {
     alpha: 0,
   };
 
@@ -69,7 +69,7 @@ export default class FrameEntity {
   private static format(message: FrameEntity): PlatformVideo.VideoFrame | PlatformVideo.HiddenVideoFrame {
     // alpha值小于 0.05 将不展示，所以不做解析处理
     if (message.alpha < 0.05) {
-      return FrameEntity.EMPTY_FRAME;
+      return FrameEntity.HIDDEN_FRAME;
     }
 
     const { alpha, layout, transform, shapes } = message;

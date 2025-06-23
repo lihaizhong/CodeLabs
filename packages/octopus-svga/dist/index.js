@@ -1035,7 +1035,7 @@ class ShapeEntity {
 }
 
 class FrameEntity {
-    static EMPTY_FRAME = {
+    static HIDDEN_FRAME = {
         alpha: 0,
     };
     /**
@@ -1093,7 +1093,7 @@ class FrameEntity {
     static format(message) {
         // alpha值小于 0.05 将不展示，所以不做解析处理
         if (message.alpha < 0.05) {
-            return FrameEntity.EMPTY_FRAME;
+            return FrameEntity.HIDDEN_FRAME;
         }
         const { alpha, layout, transform, shapes } = message;
         return {
@@ -1368,7 +1368,7 @@ class MovieEntity {
         const { fps, frames, viewBoxWidth, viewBoxHeight } = message.params;
         return {
             version,
-            filename: '',
+            filename: "",
             locked: false,
             dynamicElements: {},
             size: {
