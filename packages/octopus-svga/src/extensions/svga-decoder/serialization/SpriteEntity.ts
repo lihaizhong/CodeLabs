@@ -44,7 +44,31 @@ export default class SpriteEntity {
       }
     }
 
-    return message;
+    return SpriteEntity.format(message);
+  }
+
+  static format(message: SpriteEntity): PlatformVideo.VideoSprite {
+    const { imageKey, frames } = message;
+    let lastShapes: PlatformVideo.VideoFrameShape[] = [];
+
+    for (let i = 0; i < frames.length; i++) {
+      const mFrame = frames[i] as PlatformVideo.VideoFrame;
+
+      if (mFrame.alpha === 0) {
+        continue;
+      }
+
+      if (mFrame.shapes.length === 0) {
+        mFrame.shapes = lastShapes;
+      } else {
+        lastShapes = mFrame.shapes;
+      }
+    }
+
+    return {
+      imageKey,
+      frames,
+    };
   }
 
   /**

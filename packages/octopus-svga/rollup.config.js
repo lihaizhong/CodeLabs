@@ -20,6 +20,6 @@ export default {
     }),
     commonjs(),
     typescript({ tsconfig: "./tsconfig.build.json" }),
-    terser(),
+    // terser(),
   ],
 };

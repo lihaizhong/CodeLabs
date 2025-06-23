@@ -48,14 +48,9 @@ export default class Layout {
   }
 
   static format(message: Layout): PlatformVideo.Rect {
-    const { x, y, width, height } = message;
+    const { x = 0, y = 0, width = 0, height = 0 } = message;
 
-    return {
-      x: (x + 0.5) || 0,
-      y: (y + 0.5) || 0,
-      width: (width + 0.5) || 0,
-      height: (height + 0.5) || 0,
-    };
+    return { x, y, width, height };
   }
 
   /**

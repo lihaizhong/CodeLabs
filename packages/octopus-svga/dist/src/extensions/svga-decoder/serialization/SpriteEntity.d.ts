@@ -12,6 +12,7 @@ export default class SpriteEntity {
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
     static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.VideoSprite;
+    static format(message: SpriteEntity): PlatformVideo.VideoSprite;
     /**
      * SpriteEntity frames.
      * @member {Array.<com.opensource.svga.IFrameEntity>} frames

@@ -14,7 +14,10 @@ export default class MovieEntity {
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.Video {
+  static decode(
+    reader: Reader | Uint8Array,
+    length?: number
+  ): PlatformVideo.Video {
     reader = Reader.create(reader);
 
     const end = length === undefined ? reader.len : reader.pos + length;
@@ -78,7 +81,7 @@ export default class MovieEntity {
 
     return {
       version,
-      filename: '',
+      filename: "",
       locked: false,
       dynamicElements: {},
       size: {

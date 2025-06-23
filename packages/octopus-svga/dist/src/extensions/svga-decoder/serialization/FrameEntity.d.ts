@@ -1,5 +1,6 @@
 import Reader from "../io/Reader";
 export default class FrameEntity {
+    private static EMPTY_FRAME;
     /**
      * Decodes a FrameEntity message from the specified reader or buffer.
      * @function decode

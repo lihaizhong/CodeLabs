@@ -8,7 +8,7 @@ import {
   getOneAtRandom,
 } from "../../utils/constants";
 
-const files = [svgaSources, svgaLargeSources, svgaHugeSources, yySources][2];
+const files = [svgaSources, svgaLargeSources, svgaHugeSources, yySources][3];
 const player = new Player();
 let videoItem;
 let lastStatus = "next";

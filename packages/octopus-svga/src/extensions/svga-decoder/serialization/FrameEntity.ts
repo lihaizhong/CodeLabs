@@ -4,6 +4,10 @@ import Transform from "./Transform";
 import ShapeEntity from "./ShapeEntity";
 
 export default class FrameEntity {
+  private static EMPTY_FRAME: PlatformVideo.HiddenVideoFrame = {
+    alpha: 0,
+  };
+
   /**
    * Decodes a FrameEntity message from the specified reader or buffer.
    * @function decode
@@ -42,9 +46,10 @@ export default class FrameEntity {
           break;
         }
         case 5: {
-          if (!(message.shapes && message.shapes.length)) {
+          if (!Array.isArray(message.shapes)) {
             message.shapes = [];
           }
+
           const shape = ShapeEntity.decode(reader, reader.uint32())
 
           if (shape !== null) {
@@ -64,7 +69,7 @@ export default class FrameEntity {
   private static format(message: FrameEntity): PlatformVideo.VideoFrame | PlatformVideo.HiddenVideoFrame {
     // alpha值小于 0.05 将不展示，所以不做解析处理
     if (message.alpha < 0.05) {
-      return { alpha: 0 };
+      return FrameEntity.EMPTY_FRAME;
     }
 
     const { alpha, layout, transform, shapes } = message;
