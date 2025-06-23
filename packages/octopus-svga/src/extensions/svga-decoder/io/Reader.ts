@@ -124,6 +124,7 @@ export default class Reader {
     }
 
     const value = readFloatLE(this.buf, this.pos);
+
     this.pos += 4;
 
     return value;
@@ -149,6 +150,7 @@ export default class Reader {
     const [start, end, length] = this.getBytesRange();
 
     this.pos += length;
+
     if (length === 0) {
       return Reader.EMPTY_UINT8ARRAY;
     }
@@ -180,38 +182,49 @@ export default class Reader {
       if (this.pos + length > this.len) {
         throw this.indexOutOfRange(this, length);
       }
+
       this.pos += length;
+
       return this;
     }
     
     // 变长整数跳过优化 - 使用位运算
     const buf = this.buf;
-    let pos = this.pos;
     const len = this.len;
+    let pos = this.pos;
     
     // 一次检查多个字节，减少循环次数
     while (pos < len) {
       const byte = buf[pos++];
+
       if ((byte & 0x80) === 0) {
         this.pos = pos;
+
         return this;
       }
+
       // 快速检查连续的高位字节
       if (pos < len && (buf[pos] & 0x80) !== 0) {
         pos++;
+
         if (pos < len && (buf[pos] & 0x80) !== 0) {
           pos++;
+
           if (pos < len && (buf[pos] & 0x80) !== 0) {
             pos++;
+
             // 继续检查剩余字节
             while (pos < len && (buf[pos] & 0x80) !== 0) {
               pos++;
+
               if (pos - this.pos >= 10) {
                 throw Error("invalid varint encoding");
               }
             }
+
             if (pos < len) {
               this.pos = pos + 1;
+
               return this;
             }
           }
@@ -251,6 +264,7 @@ export default class Reader {
       default:
         throw Error("invalid wire type " + wireType + " at offset " + this.pos);
     }
+
     return this;
   }
 }
