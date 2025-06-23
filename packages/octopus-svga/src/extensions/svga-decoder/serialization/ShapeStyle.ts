@@ -14,7 +14,7 @@ export default class ShapeStyle {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader, length?: number): PlatformVideo.VideoStyles {
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = reader.end(length);
     const message = new ShapeStyle();
     let tag: number;
 

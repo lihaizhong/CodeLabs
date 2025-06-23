@@ -37,6 +37,7 @@ export default class Reader {
      * @returns
      */
     private readVarint32Slow;
+    end(length?: number): number;
     /**
      * Reads a varint as an unsigned 32 bit value.
      * @function

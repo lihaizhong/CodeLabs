@@ -89,6 +89,10 @@ export default class Reader {
     return value >>> 0; // 确保无符号
   }
 
+  end(length?: number) {
+    return length === undefined ? this.len : this.pos + length
+  }
+
   /**
    * Reads a varint as an unsigned 32 bit value.
    * @function

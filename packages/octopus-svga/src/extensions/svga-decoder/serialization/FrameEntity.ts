@@ -20,7 +20,7 @@ export default class FrameEntity {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader, length?: number): PlatformVideo.VideoFrame | PlatformVideo.HiddenVideoFrame {
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = reader.end(length);
     const message = new FrameEntity();
     let tag: number;
 

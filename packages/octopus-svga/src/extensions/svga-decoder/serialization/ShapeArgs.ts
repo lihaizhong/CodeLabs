@@ -23,7 +23,7 @@ export default class ShapeArgs {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader, length?: number): PlatformVideo.ShapePath {
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = reader.end(length);
     const message = new ShapeArgs();
     let tag: number;
 

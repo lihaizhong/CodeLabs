@@ -15,11 +15,13 @@ export default class MovieEntity {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader, length?: number): PlatformVideo.Video {
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = reader.end(length);
     const message = new MovieEntity();
     let key: string;
     let value: Uint8Array;
+    let end2: number;
     let tag: number;
+    let tag2: number;
 
     while (reader.pos < end) {
       tag = reader.uint32();
@@ -33,11 +35,12 @@ export default class MovieEntity {
           break;
         }
         case 3: {
-          const end2 = reader.uint32() + reader.pos;
+          end2 = reader.uint32() + reader.pos;
           key = "";
           value = new Uint8Array(0);
+
           while (reader.pos < end2) {
-            let tag2 = reader.uint32();
+            tag2 = reader.uint32();
             switch (tag2 >>> 3) {
               case 1:
                 key = reader.string();
@@ -50,14 +53,11 @@ export default class MovieEntity {
                 break;
             }
           }
+
           message.images[key] = value;
           break;
         }
         case 4: {
-          if (!(message.sprites && message.sprites.length)) {
-            message.sprites = [];
-          }
-
           message.sprites.push(SpriteEntity.decode(reader, reader.uint32()));
           break;
         }

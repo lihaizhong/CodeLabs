@@ -18,7 +18,7 @@ export default class ShapeEntity {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader, length?: number): PlatformVideo.VideoFrameShape | null {
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = reader.end(length);
     const message = new ShapeEntity();
     let tag: number;
 

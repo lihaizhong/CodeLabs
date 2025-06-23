@@ -29,7 +29,7 @@ export default class RGBAColor {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader, length?: number): PlatformVideo.RGBA<number, number, number, number> {
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = reader.end(length);
     const message = new RGBAColor();
     let tag: number;
 

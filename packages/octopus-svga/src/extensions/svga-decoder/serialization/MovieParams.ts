@@ -13,7 +13,7 @@ export default class MovieParams {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader, length?: number): PlatformVideo.VideoParams {
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = reader.end(length);
     const message = new MovieParams();
     let tag: number;
 

@@ -14,7 +14,7 @@ export default class SpriteEntity {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader, length?: number): PlatformVideo.VideoSprite {
-    const end = length === undefined ? reader.len : reader.pos + length;
+    const end = reader.end(length);
     const message = new SpriteEntity();
     let tag: number;
 
