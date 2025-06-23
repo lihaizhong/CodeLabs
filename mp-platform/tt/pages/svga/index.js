@@ -1,4 +1,10 @@
-import { svgaSources, svgaReplaceSources, svgaLargeSources, svgaHugeSources, getOneAtRandom } from "../../utils/constants";
+import {
+  svgaSources,
+  svgaReplaceSources,
+  svgaLargeSources,
+  svgaHugeSources,
+  getOneAtRandom,
+} from "../../utils/constants";
 
 const sources = svgaLargeSources;
 
@@ -51,7 +57,7 @@ Page({
 
     this.setData({
       current,
-      source: sources[current]
-    })
+      source: sources[current],
+    });
   },
 });
