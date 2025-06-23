@@ -18,6 +18,7 @@ export default class SpriteEntity {
     const message = new SpriteEntity();
     let tag: number;
 
+    reader.preflight.set("latest_shapes", []);
     while (reader.pos < end) {
       tag = reader.uint32();
       switch (tag >>> 3) {
@@ -29,6 +30,7 @@ export default class SpriteEntity {
           if (!(message.frames && message.frames.length)) {
             message.frames = [];
           }
+
           message.frames.push(FrameEntity.decode(reader, reader.uint32()));
           break;
         }
@@ -46,26 +48,9 @@ export default class SpriteEntity {
   }
 
   static format(message: SpriteEntity): PlatformVideo.VideoSprite {
-    const { imageKey, frames } = message;
-    let lastShapes: PlatformVideo.VideoFrameShape[] = [];
-
-    for (let i = 0; i < frames.length; i++) {
-      const mFrame = frames[i] as PlatformVideo.VideoFrame;
-
-      if (mFrame.alpha === 0) {
-        continue;
-      }
-
-      if (mFrame.shapes.length === 0) {
-        mFrame.shapes = lastShapes;
-      } else {
-        lastShapes = mFrame.shapes;
-      }
-    }
-
     return {
-      imageKey,
-      frames,
+      imageKey: message.imageKey,
+      frames: message.frames,
     };
   }
 

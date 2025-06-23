@@ -44,10 +44,6 @@ export default class FrameEntity {
           break;
         }
         case 5: {
-          if (!Array.isArray(message.shapes)) {
-            message.shapes = [];
-          }
-
           const shape = ShapeEntity.decode(reader, reader.uint32())
 
           if (shape !== null) {
@@ -59,6 +55,12 @@ export default class FrameEntity {
           reader.skipType(tag & 7);
           break;
       }
+    }
+
+    if (message.shapes.length === 0) {
+      message.shapes = reader.preflight.get("latest_shapes");
+    } else {
+      reader.preflight.set("latest_shapes", message.shapes);
     }
 
     return FrameEntity.format(message);
