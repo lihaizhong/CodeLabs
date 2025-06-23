@@ -1,3 +1,4 @@
+import { Preflight } from "./preflight";
 export default class Reader {
     private static EMPTY_UINT8ARRAY;
     /**
@@ -7,7 +8,6 @@ export default class Reader {
      * @returns {Reader|BufferReader} A {@link BufferReader} if `buffer` is a Buffer, otherwise a {@link Reader}
      * @throws {Error} If `buffer` is not a valid buffer
      */
-    static create(buffer: Reader | Uint8Array): Reader;
     /**
      * Read buffer.
      * @type {Uint8Array}
@@ -23,6 +23,7 @@ export default class Reader {
      * @type {number}
      */
     len: number;
+    preflight: Preflight;
     /**
      * Constructs a new reader instance using the specified buffer.
      * @classdesc Wire format reader using `Uint8Array` if available, otherwise `Array`.

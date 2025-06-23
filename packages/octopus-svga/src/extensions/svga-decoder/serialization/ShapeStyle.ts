@@ -3,19 +3,17 @@ import RGBAColor from "./RGBAColor";
 
 export default class ShapeStyle {
   /**
-   * Decodes a ShapeStyle message from the specified reader or buffer.
+   * Decodes a ShapeStyle message from the specified reader.
    * @function decode
    * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
    * @static
-   * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+   * @param {$protobuf.Reader} reader Reader to decode from
    * @param {number} [length] Message length if known beforehand
    * @returns {com.opensource.svga.ShapeEntity.ShapeStyle} ShapeStyle
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.VideoStyles {
-    reader = Reader.create(reader);
-
+  static decode(reader: Reader, length?: number): PlatformVideo.VideoStyles {
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = new ShapeStyle();
     let tag: number;

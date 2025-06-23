@@ -4,22 +4,17 @@ import MovieParams from "./MovieParams";
 
 export default class MovieEntity {
   /**
-   * Decodes a MovieEntity message from the specified reader or buffer.
+   * Decodes a MovieEntity message from the specified reader.
    * @function decode
    * @memberof com.opensource.svga.MovieEntity
    * @static
-   * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+   * @param {$protobuf.Reader} reader Reader to decode from
    * @param {number} [length] Message length if known beforehand
    * @returns {com.opensource.svga.MovieEntity} MovieEntity
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(
-    reader: Reader | Uint8Array,
-    length?: number
-  ): PlatformVideo.Video {
-    reader = Reader.create(reader);
-
+  static decode(reader: Reader, length?: number): PlatformVideo.Video {
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = new MovieEntity();
     let key: string;

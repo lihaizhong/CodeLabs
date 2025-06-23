@@ -12,19 +12,17 @@ export interface ShapeArgsProps {
 
 export default class ShapeArgs {
   /**
-   * Decodes a ShapeArgs message from the specified reader or buffer.
+   * Decodes a ShapeArgs message from the specified reader.
    * @function decode
    * @memberof com.opensource.svga.ShapeEntity.ShapeArgs
    * @static
-   * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+   * @param {$protobuf.Reader} reader Reader to decode from
    * @param {number} [length] Message length if known beforehand
    * @returns {com.opensource.svga.ShapeEntity.ShapeArgs} ShapeArgs
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.ShapePath {
-    reader = Reader.create(reader);
-
+  static decode(reader: Reader, length?: number): PlatformVideo.ShapePath {
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = new ShapeArgs();
     let tag: number;

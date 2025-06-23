@@ -1,5 +1,6 @@
 import { platform } from "../../../platform";
 import { readFloatLE } from "./float";
+import { Preflight } from "./preflight";
 
 export default class Reader {
   // 添加静态缓存，用于常用的空数组
@@ -12,17 +13,17 @@ export default class Reader {
    * @returns {Reader|BufferReader} A {@link BufferReader} if `buffer` is a Buffer, otherwise a {@link Reader}
    * @throws {Error} If `buffer` is not a valid buffer
    */
-  static create(buffer: Reader | Uint8Array) {
-    if (buffer instanceof Reader) {
-      return buffer;
-    }
+  // static create(buffer: Reader | Uint8Array) {
+  //   if (buffer instanceof Reader) {
+  //     return buffer;
+  //   }
 
-    if (buffer instanceof Uint8Array) {
-      return new Reader(buffer);
-    }
+  //   if (buffer instanceof Uint8Array) {
+  //     return new Reader(buffer);
+  //   }
 
-    throw Error("illegal buffer");
-  }
+  //   throw Error("illegal buffer");
+  // }
 
   /**
    * Read buffer.
@@ -39,6 +40,8 @@ export default class Reader {
    * @type {number}
    */
   len: number;
+
+  preflight = new Preflight();
 
   /**
    * Constructs a new reader instance using the specified buffer.

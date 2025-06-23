@@ -1,17 +1,17 @@
 import Reader from "../io/Reader";
 export default class EllipseArgs {
     /**
-     * Decodes an EllipseArgs message from the specified reader or buffer.
+     * Decodes an EllipseArgs message from the specified reader.
      * @function decode
      * @memberof com.opensource.svga.ShapeEntity.EllipseArgs
      * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {$protobuf.Reader} reader Reader to decode from
      * @param {number} [length] Message length if known beforehand
      * @returns {com.opensource.svga.ShapeEntity.EllipseArgs} EllipseArgs
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.EllipsePath;
+    static decode(reader: Reader, length?: number): PlatformVideo.EllipsePath;
     /**
      * EllipseArgs x.
      * @member {number} x

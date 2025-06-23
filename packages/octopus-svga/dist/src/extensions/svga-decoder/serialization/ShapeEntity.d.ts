@@ -1,17 +1,17 @@
 import Reader from "../io/Reader";
 export default class ShapeEntity {
     /**
-     * Decodes a ShapeEntity message from the specified reader or buffer.
+     * Decodes a ShapeEntity message from the specified reader.
      * @function decode
      * @memberof com.opensource.svga.ShapeEntity
      * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {$protobuf.Reader} reader Reader to decode from
      * @param {number} [length] Message length if known beforehand
      * @returns {com.opensource.svga.ShapeEntity} ShapeEntity
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.VideoFrameShape | null;
+    static decode(reader: Reader, length?: number): PlatformVideo.VideoFrameShape | null;
     static format(message: ShapeEntity): PlatformVideo.VideoFrameShape | null;
     /**
      * ShapeEntity type.

@@ -9,19 +9,17 @@ export default class FrameEntity {
   };
 
   /**
-   * Decodes a FrameEntity message from the specified reader or buffer.
+   * Decodes a FrameEntity message from the specified reader.
    * @function decode
    * @memberof com.opensource.svga.FrameEntity
    * @static
-   * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+   * @param {$protobuf.Reader} reader Reader to decode from
    * @param {number} [length] Message length if known beforehand
    * @returns {com.opensource.svga.FrameEntity} FrameEntity
    * @throws {Error} If the payload is not a reader or valid buffer
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
-  static decode(reader: Reader | Uint8Array, length?: number): PlatformVideo.VideoFrame | PlatformVideo.HiddenVideoFrame {
-    reader = Reader.create(reader);
-
+  static decode(reader: Reader, length?: number): PlatformVideo.VideoFrame | PlatformVideo.HiddenVideoFrame {
     const end = length === undefined ? reader.len : reader.pos + length;
     const message = new FrameEntity();
     let tag: number;

@@ -1,42 +1,73 @@
 import Reader from "./Reader";
 
-/**
- * 计算二进制数据的哈希值
- * @param reader Reader对象或Uint8Array
- * @param length 长度
- * @returns 哈希值
- */
-export function calculateHash(reader: Reader | Uint8Array, length?: number): string {
-  if (!(reader instanceof Reader)) {
-    reader = Reader.create(reader);
+export class Preflight {
+  private caches: Map<string, any> = new Map();
+
+  /**
+   * 计算二进制数据的哈希值
+   * @param reader Reader对象
+   * @param length 长度
+   * @returns 哈希值
+   */
+  calculate(reader: Reader, length?: number): string {
+    // 保存原始位置
+    const { pos: startPos, buf } = reader;
+    const endPos =
+      length === undefined ? reader.len : Math.min(startPos + length, reader.len);
+    // 采样数据以加快计算速度，同时保持足够的唯一性
+    // 对于大数据，每隔几个字节采样一次
+    const step = Math.max(1, Math.floor((endPos - startPos) / 100));
+    // 使用简单的哈希算法
+    let hash = 0;
+
+    for (let i = startPos; i < endPos; i += step) {
+      // 简单的哈希算法，类似于字符串哈希
+      hash = (hash << 5) - hash + buf[i];
+      hash = hash & hash; // 转换为32位整数
+    }
+
+    // 添加数据长度作为哈希的一部分，增加唯一性
+    hash = (hash << 5) - hash + (endPos - startPos);
+    hash = hash & hash;
+
+    // 重置读取位置
+    reader.pos = startPos;
+
+    // 转换为字符串
+    return hash.toString(36);
   }
 
-  // 保存原始位置
-  const startPos = reader.pos;
-  const endPos =
-    length === undefined ? reader.len : Math.min(startPos + length, reader.len);
-
-  // 使用简单的哈希算法
-  let hash = 0;
-  const buf = reader.buf;
-
-  // 采样数据以加快计算速度，同时保持足够的唯一性
-  // 对于大数据，每隔几个字节采样一次
-  const step = Math.max(1, Math.floor((endPos - startPos) / 100));
-
-  for (let i = startPos; i < endPos; i += step) {
-    // 简单的哈希算法，类似于字符串哈希
-    hash = (hash << 5) - hash + buf[i];
-    hash = hash & hash; // 转换为32位整数
+  /**
+   * 检查是否存在缓存数据
+   * @param key 键
+   * @returns 是否存在
+   */
+  has(key: string): boolean {
+    return this.caches.has(key);
   }
 
-  // 添加数据长度作为哈希的一部分，增加唯一性
-  hash = (hash << 5) - hash + (endPos - startPos);
-  hash = hash & hash;
+  /**
+   * 获取缓存数据
+   * @param key 键
+   * @returns 缓存数据
+   */
+  get(key: string): any {
+    return this.caches.get(key);
+  }
 
-  // 重置读取位置
-  reader.pos = startPos;
+  /**
+   * 设置缓存数据
+   * @param key 键
+   * @param value 缓存数据
+   */
+  set(key: string, value: any) {
+    this.caches.set(key, value);
+  }
 
-  // 转换为字符串
-  return hash.toString(36);
+  /**
+   * 清空所有缓存数据
+   */
+  clear() {
+    this.caches.clear();
+  }
 }
