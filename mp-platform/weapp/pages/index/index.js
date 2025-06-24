@@ -1,3 +1,19 @@
+if (typeof wx.createSharedArrayBuffer === "function") {
+  const sharedArrayBuffer = wx.createSharedArrayBuffer(128);
+
+  console.log('sharedArrayBuffer', sharedArrayBuffer);
+} else {
+  console.warn('not support createSharedArrayBuffer');
+}
+
+if (typeof SharedArrayBuffer === "function") {
+  const sharedArrayBuffer = new SharedArrayBuffer(128);
+
+  console.log('sharedArrayBuffer', sharedArrayBuffer);
+} else {
+  console.warn('not support SharedArrayBuffer');
+}
+
 Page({
   data: {
     btnList: [

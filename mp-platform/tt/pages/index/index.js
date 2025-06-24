@@ -1,4 +1,18 @@
-const app = getApp();
+if (typeof tt.createSharedArrayBuffer === "function") {
+  const sharedArrayBuffer = tt.createSharedArrayBuffer(128);
+
+  console.log('sharedArrayBuffer', sharedArrayBuffer);
+} else {
+  console.warn('not support createSharedArrayBuffer');
+}
+
+if (typeof SharedArrayBuffer === "function") {
+  const sharedArrayBuffer = new SharedArrayBuffer(128);
+
+  console.log('sharedArrayBuffer', sharedArrayBuffer);
+} else {
+  console.warn('not support SharedArrayBuffer');
+}
 
 Page({
   data: {
