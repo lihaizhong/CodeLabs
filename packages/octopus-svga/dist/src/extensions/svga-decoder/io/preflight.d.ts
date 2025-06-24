@@ -4,10 +4,10 @@ export declare class Preflight {
     /**
      * 计算二进制数据的哈希值
      * @param reader Reader对象
-     * @param length 长度
+     * @param end 结束位置
      * @returns 哈希值
      */
-    calculate(reader: Reader, length?: number): string;
+    calculate(reader: Reader, end: number): string;
     /**
      * 检查是否存在缓存数据
      * @param key 键

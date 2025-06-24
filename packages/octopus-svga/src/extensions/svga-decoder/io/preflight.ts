@@ -3,20 +3,34 @@ import Reader from "./Reader";
 export class Preflight {
   private caches: Map<string, any> = new Map();
 
+  // private count: number = 0;
+
+  // get size() {
+  //   return this.caches.size;
+  // }
+
+  // get hitCount() {
+  //   return this.count;
+  // }
+
+  // get cache() {
+  //   return Object.fromEntries(this.caches);
+  // }
+
   /**
    * 计算二进制数据的哈希值
    * @param reader Reader对象
-   * @param length 长度
+   * @param end 结束位置
    * @returns 哈希值
    */
-  calculate(reader: Reader, length?: number): string {
+  calculate(reader: Reader, end: number): string {
     // 保存原始位置
     const { pos: startPos, buf } = reader;
-    const endPos =
-      length === undefined ? reader.len : Math.min(startPos + length, reader.len);
+    const endPos = Math.min(end, reader.len);
+    const dataLength = endPos - startPos;
     // 采样数据以加快计算速度，同时保持足够的唯一性
     // 对于大数据，每隔几个字节采样一次
-    const step = Math.max(1, Math.floor((endPos - startPos) / 100));
+    const step = Math.max(1, Math.floor(dataLength / 100));
     // 使用简单的哈希算法
     let hash = 0;
 
@@ -27,12 +41,10 @@ export class Preflight {
     }
 
     // 添加数据长度作为哈希的一部分，增加唯一性
-    hash = (hash << 5) - hash + (endPos - startPos);
+    hash = (hash << 5) - hash + dataLength;
     hash = hash & hash;
-
     // 重置读取位置
     reader.pos = startPos;
-
     // 转换为字符串
     return hash.toString(36);
   }

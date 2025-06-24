@@ -29,17 +29,17 @@ export default class Reader {
    * Read buffer.
    * @type {Uint8Array}
    */
-  buf: Uint8Array;
+  readonly buf: Uint8Array;
+  /**
+   * Read buffer length.
+   * @type {number}
+   */
+  readonly len: number;
   /**
    * Read buffer position.
    * @type {number}
    */
   pos: number;
-  /**
-   * Read buffer length.
-   * @type {number}
-   */
-  len: number;
 
   preflight = new Preflight();
 
@@ -196,8 +196,7 @@ export default class Reader {
     }
     
     // 变长整数跳过优化 - 使用位运算
-    const buf = this.buf;
-    const len = this.len;
+    const { buf, len } = this;
     let pos = this.pos;
     
     // 一次检查多个字节，减少循环次数

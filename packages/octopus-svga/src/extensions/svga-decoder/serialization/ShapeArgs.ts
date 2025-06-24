@@ -23,7 +23,15 @@ export default class ShapeArgs {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader, length?: number): PlatformVideo.ShapePath {
+    const { preflight } = reader;
     const end = reader.end(length);
+    const hash = preflight.calculate(reader, end);
+
+    if (preflight.has(hash)) {
+      reader.pos = end;
+      return preflight.get(hash);
+    }
+
     const message = new ShapeArgs();
     let tag: number;
 
@@ -40,7 +48,9 @@ export default class ShapeArgs {
       }
     }
 
-    return message;
+    preflight.set(hash, message);
+
+    return preflight.get(hash);
   }
 
   /**

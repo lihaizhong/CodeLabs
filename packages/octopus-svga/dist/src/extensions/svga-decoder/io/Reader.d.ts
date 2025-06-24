@@ -12,17 +12,17 @@ export default class Reader {
      * Read buffer.
      * @type {Uint8Array}
      */
-    buf: Uint8Array;
+    readonly buf: Uint8Array;
+    /**
+     * Read buffer length.
+     * @type {number}
+     */
+    readonly len: number;
     /**
      * Read buffer position.
      * @type {number}
      */
     pos: number;
-    /**
-     * Read buffer length.
-     * @type {number}
-     */
-    len: number;
     preflight: Preflight;
     /**
      * Constructs a new reader instance using the specified buffer.

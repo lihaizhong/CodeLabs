@@ -19,6 +19,7 @@ export default class Transform {
 
     while (reader.pos < end) {
       tag = reader.uint32();
+
       switch (tag >>> 3) {
         case 1: {
           message.a = reader.float();
@@ -49,6 +50,7 @@ export default class Transform {
           break;
       }
     }
+
     return message;
   }
 

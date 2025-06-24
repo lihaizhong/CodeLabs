@@ -13,7 +13,15 @@ export default class EllipseArgs {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader, length?: number): PlatformVideo.EllipsePath {
+    const { preflight } = reader;
     const end = reader.end(length);
+    const hash = preflight.calculate(reader, end);
+
+    if (preflight.has(hash)) {
+      reader.pos = end;
+      return preflight.get(hash);
+    }
+
     const message = new EllipseArgs();
     let tag: number;
 
@@ -42,7 +50,9 @@ export default class EllipseArgs {
       }
     }
 
-    return message;
+    preflight.set(hash, message);
+
+    return preflight.get(hash);
   }
 
   /**
