@@ -7,12 +7,7 @@ import {
   getOneAtRandom,
 } from "../../utils/constants";
 
-// const sources = [
-//   'http://10.1.133.197:5151/svga/序列1.svga',
-//   'http://10.1.133.197:5151/svga/序列2.svga',
-//   'http://10.1.133.197:5151/svga/序列3.svga'
-// ]
-const sources = yySources;
+const sources = [svgaSources, svgaCustomSources, yySources, svgaLargeSources, svgaHugeSources][2];
 
 Page({
   data: {
