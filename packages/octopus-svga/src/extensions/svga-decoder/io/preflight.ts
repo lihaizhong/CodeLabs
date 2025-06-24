@@ -43,8 +43,6 @@ export class Preflight {
     // 添加数据长度作为哈希的一部分，增加唯一性
     hash = (hash << 5) - hash + dataLength;
     hash = hash & hash;
-    // 重置读取位置
-    reader.pos = startPos;
     // 转换为字符串
     return hash.toString(36);
   }
