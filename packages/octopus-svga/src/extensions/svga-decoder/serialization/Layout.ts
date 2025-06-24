@@ -13,7 +13,15 @@ export default class Layout {
    * @throws {$protobuf.util.ProtocolError} If required fields are missing
    */
   static decode(reader: Reader, length?: number): PlatformVideo.Rect {
+    const { preflight } = reader;
     const end = reader.end(length);
+    const hash = preflight.calculate(reader, end);
+
+    if (preflight.has(hash)) {
+      reader.pos = end;
+      return preflight.get(hash);
+    }
+
     const message = new Layout();
     let tag: number;
 
@@ -42,7 +50,9 @@ export default class Layout {
       }
     }
 
-    return Layout.format(message);
+    preflight.set(hash, Layout.format(message));
+
+    return preflight.get(hash);
   }
 
   static format(message: Layout): PlatformVideo.Rect {

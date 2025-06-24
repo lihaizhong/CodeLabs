@@ -1,12 +1,12 @@
 import { VideoManager, platform } from "octopus-svga";
-import { posterFiles } from "../../utils/constants";
+import { posterFiles, yySources } from "../../utils/constants";
 
-const files = posterFiles.map((item) => item.url);
+// const files = posterFiles.map((item) => item.url);
+const files = yySources;
 const videoManager = new VideoManager();
 
 async function render(current) {
   const bucket = await videoManager.go(current);
-  console.log('bucket', bucket, current, files);
   const videoItem = bucket.entity;
   const $infos = document.getElementById("js-animate-infos");
   const $switch = document.getElementById("js-animate-switch");
@@ -16,9 +16,8 @@ async function render(current) {
     ["动画尺寸", `${videoItem.size.width} x ${videoItem.size.height}`],
     ["动画帧数", videoItem.frames],
     ["动画帧率", videoItem.fps],
-  ]
+  ];
 
-  console.log(videoItem.filename, videoItem);
   $infos.innerHTML = "";
   for (const [key, value] of infos) {
     const $item = document.createElement("div");
@@ -32,8 +31,9 @@ async function render(current) {
     $infos.appendChild($item);
   }
 
+  const entries = Object.entries(videoItem.images)
   $switch.innerHTML = "";
-  Object.entries(videoItem.images).forEach(([key, value], index) => {
+  entries.forEach(([key, value], index) => {
     const $item = document.createElement("div");
     const b64Image = platform.decode.toDataURL(value);
     const image = new Image();
@@ -54,23 +54,27 @@ async function render(current) {
 
         $item.classList.add("weui-cell_active");
         document.getElementById("analyze-stage").src = b64Image;
-        document.getElementById(
-          "analyze-half-screen-dialog-close"
-        ).click();
+        document.getElementById("analyze-half-screen-dialog-close").click();
       });
 
       $switch.appendChild($item);
 
       if (index === 0) {
         $item.click();
-      } 
-    }
+      }
+    };
   });
+
+  if (entries.length === 0) {
+    document.getElementById("analyze-stage").src = "https://ftp.bmp.ovh/imgs/2019/11/feca07d97e0b18bc.png"
+  }
 }
 
 function toggleHalfScreenDialog() {
   const $operateBtn = document.getElementById("oper-btn");
-  const $analyzeHalfScreenDialog = document.getElementById("analyze-half-screen-dialog");
+  const $analyzeHalfScreenDialog = document.getElementById(
+    "analyze-half-screen-dialog"
+  );
   const $analyzeHalfScreenDialogCloseBtn = document.getElementById(
     "analyze-half-screen-dialog-close"
   );
@@ -96,7 +100,7 @@ window.addEventListener("DOMContentLoaded", () => {
     render(--current);
   });
   $nextBtn.addEventListener("click", () => {
-    if (current + 1 >= posterFiles.length) {
+    if (current + 1 >= files.length) {
       return;
     }
 

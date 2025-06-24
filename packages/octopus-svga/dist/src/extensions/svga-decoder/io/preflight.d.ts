@@ -1,6 +1,9 @@
 import Reader from "./Reader";
 export declare class Preflight {
     private caches;
+    private count;
+    get size(): number;
+    get hitCount(): number;
     /**
      * 计算二进制数据的哈希值
      * @param reader Reader对象

@@ -3,15 +3,15 @@ import Reader from "./Reader";
 export class Preflight {
   private caches: Map<string, any> = new Map();
 
-  // private count: number = 0;
+  private count: number = 0;
 
-  // get size() {
-  //   return this.caches.size;
-  // }
+  get size() {
+    return this.caches.size;
+  }
 
-  // get hitCount() {
-  //   return this.count;
-  // }
+  get hitCount() {
+    return this.count;
+  }
 
   // get cache() {
   //   return Object.fromEntries(this.caches);
@@ -53,7 +53,15 @@ export class Preflight {
    * @returns 是否存在
    */
   has(key: string): boolean {
-    return this.caches.has(key);
+    const hit = this.caches.has(key);
+
+    if (hit) {
+      this.count++;
+    }
+
+    return hit;
+
+    // return this.caches.has(key);
   }
 
   /**
@@ -78,6 +86,7 @@ export class Preflight {
    * 清空所有缓存数据
    */
   clear() {
+    this.count = 0;
     this.caches.clear();
   }
 }
