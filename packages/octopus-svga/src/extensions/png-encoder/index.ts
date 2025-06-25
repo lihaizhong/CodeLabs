@@ -27,6 +27,7 @@ export class PNGEncoder {
     const crc = new Uint8Array(4);
     new DataView(crc.buffer).setUint32(0, this.crc32.calculate(partialChunk) >>> 0, false);
 
+    // 汇总成完整的chunk数据
     const result = new Uint8Array(length.length + partialChunk.length + crc.length);
     result.set(length);
     result.set(partialChunk, length.length);
@@ -58,27 +59,26 @@ export class PNGEncoder {
   }
 
   private createIDATChunk(): Uint8Array {
-    const { width, height, view } = this;
-    const rowSize = width * 4 + 1;
-    const idatData = new Uint8Array(rowSize * height);
+    const { width, height } = this;
+    const validRowSize = width * 4;
+    // 每行开头添加一位过滤头数据
+    const rowSize = validRowSize + 1;
+    const data = new Uint8Array(rowSize * height);
     // 将Uint32数据转换为Uint8数据
-    const pixelsData = new Uint8Array(view.buffer);
+    const pixelsData = new Uint8Array(this.view.buffer);
+    let startIdx: number;
+    let srcStart: number;
 
     for (let y = 0; y < height; y++) {
-      const startIdx = y * rowSize;
-      idatData[startIdx] = 0x00; // 过滤头
+      startIdx = y * rowSize;
+      data[startIdx] = 0x00; // 过滤头
       // ✅ 复制预先转换好的 RGBA 数据
-      const srcStart = y * width * 4; // Uint32 => 每个元素占 4 字节
-      const srcEnd = srcStart + width * 4;
-      idatData.set(pixelsData.subarray(srcStart, srcEnd), startIdx + 1);
+      srcStart = y * validRowSize; // Uint32 => 每个元素占 4 字节
+      data.set(pixelsData.subarray(srcStart, srcStart + validRowSize), startIdx + 1);
     }
 
     // 使用 zlib 进行压缩, 平衡压缩率有利于提升文件生成速度
-    return this.createChunk("IDAT", zlibSync(idatData));
-  }
-
-  private createIENDChunk(): Uint8Array {
-    return this.createChunk("IEND", new Uint8Array(0));
+    return this.createChunk("IDAT", zlibSync(data));
   }
 
   public setPixel(x: number, y: number, pixel: number): void {
@@ -87,16 +87,21 @@ export class PNGEncoder {
 
   public write(pixels: Uint8Array | Uint8ClampedArray): this {
     const { width, height } = this;
+    let pos: number;
+    let r: number;
+    let g: number;
+    let b: number;
+    let a: number;
+    let pixel: number;
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        const index = (y * width + x) * 4;
-        const r = pixels[index];
-        const g = pixels[index + 1];
-        const b = pixels[index + 2];
-        const a = pixels[index + 3];
-        const pixel = ((r << 24) | (g << 16) | (b << 8) | a) >>> 0;
-
+        pos = (y * width + x) * 4;
+        r = pixels[pos];
+        g = pixels[pos + 1];
+        b = pixels[pos + 2];
+        a = pixels[pos + 3];
+        pixel = ((r << 24) | (g << 16) | (b << 8) | a) >>> 0;
         this.setPixel(x, y, pixel);
       }
     }
@@ -105,31 +110,30 @@ export class PNGEncoder {
   }
 
   public flush(): Uint8Array {
-    // 1. 文件头（固定 8 字节）
-    const pngSignature = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
-    
     // 预先创建所有块
     const iHDRChunk = this.createIHDRChunk();
     const iDATChunk = this.createIDATChunk();
-    const iENDChunk = this.createIENDChunk();
+    const iENDChunk = this.createChunk("IEND", new Uint8Array(0));
     
-    // 直接计算总大小
-    const totalSize = 8 + iHDRChunk.length + iDATChunk.length + iENDChunk.length;
+    // 一次性分配内存（直接计算总大小）
+    const pngData = new Uint8Array(8 + iHDRChunk.length + iDATChunk.length + iENDChunk.length);
     
-    // 一次性分配内存
-    const pngData = new Uint8Array(totalSize);
+    /* ------ 按顺序写入数据 ------ */
+
+    // 1. 写入文件头（固定 8 字节）
     let offset = 0;
-    
-    // 按顺序写入数据
-    pngData.set(pngSignature, offset);
-    offset += pngSignature.length;
+    pngData.set(new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]), offset);
+    // 2. 写入IHDR块
+    offset += 8;
     pngData.set(iHDRChunk, offset);
+    // 3. 写入IDAT块
     offset += iHDRChunk.length;
     pngData.set(iDATChunk, offset);
+    // 4. 写入IEND块
     offset += iDATChunk.length;
     pngData.set(iENDChunk, offset);
-
-    // 清空缓存
+    
+    /* ------ 清空 CRC32 缓存 ------ */
     this.crc32.clear();
 
     return pngData;

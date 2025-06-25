@@ -1,7 +1,7 @@
 import Reader from "./io/Reader";
 import { MovieEntity } from "./serialization";
 
-export * from "./serialization";
+export type * from "./serialization";
 
 export function createVideoEntity(data: Uint8Array, filename: string) {
   if (data instanceof Uint8Array) {

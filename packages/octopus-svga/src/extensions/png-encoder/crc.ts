@@ -1,49 +1,45 @@
 import { platform } from "../../platform";
 
-// CRC32 表初始化
-function initCRC32Table(): Uint32Array {
-  return Uint32Array.from(Array(256), (_, i) => {
+export class CRC32 {
+  // CRC32 Table 初始化
+  private static table = Uint32Array.from(Array(256), (_, i) => {
     let c = i;
+
     for (let j = 0; j < 8; j++) {
       c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
     }
+
     return c >>> 0;
   });
-}
 
-export class CRC32 {
-  private static table = initCRC32Table();
+  private static WHITE_COLOR: number = 0xffffffff;
 
-  private readonly cache = new Map<string, number>();
+  private readonly caches = new Map<string, number>();
 
   calculate(buff: Uint8Array): number {
-    if (!buff || !(buff instanceof Uint8Array)) {
+    if (!(buff instanceof Uint8Array)) {
       throw new TypeError('Input must be a Uint8Array');
     }
-  
-    const { table } = CRC32;
-    const { cache } = this;
+
+    const { caches } = this;
     const key = platform.decode.bytesToString(buff);
   
-    if (cache.has(key)) {
-      return cache.get(key)!;
+    if (caches.has(key)) {
+      return caches.get(key)!;
     }
-  
-    let crc = 0xffffffff;
-    const { length } = buff;
-  
-    // 使用位运算优化
-    for (let i = 0; i < length; i++) {
-      crc = (crc >>> 8) ^ table[(crc ^ buff[i]) & 0xff];
-    }
-  
-    const result = (crc ^ 0xffffffff) >>> 0;
-    cache.set(key, result);
 
-    return result;
+    let crc = CRC32.WHITE_COLOR;
+    // 使用位运算优化
+    for (let i = 0; i < buff.length; i++) {
+      crc = (crc >>> 8) ^ CRC32.table[(crc ^ buff[i]) & 0xff];
+    }
+
+    caches.set(key, (crc ^ CRC32.WHITE_COLOR) >>> 0);
+
+    return caches.get(key) as number;
   }
 
   clear(){
-    this.cache.clear();
+    this.caches.clear();
   }
 }

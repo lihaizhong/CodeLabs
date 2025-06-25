@@ -7,7 +7,6 @@ export declare class PNGEncoder {
     private createChunk;
     private createIHDRChunk;
     private createIDATChunk;
-    private createIENDChunk;
     setPixel(x: number, y: number, pixel: number): void;
     write(pixels: Uint8Array | Uint8ClampedArray): this;
     flush(): Uint8Array;
