@@ -53,7 +53,7 @@ const QRCodeUtils = {
   insertQrCodeToPNG(size) {
     console.time("generateImageFromCode");
     const img = generateImageFromCode({
-      code: "i generate a png",
+      code: "this is a test",
       size: 500,
     });
     console.timeEnd("generateImageFromCode");
