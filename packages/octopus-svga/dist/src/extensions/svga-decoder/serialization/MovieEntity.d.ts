@@ -1,6 +1,7 @@
 import Reader from "../io/Reader";
 import MovieParams from "./MovieParams";
 export default class MovieEntity {
+    static EMPTY_U8: Uint8Array<ArrayBuffer>;
     /**
      * Decodes a MovieEntity message from the specified reader.
      * @function decode

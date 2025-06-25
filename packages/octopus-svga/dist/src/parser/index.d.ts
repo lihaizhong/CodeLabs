@@ -8,7 +8,7 @@ export declare class Parser {
      * @param url 视频地址
      * @returns
      */
-    static parseVideo(data: ArrayBuffer, url: string): PlatformVideo.Video;
+    static parseVideo(data: ArrayBuffer, url: string, decompression?: boolean): PlatformVideo.Video;
     /**
      * 读取文件资源
      * @param url 文件资源地址

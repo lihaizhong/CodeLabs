@@ -12,14 +12,17 @@ export class Parser {
    * @param url 视频地址
    * @returns
    */
-  static parseVideo(data: ArrayBuffer, url: string): PlatformVideo.Video {
+  static parseVideo(
+    data: ArrayBuffer | SharedArrayBuffer | ArrayBufferLike,
+    url: string,
+    decompression: boolean = true
+  ): PlatformVideo.Video {
     const u8a = new Uint8Array(data);
 
-    if (u8a.subarray(0, 4).toString() === "80,75,3,4") {
-      throw new Error("this parser only support version@2 of SVGA.");
-    }
-
-    return createVideoEntity(unzlibSync(u8a), platform.path.filename(url));
+    return createVideoEntity(
+      decompression ? unzlibSync(u8a) : u8a,
+      platform.path.filename(url)
+    );
   }
 
   /**
@@ -34,12 +37,12 @@ export class Parser {
     if (remote.is(url)) {
       return remote.fetch(url);
     }
-  
+
     // 读取本地文件
     if (globals.env !== "h5") {
       return local!.read(url);
     }
-  
+
     return Promise.resolve(null);
   }
 
