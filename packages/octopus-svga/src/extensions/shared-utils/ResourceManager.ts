@@ -117,13 +117,18 @@ export class ResourceManager {
     const imageAwaits: Promise<void>[] = [];
 
     Object.entries(images).forEach(([name, image]) => {
+      // 过滤 1px 透明图
+      if (image instanceof Uint8Array && image.byteLength < 70) {
+        return;
+      }
+
       const p = platform.image
         .load(
           () => this.createImage(),
           image as OctopusPlatform.RawImage,
           platform.path.resolve(
             filename,
-            type === "dynamic" ? `dynamic_${name}` : name
+            type === "dynamic" ? `dyn_${name}` : name
           )
         )
         .then((img) => {

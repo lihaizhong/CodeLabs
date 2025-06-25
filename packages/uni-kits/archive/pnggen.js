@@ -87,8 +87,8 @@ function generatePNG(width, height, pixelDataRGBA) {
 // 示例生成一个红色 2x2 的 PNG
 // --------------------------
 function main() {
-  const width = 1000;
-  const height = 1000;
+  const width = 1;
+  const height = 1;
   const pixels = Buffer.alloc(width * height * 4);
 
   // 填充像素为透明（RGB=0,0,0），不透明（A=0）
@@ -106,7 +106,9 @@ function main() {
     console.log('pngData chunk', pngData.subarray(i, i + 20));
   }
 
-  console.log('PNG 文件已生成: output.png');
+  const pngViewer = new Uint8Array(pngData)
+
+  console.log('PNG 文件已生成: output.png', 'byteLength', pngViewer.byteLength, 'byteOffset', pngViewer.byteOffset);
 }
 
 main()

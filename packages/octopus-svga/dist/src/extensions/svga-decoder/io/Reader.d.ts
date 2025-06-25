@@ -2,13 +2,6 @@ import { Preflight } from "./preflight";
 export default class Reader {
     private static EMPTY_UINT8ARRAY;
     /**
-     * Creates a new reader using the specified buffer.
-     * @function
-     * @param {Reader|Uint8Array|Buffer} buffer Buffer to read from
-     * @returns {Reader|BufferReader} A {@link BufferReader} if `buffer` is a Buffer, otherwise a {@link Reader}
-     * @throws {Error} If `buffer` is not a valid buffer
-     */
-    /**
      * Read buffer.
      * @type {Uint8Array}
      */
@@ -37,6 +30,11 @@ export default class Reader {
      * @returns
      */
     private readVarint32Slow;
+    /**
+     * Reads a sequence of bytes preceded by its length as a varint.
+     * @param length
+     * @returns
+     */
     end(length?: number): number;
     /**
      * Reads a varint as an unsigned 32 bit value.
@@ -55,9 +53,13 @@ export default class Reader {
      * @returns {number} Value read
      */
     float(): number;
+    /**
+     * read bytes range
+     * @returns
+     */
     private getBytesRange;
     /**
-     * Reads a sequence of bytes preceeded by its length as a varint.
+     * Reads a sequence of bytes preceded by its length as a varint.
      * @returns {Uint8Array} Value read
      */
     bytes(): Uint8Array<ArrayBufferLike>;
