@@ -21,6 +21,7 @@ export default class SpriteEntity {
     reader.preflight.set("latest_shapes", []);
     while (reader.pos < end) {
       tag = reader.uint32();
+
       switch (tag >>> 3) {
         case 1: {
           message.imageKey = reader.string();

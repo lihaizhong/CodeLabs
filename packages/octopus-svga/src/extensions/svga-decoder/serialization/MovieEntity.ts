@@ -3,6 +3,7 @@ import SpriteEntity from "./SpriteEntity";
 import MovieParams from "./MovieParams";
 
 export default class MovieEntity {
+  static EMPTY_U8 = new Uint8Array(0);
   /**
    * Decodes a MovieEntity message from the specified reader.
    * @function decode
@@ -25,6 +26,7 @@ export default class MovieEntity {
 
     while (reader.pos < end) {
       tag = reader.uint32();
+
       switch (tag >>> 3) {
         case 1: {
           message.version = reader.string();
@@ -37,7 +39,7 @@ export default class MovieEntity {
         case 3: {
           end2 = reader.uint32() + reader.pos;
           key = "";
-          value = new Uint8Array(0);
+          value = MovieEntity.EMPTY_U8;
 
           while (reader.pos < end2) {
             tag2 = reader.uint32();

@@ -24,6 +24,7 @@ export default class ShapeEntity {
 
     while (reader.pos < end) {
       tag = reader.uint32();
+
       switch (tag >>> 3) {
         case 1: {
           message.type = reader.int32();

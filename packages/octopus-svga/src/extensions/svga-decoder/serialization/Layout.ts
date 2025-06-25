@@ -27,6 +27,7 @@ export default class Layout {
 
     while (reader.pos < end) {
       tag = reader.uint32();
+
       switch (tag >>> 3) {
         case 1: {
           message.x = reader.float();

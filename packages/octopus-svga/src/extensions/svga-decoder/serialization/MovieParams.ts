@@ -19,6 +19,7 @@ export default class MovieParams {
 
     while (reader.pos < end) {
       tag = reader.uint32();
+
       switch (tag >>> 3) {
         case 1: {
           message.viewBoxWidth = reader.float();

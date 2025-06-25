@@ -28,6 +28,7 @@ export default class ShapeStyle {
 
     while (reader.pos < end) {
       tag = reader.uint32();
+
       switch (tag >>> 3) {
         case 1: {
           message.fill = RGBAColor.decode(
