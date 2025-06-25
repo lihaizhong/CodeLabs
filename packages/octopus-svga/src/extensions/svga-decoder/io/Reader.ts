@@ -7,25 +7,6 @@ export default class Reader {
   private static EMPTY_UINT8ARRAY = new Uint8Array(0);
 
   /**
-   * Creates a new reader using the specified buffer.
-   * @function
-   * @param {Reader|Uint8Array|Buffer} buffer Buffer to read from
-   * @returns {Reader|BufferReader} A {@link BufferReader} if `buffer` is a Buffer, otherwise a {@link Reader}
-   * @throws {Error} If `buffer` is not a valid buffer
-   */
-  // static create(buffer: Reader | Uint8Array) {
-  //   if (buffer instanceof Reader) {
-  //     return buffer;
-  //   }
-
-  //   if (buffer instanceof Uint8Array) {
-  //     return new Reader(buffer);
-  //   }
-
-  //   throw Error("illegal buffer");
-  // }
-
-  /**
    * Read buffer.
    * @type {Uint8Array}
    */
@@ -89,6 +70,11 @@ export default class Reader {
     return value >>> 0; // 确保无符号
   }
 
+  /**
+   * Reads a sequence of bytes preceded by its length as a varint.
+   * @param length 
+   * @returns 
+   */
   end(length?: number) {
     return length === undefined ? this.len : this.pos + length
   }
@@ -126,17 +112,22 @@ export default class Reader {
    * @returns {number} Value read
    */
   float() {
-    if (this.pos + 4 > this.len) {
+    const pos = this.pos + 4;
+
+    if (pos > this.len) {
       throw this.indexOutOfRange(this, 4);
     }
 
     const value = readFloatLE(this.buf, this.pos);
-
-    this.pos += 4;
+    this.pos = pos;
 
     return value;
   }
 
+  /**
+   * read bytes range
+   * @returns 
+   */
   private getBytesRange() {
     const length = this.uint32();
     const start = this.pos;
@@ -150,7 +141,7 @@ export default class Reader {
   }
 
   /**
-   * Reads a sequence of bytes preceeded by its length as a varint.
+   * Reads a sequence of bytes preceded by its length as a varint.
    * @returns {Uint8Array} Value read
    */
   bytes() {
@@ -173,7 +164,6 @@ export default class Reader {
     const [start, end] = this.getBytesRange();
     // 直接在原始buffer上解码，避免创建中间bytes对象
     const result = platform.decode.utf8(this.buf, start, end);
-
     this.pos = end;
 
     return result;
