@@ -7,58 +7,46 @@ import {
   getOneAtRandom,
 } from "../../utils/constants";
 
-const sources = [svgaSources, svgaCustomSources, yySources, svgaLargeSources, svgaHugeSources][2];
-
 Page({
   data: {
-    source: "",
+    sources: [
+      svgaSources,
+      svgaCustomSources,
+      yySources,
+      svgaLargeSources,
+      svgaHugeSources,
+    ][3],
     current: 0,
   },
 
   handleSwitchAtRandom() {
-    const { ranIndex, source } = getOneAtRandom();
+    const { sources } = this.data;
+    const { ranIndex } = getOneAtRandom(sources.length);
 
     this.setData({
-      source,
       current: ranIndex,
     });
   },
 
   handleSwitchPrev() {
-    const { current } = this.data;
+    const { current, sources } = this.data;
     let prev = current - 1;
 
     if (prev < 0) {
       prev = sources.length - 1;
     }
 
-    this.setData({
-      source: sources[prev],
-      current: prev,
-    });
+    this.setData({ current: prev });
   },
 
   handleSwitchNext() {
-    const { current } = this.data;
+    const { current, sources } = this.data;
     let next = current + 1;
 
     if (next > sources.length - 1) {
       next = 0;
     }
 
-    this.setData({
-      source: sources[next],
-      current: next,
-    });
-  },
-
-  onLoad() {
-    // this.handleSwitchAtRandom();
-    const current = 0;
-
-    this.setData({
-      current,
-      source: sources[current],
-    });
+    this.setData({ current: next });
   },
 });

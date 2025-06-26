@@ -13,6 +13,7 @@ export default definePlugin<"path">({
     if (env === "h5") {
       return {
         USER_DATA_PATH: "",
+        is: (_: string) => false,
         filename,
         resolve: (filename: string, prefix?: string) => `${prefix ? `${prefix}__` : ""}${filename}`,
       } satisfies OctopusPlatform.PlatformPlugin['path'];
@@ -25,6 +26,7 @@ export default definePlugin<"path">({
 
     return {
       USER_DATA_PATH,
+      is: (filepath: string) => filepath?.startsWith(USER_DATA_PATH),
       filename,
       resolve: (filename: string, prefix?: string) =>
         `${USER_DATA_PATH}/${prefix ? `${prefix}__` : ""}${filename}`,

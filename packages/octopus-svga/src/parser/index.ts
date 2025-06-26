@@ -1,14 +1,19 @@
 // import { unzlibSync } from "fflate";
-import { unzlibSync, createVideoEntity } from "../extensions";
+import { unzlibSync, createVideoEntity, calculateHash } from "../extensions";
 import { platform } from "../platform";
 
 /**
  * SVGA 下载解析器
  */
 export class Parser {
-  static decompress(
-    data: ArrayBuffer | SharedArrayBuffer | ArrayBufferLike
-  ): ArrayBuffer | SharedArrayBuffer | ArrayBufferLike {
+  static hash(buff: ArrayBufferLike) {
+    const view = new Uint8Array(buff);
+    const step = Math.max(1, Math.floor(view.byteLength / 100));
+
+    return calculateHash(view, 0, view.byteLength, step);
+  }
+  
+  static decompress(data: ArrayBufferLike): ArrayBufferLike {
     return unzlibSync(new Uint8Array(data)).buffer;
   }
 
@@ -19,7 +24,7 @@ export class Parser {
    * @returns
    */
   static parseVideo(
-    data: ArrayBuffer | SharedArrayBuffer | ArrayBufferLike,
+    data: ArrayBufferLike,
     url: string,
     decompression: boolean = true
   ): PlatformVideo.Video {
@@ -34,11 +39,11 @@ export class Parser {
    * @param url 文件资源地址
    * @returns
    */
-  static download(url: string): Promise<ArrayBuffer> {
+  static download(url: string): Promise<ArrayBufferLike> {
     const { remote, path, local, globals } = platform;
 
     // 读取本地文件
-    if (globals.env !== "h5" && url.startsWith(path.USER_DATA_PATH)) {
+    if (globals.env !== "h5" && path.is(url)) {
       return local!.read(url);
     }
 

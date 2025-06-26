@@ -17,7 +17,7 @@ export default definePlugin<"local">({
 
     return {
       write: (
-        data: ArrayBuffer,
+        data: ArrayBufferLike,
         filePath: string
       ) => {
         return new Promise<string>((resolve, reject) => {
@@ -33,7 +33,7 @@ export default definePlugin<"local">({
         return new Promise((resolve, reject) => {
           fsm!.readFile({
             filePath,
-            success: (res: any) => resolve(res.data as ArrayBuffer),
+            success: (res: any) => resolve(res.data),
             fail: reject,
           });
         });

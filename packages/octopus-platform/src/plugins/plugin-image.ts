@@ -24,13 +24,7 @@ export default definePlugin<"image">({
     ) => Promise<string> | string = (
       data: Uint8Array | string,
       _filepath: string
-    ) => {
-      if (typeof data === "string") {
-        return data;
-      }
-
-      return decode.toDataURL(data);
-    };
+    ) => (typeof data === "string" ? data : decode.toDataURL(data));
 
     /**
      * 加载图片
@@ -117,11 +111,11 @@ export default definePlugin<"image">({
         createImage: () => HTMLImageElement,
         data: ImageBitmap | Uint8Array | string,
         filepath: string
-      ) => {
-        const src = await genImageSource(data as Uint8Array | string, filepath);
-
-        return loadImage(createImage(), src);
-      },
+      ) =>
+        loadImage(
+          createImage(),
+          await genImageSource(data as Uint8Array | string, filepath)
+        ),
       release: releaseImage,
     } satisfies OctopusPlatform.PlatformPlugin["image"];
   },

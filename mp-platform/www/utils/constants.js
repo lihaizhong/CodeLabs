@@ -59,18 +59,48 @@ export const svgaSources = [
   "45eadf03bee2013daa407fd4b91e29f5.svga",
 ].map((filename) => `${LOCAL_SVGA_URL}/${filename}`);
 
+export const svgaCustomSources = [
+  {
+    filename: "custom.svga",
+    replace: {
+      qrcode_001: "custom_qrcode_001.png",
+      qrcode_002: "custom_qrcode_002.png",
+      bj_001: "custom_bj_001.png",
+      bj_002: "custom_bj_002.png",
+    },
+  },
+  {
+    filename: "replace_001.svga",
+    replace: {
+      qrcode_001: "replace_001.png",
+    },
+  },
+  {
+    filename: "replace_002.svga",
+    replace: {
+      qrcode_001: "replace_002.png",
+    },
+  },
+].map((item) => {
+  const { filename, replace } = item;
+
+  return {
+    filename,
+    url: `${LOCAL_SVGA_URL}/custom/${filename}`,
+    replace: Object.keys(replace).reduce((values, key) => {
+      values[key] = `${LOCAL_SVGA_URL}/custom/${replace[key]}`;
+
+      return values;
+    }, {}),
+  };
+});
+
 export const svgaLargeSources = [
   "frame00.svga",
   "frame01.svga",
   "frame02.svga",
   "frame03.svga",
 ].map((filename) => `${LOCAL_SVGA_URL}/large/${filename}`);
-
-export const svgaHugeSources = [
-  "frame01.svga",
-  "frame02.svga",
-  "frame03.svga",
-].map((filename) => `${LOCAL_SVGA_URL}/huge/${filename}`);
 
 export const yySources = [
   "angel.svga",
@@ -87,30 +117,14 @@ export const yySources = [
   "Walkthrough.svga",
 ].map((filename) => `${LOCAL_SVGA_URL}/yy/${filename}`);
 
-export const posterFiles = [
-  {
-    filename: "微信认证授权码.svga",
-    modify: (entity) => {},
-  },
-  {
-    filename: "支付宝认证授权码.svga",
-    modify: (entity) => {},
-  },
-  {
-    filename: "微信认证授权码-纯净版.svga",
-    modify: (entity) => {},
-  },
-  {
-    filename: "支付宝认证授权码-纯净版.svga",
-    modify: (entity) => {},
-  },
-].map((item) => ({
-  ...item,
-  url: `${LOCAL_SVGA_URL}/poster/${item.filename}`,
-}));
+export const svgaHugeSources = [
+  "frame01.svga",
+  "frame02.svga",
+  "frame03.svga",
+].map((filename) => `${LOCAL_SVGA_URL}/huge/${filename}`);
 
-export function getOneAtRandom(files) {
-  const ranIndex = Math.floor(Math.random() * files.length);
+export function getOneAtRandom(size) {
+  const ranIndex = Math.floor(Math.random() * size);
 
-  return { ranIndex, url: files[ranIndex] };
+  return { ranIndex };
 }

@@ -1,22 +1,86 @@
-import { benchmark, Parser, Player } from "octopus-svga";
+import { Player, VideoEditor, VideoManager, benchmark } from "octopus-svga";
 import Page from "../../utils/Page";
 import {
   svgaSources,
+  svgaCustomSources,
   svgaLargeSources,
   yySources,
   svgaHugeSources,
   getOneAtRandom,
 } from "../../utils/constants";
+import ReadyGo from "../../utils/ReadyGo";
+import { SvgaWorker } from "./worker";
 
-const files = [svgaSources, svgaLargeSources, svgaHugeSources, yySources][3];
-const player = new Player();
-let videoItem;
-let lastStatus = "next";
+let player;
+const playerAwait = async () => {
+  let loopStartTime;
+  let startTime;
+
+  player = new Player();
+  player.onStart = async () => {
+    startTime = loopStartTime = benchmark.now();
+
+    const bucket = await videoManager.get();
+
+    console.log(
+      "---- START ----",
+      "每帧期望消耗时长",
+      1000 / bucket.entity.fps,
+      "预期总消耗时长",
+      (bucket.entity.frames / bucket.entity.fps) * 1000
+    );
+  };
+  player.onProcess = (percent, frame) => {
+    let loopEndTime = benchmark.now();
+
+    console.log(
+      "---- UPDATE ----",
+      "当前进度",
+      percent,
+      "当前帧数",
+      frame,
+      "持续时间",
+      loopEndTime - loopStartTime
+    );
+
+    loopStartTime = loopEndTime;
+  };
+  player.onEnd = () => {
+    benchmark.log("---- END ----", "总消耗时间", benchmark.now() - startTime);
+  };
+  await player.setConfig({
+    container: "#palette",
+    loop: 1,
+    playMode: "forwards",
+    fillMode: "backwards",
+    // contentMode: "aspect-fill",
+    // contentMode: "fill",
+    contentMode: "aspect-fit",
+    // contentMode: "center",
+  });
+};
+const worker = new SvgaWorker();
+const readyGo = new ReadyGo();
+const videoManager = new VideoManager("fast", {
+  download: (url) =>
+    new Promise((resolve) => {
+      worker.once(url, (data) => resolve(data));
+      worker.emit(url, url);
+    }),
+  decompress: (_, buff) => Promise.resolve(buff),
+});
 
 Page({
   data: {
-    url: "",
+    sources: [
+      svgaSources,
+      svgaCustomSources,
+      yySources,
+      svgaLargeSources,
+      svgaHugeSources,
+    ][0],
     current: 0,
+    message: "",
   },
 
   bindEvents: {
@@ -26,134 +90,99 @@ Page({
   },
 
   observers: {
-    url() {
-      this.initialize();
+    current(value) {
+      benchmark.log("当前动效位置", value);
+      readyGo.ready(this.initialize.bind(this));
+    },
+    message(value) {
+      showPopup(value);
     },
   },
 
   handleSwitchAtRandom() {
-    const { ranIndex, url } = getOneAtRandom(files);
+    const { sources } = this;
+    const { ranIndex } = getOneAtRandom(sources);
 
-    this.setData({
-      url,
-      current: ranIndex,
-    });
+    this.setData({ current: ranIndex });
   },
 
   handleSwitchPrev() {
-    const { current } = this.data;
-    let prev;
+    const { current, sources } = this.data;
+    let prev = current - 1;
 
-    if (lastStatus === "next") {
-      prev = current;
-      lastStatus = "prev";
-    } else {
-      prev = current - 1;
-
-      if (prev < 0) {
-        prev = files.length - 1;
-      }
+    if (prev < 0) {
+      prev = sources.length - 1;
     }
 
-    // player.setItem("playMode", "fallbacks");
-    // player.setItem("fillMode", "forwards");
-    this.setData({
-      url: files[prev],
-      current: prev,
-    });
+    this.setData({ current: prev });
   },
 
   handleSwitchNext() {
-    const { current } = this.data;
-    let next;
+    const { current, sources } = this.data;
+    let next = current + 1;
 
-    if (lastStatus === "prev") {
-      next = current;
-      lastStatus = "next";
-    } else {
-      next = current + 1;
-
-      if (next > files.length - 1) {
-        next = 0;
-      }
+    if (next > sources.length - 1) {
+      next = 0;
     }
 
-    // player.setItem("playMode", "forwards");
-    // player.setItem("fillMode", "backwards");
-    this.setData({
-      url: files[next],
-      current: next,
-    });
+    this.setData({ current: next });
   },
 
   async initialize() {
     try {
-      showPopup("准备下载资源");
-      const rawVideoItem = await Parser.download(this.data.url);
-      videoItem = await benchmark.time("parse video", () =>
-        Parser.parseVideo(rawVideoItem, this.data.url)
-      );
-      showPopup("下载资源成功");
+      const { current, sources } = this.data;
+      const source = sources[current];
+      const bucket = await videoManager.go(current);
 
-      console.log(this.data.url, videoItem);
-      await benchmark.time("mount video", () => player.mount(videoItem));
-      showPopup("资源装载成功");
+      if (typeof source === "object" && source !== null && source.replace) {
+        const editor = new VideoEditor(
+          player.painter,
+          player.resource,
+          bucket.entity
+        );
+
+        this.setData({ message: "文件编辑中" });
+        await benchmark.time("replace images", () =>
+          Promise.all(
+            Object.keys(source.replace).map((key) =>
+              editor.setImage(key, source.replace[key])
+            )
+          )
+        );
+      }
+
+      this.setData({ message: "资源装载中..." });
+      benchmark.log(source, bucket);
+      await benchmark.time("mount", () => player.mount(bucket.entity));
+      // player.stepToPercentage(0.3);
       player.start();
-      // player.stepToPercentage(1, true);
-      showPopup("");
+      this.setData({ message: "" });
     } catch (ex) {
-      console.error("svga初始化失败！", ex);
-      showPopup(ex.message + "\n" + ex.stack);
+      console.error("svga初始化失败", ex);
+      this.setData({ message: ex.message + "\n" + ex.stack });
     }
   },
 
   async onLoad() {
-    await player.setConfig({
-      container: "#palette",
-      loop: 1,
-      playMode: "forwards",
-      fillMode: "backwards",
-      // contentMode: "aspect-fill",
-      // contentMode: "fill",
-      contentMode: "aspect-fit",
-      // contentMode: "center",
-    });
+    worker.open();
+    await playerAwait();
+    const urls = this.data.sources.map((item) =>
+      typeof item === "string" ? item : item.url
+    );
 
-    let loopStartTime;
-    let startTime;
-    player.onStart = () => {
-      startTime = loopStartTime = performance.now();
-      console.log(
-        "---- START ----",
-        "每帧期望消耗时长",
-        1000 / videoItem.fps,
-        "预期总消耗时长",
-        (videoItem.frames / videoItem.fps) * 1000
-      );
-    };
-    player.onProcess = (percent, frame) => {
-      let loopEndTime = performance.now();
+    benchmark.log("准备资源中");
+    await videoManager.prepare(urls);
+    benchmark.log("组件准备就绪");
+    readyGo.go();
+    this.setData({ current: 0 });
+  },
 
-      console.log(
-        "当前进度",
-        percent,
-        "当前帧数",
-        frame,
-        "持续时间",
-        loopEndTime - loopStartTime
-      );
-      console.log("---- UPDATE ----");
-
-      loopStartTime = loopEndTime;
-    };
-    player.onEnd = () => {
-      console.log("---- END ----", "总消耗时间", performance.now() - startTime);
-    };
-    // this.handleSwitchAtRandom();
-    this.setData({
-      current: 0,
-      url: files[0],
-    });
+  onUnload() {
+    readyGo.reset();
+    videoManager.clear();
+    worker.close();
+    player?.destroy();
+    player = null;
   },
 });
 

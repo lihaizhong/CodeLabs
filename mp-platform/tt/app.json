@@ -4,6 +4,7 @@
     "pages/svga/index",
     "pages/svga2/index"
   ],
+  "workers": "workers",
   "window":{
     "backgroundTextStyle":"light",
     "navigationBarBackgroundColor": "#fff",

@@ -34,7 +34,7 @@ export default definePlugin<"remote">({
           dataType: "arraybuffer",
           responseType: "arraybuffer",
           enableCache,
-          success: (res: any) => resolve(res.data as ArrayBuffer),
+          success: (res: any) => resolve(res.data),
           fail: reject,
         });
       }).catch((err) => {

@@ -1,3 +1,4 @@
+import { calculateHash } from "../../shared-utils/hash";
 import Reader from "./Reader";
 
 export class Preflight {
@@ -27,24 +28,11 @@ export class Preflight {
     // 保存原始位置
     const { pos: startPos, buf } = reader;
     const endPos = Math.min(end, reader.len);
-    const dataLength = endPos - startPos;
     // 采样数据以加快计算速度，同时保持足够的唯一性
     // 对于大数据，每隔几个字节采样一次
-    const step = Math.max(1, Math.floor(dataLength / 100));
-    // 使用简单的哈希算法
-    let hash = 0;
-
-    for (let i = startPos; i < endPos; i += step) {
-      // 简单的哈希算法，类似于字符串哈希
-      hash = (hash << 5) - hash + buf[i];
-      hash = hash & hash; // 转换为32位整数
-    }
-
-    // 添加数据长度作为哈希的一部分，增加唯一性
-    hash = (hash << 5) - hash + dataLength;
-    hash = hash & hash;
-    // 转换为字符串
-    return hash.toString(36);
+    const step = Math.max(1, Math.floor((endPos - startPos) / 100));
+    
+    return calculateHash(buf, startPos, endPos, step);
   }
 
   /**

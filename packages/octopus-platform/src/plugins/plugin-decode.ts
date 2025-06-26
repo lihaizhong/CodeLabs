@@ -15,7 +15,16 @@ export default definePlugin<"decode">({
       toBuffer(data: Uint8Array): ArrayBuffer {
         const { buffer, byteOffset, byteLength } = data;
 
-        return buffer.slice(byteOffset, byteOffset + byteLength) as ArrayBuffer;
+        if (buffer instanceof ArrayBuffer) {
+          return buffer.slice(byteOffset, byteOffset + byteLength);
+        }
+
+        const buff = new ArrayBuffer(byteLength);
+        const view = new Uint8Array(buff);
+
+        view.set(data);
+
+        return buff;
       },
       bytesToString(data: Uint8Array): string {
         const chunkSize = 8192; // 安全的块大小
@@ -33,7 +42,7 @@ export default definePlugin<"decode">({
     } as OctopusPlatform.PlatformPlugin["decode"];
 
     if (env === "h5") {
-      const textDecoder = new TextDecoder('utf-8', { fatal: true });
+      const textDecoder = new TextDecoder("utf-8", { fatal: true });
 
       decode.toDataURL = (data: Uint8Array) =>
         b64Wrap(btoa(decode.bytesToString(data)));

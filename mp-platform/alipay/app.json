@@ -8,6 +8,7 @@
   "window": {
     "defaultTitle": "My App"
   },
+  "workers": ["workers/index.js"],
   "behavior": {
     "requestReferrerStrategy": "page",
     "requestReferrerStyle": "full",

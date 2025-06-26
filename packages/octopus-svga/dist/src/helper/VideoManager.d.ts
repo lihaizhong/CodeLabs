@@ -1,9 +1,8 @@
 export interface Bucket {
     origin: string;
     local: string;
-    entity: PlatformVideo.Video | ArrayBuffer | null;
-    promise: Promise<PlatformVideo.Video | null> | null;
-    status: number;
+    entity: PlatformVideo.Video | null;
+    promise: Promise<ArrayBufferLike> | null;
 }
 export interface NeedUpdatePoint {
     action: "remove" | "add";
@@ -11,7 +10,25 @@ export interface NeedUpdatePoint {
     end: number;
 }
 export type LoadMode = "fast" | "whole";
+export interface VideoManagerOptions {
+    download: (url: string) => Promise<ArrayBufferLike>;
+    decompress: (url: string, buff: ArrayBufferLike) => Promise<ArrayBufferLike>;
+    parse: (url: string, buff: ArrayBufferLike) => PlatformVideo.Video;
+}
+export type Decompress = (url: string, buff: ArrayBufferLike) => Promise<ArrayBufferLike> | ArrayBufferLike;
 export declare class VideoManager {
+    /**
+     * 将文件写入用户目录中
+     * @param bucket
+     * @param buff
+     */
+    private static writeFileToUserDirectory;
+    /**
+     * 从用户目录中移除文件
+     * @param bucket
+     * @returns
+     */
+    private static removeFileFromUserDirectory;
     /**
      * 视频池的当前指针位置
      */
@@ -30,39 +47,31 @@ export declare class VideoManager {
     private remainEnd;
     /**
      * 视频加载模式
-     * 快速加载模式：可保证当前视频加载完成后，尽快播放；其他请求将使用Promise的方式保存在bucket中，以供后续使用
-     * 完整加载模式：可保证所有视频加载完成，确保播放切换的流畅性
+     * - 快速加载模式：可保证当前视频加载完成后，尽快播放；其他请求将使用Promise的方式保存在bucket中，以供后续使用
+     * - 完整加载模式：可保证所有视频加载完成，确保播放切换的流畅性
      */
     private loadMode;
     /**
      * 视频池的所有数据
      */
     private buckets;
+    private readonly options;
     /**
      * 获取视频池大小
      */
-    get length(): number;
-    /**
-     * 获取当前指针位置
-     * @returns
-     */
-    get current(): number;
+    get size(): number;
+    constructor(loadMode: LoadMode, options?: VideoManagerOptions);
     /**
      * 更新留存指针位置
      */
-    private updateRemainPoints;
+    private updateRemainRange;
     /**
      * 更新留存指针位置
      * @param point 最新的指针位置
      * @returns
      */
-    private updateBucketOperators;
-    /**
-     * 获取当前的视频信息
-     * @param point 最新的指针位置
-     * @returns
-     */
-    private getBucket;
+    private updateRemainOperations;
+    private downloadAndParseVideo;
     /**
      * 创建bucket
      * @param url 远程地址
@@ -72,11 +81,6 @@ export declare class VideoManager {
      */
     private createBucket;
     /**
-     * 视频加载模式
-     * @param loadMode
-     */
-    setLoadMode(loadMode: LoadMode): void;
-    /**
      * 预加载视频到本地磁盘中
      * @param urls 视频远程地址
      * @param point 当前指针位置
@@ -84,19 +88,24 @@ export declare class VideoManager {
      */
     prepare(urls: string[], point?: number, maxRemain?: number): Promise<void>;
     /**
+     * 获取指定位置的bucket
+     * @param pos
+     * @returns
+     */
+    go(point: number): Promise<Bucket>;
+    /**
      * 获取当前帧的bucket
      * @returns
      */
     get(): Promise<Bucket>;
     /**
-     * 获取指定位置的bucket
-     * @param pos
+     * 获取当前的指针位置
      * @returns
      */
-    go(pos: number): Promise<Bucket>;
+    getPoint(): number;
     /**
      * 清理所有的bucket
      * @returns
      */
-    clear(): Promise<string[]>;
+    clear(): Promise<void>;
 }

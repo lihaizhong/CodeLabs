@@ -25,14 +25,15 @@ declare namespace OctopusPlatform {
 
     path: {
       USER_DATA_PATH: string;
-      filename: (path: string) => string;
+      is: (filepath: string) => boolean;
+      filename: (filepath: string) => string;
       resolve: (name: string, prefix?: string) => string;
     };
 
     local: {
-      write: (data: ArrayBuffer, path: string) => Promise<string>;
-      read: (path: string) => Promise<ArrayBuffer>;
-      remove: (path: string) => Promise<string>;
+      write: (data: ArrayBufferLike, filepath: string) => Promise<string>;
+      read: (filepath: string) => Promise<ArrayBuffer>;
+      remove: (filepath: string) => Promise<string>;
     } | null;
 
     decode: {

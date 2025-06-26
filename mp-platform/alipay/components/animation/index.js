@@ -1,9 +1,44 @@
-import { Parser, Player, VideoEditor, benchmark } from "../../utils/fuck-svga";
+import {
+  Parser,
+  Player,
+  VideoEditor,
+  VideoManager,
+  benchmark,
+} from "../../utils/fuck-svga";
 import ReadyGo from "../../utils/ReadyGo";
+import { SvgaWorker } from "./worker";
 
 let player;
+const playerAwait = async (scope) => {
+  player = new Player();
+  player.onStart = () => {
+    benchmark.log("---- START ----");
+  };
+  player.onProcess = (percent, frame) => {
+    benchmark.log("---- UPDATE ----", "当前进度", percent, "当前帧", frame);
+  };
+  player.onEnd = () => {
+    benchmark.log("---- END ----");
+  };
+  await player.setConfig(
+    {
+      container: "#palette",
+      loop: 1,
+      playMode: "forwards",
+      fillMode: "backwards",
+      contentMode: "aspect-fit",
+    },
+    scope
+  );
+};
+const worker = new SvgaWorker();
 const readyGo = new ReadyGo();
-const cache = new Map();
+const decompress = (url, buff) =>
+  new Promise((resolve) => {
+    worker.once(url, (data) => resolve(data));
+    worker.emit(url, buff);
+  });
+const videoManager = new VideoManager("fast", { decompress });
 
 Component({
   options: {
@@ -13,46 +48,44 @@ Component({
   },
 
   props: {
-    source: {
-      type: [String, Object],
-      value: "",
+    current: {
+      type: Number,
+      value: 0,
+    },
+    sources: {
+      type: Array,
+      value: [],
     },
   },
 
   observers: {
-    source(value) {
-      const url = typeof value === "string" ? value : value?.url;
-
-      if (url !== "") {
-        readyGo.ready(this.initialize.bind(this));
-      }
+    current(value) {
+      benchmark.log("当前动效位置", value);
+      readyGo.ready(this.initialize.bind(this));
     },
   },
 
   lifetimes: {
-    async ready() {
-      player = new Player();
-      await player.setConfig(
-        {
-          container: "#palette",
-          loop: 1,
-          playMode: "forwards",
-          fillMode: "backwards",
-          contentMode: "aspect-fit",
-        },
-        this
-      );
-      player.onProcess = (percent, frame) => {
-        console.log("当前进度", percent, frame);
-        console.log("---- UPDATE ----");
-      };
-      player.onEnd = () => {
-        console.log("---- END ----");
-      };
-      readyGo.go();
+    ready() {
+      worker.open();
+      Promise.all([playerAwait(this)])
+        .then(() => {
+          const urls = this.props.sources.map((item) =>
+            typeof item === "string" ? item : item.url
+          );
+
+          benchmark.log("准备资源中");
+          return videoManager.prepare(urls);
+        })
+        .then(() => {
+          benchmark.log("组件准备就绪");
+          readyGo.go();
+        });
     },
     detached() {
       readyGo.reset();
+      videoManager.clear();
+      worker.close();
       player?.destroy();
       player = null;
     },
@@ -65,49 +98,35 @@ Component({
   methods: {
     async initialize() {
       try {
-        const { source } = this.props;
-        let videoItem;
+        const { current, sources } = this.props;
+        const source = sources[current];
+        const bucket = await videoManager.go(current);
 
-        if (cache.has(source)) {
-          this.setData({ message: "匹配到缓存" });
-          videoItem = cache.get(source);
-        } else {
-          this.setData({ message: "准备下载资源" });
-          await benchmark.time("load", async () => {
-            if (typeof source === "string") {
-              videoItem = await Parser.load(source);
-            } else {
-              videoItem = await Parser.load(source.url);
+        if (typeof source === "object" && source !== null && source.replace) {
+          const editor = new VideoEditor(
+            player.painter,
+            player.resource,
+            bucket.entity
+          );
 
-              // 替换元素
-              if (source.replace) {
-                const editor = new VideoEditor(
-                  player.painter,
-                  player.resource,
-                  videoItem
-                );
-
-                await Promise.all(
-                  Object.keys(source.replace).map((key) =>
-                    editor.setImage(key, source.replace[key])
-                  )
-                );
-              }
-            }
-          });
-
-          cache.set(source, videoItem);
-          this.setData({ message: "下载资源成功" });
+          this.setData({ message: "文件编辑中" });
+          await benchmark.time("replace images", () =>
+            Promise.all(
+              Object.keys(source.replace).map((key) =>
+                editor.setImage(key, source.replace[key])
+              )
+            )
+          );
         }
 
-        console.log(source, videoItem);
-        await benchmark.time("mount", () => player.mount(videoItem));
-        this.setData({ message: "资源装载成功" });
+        this.setData({ message: "资源装载中..." });
+        benchmark.log(source, bucket);
+        await benchmark.time("mount", () => player.mount(bucket.entity));
         // player.stepToPercentage(0.3);
         player.start();
         this.setData({ message: "" });
       } catch (ex) {
-        console.error("svga初始化失败！", ex);
+        console.error("svga初始化失败", ex);
         this.setData({ message: ex.message + "\n" + ex.stack });
       }
     },
