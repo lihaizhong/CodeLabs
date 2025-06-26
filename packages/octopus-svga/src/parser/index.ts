@@ -6,6 +6,12 @@ import { platform } from "../platform";
  * SVGA 下载解析器
  */
 export class Parser {
+  static decompress(
+    data: ArrayBuffer | SharedArrayBuffer | ArrayBufferLike
+  ): ArrayBuffer | SharedArrayBuffer | ArrayBufferLike {
+    return unzlibSync(new Uint8Array(data)).buffer;
+  }
+
   /**
    * 解析视频实体
    * @param data 视频二进制数据
@@ -17,10 +23,8 @@ export class Parser {
     url: string,
     decompression: boolean = true
   ): PlatformVideo.Video {
-    const u8a = new Uint8Array(data);
-
     return createVideoEntity(
-      decompression ? unzlibSync(u8a) : u8a,
+      new Uint8Array(decompression ? this.decompress(data) : data),
       platform.path.filename(url)
     );
   }
@@ -30,20 +34,16 @@ export class Parser {
    * @param url 文件资源地址
    * @returns
    */
-  static download(url: string): Promise<ArrayBuffer | null> {
-    const { remote, local, globals } = platform;
-
-    // 读取远程文件
-    if (remote.is(url)) {
-      return remote.fetch(url);
-    }
+  static download(url: string): Promise<ArrayBuffer> {
+    const { remote, path, local, globals } = platform;
 
     // 读取本地文件
-    if (globals.env !== "h5") {
+    if (globals.env !== "h5" && url.startsWith(path.USER_DATA_PATH)) {
       return local!.read(url);
     }
 
-    return Promise.resolve(null);
+    // 读取远程文件
+    return remote.fetch(url);
   }
 
   /**
