@@ -1,61 +1,19 @@
+import { platform } from "../platform";
+
 const badge = ["%cBENCHMARK", "padding: 2px 4px; background: #68B984; color: #FFFFFF; border-radius: 4px;"];
-
-// 检查环境
-const env: string = (() => {
-  if (typeof window !== "undefined") {
-    return "h5";
-  }
-
-  if (typeof tt !== "undefined") {
-    return "tt";
-  }
-
-  if (typeof my !== "undefined") {
-    return "alipay";
-  }
-
-  if (typeof wx !== "undefined") {
-    return "weapp";
-  }
-
-  return "unknown";
-})();
-
 // 检查系统
 const sys: string = (() => {
-  if (env === "alipay") {
-    return my.getDeviceBaseInfo().platform as string;
+  switch (platform.globals.env) {
+    case "weapp":
+      return wx.getDeviceInfo().platform as string;
+    case "alipay":
+      return my.getDeviceBaseInfo().platform as string;
+    case "tt":
+      return tt.getDeviceInfoSync().platform as string;
+    default:
+      return "unknown";
   }
-
-  if (env === "tt") {
-    return tt.getDeviceInfoSync().platform as string;
-  }
-
-  if (env === "weapp") {
-    // @ts-ignore
-    return wx.getDeviceInfo().platform as string;
-  }
-
-  return "unknown";
 })().toLocaleLowerCase();
-
-// 检查时间工具
-const now: () => number = (() => {
-  if (env === "h5" || env === "tt") {
-    return () => performance.now();
-  }
-
-  if (env === "weapp") {
-    // @ts-ignore
-    return () => wx.getPerformance().now();
-  }
-
-  if (env === "alipay") {
-    return () => my.getPerformance().now() / 1000;
-  }
-
-  return () => Date.now();
-})();
 
 class Stopwatch {
   private labels: Map<string, number> = new Map();
@@ -66,7 +24,7 @@ class Stopwatch {
 
   start(label: string) {
     if (this.isRealMachine) {
-      this.labels.set(label, now());
+      this.labels.set(label, platform.now());
     } else {
       console.time(label);
     }
@@ -76,7 +34,7 @@ class Stopwatch {
     if (this.isRealMachine) {
       const startTime = this.labels.get(label);
       if (typeof startTime === "number") {
-        console.log(`${label}: ${now() - startTime} ms`);
+        console.log(`${label}: ${platform.now() - startTime} ms`);
         this.labels.delete(label);
       }
     } else {
@@ -95,7 +53,7 @@ export interface Benchmark extends Stopwatch {
 const stopwatch = new Stopwatch();
 const benchmark: Benchmark = Object.create(stopwatch);
 
-benchmark.now = now;
+benchmark.now = () => platform.now();
 
 benchmark.time = async (label, callback) => {
   stopwatch.start(label);
