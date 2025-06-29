@@ -267,13 +267,13 @@ export class VideoManager {
   /**
    * 创建bucket
    * @param url 远程地址
-   * @param inRemainRange 是否在留存范围内
+   * @param needDownloadAndDecompress 是否需要下载并解压
    * @param needDownloadAndParse 是否需要下载并解析
    * @returns
    */
   private async createBucket(
     url: string,
-    inRemainRange: boolean,
+    needDownloadAndDecompress: boolean,
     needDownloadAndParse: boolean
   ): Promise<Bucket> {
     const bucket: Bucket = {
@@ -285,7 +285,7 @@ export class VideoManager {
 
     if (needDownloadAndParse) {
       bucket.entity = await this.downloadAndParseVideo(bucket, true);
-    } else if (inRemainRange) {
+    } else if (needDownloadAndDecompress) {
       bucket.promise = this.downloadAndParseVideo(bucket);
     }
 
@@ -313,7 +313,7 @@ export class VideoManager {
       true
     );
 
-    this.buckets = await Promise.all(
+    this.buckets = await benchmark.time("资源加载时间", () => Promise.all(
       urls.map((url: string, index: number) => {
         // 当前帧的视频已经预加载到内存中
         if (index === currentPoint) {
@@ -326,48 +326,7 @@ export class VideoManager {
           loadMode === "whole"
         );
       })
-    );
-  }
-
-  /**
-   * 获取指定位置的bucket
-   * @param pos
-   * @returns
-   */
-  async go(point: number): Promise<Bucket> {
-    const { size, buckets, loadMode } = this;
-
-    if (point < 0 || point >= size) {
-      return buckets[point];
-    }
-
-    const operators = this.updateRemainOperations(point);
-    if (operators.length) {
-      const waitings: Promise<ArrayBufferLike | null>[] = [];
-      operators.forEach(({ action, start, end }) => {
-        const loopEnd = end < start ? size + end : end;
-        for (let i = start; i < loopEnd; i++) {
-          const bucket = buckets[i % size];
-          if (action === "remove") {
-            bucket.entity = null;
-            bucket.promise = null;
-          } else if (action === "add") {
-            if (bucket.entity === null) {
-              if (bucket.promise === null) {
-                bucket.promise = this.downloadAndParseVideo(bucket);
-              }
-
-              if (loadMode === "whole" || point === i) {
-                waitings.push(bucket.promise);
-              }
-            }
-          }
-        }
-      });
-      await Promise.all(waitings);
-    }
-
-    return this.get();
+    ));
   }
 
   /**
@@ -395,6 +354,42 @@ export class VideoManager {
    */
   getPoint(): number {
     return this.point;
+  }
+
+  /**
+   * 获取指定位置的bucket
+   * @param pos
+   * @returns
+   */
+  async go(point: number): Promise<Bucket> {
+    const { size, buckets, loadMode } = this;
+
+    if (point < 0 || point >= size) {
+      return buckets[this.point];
+    }
+
+    if (loadMode !== "whole") {
+      const operators = this.updateRemainOperations(point);
+      if (operators.length) {
+        operators.forEach(({ action, start, end }) => {
+          const loopEnd = end < start ? size + end : end;
+          for (let i = start; i < loopEnd; i++) {
+            const bucket = buckets[i % size];
+            if (action === "remove") {
+              bucket.entity = null;
+              bucket.promise = null;
+            } else if (action === "add") {
+              if (bucket.entity === null && bucket.promise === null) {
+                bucket.promise = this.downloadAndParseVideo(bucket);
+              }
+            }
+          }
+        });
+      }
+    }
+    
+
+    return this.get();
   }
 
   /**

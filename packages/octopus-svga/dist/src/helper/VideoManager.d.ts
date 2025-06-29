@@ -75,7 +75,7 @@ export declare class VideoManager {
     /**
      * 创建bucket
      * @param url 远程地址
-     * @param inRemainRange 是否在留存范围内
+     * @param needDownloadAndDecompress 是否需要下载并解压
      * @param needDownloadAndParse 是否需要下载并解析
      * @returns
      */
@@ -88,12 +88,6 @@ export declare class VideoManager {
      */
     prepare(urls: string[], point?: number, maxRemain?: number): Promise<void>;
     /**
-     * 获取指定位置的bucket
-     * @param pos
-     * @returns
-     */
-    go(point: number): Promise<Bucket>;
-    /**
      * 获取当前帧的bucket
      * @returns
      */
@@ -103,6 +97,12 @@ export declare class VideoManager {
      * @returns
      */
     getPoint(): number;
+    /**
+     * 获取指定位置的bucket
+     * @param pos
+     * @returns
+     */
+    go(point: number): Promise<Bucket>;
     /**
      * 清理所有的bucket
      * @returns
