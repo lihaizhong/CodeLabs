@@ -22,7 +22,7 @@ const playerAwait = async () => {
 
     const bucket = await videoManager.get();
 
-    console.log(
+    benchmark.log(
       "---- START ----",
       "每帧期望消耗时长",
       1000 / bucket.entity.fps,
@@ -33,7 +33,7 @@ const playerAwait = async () => {
   player.onProcess = (percent, frame) => {
     let loopEndTime = benchmark.now();
 
-    console.log(
+    benchmark.log(
       "---- UPDATE ----",
       "当前进度",
       percent,

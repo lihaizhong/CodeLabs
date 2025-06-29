@@ -4,8 +4,8 @@ import { platform } from "../../platform";
 export class ResourceManager {
   /**
    * 判断是否是 ImageBitmap
-   * @param img 
-   * @returns 
+   * @param img
+   * @returns
    */
   private static isBitmap(img: any): boolean {
     return platform.globals.env === "h5" && img instanceof ImageBitmap;
@@ -13,7 +13,7 @@ export class ResourceManager {
 
   /**
    * 释放内存资源（图片）
-   * @param img 
+   * @param img
    */
   private static releaseOne(img: OctopusPlatform.PlatformImage | ImageBitmap) {
     if (ResourceManager.isBitmap(img)) {
@@ -56,7 +56,7 @@ export class ResourceManager {
 
   /**
    * 创建图片标签
-   * @returns 
+   * @returns
    */
   private createImage(): OctopusPlatform.PlatformImage {
     let img: OctopusPlatform.PlatformImage | null = null;
@@ -77,9 +77,11 @@ export class ResourceManager {
 
   /**
    * 将 ImageBitmap 插入到 caches
-   * @param img 
+   * @param img
    */
-  private inertBitmapIntoCaches(img: OctopusPlatform.PlatformImage | ImageBitmap) {
+  private inertBitmapIntoCaches(
+    img: OctopusPlatform.PlatformImage | ImageBitmap
+  ) {
     if (ResourceManager.isBitmap(img)) {
       this.caches.push(img);
     }
@@ -89,18 +91,23 @@ export class ResourceManager {
    * 加载额外的图片资源
    * @param source 资源内容/地址
    * @param filename 文件名称
-   * @returns 
+   * @returns
    */
-  public loadExtImage(source: string | Uint8Array, filename: string): Promise<OctopusPlatform.PlatformImage | ImageBitmap> {
-    return platform.image.load(
-      () => this.createImage(),
-      source,
-      platform.path.resolve(filename, "ext")
-    ).then((img) => {
-      this.inertBitmapIntoCaches(img);
+  public loadExtImage(
+    source: string | Uint8Array,
+    filename: string
+  ): Promise<OctopusPlatform.PlatformImage | ImageBitmap> {
+    return platform.image
+      .load(
+        () => this.createImage(),
+        source,
+        platform.path.resolve(filename, "ext")
+      )
+      .then((img) => {
+        this.inertBitmapIntoCaches(img);
 
-      return img;
-    });
+        return img;
+      });
   }
 
   /**
@@ -127,7 +134,7 @@ export class ResourceManager {
           () => this.createImage(),
           image as OctopusPlatform.RawImage,
           platform.path.resolve(
-            filename,
+            `${filename.replace(/\.svga$/g, "")}.png`,
             type === "dynamic" ? `dyn_${name}` : name
           )
         )
@@ -158,7 +165,7 @@ export class ResourceManager {
     this.materials.clear();
     this.dynamicMaterials.clear();
     // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
-    ["alipay", "h5"].includes(platform.globals.env) ? this.cleanup() : this.tidyUp();
+    platform.globals.env === "alipay" ? this.cleanup() : this.tidyUp();
   }
 
   /**

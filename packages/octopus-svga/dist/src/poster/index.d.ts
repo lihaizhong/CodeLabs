@@ -18,6 +18,7 @@ export declare class Poster {
      * 是否配置完成
      */
     private isConfigured;
+    private imageData;
     /**
      * 刷头实例
      */
@@ -52,6 +53,7 @@ export declare class Poster {
      * 绘制海报
      */
     draw(): void;
+    toBuffer(): Uint8Array<ArrayBufferLike>;
     /**
      * 获取海报元数据
      * @returns

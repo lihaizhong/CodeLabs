@@ -1,5 +1,5 @@
 import { VideoManager, platform } from "octopus-svga";
-import { posterFiles, yySources } from "../../utils/constants";
+import { yySources } from "../../utils/constants";
 
 // const files = posterFiles.map((item) => item.url);
 const files = yySources;

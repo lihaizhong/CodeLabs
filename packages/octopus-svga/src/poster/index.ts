@@ -1,6 +1,6 @@
 import { Renderer2D } from "../extensions";
 import { ResourceManager } from "../extensions";
-import { getDataURLFromImageData } from "../helper";
+import { getBufferFromImageData, getDataURLFromImageData } from "../helper";
 import { Painter } from "../painter";
 
 export class Poster {
@@ -24,6 +24,8 @@ export class Poster {
    * 是否配置完成
    */
   private isConfigured = false;
+
+  private imageData: ImageData | null = null;
 
   /**
    * 刷头实例
@@ -128,6 +130,15 @@ export class Poster {
       0,
       entity!.sprites.length
     );
+    this.imageData = painter.XC!.getImageData(0, 0, painter.W, painter.H);
+  }
+
+  public toBuffer() {
+    if (this.imageData === null) {
+      throw new Error("please call the draw method first.")
+    }
+
+    return getBufferFromImageData(this.imageData);
   }
 
   /**
@@ -135,9 +146,11 @@ export class Poster {
    * @returns
    */
   public toDataURL(): string {
-    const { XC, W, H } = this.painter
+    if (this.imageData === null) {
+      throw new Error("please call the draw method first.")
+    }
 
-    return getDataURLFromImageData(XC!.getImageData(0, 0, W, H));
+    return getDataURLFromImageData(this.imageData)
   }
 
   /**

@@ -1,4 +1,4 @@
-<fuck-poster url="{{ url }}" class="poster"></fuck-poster>
+<fuck-poster current="{{ current }}" sources="{{ sources }}" frame="{{ 0 }}" class="poster"></fuck-poster>
 <cover-view class="footer">
   <button class="foot-btn" type="primary" bindtap="handleSwitchPrev">上一张</button>
   <button class="foot-btn" type="primary" bindtap="handleSwitchAtRandom">试一试</button>

@@ -1,14 +1,36 @@
-import { Parser, Poster } from "octopus-svga";
-import { posterFiles } from "../../utils/constants";
+import { Parser, Poster, VideoEditor, benchmark } from "octopus-svga";
+import { posterSources } from "../../utils/constants";
+
+const posterFiles = posterSources;
 
 async function generatePoster(point) {
   const data = posterFiles[point];
-  const posterItem = await Parser.load(data.url);
+  let posterItem;
+
+  if (typeof data === "string") {
+    posterItem = await Parser.load(data);
+  } else {
+    posterItem = await Parser.load(data.url);
+  }
+
   const { width, height } = posterItem.size;
   const poster = new Poster(width, height);
 
-  data.modify?.(posterItem);
-  console.log("posterItem", posterItem);
+  if (typeof data === "object" && data !== null) {
+    const videoEditor = new VideoEditor(
+      poster.painter,
+      poster.resource,
+      posterItem
+    );
+
+    await Promise.all(
+      Object.keys(data.replace).map((key) =>
+        videoEditor.setImage(key, data.replace[key])
+      )
+    );
+  }
+
+  benchmark.log("poster item", posterItem);
   await poster.mount(posterItem);
 
   const $elem = document.getElementById("poster");
@@ -17,7 +39,7 @@ async function generatePoster(point) {
   poster.draw();
 
   $elem.src = poster.toDataURL();
-  console.log("data url", $elem.src);
+  benchmark.log("data url", $elem.src);
 }
 
 window.addEventListener("DOMContentLoaded", () => {

@@ -123,6 +123,13 @@ export const svgaHugeSources = [
   "frame03.svga",
 ].map((filename) => `${LOCAL_SVGA_URL}/huge/${filename}`);
 
+export const posterSources = [
+  "微信认证授权码-纯净版.svga",
+  "微信认证授权码.svga",
+  "支付宝认证授权码-纯净版.svga",
+  "支付宝认证授权码.svga"
+].map((filename) => `${LOCAL_SVGA_URL}/poster/${filename}`);
+
 export function getOneAtRandom(size) {
   const ranIndex = Math.floor(Math.random() * size);
 

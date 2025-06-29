@@ -195,20 +195,12 @@ export class VideoManager {
    * @returns
    */
   private includeRemainRange(point: number): boolean {
-    benchmark.log(
-      "remainStart",
-      this.remainStart,
-      "remainEnd",
-      this.remainEnd,
-      "point",
-      point
-    );
     if (this.remainStart < this.remainEnd) {
       return point >= this.remainStart && point < this.remainEnd;
     }
 
     if (this.remainStart > this.remainEnd) {
-      return point <= this.remainStart || point > this.remainEnd;
+      return point >= this.remainStart || point < this.remainEnd;
     }
 
     return true;

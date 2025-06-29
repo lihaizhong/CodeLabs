@@ -6,19 +6,23 @@ const readyGo = new ReadyGo();
 
 Component({
   properties: {
-    url: {
-      type: String,
-      value: "",
+    current: {
+      type: Number,
+      value: 0,
+    },
+    sources: {
+      type: Array,
+      value: [],
     },
     frame: {
       type: Number,
-      value: 5,
-    }
+      value: 0,
+    },
   },
 
   observers: {
-    url(value) {
-      if (value !== "") {
+    current(value) {
+      if (typeof value === "number") {
         readyGo.ready(this.initialize.bind(this));
       }
     },
@@ -27,6 +31,7 @@ Component({
   lifetimes: {
     async ready() {
       const { windowWidth: width, windowHeight: height } = wx.getWindowInfo();
+
       poster = new Poster(width, height);
       await poster.setConfig("#palette", this);
       readyGo.go();
@@ -45,11 +50,34 @@ Component({
 
   methods: {
     async initialize() {
+      const { current, sources, frame } = this.properties;
+      const source = sources[current];
+      let videoItem;
+
       try {
         this.setData({ message: "准备下载资源" });
-        const videoItem = await Parser.load(this.properties.url);
+        if (typeof source === "string") {
+          videoItem = await Parser.load(source);
+        } else {
+          videoItem = await Parser.load(source.url);
+          const editor = new VideoEditor(
+            player.painter,
+            player.resource,
+            bucket.entity
+          );
+
+          this.setData({ message: "文件编辑中" });
+          await benchmark.time("replace images", () =>
+            Promise.all(
+              Object.keys(source.replace).map((key) =>
+                editor.setImage(key, source.replace[key])
+              )
+            )
+          );
+        }
+
         this.setData({ message: "下载资源成功" });
-        await poster.mount(videoItem, this.properties.frame);
+        await poster.mount(videoItem, frame);
         this.setData({ message: "资源装载成功" });
         poster.draw();
 
@@ -61,6 +89,6 @@ Component({
         console.error("svga初始化失败！", ex);
         this.setData({ message: ex.message + "\n" + ex.stack });
       }
-    }
+    },
   },
 });
