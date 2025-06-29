@@ -49,6 +49,10 @@ class Stopwatch {
     this.markLabels.set(label, nowTime);
   }
 
+  reset(label: string) {
+    this.markLabels.delete(label);
+  }
+
   clear() {
     this.timeLabels.clear();
     this.markLabels.clear();

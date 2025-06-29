@@ -5,6 +5,7 @@ declare class Stopwatch {
     start(label: string): void;
     stop(label: string): void;
     mark(label: string): void;
+    reset(label: string): void;
     clear(): void;
 }
 export interface Benchmark extends Stopwatch {
