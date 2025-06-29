@@ -283,12 +283,10 @@ export class VideoManager {
       promise: null,
     };
 
-    if (inRemainRange) {
-      if (needDownloadAndParse) {
-        bucket.entity = await this.downloadAndParseVideo(bucket, true);
-      } else {
-        bucket.promise = this.downloadAndParseVideo(bucket);
-      }
+    if (needDownloadAndParse) {
+      bucket.entity = await this.downloadAndParseVideo(bucket, true);
+    } else if (inRemainRange) {
+      bucket.promise = this.downloadAndParseVideo(bucket);
     }
 
     return bucket;
