@@ -153,23 +153,22 @@ export class VideoManager {
    * 更新留存指针位置
    */
   private updateRemainRange(
-    point?: number,
-    maxRemain?: number,
-    totalCount: number = this.buckets.length
+    point: number,
+    maxRemain: number,
+    totalCount: number
   ): void {
-    if (typeof point === "number") {
-      if (point < 0) {
-        this.point = 0;
-      } else if (point > totalCount) {
-        this.point = totalCount - 1;
-      } else {
-        this.point = point;
-      }
-    } else {
+    if (point < 0) {
       this.point = 0;
+    } else if (point >= totalCount) {
+      this.point = totalCount - 1;
+    } else {
+      this.point = point;
     }
 
-    if (typeof maxRemain === "number") {
+    if (this.loadMode === "whole") {
+      this.remainStart = 0;
+      this.remainEnd = totalCount;
+    } else {
       if (maxRemain < 1) {
         this.maxRemain = 1;
       } else if (maxRemain > totalCount) {
@@ -177,67 +176,42 @@ export class VideoManager {
       } else {
         this.maxRemain = 3;
       }
-    } else {
-      this.maxRemain = 3;
-    }
 
-    this.remainStart = Math.max(0, this.point - Math.ceil(this.maxRemain / 2));
-    this.remainEnd = this.remainStart + this.maxRemain;
+      this.remainStart = this.point - Math.floor(this.maxRemain / 2);
+      if (this.remainStart < 0) {
+        this.remainStart = totalCount + this.remainStart;
+      }
 
-    if (this.remainEnd > totalCount) {
-      this.remainEnd = this.remainEnd % totalCount;
+      this.remainEnd = this.remainStart + this.maxRemain;
+      if (this.remainEnd > totalCount) {
+        this.remainEnd = this.remainEnd % totalCount;
+      }
     }
   }
 
   /**
-   * 更新留存指针位置
-   * @param point 最新的指针位置
+   * 指针是否在留存空间内
+   * @param point
    * @returns
    */
-  private updateRemainOperations(point: number): NeedUpdatePoint[] {
-    const { remainStart: latestRemainStart, remainEnd: latestRemainEnd } = this;
-    const createOperation = (
-      action: "add" | "remove",
-      start: number,
-      end: number
-    ) => ({ action, start, end });
-
-    this.updateRemainRange(point);
-    if (latestRemainStart === latestRemainEnd) {
-      return [createOperation("add", this.remainStart, this.remainEnd)];
+  private includeRemainRange(point: number): boolean {
+    benchmark.log(
+      "remainStart",
+      this.remainStart,
+      "remainEnd",
+      this.remainEnd,
+      "point",
+      point
+    );
+    if (this.remainStart < this.remainEnd) {
+      return point >= this.remainStart && point < this.remainEnd;
     }
 
-    if (
-      this.remainStart > latestRemainEnd ||
-      this.remainEnd < latestRemainStart
-    ) {
-      return [
-        createOperation("remove", latestRemainStart, latestRemainEnd),
-        createOperation("add", this.remainStart, this.remainEnd),
-      ];
+    if (this.remainStart > this.remainEnd) {
+      return point <= this.remainStart || point > this.remainEnd;
     }
 
-    if (
-      this.remainStart > latestRemainStart &&
-      this.remainEnd > latestRemainEnd
-    ) {
-      return [
-        createOperation("remove", latestRemainStart, this.remainStart),
-        createOperation("add", latestRemainEnd, this.remainEnd),
-      ];
-    }
-
-    if (
-      this.remainStart < latestRemainStart &&
-      this.remainEnd < latestRemainEnd
-    ) {
-      return [
-        createOperation("remove", this.remainEnd, latestRemainEnd),
-        createOperation("add", this.remainStart, latestRemainStart),
-      ];
-    }
-
-    return [];
+    return true;
   }
 
   private async downloadAndParseVideo(
@@ -267,13 +241,13 @@ export class VideoManager {
   /**
    * 创建bucket
    * @param url 远程地址
-   * @param needDownloadAndDecompress 是否需要下载并解压
+   * @param point 指针位置
    * @param needDownloadAndParse 是否需要下载并解析
    * @returns
    */
   private async createBucket(
     url: string,
-    needDownloadAndDecompress: boolean,
+    point: number,
     needDownloadAndParse: boolean
   ): Promise<Bucket> {
     const bucket: Bucket = {
@@ -285,7 +259,7 @@ export class VideoManager {
 
     if (needDownloadAndParse) {
       bucket.entity = await this.downloadAndParseVideo(bucket, true);
-    } else if (needDownloadAndDecompress) {
+    } else if (this.includeRemainRange(point)) {
       bucket.promise = this.downloadAndParseVideo(bucket);
     }
 
@@ -300,33 +274,31 @@ export class VideoManager {
    */
   async prepare(
     urls: string[],
-    point?: number,
-    maxRemain?: number
+    point: number = 0,
+    maxRemain: number = 3
   ): Promise<void> {
     this.updateRemainRange(point, maxRemain, urls.length);
 
-    const { loadMode, remainStart, remainEnd, point: currentPoint } = this;
+    const { loadMode, point: currentPoint } = this;
     // 优先加载当前动效
     const preloadBucket: Bucket = await this.createBucket(
       urls[currentPoint],
-      true,
+      currentPoint,
       true
     );
 
-    this.buckets = await benchmark.time("资源加载时间", () => Promise.all(
-      urls.map((url: string, index: number) => {
-        // 当前帧的视频已经预加载到内存中
-        if (index === currentPoint) {
-          return preloadBucket;
-        }
+    this.buckets = await benchmark.time("资源加载时间", () =>
+      Promise.all(
+        urls.map((url: string, index: number) => {
+          // 当前帧的视频已经预加载到内存中
+          if (index === currentPoint) {
+            return preloadBucket;
+          }
 
-        return this.createBucket(
-          url,
-          remainStart <= index && index < remainEnd,
-          loadMode === "whole"
-        );
-      })
-    ));
+          return this.createBucket(url, index, loadMode === "whole");
+        })
+      )
+    );
   }
 
   /**
@@ -368,26 +340,19 @@ export class VideoManager {
       return buckets[this.point];
     }
 
+    this.updateRemainRange(point, this.maxRemain, buckets.length);
     if (loadMode !== "whole") {
-      const operators = this.updateRemainOperations(point);
-      if (operators.length) {
-        operators.forEach(({ action, start, end }) => {
-          const loopEnd = end < start ? size + end : end;
-          for (let i = start; i < loopEnd; i++) {
-            const bucket = buckets[i % size];
-            if (action === "remove") {
-              bucket.entity = null;
-              bucket.promise = null;
-            } else if (action === "add") {
-              if (bucket.entity === null && bucket.promise === null) {
-                bucket.promise = this.downloadAndParseVideo(bucket);
-              }
-            }
+      buckets.forEach((bucket: Bucket, index: number) => {
+        if (this.includeRemainRange(index)) {
+          if (bucket.entity === null && bucket.promise === null) {
+            bucket.promise = this.downloadAndParseVideo(bucket);
           }
-        });
-      }
+        } else {
+          bucket.entity = null;
+          bucket.promise = null;
+        }
+      });
     }
-    
 
     return this.get();
   }

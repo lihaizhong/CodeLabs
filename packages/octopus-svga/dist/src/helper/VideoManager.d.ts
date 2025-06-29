@@ -66,16 +66,16 @@ export declare class VideoManager {
      */
     private updateRemainRange;
     /**
-     * 更新留存指针位置
-     * @param point 最新的指针位置
+     * 指针是否在留存空间内
+     * @param point
      * @returns
      */
-    private updateRemainOperations;
+    private includeRemainRange;
     private downloadAndParseVideo;
     /**
      * 创建bucket
      * @param url 远程地址
-     * @param needDownloadAndDecompress 是否需要下载并解压
+     * @param point 指针位置
      * @param needDownloadAndParse 是否需要下载并解析
      * @returns
      */
