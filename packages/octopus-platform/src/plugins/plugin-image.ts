@@ -29,15 +29,15 @@ export default definePlugin<"image">({
     /**
      * 加载图片
      * @param img
-     * @param src
+     * @param url
      * @returns
      */
-    function loadImage(img: OctopusPlatform.PlatformImage, src: string) {
+    function loadImage(img: OctopusPlatform.PlatformImage, url: string) {
       return new Promise<OctopusPlatform.PlatformImage>((resolve, reject) => {
         img.onload = () => resolve(img);
         img.onerror = () =>
-          reject(new Error(`SVGA LOADING FAILURE: ${img.src}`));
-        img.src = src;
+          reject(new Error(`SVGA LOADING FAILURE: ${url}`));
+        img.src = url;
       });
     }
 
