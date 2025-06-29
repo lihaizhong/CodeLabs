@@ -11,7 +11,6 @@ import {
   pluginRAF,
 } from "octopus-platform";
 import { version } from "../../package.json";
-// import benchmark from "../benchmark";
 
 export type PlatformProperties =
   | "now"
@@ -80,10 +79,3 @@ class EnhancedPlatform extends Platform<PlatformProperties> {
 }
 
 export const platform = new EnhancedPlatform();
-
-// benchmark.log(
-//   "PLATFORM VERSION",
-//   platform.platformVersion,
-//   "VERSION",
-//   platform.version
-// );

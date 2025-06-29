@@ -9,6 +9,7 @@ export default {
     format: "es",
     sourcemap: true,
   },
+  external: ["octopus-platform"],
   plugins: [
     json({
       include: ["./package.json"],

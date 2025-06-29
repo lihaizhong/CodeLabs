@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "fflate": "^0.8.2",
+    "octopus-benchmark": "workspace:^",
     "octopus-platform": "workspace:^"
   }
 }

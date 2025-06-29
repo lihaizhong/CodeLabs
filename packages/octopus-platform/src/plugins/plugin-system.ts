@@ -7,11 +7,11 @@ export default definePlugin<"system">({
 
     switch (env) {
       case "weapp":
-        return wx.getDeviceInfo().platform as string;
+        return (wx.getDeviceInfo().platform as string).toLowerCase();
       case "alipay":
-        return my.getDeviceBaseInfo().platform as string;
+        return (my.getDeviceBaseInfo().platform as string).toLowerCase();
       case "tt":
-        return tt.getDeviceInfoSync().platform as string;
+        return (tt.getDeviceInfoSync().platform as string).toLowerCase();
       default:
         return "unknown";
     }

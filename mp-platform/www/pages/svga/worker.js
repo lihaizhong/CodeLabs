@@ -19,10 +19,10 @@ export class SvgaWorker {
       const { fn, options } = handler;
 
       fn(data);
+      benchmark.stop(`${method} 下载并解压时间`);
       if (options.once) {
         this.listeners.delete(method);
       }
-      benchmark.stop(`${method} 下载并解压时间`);
     };
     // 当 Worker 对象接收到一条无法被反序列化的数据时，触发该事件
     this.worker.onmessageerror = (error) => {
@@ -35,10 +35,7 @@ export class SvgaWorker {
 
   once(method, fn) {
     this.listeners.set(method, {
-      fn: (data) => {
-        benchmark.start(method);
-        fn?.(data);
-      },
+      fn: (data) => fn?.(data),
       options: {
         once: true,
       },
