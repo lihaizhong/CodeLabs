@@ -6,15 +6,17 @@ const badge = [
 ];
 
 class Stopwatch {
-  private labels: Map<string, number> = new Map();
-
   private readonly isRealMachine = ["ios", "android", "openharmony"].includes(
     platform.system
   );
 
+  private readonly timeLabels: Map<string, number> = new Map();
+
+  private readonly markLabels: Map<string, number> = new Map();
+
   start(label: string) {
     if (this.isRealMachine) {
-      this.labels.set(label, platform.now());
+      this.timeLabels.set(label, platform.now());
     } else {
       console.time(label);
     }
@@ -22,14 +24,34 @@ class Stopwatch {
 
   stop(label: string) {
     if (this.isRealMachine) {
-      const startTime = this.labels.get(label);
-      if (typeof startTime === "number") {
-        console.log(`${label}: ${platform.now() - startTime} ms`);
-        this.labels.delete(label);
+      const nowTime = platform.now();
+
+      if (this.timeLabels.has(label)) {
+        console.log(
+          `${label}: ${nowTime - (this.timeLabels.get(label) as number)} ms`
+        );
+        this.timeLabels.delete(label);
       }
     } else {
       console.timeEnd(label);
     }
+  }
+
+  mark(label: string) {
+    const nowTime = platform.now();
+
+    if (this.markLabels.has(label)) {
+      console.log(
+        `${label}: ${nowTime - (this.markLabels.get(label) as number)} ms`
+      );
+    }
+
+    this.markLabels.set(label, nowTime);
+  }
+
+  clear() {
+    this.timeLabels.clear();
+    this.markLabels.clear();
   }
 }
 

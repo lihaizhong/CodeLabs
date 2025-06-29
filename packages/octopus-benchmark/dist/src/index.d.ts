@@ -1,8 +1,11 @@
 declare class Stopwatch {
-    private labels;
     private readonly isRealMachine;
+    private readonly timeLabels;
+    private readonly markLabels;
     start(label: string): void;
     stop(label: string): void;
+    mark(label: string): void;
+    clear(): void;
 }
 export interface Benchmark extends Stopwatch {
     now: () => number;
