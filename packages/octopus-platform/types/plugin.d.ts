@@ -18,6 +18,8 @@ declare namespace OctopusPlatform {
 
     now: () => number;
 
+    system: string;
+
     remote: {
       is: (url: string) => boolean;
       fetch: (url: string) => Promise<ArrayBuffer>;
