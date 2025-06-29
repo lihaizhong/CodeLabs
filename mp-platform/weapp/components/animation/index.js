@@ -104,7 +104,6 @@ Component({
       videoManager.clear();
       worker.close();
       player?.destroy();
-      player = null;
     },
   },
 

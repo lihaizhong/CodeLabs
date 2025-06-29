@@ -1,8 +1,8 @@
 import { Parser, Poster } from "../../utils/fuck-svga";
 import ReadyGo from "../../utils/ReadyGo";
 
-let poster;
 const readyGo = new ReadyGo();
+let poster;
 
 Component({
   properties: {
@@ -38,8 +38,7 @@ Component({
     },
     detached() {
       readyGo.reset();
-      poster.destroy();
-      poster = null;
+      poster?.destroy();
     },
   },
 

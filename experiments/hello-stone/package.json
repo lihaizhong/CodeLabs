@@ -1,7 +1,7 @@
 {
   "name": "hello-stone",
   "version": "1.0.0",
-  "description": "",
+  "description": "使用JavaScript开发的一个简单脚本语言",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

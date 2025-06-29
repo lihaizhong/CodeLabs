@@ -10,15 +10,40 @@ import { SvgaWorker } from "./worker";
 
 let player;
 const playerAwait = async (scope) => {
+  let loopStartTime;
+  let startTime;
+
   player = new Player();
-  player.onStart = () => {
-    benchmark.log("---- START ----");
+  player.onStart = async () => {
+    startTime = loopStartTime = benchmark.now();
+
+    const bucket = await videoManager.get();
+
+    benchmark.log(
+      "---- START ----",
+      "每帧期望消耗时长",
+      1000 / bucket.entity.fps,
+      "预期总消耗时长",
+      (bucket.entity.frames / bucket.entity.fps) * 1000
+    );
   };
   player.onProcess = (percent, frame) => {
-    benchmark.log("---- UPDATE ----", "当前进度", percent, "当前帧", frame);
+    let loopEndTime = benchmark.now();
+
+    benchmark.log(
+      "---- UPDATE ----",
+      "当前进度",
+      percent,
+      "当前帧",
+      frame,
+      "持续时间",
+      loopEndTime - loopStartTime
+    );
+
+    loopStartTime = loopEndTime;
   };
   player.onEnd = () => {
-    benchmark.log("---- END ----");
+    benchmark.log("---- END ----", "总消耗时间", benchmark.now() - startTime);
   };
   await player.setConfig(
     {
@@ -87,7 +112,6 @@ Component({
       videoManager.clear();
       worker.close();
       player?.destroy();
-      player = null;
     },
   },
 
