@@ -1,6 +1,9 @@
 const LOCAL_SVGA_URL = `${window.location.origin}/svga`;
 // const REMOTE_SVGA_URL = 'https://assets.2dfire.com/frontend';
 
+export const EMPTY_PLACEHOLDER =
+  "https://ftp.bmp.ovh/imgs/2019/11/feca07d97e0b18bc.png";
+
 export const svgaSources = [
   "9ce0cce7205fbebba380ed44879e5660.svga",
   "1ddb590515d196f07c411794633e4406.svga",
@@ -127,7 +130,7 @@ export const posterSources = [
   "微信认证授权码-纯净版.svga",
   "微信认证授权码.svga",
   "支付宝认证授权码-纯净版.svga",
-  "支付宝认证授权码.svga"
+  "支付宝认证授权码.svga",
 ].map((filename) => `${LOCAL_SVGA_URL}/poster/${filename}`);
 
 export function getOneAtRandom(size) {

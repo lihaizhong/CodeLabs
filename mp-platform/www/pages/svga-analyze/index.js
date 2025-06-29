@@ -1,13 +1,10 @@
-import { VideoManager, platform } from "octopus-svga";
-import { yySources } from "../../utils/constants";
+import { Parser, platform } from "octopus-svga";
+import { EMPTY_PLACEHOLDER, yySources } from "../../utils/constants";
 
-// const files = posterFiles.map((item) => item.url);
 const files = yySources;
-const videoManager = new VideoManager();
 
 async function render(current) {
-  const bucket = await videoManager.go(current);
-  const videoItem = bucket.entity;
+  const videoItem = await Parser.load(files[current]);
   const $infos = document.getElementById("js-animate-infos");
   const $switch = document.getElementById("js-animate-switch");
   const infos = [
@@ -31,7 +28,7 @@ async function render(current) {
     $infos.appendChild($item);
   }
 
-  const entries = Object.entries(videoItem.images)
+  const entries = Object.entries(videoItem.images);
   $switch.innerHTML = "";
   entries.forEach(([key, value], index) => {
     const $item = document.createElement("div");
@@ -66,7 +63,7 @@ async function render(current) {
   });
 
   if (entries.length === 0) {
-    document.getElementById("analyze-stage").src = "https://ftp.bmp.ovh/imgs/2019/11/feca07d97e0b18bc.png"
+    document.getElementById("analyze-stage").src = EMPTY_PLACEHOLDER;
   }
 }
 
@@ -108,8 +105,5 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   toggleHalfScreenDialog();
-
-  videoManager.prepare(files).then(() => {
-    render(current);
-  });
+  render(current);
 });

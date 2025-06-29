@@ -1,9 +1,14 @@
 import { Parser, Poster, VideoEditor, benchmark } from "octopus-svga";
-import { posterSources } from "../../utils/constants";
+import { EMPTY_PLACEHOLDER, posterSources } from "../../utils/constants";
 
 const posterFiles = posterSources;
 
+function resetImage() {
+  document.getElementById("poster").src = EMPTY_PLACEHOLDER;
+}
+
 async function generatePoster(point) {
+  const $elem = document.getElementById("poster");
   const data = posterFiles[point];
   let posterItem;
 
@@ -33,8 +38,6 @@ async function generatePoster(point) {
   benchmark.log("poster item", posterItem);
   await poster.mount(posterItem);
 
-  const $elem = document.getElementById("poster");
-
   poster.setContentMode("aspect-fit");
   poster.draw();
 
@@ -54,6 +57,7 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    resetImage();
     generatePoster(--current);
   });
 
@@ -62,8 +66,10 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    resetImage();
     generatePoster(++current);
   });
 
+  resetImage();
   generatePoster(current);
 });
