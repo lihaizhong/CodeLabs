@@ -1,22 +1,20 @@
-import { OctopusPlatform } from "src/platform";
-
-function delay<T>(callback: () => T | Promise<T>, interval: number): Promise<T> {
-  return new Promise<T>(
-    (resolve) => setTimeout(
-      () => resolve(callback()),
-      interval
-    )
-  )
+function delay<T>(
+  callback: () => T | Promise<T>,
+  interval: number
+): Promise<T> {
+  return new Promise<T>((resolve) =>
+    setTimeout(() => resolve(callback()), interval)
+  );
 }
 
-export const retry: OctopusPlatform["retry"] = async <T>(
+export async function retry<T>(
   fn: () => T | Promise<T>,
   intervals: number[] = [],
   /*
    * @private 不建议外部传入
    */
   times: number = 0
-) => {
+): Promise<T> {
   try {
     return fn();
   } catch (err) {
@@ -24,9 +22,6 @@ export const retry: OctopusPlatform["retry"] = async <T>(
       throw err;
     }
 
-    return delay<T>(
-      () => retry<T>(fn, intervals, ++times),
-      intervals[times]
-    );
+    return delay<T>(() => retry<T>(fn, intervals, ++times), intervals[times]);
   }
-};
+}
