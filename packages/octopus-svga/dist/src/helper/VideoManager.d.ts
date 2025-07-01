@@ -12,10 +12,9 @@ export interface NeedUpdatePoint {
 export type LoadMode = "fast" | "whole";
 export interface VideoManagerOptions {
     download: (url: string) => Promise<ArrayBufferLike>;
-    decompress: (url: string, buff: ArrayBufferLike) => Promise<ArrayBufferLike>;
-    parse: (url: string, buff: ArrayBufferLike) => PlatformVideo.Video;
+    decompress: (url: string, buff: ArrayBufferLike) => Promise<ArrayBufferLike> | ArrayBufferLike;
+    parse: (url: string, buff: ArrayBufferLike) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
 }
-export type Decompress = (url: string, buff: ArrayBufferLike) => Promise<ArrayBufferLike> | ArrayBufferLike;
 export declare class VideoManager {
     /**
      * 将文件写入用户目录中

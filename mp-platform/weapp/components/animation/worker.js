@@ -49,10 +49,7 @@ export class SvgaWorker {
 
   once(method, fn) {
     this.listeners.set(method, {
-      fn: (data) => {
-        benchmark.start(method);
-        fn?.(data);
-      },
+      fn: (data) => fn?.(data),
       options: {
         once: true,
       },
@@ -61,9 +58,7 @@ export class SvgaWorker {
 
   on(method, fn) {
     this.listeners.set(method, {
-      fn: (data) => {
-        fn?.(data);
-      },
+      fn: (data) => fn?.(data),
       options: {
         once: false,
       },
