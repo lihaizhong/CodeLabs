@@ -333,7 +333,7 @@ export class VideoManager {
     }
 
     this.updateRemainRange(point, this.maxRemain, buckets.length);
-    if (loadMode !== "whole") {
+    if (loadMode !== "whole" || this.maxRemain !== buckets.length) {
       buckets.forEach((bucket: Bucket, index: number) => {
         if (this.includeRemainRange(index)) {
           if (bucket.entity === null && bucket.promise === null) {
