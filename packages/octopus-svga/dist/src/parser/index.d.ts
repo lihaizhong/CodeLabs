@@ -3,11 +3,17 @@
  */
 export declare class Parser {
     static hash(buff: ArrayBufferLike): string;
+    /**
+     * 解压视频源文件
+     * @param data
+     * @returns
+     */
     static decompress(data: ArrayBufferLike): ArrayBufferLike;
     /**
      * 解析视频实体
      * @param data 视频二进制数据
      * @param url 视频地址
+     * @param decompression 是否解压
      * @returns
      */
     static parseVideo(data: ArrayBufferLike, url: string, decompression?: boolean): PlatformVideo.Video;

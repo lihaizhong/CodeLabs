@@ -13,6 +13,11 @@ export class Parser {
     return calculateHash(view, 0, view.byteLength, step);
   }
   
+  /**
+   * 解压视频源文件
+   * @param data 
+   * @returns 
+   */
   static decompress(data: ArrayBufferLike): ArrayBufferLike {
     return unzlibSync(new Uint8Array(data)).buffer;
   }
@@ -21,6 +26,7 @@ export class Parser {
    * 解析视频实体
    * @param data 视频二进制数据
    * @param url 视频地址
+   * @param decompression 是否解压
    * @returns
    */
   static parseVideo(
