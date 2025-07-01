@@ -23,14 +23,9 @@ export type LoadMode = "fast" | "whole";
 
 export interface VideoManagerOptions {
   download: (url: string) => Promise<ArrayBufferLike>;
-  decompress: (url: string, buff: ArrayBufferLike) => Promise<ArrayBufferLike>;
-  parse: (url: string, buff: ArrayBufferLike) => PlatformVideo.Video;
+  decompress: (url: string, buff: ArrayBufferLike) => Promise<ArrayBufferLike> | ArrayBufferLike;
+  parse: (url: string, buff: ArrayBufferLike) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
 }
-
-export type Decompress = (
-  url: string,
-  buff: ArrayBufferLike
-) => Promise<ArrayBufferLike> | ArrayBufferLike;
 
 export class VideoManager {
   /**
@@ -333,7 +328,7 @@ export class VideoManager {
     }
 
     this.updateRemainRange(point, this.maxRemain, buckets.length);
-    if (loadMode !== "whole") {
+    if (loadMode !== "whole" || this.maxRemain !== buckets.length) {
       buckets.forEach((bucket: Bucket, index: number) => {
         if (this.includeRemainRange(index)) {
           if (bucket.entity === null && bucket.promise === null) {
