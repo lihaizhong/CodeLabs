@@ -1,10 +1,20 @@
-import { definePlugin } from "../definePlugin";
+import { definePlugin, OctopusPlatformPlugins } from "../definePlugin";
+
+// 扩展OctopusPlatformPlugins接口
+declare module "../definePlugin" {
+  interface OctopusPlatformPlugins {
+    remote: {
+      is: (url: string) => boolean;
+      fetch: (url: string) => Promise<ArrayBuffer>;
+    };
+  }
+}
 
 /**
  * 用于处理远程文件读取
  * @returns
  */
-export default definePlugin<"remote">({
+export default definePlugin<"remote">({  
   name: "remote",
   install() {
     const { env, br } = this.globals;
@@ -23,7 +33,7 @@ export default definePlugin<"remote">({
               `HTTP error, status=${response.status}, statusText=${response.statusText}`
             );
           }),
-      } satisfies OctopusPlatform.PlatformPlugin["remote"];
+      } satisfies OctopusPlatformPlugins["remote"];
     }
 
     function download(url: string, enableCache: boolean): Promise<ArrayBuffer> {
@@ -54,6 +64,6 @@ export default definePlugin<"remote">({
     return {
       is: isRemote,
       fetch: (url: string) => download(url, true),
-    } satisfies OctopusPlatform.PlatformPlugin["remote"];
+    } satisfies OctopusPlatformPlugins["remote"];
   },
 });

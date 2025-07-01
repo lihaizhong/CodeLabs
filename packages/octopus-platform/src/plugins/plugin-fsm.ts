@@ -1,10 +1,21 @@
-import { definePlugin } from "../definePlugin";
+import { definePlugin, OctopusPlatformPlugins } from "../definePlugin";
+
+// 扩展OctopusPlatformPlugins接口
+declare module "../definePlugin" {
+  interface OctopusPlatformPlugins {
+    local: {
+      write: (data: ArrayBufferLike, filepath: string) => Promise<string>;
+      read: (filepath: string) => Promise<ArrayBuffer>;
+      remove: (filepath: string) => Promise<string>;
+    } | null;
+  }
+}
 
 /**
  * 用于处理本地文件存储
  * @returns
  */
-export default definePlugin<"local">({
+export default definePlugin<"local">({  
   name: "local",
   install() {
     const { env, br } = this.globals;
@@ -16,10 +27,7 @@ export default definePlugin<"local">({
     const fsm = br.getFileSystemManager();
 
     return {
-      write: (
-        data: ArrayBufferLike,
-        filePath: string
-      ) => {
+      write: (data: ArrayBufferLike, filePath: string) => {
         return new Promise<string>((resolve, reject) => {
           fsm!.writeFile({
             filePath,
@@ -46,7 +54,7 @@ export default definePlugin<"local">({
             fail: reject,
           });
         });
-      }
-    } satisfies OctopusPlatform.PlatformPlugin["local"];
+      },
+    } satisfies OctopusPlatformPlugins["local"];
   },
 });

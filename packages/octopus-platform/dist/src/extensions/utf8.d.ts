@@ -1,11 +1,4 @@
 /**
- * Reads UTF8 bytes as a string.
- * @param {Uint8Array} buffer Source buffer
- * @param {number} start Source start
- * @param {number} end Source end
- * @returns {string} String read
- */
-/**
  * 优化的 UTF-8 解码函数
  * 主要优化点：
  * 1. 使用静态缓冲区减少内存分配

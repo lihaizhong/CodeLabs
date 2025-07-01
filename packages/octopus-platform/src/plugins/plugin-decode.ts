@@ -1,11 +1,23 @@
-import { definePlugin } from "../definePlugin";
+import { definePlugin, OctopusPlatformPlugins } from "../definePlugin";
 import { utf8 } from "../extensions/utf8";
+
+// 扩展OctopusPlatformPlugins接口
+declare module "../definePlugin" {
+  interface OctopusPlatformPlugins {
+    decode: {
+      toDataURL: (data: Uint8Array) => string;
+      toBuffer: (data: Uint8Array) => ArrayBuffer;
+      bytesToString: (data: Uint8Array) => string;
+      utf8: (data: Uint8Array, start: number, end: number) => string;
+    };
+  }
+}
 
 /**
  * 用于处理数据解码
  * @returns
  */
-export default definePlugin<"decode">({
+export default definePlugin<"decode">({  
   name: "decode",
   install() {
     const { env, br } = this.globals;
@@ -39,7 +51,7 @@ export default definePlugin<"decode">({
 
         return result;
       },
-    } as OctopusPlatform.PlatformPlugin["decode"];
+    } as OctopusPlatformPlugins["decode"];
 
     if (env === "h5") {
       const textDecoder = new TextDecoder("utf-8", { fatal: true });

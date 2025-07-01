@@ -1,0 +1,70 @@
+import { definePlugin } from "../definePlugin";
+/**
+ * 图片加载插件
+ * @package plugin-fsm 本地文件存储能力
+ * @package plugin-path 路径处理能力
+ * @package plugin-decode 解码能力
+ */
+export default definePlugin({
+    name: "image",
+    dependencies: ["local", "decode"],
+    install() {
+        const { local, decode } = this;
+        const { env } = this.globals;
+        let genImageSource = (data, _filepath) => (typeof data === "string" ? data : decode.toDataURL(data));
+        /**
+         * 加载图片
+         * @param img
+         * @param url
+         * @returns
+         */
+        function loadImage(img, url) {
+            return new Promise((resolve, reject) => {
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${url}`));
+                img.src = url;
+            });
+        }
+        function releaseImage(img) {
+            img.onload = null;
+            img.onerror = null;
+            img.src = "";
+        }
+        if (env === "h5") {
+            return {
+                create: (_) => new Image(),
+                load: (createImage, data, filepath) => {
+                    // 由于ImageBitmap在图片渲染上有优势，故优先使用
+                    if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
+                        return createImageBitmap(new Blob([decode.toBuffer(data)]));
+                    }
+                    if (data instanceof ImageBitmap) {
+                        return Promise.resolve(data);
+                    }
+                    return loadImage(createImage(), genImageSource(data, filepath));
+                },
+                release: releaseImage,
+            };
+        }
+        // FIXME: 支付宝小程序IDE保存临时文件会失败;抖音最大用户文件大小为10M
+        if (env === "weapp") {
+            genImageSource = async (data, filepath) => {
+                if (typeof data === "string") {
+                    return data;
+                }
+                // FIXME: IOS设备 微信小程序 Uint8Array转base64 时间较长，使用图片缓存形式速度会更快
+                return local
+                    .write(decode.toBuffer(data), filepath)
+                    .catch((ex) => {
+                    console.warn(`image write fail: ${ex.errorMessage || ex.errMsg || ex.message}`);
+                    return decode.toDataURL(data);
+                });
+            };
+        }
+        return {
+            create: (canvas) => canvas.createImage(),
+            load: async (createImage, data, filepath) => loadImage(createImage(), await genImageSource(data, filepath)),
+            release: releaseImage,
+        };
+    },
+});

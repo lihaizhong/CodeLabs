@@ -1,3 +1,4 @@
+import { OctopusPlatform } from "src/platform";
 import { initialPlatformGlobal } from "../../__mocks__";
 import pluginCanvas from "../../src/plugins/plugin-canvas";
 
@@ -43,11 +44,11 @@ describe("pluginCanvas 插件", () => {
       const platform = {
         globals: initialPlatformGlobal("h5"),
         retry: (callback: () => void) => Promise.resolve(callback()),
-      } as OctopusPlatform.Platform;
+      } as OctopusPlatform<"getCanvas">;
       const getCanvas = pluginCanvas.install.call(platform);
       const getCanvasForWeapp = pluginCanvas.install.call({
         globals: initialPlatformGlobal("weapp"),
-      } as OctopusPlatform.Platform);
+      } as OctopusPlatform<"getCanvas">);
 
       expect(typeof getCanvas).toBe("function");
       expect(getCanvas.toString()).not.toEqual(getCanvasForWeapp.toString());
@@ -57,7 +58,7 @@ describe("pluginCanvas 插件", () => {
       const platform = {
         globals: initialPlatformGlobal("h5"),
         retry: (callback: () => void) => Promise.resolve(callback()),
-      } as OctopusPlatform.Platform;
+      } as OctopusPlatform<"getCanvas">;
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -72,7 +73,7 @@ describe("pluginCanvas 插件", () => {
       const platform = {
         globals: initialPlatformGlobal("h5"),
         retry: (callback: () => void) => Promise.reject(callback()),
-      } as OctopusPlatform.Platform;
+      } as OctopusPlatform<"getCanvas">;
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -90,7 +91,7 @@ describe("pluginCanvas 插件", () => {
       const platform = {
         globals: initialPlatformGlobal("h5"),
         retry: (callback: () => void) => Promise.resolve(callback()),
-      } as OctopusPlatform.Platform;
+      } as OctopusPlatform<"getCanvas">;
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -106,7 +107,7 @@ describe("pluginCanvas 插件", () => {
       const platform = {
         globals: initialPlatformGlobal("h5"),
         retry: (callback: () => void) => Promise.resolve(callback()),
-      } as OctopusPlatform.Platform;
+      } as OctopusPlatform<"getCanvas">;
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -145,17 +146,17 @@ describe("pluginCanvas 插件", () => {
       const platform = {
         globals: initialPlatformGlobal("weapp"),
         retry: (callback: () => void) => Promise.resolve(callback()),
-      } as OctopusPlatform.Platform;
+      } as OctopusPlatform<"getCanvas">;
       const getCanvas = pluginCanvas.install.call(platform);
       const getCanvasForH5 = pluginCanvas.install.call({
         globals: initialPlatformGlobal("h5"),
-      } as OctopusPlatform.Platform);
+      } as OctopusPlatform<"getCanvas">);
       const getCanvasForAlipay = pluginCanvas.install.call({
         globals: initialPlatformGlobal("alipay"),
-      } as OctopusPlatform.Platform);
+      } as OctopusPlatform<"getCanvas">);
       const getCanvasForTT = pluginCanvas.install.call({
         globals: initialPlatformGlobal("tt"),
-      } as OctopusPlatform.Platform);
+      } as OctopusPlatform<"getCanvas">);
 
       expect(typeof getCanvas).toBe("function");
       expect(getCanvas.toString()).not.toEqual(getCanvasForH5.toString());
@@ -167,7 +168,7 @@ describe("pluginCanvas 插件", () => {
       const platform = {
         globals: initialPlatformGlobal("weapp"),
         retry: (callback: () => void) => Promise.resolve(callback()),
-      } as OctopusPlatform.Platform;
+      } as OctopusPlatform<"getCanvas">;
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -191,7 +192,7 @@ describe("pluginCanvas 插件", () => {
       const platform = {
         globals: initialPlatformGlobal("weapp"),
         retry: (callback: () => void) => Promise.resolve(callback()),
-      } as OctopusPlatform.Platform;
+      } as OctopusPlatform<"getCanvas">;
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -212,7 +213,7 @@ describe("pluginCanvas 插件", () => {
       const platform = {
         globals: initialPlatformGlobal("weapp"),
         retry: (callback: () => void) => Promise.resolve(callback()),
-      } as OctopusPlatform.Platform;
+      } as OctopusPlatform<"getCanvas">;
       const getCanvas = pluginCanvas.install.call(platform);
 
       // @ts-ignore
@@ -238,7 +239,7 @@ describe("pluginCanvas 插件", () => {
         const platform = {
           globals: initialPlatformGlobal("weapp"),
           retry: (callback: () => void) => Promise.resolve(callback()),
-        } as OctopusPlatform.Platform;
+        } as OctopusPlatform<"getCanvas">;
         const getCanvas = pluginCanvas.install.call(platform);
         const MAX_SIZE = 1365;
   
@@ -264,7 +265,7 @@ describe("pluginCanvas 插件", () => {
         const platform = {
           globals: initialPlatformGlobal("weapp"),
           retry: (callback: () => void) => Promise.resolve(callback()),
-        } as OctopusPlatform.Platform;
+        } as OctopusPlatform<"getCanvas">;
         const getCanvas = pluginCanvas.install.call(platform);
         const MAX_SIZE = 1365;
   
@@ -290,7 +291,7 @@ describe("pluginCanvas 插件", () => {
         const platform = {
           globals: initialPlatformGlobal("alipay"),
           retry: (callback: () => void) => Promise.resolve(callback()),
-        } as OctopusPlatform.Platform;
+        } as OctopusPlatform<"getCanvas">;
         const getCanvas = pluginCanvas.install.call(platform);
   
         // @ts-ignore
@@ -315,7 +316,7 @@ describe("pluginCanvas 插件", () => {
         const platform = {
           globals: initialPlatformGlobal("tt"),
           retry: (callback: () => void) => Promise.resolve(callback()),
-        } as OctopusPlatform.Platform;
+        } as OctopusPlatform<"getCanvas">;
         const getCanvas = pluginCanvas.install.call(platform);
   
         // @ts-ignore

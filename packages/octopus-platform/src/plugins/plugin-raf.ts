@@ -1,4 +1,12 @@
+import { MiniProgramCanvas, PlatformCanvas } from "../typings";
 import { definePlugin } from "../definePlugin";
+
+// 扩展OctopusPlatformPlugins接口
+declare module "../definePlugin" {
+  interface OctopusPlatformPlugins {
+    rAF: (canvas: PlatformCanvas, callback: () => void) => number;
+  }
+}
 
 /**
  * 用于处理requestAnimationFrame
@@ -6,7 +14,6 @@ import { definePlugin } from "../definePlugin";
  */
 export default definePlugin<"rAF">({
   name: "rAF",
-  dependencies: ["now"],
   install() {
     const { env } = this.globals;
 
@@ -24,16 +31,13 @@ export default definePlugin<"rAF">({
           ? requestAnimationFrame
           : requestAnimationFrameImpl();
 
-      return (_: OctopusPlatform.PlatformCanvas, callback: () => void) =>
-        rAF(callback);
+      return (_: PlatformCanvas, callback: () => void) => rAF(callback);
     }
 
-    return (canvas: OctopusPlatform.PlatformCanvas, callback: () => void) => {
+    return (canvas: PlatformCanvas, callback: () => void) => {
       // 检查canvas是否存在
       try {
-        return (
-          canvas as OctopusPlatform.MiniProgramCanvas
-        ).requestAnimationFrame(callback);
+        return (canvas as MiniProgramCanvas).requestAnimationFrame(callback);
       } catch (error: any) {
         console.warn(error.message);
         return requestAnimationFrameImpl()(callback);

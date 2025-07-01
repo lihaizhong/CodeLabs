@@ -1,1 +1,1 @@
-export declare const noop: () => any;
+export declare const noop: <T = any>() => T | void;

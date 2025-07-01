@@ -1,7 +1,7 @@
 {
   "name": "octopus-svga",
   "version": "0.2.0",
-  "description": "高性能SVGA播放器",
+  "description": "高性能SVGA动效播放器",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/src/index.d.ts",
@@ -28,6 +28,8 @@
     "@types/jest": "^30.0.0",
     "rimraf": "^6.0.1",
     "rollup": "^4.44.0",
+    "rollup-plugin-delete": "^3.0.1",
+    "rollup-plugin-dts": "^6.2.1",
     "tslib": "^2.8.1",
     "typescript": "^5.8.3"
   },

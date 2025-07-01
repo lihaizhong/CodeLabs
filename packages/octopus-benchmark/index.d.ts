@@ -8,11 +8,13 @@ declare class Stopwatch {
     reset(label: string): void;
     clear(): void;
 }
-export interface Benchmark extends Stopwatch {
+interface Benchmark extends Stopwatch {
     now: () => number;
     time: <T extends any = any>(label: string, callback: () => Promise<T> | T) => Promise<T> | T;
     line: (size: number) => void;
     log: (...message: unknown[]) => void;
 }
 declare const benchmark: Benchmark;
-export default benchmark;
+
+export { benchmark as default };
+export type { Benchmark };

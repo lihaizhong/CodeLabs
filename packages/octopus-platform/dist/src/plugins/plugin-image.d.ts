@@ -1,7 +1,12 @@
-export interface EnhancedPlatform extends OctopusPlatform.Platform {
-    local: OctopusPlatform.PlatformPlugin["local"];
-    path: OctopusPlatform.PlatformPlugin["path"];
-    decode: OctopusPlatform.PlatformPlugin["decode"];
+import { PlatformCanvas, PlatformImage, PlatformOffscreenCanvas } from "../typings";
+declare module "../definePlugin" {
+    interface OctopusPlatformPlugins {
+        image: {
+            create: (_: PlatformCanvas | PlatformOffscreenCanvas) => PlatformImage;
+            load: (createImage: () => HTMLImageElement, data: ImageBitmap | Uint8Array | string, filepath: string) => Promise<ImageBitmap | PlatformImage>;
+            release: (img: PlatformImage) => void;
+        };
+    }
 }
 /**
  * 图片加载插件
@@ -9,5 +14,5 @@ export interface EnhancedPlatform extends OctopusPlatform.Platform {
  * @package plugin-path 路径处理能力
  * @package plugin-decode 解码能力
  */
-declare const _default: OctopusPlatform.PlatformPluginOptions<"image">;
+declare const _default: import("../definePlugin").OctopusPlatformPluginOptions<"image", "decode" | "local" | "path">;
 export default _default;

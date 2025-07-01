@@ -2,17 +2,24 @@
   "name": "octopus-benchmark",
   "version": "0.0.1",
   "type": "module",
-  "description": "平台兼容性磨平",
-  "main": "dist/index.js",
-  "types": "dist/src/index.d.ts",
+  "description": "基准测试工具",
+  "main": "index.js",
+  "module": "es/index.js",
+  "types": "types/index.d.ts",
   "exports": {
-    ".": "./dist/index.js"
+    "import": "./es/index.js",
+    "default": "./index.js"
   },
   "scripts": {
-    "build": "rimraf -rf dist && rollup -c",
+    "declare": "tsc",
+    "cleanup": "rimraf -rf es index.d.ts index.js index.min.js index.min.js.map",
+    "generate": "rollup -c",
+    "build": "npm run cleanup && npm run declare && npm run generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["benchmark"],
+  "keywords": [
+    "benchmark"
+  ],
   "author": "lihzsky",
   "license": "MIT",
   "devDependencies": {
@@ -22,6 +29,8 @@
     "@types/jest": "^30.0.0",
     "rimraf": "^6.0.1",
     "rollup": "^4.44.0",
+    "rollup-plugin-delete": "^3.0.1",
+    "rollup-plugin-dts": "^6.2.1",
     "tslib": "^2.8.1",
     "typescript": "^5.8.3"
   },

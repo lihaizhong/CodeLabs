@@ -2,7 +2,8 @@ import { initialPlatformGlobal } from "../../__mocks__";
 import pluginDecode from "../../src/plugins/plugin-decode";
 import pluginFsm from "../../src/plugins/plugin-fsm";
 import pluginPath from "../../src/plugins/plugin-path";
-import pluginImage, { type EnhancedPlatform } from "../../src/plugins/plugin-image";
+import pluginImage from "../../src/plugins/plugin-image";
+import { OctopusPlatform } from "src/platform";
 
 jest.mock("../../src/plugins/plugin-decode", () => ({
   name: "decode",
@@ -46,10 +47,9 @@ describe("pluginImage 插件", () => {
     const platform = {
       globals: initialPlatformGlobal("h5"),
       noop: () => {},
-      decode: {} as OctopusPlatform.PlatformPlugin["decode"],
-      local: {} as OctopusPlatform.PlatformPlugin["local"],
-      path: {} as OctopusPlatform.PlatformPlugin["path"],
-    } as EnhancedPlatform;
+      decode: {} as OctopusPlatform<"decode">,
+      local: {} as OctopusPlatform<"local">,
+    } as OctopusPlatform<"decode" | "local" | "image">;
 
     platform.decode = pluginDecode.install.call(platform);
     platform.local = null;

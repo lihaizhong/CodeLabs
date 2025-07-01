@@ -1,4 +1,17 @@
+import { PlatformCanvas } from "../typings";
 import { definePlugin } from "../definePlugin";
+
+export interface GetCanvasResult {
+  canvas: PlatformCanvas;
+  context: CanvasRenderingContext2D;
+}
+
+// 扩展OctopusPlatformPlugins接口
+declare module "../definePlugin" {
+  interface OctopusPlatformPlugins {
+    getCanvas: (selector: string, component?: any) => Promise<GetCanvasResult>;
+  }
+}
 
 /**
  * 通过选择器匹配获取canvas实例
@@ -12,10 +25,10 @@ export default definePlugin<"getCanvas">({
     const intervals = [50, 100, 100];
 
     function initCanvas(
-      canvas: OctopusPlatform.PlatformCanvas | null,
+      canvas: PlatformCanvas | null,
       width: number,
       height: number
-    ): OctopusPlatform.GetCanvasResult {
+    ): GetCanvasResult {
       if (!canvas) {
         throw new Error("canvas not found.");
       }
@@ -53,7 +66,7 @@ export default definePlugin<"getCanvas">({
         document.querySelector(selector);
 
       return (selector: string) =>
-        retry<OctopusPlatform.GetCanvasResult>(() => {
+        retry<GetCanvasResult>(() => {
           // FIXME: Taro 对 canvas 做了特殊处理，canvas 元素的 id 会被加上 canvas-id 的前缀
           const canvas = (querySelector(
             `canvas[canvas-id=${selector.slice(1)}]`
@@ -63,15 +76,11 @@ export default definePlugin<"getCanvas">({
         }, intervals);
     }
 
-    return (
-      selector: string,
-      component?: any
-    ) =>
-      retry<OctopusPlatform.GetCanvasResult>(
+    return (selector: string, component?: any) =>
+      retry<GetCanvasResult>(
         () =>
-          new Promise<OctopusPlatform.GetCanvasResult>((resolve, reject) => {
+          new Promise<GetCanvasResult>((resolve, reject) => {
             let query = br.createSelectorQuery();
-
             if (component) {
               query = query.in(component);
             }

@@ -1,9 +1,25 @@
-import { definePlugin } from "../definePlugin";
+import {
+  MiniProgramCanvas,
+  MiniProgramOffscreenCanvas,
+  PlatformCanvas,
+  PlatformImage,
+  PlatformOffscreenCanvas,
+} from "../typings";
+import { definePlugin, OctopusPlatformPlugins } from "../definePlugin";
 
-export interface EnhancedPlatform extends OctopusPlatform.Platform {
-  local: OctopusPlatform.PlatformPlugin["local"];
-  path: OctopusPlatform.PlatformPlugin["path"];
-  decode: OctopusPlatform.PlatformPlugin["decode"];
+// 扩展OctopusPlatformPlugins接口
+declare module "../definePlugin" {
+  interface OctopusPlatformPlugins {
+    image: {
+      create: (canvas: PlatformCanvas | PlatformOffscreenCanvas) => PlatformImage;
+      load: (
+        createImage: () => HTMLImageElement,
+        data: ImageBitmap | Uint8Array | string,
+        filepath: string
+      ) => Promise<ImageBitmap | PlatformImage>;
+      release: (img: PlatformImage) => void;
+    };
+  }
 }
 
 /**
@@ -12,11 +28,11 @@ export interface EnhancedPlatform extends OctopusPlatform.Platform {
  * @package plugin-path 路径处理能力
  * @package plugin-decode 解码能力
  */
-export default definePlugin<"image">({
+export default definePlugin<"image", "local" | "decode">({  
   name: "image",
-  dependencies: ["local", "path", "decode"],
+  dependencies: ["local", "decode"],
   install() {
-    const { local, decode } = this as EnhancedPlatform;
+    const { local, decode } = this as any;
     const { env } = this.globals;
     let genImageSource: (
       data: Uint8Array | string,
@@ -32,16 +48,15 @@ export default definePlugin<"image">({
      * @param url
      * @returns
      */
-    function loadImage(img: OctopusPlatform.PlatformImage, url: string) {
-      return new Promise<OctopusPlatform.PlatformImage>((resolve, reject) => {
+    function loadImage(img: PlatformImage, url: string) {
+      return new Promise<PlatformImage>((resolve, reject) => {
         img.onload = () => resolve(img);
-        img.onerror = () =>
-          reject(new Error(`SVGA LOADING FAILURE: ${url}`));
+        img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${url}`));
         img.src = url;
       });
     }
 
-    function releaseImage(img: OctopusPlatform.PlatformImage) {
+    function releaseImage(img: PlatformImage) {
       img.onload = null;
       img.onerror = null;
       img.src = "";
@@ -49,11 +64,7 @@ export default definePlugin<"image">({
 
     if (env === "h5") {
       return {
-        create: (
-          _:
-            | OctopusPlatform.PlatformCanvas
-            | OctopusPlatform.PlatformOffscreenCanvas
-        ) => new Image(),
+        create: (_: PlatformCanvas | PlatformOffscreenCanvas) => new Image(),
         load: (
           createImage: () => HTMLImageElement,
           data: ImageBitmap | Uint8Array | string,
@@ -74,7 +85,7 @@ export default definePlugin<"image">({
           );
         },
         release: releaseImage,
-      } satisfies OctopusPlatform.PlatformPlugin["image"];
+      } satisfies OctopusPlatformPlugins["image"];
     }
 
     // FIXME: 支付宝小程序IDE保存临时文件会失败;抖音最大用户文件大小为10M
@@ -97,15 +108,9 @@ export default definePlugin<"image">({
     }
 
     return {
-      create: (
-        canvas:
-          | OctopusPlatform.PlatformCanvas
-          | OctopusPlatform.PlatformOffscreenCanvas
-      ) =>
+      create: (canvas: PlatformCanvas | PlatformOffscreenCanvas) =>
         (
-          canvas as
-            | OctopusPlatform.MiniProgramCanvas
-            | OctopusPlatform.MiniProgramOffscreenCanvas
+          canvas as MiniProgramCanvas | MiniProgramOffscreenCanvas
         ).createImage(),
       load: async (
         createImage: () => HTMLImageElement,
@@ -117,6 +122,6 @@ export default definePlugin<"image">({
           await genImageSource(data as Uint8Array | string, filepath)
         ),
       release: releaseImage,
-    } satisfies OctopusPlatform.PlatformPlugin["image"];
+    } satisfies OctopusPlatformPlugins["image"];
   },
 });

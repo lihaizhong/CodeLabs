@@ -1,3 +1,4 @@
+import { OctopusPlatform } from "../../src/platform";
 import { initialPlatformGlobal } from "../../__mocks__";
 import pluginDownload from "../../src/plugins/plugin-download";
 
@@ -20,7 +21,7 @@ describe("pluginDownload 插件", () => {
   });
 
   describe("H5 环境", () => {
-    const platform = { globals: initialPlatformGlobal("h5") } as OctopusPlatform.Platform;
+    const platform = { globals: initialPlatformGlobal("h5") } as OctopusPlatform<"remote">;
 
     it("检查插件是否正常安装", () => {
       const download = pluginDownload.install.call(platform);
@@ -73,7 +74,7 @@ describe("pluginDownload 插件", () => {
   });
 
   describe("小程序(weapp, alipay, tt) 环境", () => {
-    const platform = { globals: initialPlatformGlobal("weapp") } as OctopusPlatform.Platform;
+    const platform = { globals: initialPlatformGlobal("weapp") } as OctopusPlatform<"remote">;
 
     it("检查插件是否正常安装", () => {
       const download = pluginDownload.install.call(platform);

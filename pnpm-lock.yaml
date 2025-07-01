@@ -148,6 +148,12 @@ importers:
       rollup:
         specifier: ^4.44.0
         version: 4.44.0
+      rollup-plugin-delete:
+        specifier: ^3.0.1
+        version: 3.0.1(rollup@4.44.0)
+      rollup-plugin-dts:
+        specifier: ^6.2.1
+        version: 6.2.1(rollup@4.44.0)(typescript@5.8.3)
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -229,6 +235,12 @@ importers:
       rollup:
         specifier: ^4.44.0
         version: 4.44.0
+      rollup-plugin-delete:
+        specifier: ^3.0.1
+        version: 3.0.1(rollup@4.44.0)
+      rollup-plugin-dts:
+        specifier: ^6.2.1
+        version: 6.2.1(rollup@4.44.0)(typescript@5.8.3)
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -272,6 +284,12 @@ importers:
       rollup:
         specifier: ^4.44.0
         version: 4.44.0
+      rollup-plugin-delete:
+        specifier: ^3.0.1
+        version: 3.0.1(rollup@4.44.0)
+      rollup-plugin-dts:
+        specifier: ^6.2.1
+        version: 6.2.1(rollup@4.44.0)(typescript@5.8.3)
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -1044,6 +1062,10 @@ packages:
   '@sinclair/typebox@0.34.35':
     resolution: {integrity: sha512-C6ypdODf2VZkgRT6sFM8E1F8vR+HcffniX0Kp8MsU8PIfrlXbNCBz0jzj17GjdmjTx1OtZzdH8+iALL21UjF5A==}
 
+  '@sindresorhus/merge-streams@2.3.0':
+    resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
+    engines: {node: '>=18'}
+
   '@sinonjs/commons@3.0.1':
     resolution: {integrity: sha512-K3mCHKQ9sVh8o1C9cxkwxaOmXoAMlDxC1mYyHrjqOWEcBjYr76t96zL2zlj5dUGZ3HSw240X1qgH3Mjf1yJWpQ==}
 
@@ -1636,6 +1658,10 @@ packages:
     resolution: {integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==}
     engines: {node: '>=0.10.0'}
 
+  del@8.0.0:
+    resolution: {integrity: sha512-R6ep6JJ+eOBZsBr9esiNN1gxFbZE4Q2cULkUSFumGYecAiS6qodDvcPx/sFuWHMNul7DWmrtoEOpYSm7o6tbSA==}
+    engines: {node: '>=18'}
+
   detect-indent@6.1.0:
     resolution: {integrity: sha512-reYkTUJAZb9gUuZ2RvVCNhVHdg62RHnJ7WJl8ftMi4diZ6NWlciOzQN88pUhSELEwflJht4oQDv0F0BMlwaYtA==}
     engines: {node: '>=8'}
@@ -1863,6 +1889,10 @@ packages:
     resolution: {integrity: sha512-jhIXaOzy1sb8IyocaruWSn1TjmnBVs8Ayhcy83rmxNJ8q2uWKCAj3CnJY+KpGSXCueAPc0i05kVvVKtP1t9S3g==}
     engines: {node: '>=10'}
 
+  globby@14.1.0:
+    resolution: {integrity: sha512-0Ia46fDOaT7k4og1PDW4YbodWWr3scS2vAr2lTbsplOt2WkKp0vQbkI9wKis/T5LV/dqPjO3bpS/z6GTJB82LA==}
+    engines: {node: '>=18'}
+
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
@@ -1910,6 +1940,10 @@ packages:
 
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
+    engines: {node: '>= 4'}
+
+  ignore@7.0.5:
+    resolution: {integrity: sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg==}
     engines: {node: '>= 4'}
 
   import-local@3.2.0:
@@ -1973,6 +2007,14 @@ packages:
   is-number@7.0.0:
     resolution: {integrity: sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==}
     engines: {node: '>=0.12.0'}
+
+  is-path-cwd@3.0.0:
+    resolution: {integrity: sha512-kyiNFFLU0Ampr6SDZitD/DwUo4Zs1nSdnygUBqsu3LooL00Qvb5j+UnvApUn/TTj1J3OuE6BTdQ5rudKmU2ZaA==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
+  is-path-inside@4.0.0:
+    resolution: {integrity: sha512-lJJV/5dYS+RcL8uQdBDW9c9uWFLLBNRyFhnAKXw5tVqLlKZ4RMGZKv+YQ/IA3OhD+RpbJa1LLFM1FQPGyIXvOA==}
+    engines: {node: '>=12'}
 
   is-plain-object@3.0.1:
     resolution: {integrity: sha512-Xnpx182SBMrr/aBik8y+GuR4U1L9FqMSojwDQwPMmxyC6bvEqly9UBCxhauBF5vNh2gwWJNX6oDV7O+OM4z34g==}
@@ -2584,6 +2626,10 @@ packages:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
     engines: {node: '>=8'}
 
+  path-type@6.0.0:
+    resolution: {integrity: sha512-Vj7sf++t5pBD637NSfkxpHSMfWaeig5+DKWLhcqIYx6mWQz5hdJTGDVMQiJcw1ZYkhs7AazKDGpRVji1LJCZUQ==}
+    engines: {node: '>=18'}
+
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
@@ -2758,6 +2804,19 @@ packages:
     resolution: {integrity: sha512-wI8D5dvYovRMx/YYKtUNt3Yxaw4ORC9xo6Gt9t22kveWz1enG9QrhVlagzwrxSC455xD1dHMKhIJkbsQ7d48BA==}
     engines: {node: '>=8.3'}
 
+  rollup-plugin-delete@3.0.1:
+    resolution: {integrity: sha512-4tyijMQFwSDLA04DAHwbI2TrRwPiRwAqBQ17dxyr9CgHeHXLdgk8IDVWHFWPrL3UZJWrAmHohQ2MgmVghQDrlg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      rollup: '*'
+
+  rollup-plugin-dts@6.2.1:
+    resolution: {integrity: sha512-sR3CxYUl7i2CHa0O7bA45mCrgADyAQ0tVtGSqi3yvH28M+eg1+g5d7kQ9hLvEz5dorK3XVsH5L2jwHLQf72DzA==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      rollup: ^3.29.4 || ^4
+      typescript: ^4.5 || ^5.0
+
   rollup@4.44.0:
     resolution: {integrity: sha512-qHcdEzLCiktQIfwBq420pn2dP+30uzqYxv9ETm91wdt2R9AFcWfjNAmje4NWlnCIQ5RMTzVf0ZyisOKqHR6RwA==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
@@ -2823,6 +2882,10 @@ packages:
   slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
     engines: {node: '>=8'}
+
+  slash@5.1.0:
+    resolution: {integrity: sha512-ZA6oR3T/pEyuqwMgAKT0/hAv8oAXckzbkmR0UkUosQ+Mc4RxGoJkRmwHgHufaenlyAgE1Mxgpdcrf75y6XcnDg==}
+    engines: {node: '>=14.16'}
 
   smart-buffer@4.2.0:
     resolution: {integrity: sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==}
@@ -3046,6 +3109,10 @@ packages:
 
   undici-types@7.8.0:
     resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
+
+  unicorn-magic@0.3.0:
+    resolution: {integrity: sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA==}
+    engines: {node: '>=18'}
 
   unique-filename@4.0.0:
     resolution: {integrity: sha512-XSnEewXmQ+veP7xX2dS5Q4yZAvO40cBN2MWkJ7D/6sW4Dg6wYBNwM1Vrnz1FhH5AdeLIlUXRI9e28z1YZi71NQ==}
@@ -4071,6 +4138,8 @@ snapshots:
 
   '@sinclair/typebox@0.34.35': {}
 
+  '@sindresorhus/merge-streams@2.3.0': {}
+
   '@sinonjs/commons@3.0.1':
     dependencies:
       type-detect: 4.0.8
@@ -4610,6 +4679,15 @@ snapshots:
 
   deepmerge@4.3.1: {}
 
+  del@8.0.0:
+    dependencies:
+      globby: 14.1.0
+      is-glob: 4.0.3
+      is-path-cwd: 3.0.0
+      is-path-inside: 4.0.0
+      p-map: 7.0.3
+      slash: 5.1.0
+
   detect-indent@6.1.0: {}
 
   detect-libc@2.0.4: {}
@@ -4841,6 +4919,15 @@ snapshots:
       merge2: 1.4.1
       slash: 3.0.0
 
+  globby@14.1.0:
+    dependencies:
+      '@sindresorhus/merge-streams': 2.3.0
+      fast-glob: 3.3.3
+      ignore: 7.0.5
+      path-type: 6.0.0
+      slash: 5.1.0
+      unicorn-magic: 0.3.0
+
   graceful-fs@4.2.11: {}
 
   has-flag@4.0.0: {}
@@ -4884,6 +4971,8 @@ snapshots:
       safer-buffer: 2.1.2
 
   ignore@5.3.2: {}
+
+  ignore@7.0.5: {}
 
   import-local@3.2.0:
     dependencies:
@@ -4929,6 +5018,10 @@ snapshots:
   is-module@1.0.0: {}
 
   is-number@7.0.0: {}
+
+  is-path-cwd@3.0.0: {}
+
+  is-path-inside@4.0.0: {}
 
   is-plain-object@3.0.1: {}
 
@@ -5686,6 +5779,8 @@ snapshots:
 
   path-type@4.0.0: {}
 
+  path-type@6.0.0: {}
+
   picocolors@1.1.1: {}
 
   picomatch@2.3.1: {}
@@ -5839,6 +5934,19 @@ snapshots:
       globby: 10.0.1
       is-plain-object: 3.0.1
 
+  rollup-plugin-delete@3.0.1(rollup@4.44.0):
+    dependencies:
+      del: 8.0.0
+      rollup: 4.44.0
+
+  rollup-plugin-dts@6.2.1(rollup@4.44.0)(typescript@5.8.3):
+    dependencies:
+      magic-string: 0.30.17
+      rollup: 4.44.0
+      typescript: 5.8.3
+    optionalDependencies:
+      '@babel/code-frame': 7.27.1
+
   rollup@4.44.0:
     dependencies:
       '@types/estree': 1.0.8
@@ -5930,6 +6038,8 @@ snapshots:
   signal-exit@4.1.0: {}
 
   slash@3.0.0: {}
+
+  slash@5.1.0: {}
 
   smart-buffer@4.2.0: {}
 
@@ -6138,6 +6248,8 @@ snapshots:
   typescript@5.8.3: {}
 
   undici-types@7.8.0: {}
+
+  unicorn-magic@0.3.0: {}
 
   unique-filename@4.0.0:
     dependencies:

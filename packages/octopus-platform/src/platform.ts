@@ -1,13 +1,29 @@
 import { noop, retry } from "./extensions";
 import { version } from "../package.json";
+import type {
+  OctopusPlatformPluginOptions,
+  OctopusPlatformPlugins,
+} from "./definePlugin";
 
-export abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty>
-  implements OctopusPlatform.Platform
-{
+export type OctopusSupportedPlatform =
+  | "weapp"
+  | "alipay"
+  | "tt"
+  | "h5"
+  | "unknown";
+
+export interface OctopusPlatformGlobals {
+  env: OctopusSupportedPlatform;
+  br: any;
+  dpr: number;
+  system: string;
+}
+
+export abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
   /**
    * 插件列表
    */
-  private plugins: OctopusPlatform.PlatformPluginOptions<P>[] = [];
+  private plugins: OctopusPlatformPluginOptions<N>[] = [];
 
   /**
    * 平台版本
@@ -22,41 +38,40 @@ export abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty>
   /**
    * 全局变量
    */
-  public globals: OctopusPlatform.PlatformGlobals = {
+  public globals: OctopusPlatformGlobals = {
     env: "unknown",
     br: null,
     dpr: 1,
+    system: "unknown",
   };
 
   public noop = noop;
 
   public retry = retry;
 
-  constructor(
-    plugins: OctopusPlatform.PlatformPluginOptions<P>[],
-    version?: string
-  ) {
+  constructor(plugins: OctopusPlatformPluginOptions<N>[], version?: string) {
     this.version = version || "";
     this.plugins = plugins;
     this.globals.env = this.autoEnv();
   }
 
   protected init() {
-    this.globals.br = this.useBridge();
-    this.globals.dpr = this.usePixelRatio();
+    const { globals, plugins } = this;
+    const collection: Map<N, OctopusPlatformPluginOptions<N>> = new Map();
+    const names: N[] = [];
+    const installedPlugins: Set<N> = new Set();
 
-    const plugins: Record<
-      P,
-      OctopusPlatform.PlatformPluginOptions<P>
-    > = this.plugins.reduce((acc, plugin) => {
-      acc[plugin.name] = plugin;
+    globals.br = this.useBridge();
+    globals.dpr = this.usePixelRatio();
+    globals.system = this.useSystem();
 
-      return acc;
-    }, {} as Record<P, OctopusPlatform.PlatformPluginOptions<P>>);
-    const pluginNames = this.plugins.map((plugin) => plugin.name);
-    const installedPlugins: Record<string, boolean> = {};
+    for (const plugin of plugins) {
+      names.push(plugin.name);
+      collection.set(plugin.name, plugin);
+    }
 
-    this.usePlugins(plugins, pluginNames, installedPlugins);
+    this.usePlugins(collection, names, installedPlugins);
+    installedPlugins.clear()
   }
 
   private autoEnv() {
@@ -114,44 +129,64 @@ export abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty>
     return 1;
   }
 
+  private useSystem() {
+    const { env } = this.globals;
+    let system: string;
+
+    switch (env) {
+      case "weapp":
+        system = (wx.getDeviceInfo().platform as string);
+        break;
+      case "alipay":
+        system = (my.getDeviceBaseInfo().platform as string);
+        break;
+      case "tt":
+        system = (tt.getDeviceInfoSync().platform as string);
+      default:
+        system = "unknown";
+    }
+
+    return system.toLowerCase();
+  }
+
   private usePlugins(
-    plugins: Record<P, OctopusPlatform.PlatformPluginOptions<P>>,
-    pluginNames: string[],
-    installedPlugins: Record<string, boolean>
-  ) {
-    pluginNames.forEach((pluginName) => {
-      const plugin = plugins[pluginName as P];
-
-      if (installedPlugins[pluginName]) {
-        return;
-      }
-
-      if (plugin === undefined) {
+    plugins: Map<N, OctopusPlatformPluginOptions<N>>,
+    pluginNames: N[],
+    installedPlugins: Set<N>
+  ): void {
+    for (const pluginName of pluginNames) {
+      if (!plugins.has(pluginName)) {
         throw new Error(`Plugin ${pluginName} not found`);
       }
 
+      if (installedPlugins.has(pluginName)) {
+        return;
+      }
+
+      const plugin = plugins.get(pluginName) as OctopusPlatformPluginOptions<N>;
+
+      // 递归调用依赖
       if (Array.isArray(plugin.dependencies)) {
         for (const dependency of plugin.dependencies) {
-          if (typeof plugins[dependency as P]?.install !== "function") {
+          if (typeof plugins.get(dependency)?.install !== "function") {
             throw new Error(
               `Plugin ${pluginName} depends on plugin ${dependency}, but ${dependency} is not found`
             );
           }
         }
 
+        // 递归加载依赖
         this.usePlugins(plugins, plugin.dependencies, installedPlugins);
       }
 
       this.installPlugin(plugin);
-      installedPlugins[plugin.name] = true;
-    });
+      installedPlugins.add(pluginName);
+    }
   }
 
-  abstract installPlugin(
-    plugin: OctopusPlatform.PlatformPluginOptions<P>
-  ): void;
+  abstract installPlugin(plugin: OctopusPlatformPluginOptions<N>): void;
 
-  public switch(env: OctopusPlatform.SupportedPlatform) {
+  public switch(env: OctopusSupportedPlatform): void {
     this.globals.env = env;
     this.init();
   }

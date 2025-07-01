@@ -1,4 +1,12 @@
-export declare abstract class Platform<P extends OctopusPlatform.PlatformPluginProperty> implements OctopusPlatform.Platform {
+import type { OctopusPlatformPluginOptions, OctopusPlatformPlugins } from "./definePlugin";
+export type OctopusSupportedPlatform = "weapp" | "alipay" | "tt" | "h5" | "unknown";
+export interface OctopusPlatformGlobals {
+    env: OctopusSupportedPlatform;
+    br: any;
+    dpr: number;
+    system: string;
+}
+export declare abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
     /**
      * 插件列表
      */
@@ -14,15 +22,16 @@ export declare abstract class Platform<P extends OctopusPlatform.PlatformPluginP
     /**
      * 全局变量
      */
-    globals: OctopusPlatform.PlatformGlobals;
-    noop: () => any;
-    retry: <T>(fn: () => T | Promise<T>, intervals?: number[], times?: number) => Promise<T>;
-    constructor(plugins: OctopusPlatform.PlatformPluginOptions<P>[], version?: string);
+    globals: OctopusPlatformGlobals;
+    noop: <T = any>() => T | void;
+    retry: OctopusPlatform.Platform;
+    constructor(plugins: OctopusPlatformPluginOptions<N>[], version?: string);
     protected init(): void;
     private autoEnv;
     private useBridge;
     private usePixelRatio;
+    private useSystem;
     private usePlugins;
-    abstract installPlugin(plugin: OctopusPlatform.PlatformPluginOptions<P>): void;
-    switch(env: OctopusPlatform.SupportedPlatform): void;
+    abstract installPlugin(plugin: OctopusPlatformPluginOptions<N>): void;
+    switch(env: OctopusSupportedPlatform): void;
 }
