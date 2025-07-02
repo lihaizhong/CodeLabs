@@ -28,7 +28,15 @@
       "ignore": [],
       "disablePlugins": [],
       "outputPath": ""
-    }
+    },
+    "compileWorklet": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "disableSWC": false
   },
   "condition": {},
   "editorSetting": {
@@ -36,5 +44,6 @@
     "tabSize": 2
   },
   "srcMiniprogramRoot": "",
-  "projectname": "CodeSnippet"
+  "projectname": "CodeLabs",
+  "simulatorPluginLibVersion": {}
 }
