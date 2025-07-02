@@ -1,6 +1,6 @@
-import { benchmark } from "../../utils/fuck-svga";
+import { benchmark } from "./fuck-svga";
 
-export class SvgaWorker {
+export class EnhancedWorker {
   constructor() {
     this.worker;
     this.listeners = new Map();

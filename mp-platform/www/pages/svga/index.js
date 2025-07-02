@@ -9,7 +9,7 @@ import {
   getOneAtRandom,
 } from "../../utils/constants";
 import ReadyGo from "../../utils/ReadyGo";
-import { SvgaWorker } from "./worker";
+import { EnhancedWorker } from "../../utils/worker";
 
 let player;
 const playerAwait = async () => {
@@ -49,7 +49,7 @@ const playerAwait = async () => {
     // contentMode: "center",
   });
 };
-const worker = new SvgaWorker();
+const worker = new EnhancedWorker();
 const readyGo = new ReadyGo();
 const videoManager = new VideoManager("fast", {
   download: (url) =>

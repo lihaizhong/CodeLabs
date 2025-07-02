@@ -1,12 +1,11 @@
 import {
-  Parser,
   Player,
   VideoEditor,
   VideoManager,
   benchmark,
 } from "../../utils/fuck-svga";
 import ReadyGo from "../../utils/ReadyGo";
-import { SvgaWorker } from "./worker";
+import { EnhancedWorker } from "../../utils/EnhancedWorker";
 
 let player;
 const playerAwait = async (scope) => {
@@ -49,7 +48,7 @@ const playerAwait = async (scope) => {
     scope
   );
 };
-const worker = new SvgaWorker();
+const worker = new EnhancedWorker();
 const readyGo = new ReadyGo();
 const decompress = (url, buff) =>
   new Promise((resolve) => {
