@@ -1,4 +1,5 @@
-import { unzlibSync } from "./fflate";
+// import { unzlibSync } from "./fflate";
+import { unzlibSync } from "./unzlib";
 
 worker.onMessage((result) => {
   const { method, data } = result || {};

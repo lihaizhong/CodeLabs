@@ -1,4 +1,5 @@
-import { unzlibSync } from "./fflate";
+// import { unzlibSync } from "./fflate";
+import { unzlibSync } from "./unzlib";
 
 onmessage = (event) => {
   const { method, data } = event.data || {};
