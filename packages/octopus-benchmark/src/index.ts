@@ -6,24 +6,24 @@ const badge = [
 ];
 
 class Stopwatch {
-  private readonly isRealMachine = ["ios", "android", "openharmony"].includes(
-    platform.system
-  );
+  private readonly hasConsoleTime = typeof console.time === "function" && typeof console.timeEnd === "function";
 
   private readonly timeLabels: Map<string, number> = new Map();
 
   private readonly markLabels: Map<string, number> = new Map();
 
   start(label: string) {
-    if (this.isRealMachine) {
-      this.timeLabels.set(label, platform.now());
-    } else {
+    if (this.hasConsoleTime) {
       console.time(label);
+    } else {
+      this.timeLabels.set(label, platform.now());
     }
   }
 
   stop(label: string) {
-    if (this.isRealMachine) {
+    if (this.hasConsoleTime) {
+      console.timeEnd(label);
+    } else {
       const nowTime = platform.now();
 
       if (this.timeLabels.has(label)) {
@@ -32,8 +32,6 @@ class Stopwatch {
         );
         this.timeLabels.delete(label);
       }
-    } else {
-      console.timeEnd(label);
     }
   }
 
