@@ -28,7 +28,7 @@ declare module "../definePlugin" {
  * @package plugin-path 路径处理能力
  * @package plugin-decode 解码能力
  */
-export default definePlugin<"image", "local" | "decode">({  
+export default definePlugin<"image">({  
   name: "image",
   dependencies: ["local", "decode"],
   install() {

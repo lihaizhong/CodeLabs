@@ -1,19 +1,15 @@
 import type { OctopusPlatform } from "./platform";
 
 export interface OctopusPlatformPluginOptions<
-  N extends keyof OctopusPlatformPlugins,
-  R extends keyof OctopusPlatformPlugins = keyof OctopusPlatformPlugins
+  N extends keyof OctopusPlatformPlugins
 > {
   name: N;
-  dependencies?: R[];
-  install: (this: OctopusPlatform<N | R>) => OctopusPlatformPlugins[N];
+  dependencies?: N[];
+  install: (this: OctopusPlatform<N>) => OctopusPlatformPlugins[N];
 }
 
 export interface OctopusPlatformPlugins {}
 
-export const definePlugin = <
-  N extends keyof OctopusPlatformPlugins,
-  R extends keyof OctopusPlatformPlugins = keyof OctopusPlatformPlugins
->(
-  plugin: OctopusPlatformPluginOptions<N, R>
+export const definePlugin = <N extends keyof OctopusPlatformPlugins>(
+  plugin: OctopusPlatformPluginOptions<N>
 ) => plugin;
