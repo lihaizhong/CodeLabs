@@ -13,20 +13,7 @@ export class SvgaWorker {
         success: (res) => {
           benchmark.log("load worker success", res);
           // 创建 worker。 如果 worker 分包没下载完就调 createWorker 的话将报错
-          this.worker = wx.createWorker("workers/index.js");
-
-          // 监听 worker 消息响应。
-          this.worker.onMessage((result) => {
-            const { method, data } = result || {};
-            const handler = this.listeners.get(method);
-            const { fn, options } = handler;
-
-            fn(data);
-            if (options.once) {
-              this.listeners.delete(method);
-            }
-            benchmark.stop(`${method} 解压时间`);
-          });
+          this.createWorker();
           resolve();
         },
         fail: (res) => {
@@ -44,6 +31,29 @@ export class SvgaWorker {
           res.totalBytesExpectedToWrite
         );
       });
+    });
+  }
+
+  createWorker() {
+    this.worker = wx.createWorker("workers/index.js", { useExperimentalWorker: true });
+
+    // 监听 worker 消息响应。
+    this.worker.onMessage((result) => {
+      const { method, data } = result || {};
+      const handler = this.listeners.get(method);
+      const { fn, options } = handler;
+
+      fn(data);
+      if (options.once) {
+        this.listeners.delete(method);
+      }
+      benchmark.stop(`${method} 解压时间`);
+    });
+
+    this.worker.onProcessKilled(() => {
+      benchmark.log("worker killed");
+
+      this.createWorker();
     });
   }
 
