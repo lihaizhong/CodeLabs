@@ -142,6 +142,7 @@ export abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
         break;
       case "tt":
         system = (tt.getDeviceInfoSync().platform as string);
+        break;
       default:
         system = "unknown";
     }
