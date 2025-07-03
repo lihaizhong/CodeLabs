@@ -9,7 +9,7 @@ export class EnhancedWorker {
   open() {
     // 创建 worker
     this.worker = new Worker(
-      new URL("../../workers/index.js", import.meta.url),
+      new URL("../workers/index.js", import.meta.url),
       { type: "module" }
     );
     // 监听 worker 消息响应。

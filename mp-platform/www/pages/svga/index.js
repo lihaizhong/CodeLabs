@@ -9,7 +9,7 @@ import {
   getOneAtRandom,
 } from "../../utils/constants";
 import ReadyGo from "../../utils/ReadyGo";
-import { EnhancedWorker } from "../../utils/worker";
+import { EnhancedWorker } from "../../utils/EnhancedWorker";
 
 let player;
 const playerAwait = async () => {
@@ -51,7 +51,7 @@ const playerAwait = async () => {
 
   benchmark.time("创建 100 个 Image 元素的总时长", () => {
     for (let i = 0; i < 100; i++) {
-      player.painter.X.createImage();
+      new Image();
     }
   });
 };
