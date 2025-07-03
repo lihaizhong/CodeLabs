@@ -1,5 +1,4 @@
 declare class Stopwatch {
-    private readonly hasConsoleTime;
     private readonly timeLabels;
     private readonly markLabels;
     start(label: string): void;

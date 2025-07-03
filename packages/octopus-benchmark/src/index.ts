@@ -6,45 +6,33 @@ const badge = [
 ];
 
 class Stopwatch {
-  private readonly hasConsoleTime = typeof console.time === "function" && typeof console.timeEnd === "function";
-
   private readonly timeLabels: Map<string, number> = new Map();
 
   private readonly markLabels: Map<string, number> = new Map();
 
   start(label: string) {
-    if (this.hasConsoleTime) {
-      console.time(label);
-    } else {
-      this.timeLabels.set(label, platform.now());
-    }
+    this.timeLabels.set(label, platform.now());
   }
 
   stop(label: string) {
-    if (this.hasConsoleTime) {
-      console.timeEnd(label);
-    } else {
-      const nowTime = platform.now();
+    const nowTime = platform.now();
+    const { timeLabels } = this;
 
-      if (this.timeLabels.has(label)) {
-        console.log(
-          `${label}: ${nowTime - (this.timeLabels.get(label) as number)} ms`
-        );
-        this.timeLabels.delete(label);
-      }
+    if (timeLabels.has(label)) {
+      console.log(`${label}: ${nowTime - timeLabels.get(label)!} ms`);
+      timeLabels.delete(label);
     }
   }
 
   mark(label: string) {
     const nowTime = platform.now();
+    const { markLabels } = this;
 
-    if (this.markLabels.has(label)) {
-      console.log(
-        `${label}: ${nowTime - (this.markLabels.get(label) as number)} ms`
-      );
+    if (markLabels.has(label)) {
+      console.log(`${label}: ${nowTime - markLabels.get(label)!} ms`);
     }
 
-    this.markLabels.set(label, nowTime);
+    markLabels.set(label, nowTime);
   }
 
   reset(label: string) {
