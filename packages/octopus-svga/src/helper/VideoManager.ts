@@ -244,6 +244,7 @@ export class VideoManager {
       promise: null,
     };
 
+    this.buckets[point] = bucket;
     if (needDownloadAndParse) {
       bucket.entity = await this.downloadAndParseVideo(bucket, true);
     } else if (this.includeRemainRange(point)) {
@@ -264,6 +265,7 @@ export class VideoManager {
     point: number = 0,
     maxRemain: number = 3
   ): Promise<void> {
+    this.clear();
     this.updateRemainRange(point, maxRemain, urls.length);
 
     const { loadMode, point: currentPoint } = this;
@@ -274,7 +276,7 @@ export class VideoManager {
       true
     );
 
-    this.buckets = await benchmark.time("资源加载时间", () =>
+    await benchmark.time("资源加载时间", () =>
       Promise.all(
         urls.map((url: string, index: number) => {
           // 当前帧的视频已经预加载到内存中
