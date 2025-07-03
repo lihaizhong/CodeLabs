@@ -1,4 +1,4 @@
-import { PointPool, CurrentPoint } from "../../shared-utils/PointPool";
+import { PointPool, CurrentPoint } from "../../../shared/PointPool";
 
 export interface ICommand {
   command: string;

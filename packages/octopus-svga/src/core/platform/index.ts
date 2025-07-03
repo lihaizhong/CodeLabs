@@ -10,7 +10,7 @@ import {
   pluginPath,
   pluginRAF,
 } from "octopus-platform";
-import { version } from "../../package.json";
+import { version } from "../../../package.json";
 
 export type PlatformProperties =
   | "now"

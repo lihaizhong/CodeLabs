@@ -1,4 +1,4 @@
-import { calculateHash } from "../../shared-utils/hash";
+import { calculateHash } from "../../../shared/hash";
 import Reader from "./Reader";
 
 export class Preflight {

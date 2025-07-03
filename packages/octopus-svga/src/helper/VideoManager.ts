@@ -1,6 +1,6 @@
 import benchmark from "octopus-benchmark";
-import { platform } from "../platform";
-import { Parser } from "../parser";
+import { platform } from "../core/platform";
+import { Parser } from "../core/parser";
 
 export interface Bucket {
   // 远程地址

@@ -1,4 +1,4 @@
-import { platform } from "../../platform";
+import { platform } from "../../core/platform";
 
 export class CRC32 {
   // CRC32 Table 初始化

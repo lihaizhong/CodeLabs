@@ -1,5 +1,5 @@
 import { Painter } from "../painter";
-import { ResourceManager } from "../extensions";
+import { ResourceManager } from "../../extensions";
 /**
  * SVGA 播放器
  */

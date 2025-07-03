@@ -1,8 +1,8 @@
-import { platform } from "../platform";
+import { platform } from "../core/platform";
 import { generateImageBufferFromCode, IQrCodeImgOptions } from "./qrcode";
 import { getBufferFromImageData } from "./png";
-import type { ResourceManager } from "src/extensions";
-import type { Painter } from "src/painter";
+import type { ResourceManager } from "../extensions";
+import type { Painter } from "../core/painter";
 
 interface VideoEditorOptions {
   // 模式: R 替换, A 追加
