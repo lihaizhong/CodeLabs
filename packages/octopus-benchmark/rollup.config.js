@@ -40,6 +40,7 @@ export default defineConfig([
         plugins: [terser()],
       },
     ],
+    external: ["octopus-platform"],
     plugins: [
       ...config.plugins,
       typescript({
