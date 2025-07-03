@@ -1,15 +1,17 @@
-import type { OctopusPlatform } from "./platform";
-
+import type { OctopusPlatformWithDependencies } from "./platform";// 修改接口定义
 export interface OctopusPlatformPluginOptions<
-  N extends keyof OctopusPlatformPlugins
+  N extends keyof OctopusPlatformPlugins,
+  D extends keyof OctopusPlatformPlugins = never
 > {
   name: N;
-  dependencies?: N[];
-  install: (this: OctopusPlatform<N>) => OctopusPlatformPlugins[N];
+  dependencies?: D[];
+  install: (this: OctopusPlatformWithDependencies<N, D>) => OctopusPlatformPlugins[N];
 }
 
-export interface OctopusPlatformPlugins {}
-
-export const definePlugin = <N extends keyof OctopusPlatformPlugins>(
-  plugin: OctopusPlatformPluginOptions<N>
+// 修改函数定义
+export const definePlugin = <
+  N extends keyof OctopusPlatformPlugins,
+  D extends keyof OctopusPlatformPlugins = never
+>(
+  plugin: OctopusPlatformPluginOptions<N, D>
 ) => plugin;

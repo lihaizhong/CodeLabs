@@ -28,11 +28,11 @@ declare module "../definePlugin" {
  * @package plugin-path 路径处理能力
  * @package plugin-decode 解码能力
  */
-export default definePlugin<"image">({  
+export default definePlugin<"image", "local" | "decode">({  
   name: "image",
   dependencies: ["local", "decode"],
   install() {
-    const { local, decode } = this as any;
+    const { local, decode } = this;
     const { env } = this.globals;
     let genImageSource: (
       data: Uint8Array | string,

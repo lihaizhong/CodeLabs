@@ -19,6 +19,13 @@ export interface OctopusPlatformGlobals {
   system: string;
 }
 
+export type OctopusPlatformWithDependencies<
+  N extends keyof OctopusPlatformPlugins,
+  D extends keyof OctopusPlatformPlugins = never
+> = OctopusPlatform<N> & {
+  [K in D]: OctopusPlatformPlugins[K];
+};
+
 export abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
   /**
    * 插件列表
