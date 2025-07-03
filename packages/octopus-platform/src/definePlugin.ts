@@ -1,4 +1,8 @@
 import type { OctopusPlatformWithDependencies } from "./platform";// 修改接口定义
+
+// 确保接口被正确导出
+export interface OctopusPlatformPlugins {}
+
 export interface OctopusPlatformPluginOptions<
   N extends keyof OctopusPlatformPlugins,
   D extends keyof OctopusPlatformPlugins = never

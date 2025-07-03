@@ -35,7 +35,7 @@ export abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
   /**
    * 平台版本
    */
-  public platformVersion: string = version;
+  public platformVersion: string;
 
   /**
    * 应用版本
@@ -60,6 +60,7 @@ export abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
     this.version = version || "";
     this.plugins = plugins;
     this.globals.env = this.autoEnv();
+    this.platformVersion = version!;
   }
 
   protected init() {
