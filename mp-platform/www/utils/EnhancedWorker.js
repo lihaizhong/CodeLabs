@@ -1,6 +1,6 @@
 import { benchmark } from "octopus-svga";
 
-export class SvgaWorker {
+export class EnhancedWorker {
   constructor() {
     this.worker;
     this.listeners = new Map();

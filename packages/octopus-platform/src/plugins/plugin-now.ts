@@ -16,14 +16,9 @@ export default definePlugin<"now">({
       env === "h5" || env === "tt" ? performance : br.getPerformance();
 
     if (typeof perf?.now === "function") {
-      // 数值差别大，说明perf.now()获得的是高精度的时间戳
-      if (perf.now() - Date.now() > 0) {
-        if (env === "alipay") {
-          // 支付宝小程序的performance.now()获取的是当前时间戳，单位是微秒。
-          return () => perf.now() / 1000;
-        }
-
-        return () => perf.now();
+      // 支付宝小程序的performance.now()获取的是当前时间戳，单位是微秒。
+      if (perf.now() - Date.now() > 1) {
+        return () => perf.now() / 1000;
       }
 
       // H5环境下，performance.now()获取的不是当前时间戳，而是从页面加载开始的时间戳，单位是毫秒。

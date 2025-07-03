@@ -1,6 +1,6 @@
-import { benchmark } from "../../utils/fuck-svga";
+import { benchmark } from "./fuck-svga";
 
-export class SvgaWorker {
+export class EnhancedWorker {
   constructor() {
     this.worker;
     this.listeners = new Map();
@@ -8,7 +8,7 @@ export class SvgaWorker {
 
   open() {
     // 创建 worker。 如果 worker 分包没下载完就调 createWorker 的话将报错
-    this.worker = my.createWorker("workers/index.js");
+    this.worker = my.createWorker("workers/index.js", { useExperimentalWorker: true });
 
     // 监听 worker 消息响应。
     this.worker.onMessage((result) => {

@@ -1,11 +1,42 @@
-import { benchmark } from "../../utils/fuck-svga";
+import { benchmark } from "./fuck-svga";
 
-export class SvgaWorker {
+export class EnhancedWorker {
   constructor() {
     this.worker;
     this.listeners = new Map();
   }
 
+  /**
+   * @private
+   * 创建 Worker
+   */
+  createWorker() {
+    this.worker = wx.createWorker("workers/index.js", { useExperimentalWorker: true });
+    // 监听 worker 消息响应。
+    this.worker.onMessage((result) => {
+      const { method, data } = result || {};
+      const handler = this.listeners.get(method);
+      const { fn, options } = handler;
+
+      fn(data);
+      if (options.once) {
+        this.listeners.delete(method);
+      }
+      benchmark.stop(`${method} 解压时间`);
+    });
+
+    // 实验模式可能会出现 worker 被杀的情况，需要重新创建 worker
+    this.worker.onProcessKilled(() => {
+      benchmark.log("worker killed");
+
+      this.createWorker();
+    });
+  }
+
+  /**
+   * 下载并启动 Worker
+   * @returns 
+   */
   async open() {
     return new Promise((resolve, reject) => {
       const task = wx.preDownloadSubpackage({
@@ -13,20 +44,7 @@ export class SvgaWorker {
         success: (res) => {
           benchmark.log("load worker success", res);
           // 创建 worker。 如果 worker 分包没下载完就调 createWorker 的话将报错
-          this.worker = wx.createWorker("workers/index.js");
-
-          // 监听 worker 消息响应。
-          this.worker.onMessage((result) => {
-            const { method, data } = result || {};
-            const handler = this.listeners.get(method);
-            const { fn, options } = handler;
-
-            fn(data);
-            if (options.once) {
-              this.listeners.delete(method);
-            }
-            benchmark.stop(`${method} 解压时间`);
-          });
+          this.createWorker();
           resolve();
         },
         fail: (res) => {
@@ -47,6 +65,11 @@ export class SvgaWorker {
     });
   }
 
+  /**
+   * 一次绑定事件
+   * @param {*} method 
+   * @param {*} fn 
+   */
   once(method, fn) {
     this.listeners.set(method, {
       fn: (data) => fn?.(data),
@@ -56,6 +79,11 @@ export class SvgaWorker {
     });
   }
 
+  /**
+   * 永久绑定事件
+   * @param {*} method 
+   * @param {*} fn 
+   */
   on(method, fn) {
     this.listeners.set(method, {
       fn: (data) => fn?.(data),
@@ -65,15 +93,27 @@ export class SvgaWorker {
     });
   }
 
+  /**
+   * 移除绑定事件
+   * @param {*} method 
+   */
   off(method) {
     this.listeners.delete(method);
   }
 
+  /**
+   * 触发事件
+   * @param {*} method 
+   * @param {*} data 
+   */
   emit(method, data) {
     benchmark.start(`${method} 解压时间`);
     this.worker.postMessage({ method, data });
   }
 
+  /**
+   * 关闭 Worker
+   */
   close() {
     this.listeners.clear();
     this.worker?.terminate();
