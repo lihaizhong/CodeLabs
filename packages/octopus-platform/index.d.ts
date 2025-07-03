@@ -1,5 +1,3 @@
-import * as octopus_platform from 'octopus-platform';
-
 declare function retry<T>(fn: () => T | Promise<T>, intervals?: number[], times?: number): Promise<T>;
 
 interface MiniProgramCanvas extends HTMLCanvasElement {
@@ -79,7 +77,7 @@ interface OctopusPlatformPluginOptions<N extends keyof OctopusPlatformPlugins, D
 /**
  * 定义平台插件
  */
-declare const definePlugin: <N extends keyof octopus_platform.OctopusPlatformPlugins, D extends keyof octopus_platform.OctopusPlatformPlugins = never>(plugin: OctopusPlatformPluginOptions<N, D>) => OctopusPlatformPluginOptions<N, D>;
+declare const definePlugin: <N extends keyof OctopusPlatformPlugins, D extends keyof OctopusPlatformPlugins = never>(plugin: OctopusPlatformPluginOptions<N, D>) => OctopusPlatformPluginOptions<N, D>;
 
 type OctopusSupportedPlatform = "weapp" | "alipay" | "tt" | "h5" | "unknown";
 interface OctopusPlatformGlobals {
@@ -88,10 +86,10 @@ interface OctopusPlatformGlobals {
     dpr: number;
     system: string;
 }
-type OctopusPlatformWithDependencies<N extends keyof octopus_platform.OctopusPlatformPlugins, D extends keyof octopus_platform.OctopusPlatformPlugins = never> = OctopusPlatform<N> & {
-    [K in D]: octopus_platform.OctopusPlatformPlugins[K];
+type OctopusPlatformWithDependencies<N extends keyof OctopusPlatformPlugins, D extends keyof OctopusPlatformPlugins = never> = OctopusPlatform<N> & {
+    [K in D]: OctopusPlatformPlugins[K];
 };
-declare abstract class OctopusPlatform<N extends keyof octopus_platform.OctopusPlatformPlugins> {
+declare abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
     /**
      * 插件列表
      */

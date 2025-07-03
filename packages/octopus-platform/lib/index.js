@@ -1,7 +1,7 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.benchmark = {}));
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.OctopusPlatform = {}));
 })(this, (function (exports) { 'use strict';
 
     var noop = function () { };
@@ -225,6 +225,10 @@
              */
             this.plugins = [];
             /**
+             * 平台版本
+             */
+            this.platformVersion = "0.0.1";
+            /**
              * 应用版本
              */
             this.version = "";
@@ -242,7 +246,6 @@
             this.version = version || "";
             this.plugins = plugins;
             this.globals.env = this.autoEnv();
-            this.platformVersion = version;
         }
         OctopusPlatform.prototype.init = function () {
             var _a = this, globals = _a.globals, plugins = _a.plugins;

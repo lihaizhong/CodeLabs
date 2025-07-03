@@ -140,7 +140,7 @@ class OctopusPlatform {
     /**
      * 平台版本
      */
-    platformVersion;
+    platformVersion = "0.0.1";
     /**
      * 应用版本
      */
@@ -160,7 +160,6 @@ class OctopusPlatform {
         this.version = version || "";
         this.plugins = plugins;
         this.globals.env = this.autoEnv();
-        this.platformVersion = version;
     }
     init() {
         const { globals, plugins } = this;

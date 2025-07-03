@@ -4,7 +4,6 @@ import {
   type OctopusPlatformPluginOptions,
   pluginNow,
 } from "octopus-platform";
-import { version } from "../package.json";
 
 export type PlatformProperties = "now";
 
@@ -12,7 +11,7 @@ class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
   now!: OctopusPlatformPlugins["now"];
 
   constructor() {
-    super([pluginNow], version);
+    super([pluginNow], __VERSION__);
 
     this.init();
   }

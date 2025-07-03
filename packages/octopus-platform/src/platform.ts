@@ -1,6 +1,6 @@
 import { noop, retry } from "./extensions";
-import { version } from "../package.json";
 import type { OctopusPlatformPluginOptions } from "./definePlugin";
+import type { OctopusPlatformPlugins } from "./typings";
 
 export type OctopusSupportedPlatform =
   | "weapp"
@@ -17,14 +17,14 @@ export interface OctopusPlatformGlobals {
 }
 
 export type OctopusPlatformWithDependencies<
-  N extends keyof import("octopus-platform").OctopusPlatformPlugins,
-  D extends keyof import("octopus-platform").OctopusPlatformPlugins = never
+  N extends keyof OctopusPlatformPlugins,
+  D extends keyof OctopusPlatformPlugins = never
 > = OctopusPlatform<N> & {
-  [K in D]: import("octopus-platform").OctopusPlatformPlugins[K];
+  [K in D]: OctopusPlatformPlugins[K];
 };
 
 export abstract class OctopusPlatform<
-  N extends keyof import("octopus-platform").OctopusPlatformPlugins
+  N extends keyof OctopusPlatformPlugins
 > {
   /**
    * 插件列表
@@ -34,7 +34,7 @@ export abstract class OctopusPlatform<
   /**
    * 平台版本
    */
-  public platformVersion: string;
+  public platformVersion: string = __VERSION__;
 
   /**
    * 应用版本
@@ -59,7 +59,6 @@ export abstract class OctopusPlatform<
     this.version = version || "";
     this.plugins = plugins;
     this.globals.env = this.autoEnv();
-    this.platformVersion = version!;
   }
 
   protected init() {

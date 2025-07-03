@@ -1,4 +1,4 @@
 export * from "./platform";
 export * from "./definePlugin";
 export * from "./plugins";
-export * from "./typings";
+export type * from "./typings";

@@ -17,8 +17,8 @@ export interface OctopusPlatformPluginOptions<
  * 定义平台插件
  */
 export const definePlugin = <
-  N extends keyof import("octopus-platform").OctopusPlatformPlugins,
-  D extends keyof import("octopus-platform").OctopusPlatformPlugins = never
+  N extends keyof OctopusPlatformPlugins,
+  D extends keyof OctopusPlatformPlugins = never
 >(
   plugin: OctopusPlatformPluginOptions<N, D>
 ) => plugin;
