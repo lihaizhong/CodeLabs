@@ -7,7 +7,7 @@ declare module "../definePlugin" {
   }
 }
 
-export default definePlugin<"now">({
+export default definePlugin<"now">({  
   name: "now",
   install() {
     const { env, br } = this.globals;

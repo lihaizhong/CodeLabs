@@ -3,12 +3,13 @@
   "version": "0.0.1",
   "type": "module",
   "description": "基准测试工具",
-  "main": "index.js",
   "module": "es/index.js",
-  "types": "types/index.d.ts",
+  "main": "lib/index.js",
+  "types": "index.d.ts",
   "exports": {
     "import": "./es/index.js",
-    "default": "./index.js"
+    "default": "./lib/index.js",
+    "types": "./index.d.ts"
   },
   "scripts": {
     "declare": "tsc",

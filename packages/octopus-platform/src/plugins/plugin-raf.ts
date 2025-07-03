@@ -12,7 +12,7 @@ declare module "../definePlugin" {
  * 用于处理requestAnimationFrame
  * @returns
  */
-export default definePlugin<"rAF">({
+export default definePlugin<"rAF">({  
   name: "rAF",
   install() {
     const { env } = this.globals;

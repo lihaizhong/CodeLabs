@@ -1,8 +1,14 @@
-import type { OctopusPlatformWithDependencies } from "./platform";// 修改接口定义
+import type { OctopusPlatformWithDependencies } from "./platform";
 
-// 确保接口被正确导出
+/**
+ * 平台插件接口
+ * 各个插件通过 declare module 语法扩展此接口
+ */
 export interface OctopusPlatformPlugins {}
 
+/**
+ * 平台插件选项接口
+ */
 export interface OctopusPlatformPluginOptions<
   N extends keyof OctopusPlatformPlugins,
   D extends keyof OctopusPlatformPlugins = never
@@ -12,7 +18,9 @@ export interface OctopusPlatformPluginOptions<
   install: (this: OctopusPlatformWithDependencies<N, D>) => OctopusPlatformPlugins[N];
 }
 
-// 修改函数定义
+/**
+ * 定义平台插件
+ */
 export const definePlugin = <
   N extends keyof OctopusPlatformPlugins,
   D extends keyof OctopusPlatformPlugins = never

@@ -17,7 +17,7 @@ declare module "../definePlugin" {
  * 通过选择器匹配获取canvas实例
  * @returns
  */
-export default definePlugin<"getCanvas">({
+export default definePlugin<"getCanvas">({  
   name: "getCanvas",
   install() {
     const { retry } = this;

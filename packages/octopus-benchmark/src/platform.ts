@@ -1,15 +1,13 @@
-import { Platform, pluginNow, pluginSystem } from "octopus-platform";
+import { OctopusPlatform, OctopusPlatformPlugins, pluginNow } from "octopus-platform";
 import { version } from "../package.json";
 
-export type PlatformProperties = "now" | "system";
+export type PlatformProperties = "now";
 
-class EnhancedPlatform extends Platform<PlatformProperties> {
-  now!: OctopusPlatform.PlatformPlugin["now"];
-
-  system!: OctopusPlatform.PlatformPlugin["system"];
+class EnhancedPlatform extends OctopusPlatform<"now"> {
+  now!: OctopusPlatformPlugins;
 
   constructor() {
-    super([pluginNow, pluginSystem], version);
+    super([pluginNow], version);
 
     this.init();
   }
