@@ -43,12 +43,12 @@ export default defineConfig([
     input: config.input,
     output: [
       {
-        file: "index.js",
+        file: "lib/index.js",
         format: "umd",
         name: "benchmark",
       },
       {
-        file: "index.min.js",
+        file: "lib/index.min.js",
         format: "umd",
         name: "benchmark",
         sourcemap: true,

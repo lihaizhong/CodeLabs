@@ -3,17 +3,17 @@
   "version": "0.0.1",
   "type": "module",
   "description": "平台兼容性磨平",
-  "main": "dist/index.js",
-  "types": "dist/src/index.d.ts",
+  "module": "es/index.js",
+  "main": "lib/index.js",
+  "types": "index.d.ts",
   "exports": {
-    ".": "./dist/index.js"
+    "import": "./es/index.js",
+    "default": "./lib/index.js",
+    "types": "./index.d.ts"
   },
-  "files": [
-    "types"
-  ],
   "scripts": {
     "declare": "tsc",
-    "cleanup": "rimraf -rf es index.d.ts index.js index.min.js index.min.js.map",
+    "cleanup": "rimraf -rf es lib index.d.ts",
     "generate": "rollup -c",
     "build": "npm run cleanup && npm run declare && npm run generate",
     "test": "echo \"Error: no test specified\" && exit 1"

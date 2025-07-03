@@ -95,11 +95,3 @@ class EnhancedPlatform extends Platform<PlatformProperties> {
 
 export const platform = new EnhancedPlatform();
 ```
-
-**注意**：`pluginImage` 和 `pluginRAF` 插件在小程序端依赖 `canvas` 实例。请在使用前使用 `platform.setGlobalCanvas` 方法设置 `canvas` 实例。
-
-```ts
-import { platform } from "./platform";
-
-platform.setGlobalCanvas(canvas);
-```
