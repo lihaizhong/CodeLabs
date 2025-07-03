@@ -276,7 +276,7 @@ export class VideoManager {
       true
     );
 
-    this.buckets = await benchmark.time("资源加载时间", () =>
+    await benchmark.time("资源加载时间", () =>
       Promise.all(
         urls.map((url: string, index: number) => {
           // 当前帧的视频已经预加载到内存中
