@@ -1,6 +1,5 @@
-import { Renderer2D } from "../extensions";
-import { ResourceManager } from "../extensions";
-import { getBufferFromImageData, getDataURLFromImageData } from "../helper";
+import { Renderer2D, ResourceManager } from "../../extensions";
+import { getBufferFromImageData, getDataURLFromImageData } from "../../helper";
 import { Painter } from "../painter";
 
 export class Poster {

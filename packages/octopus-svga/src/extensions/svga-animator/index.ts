@@ -1,4 +1,4 @@
-import { platform } from "../../platform";
+import { platform } from "../../core/platform";
 
 /**
  * 动画控制器

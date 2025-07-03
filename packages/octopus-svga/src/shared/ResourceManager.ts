@@ -1,5 +1,5 @@
-import { Painter } from "../../painter";
-import { platform } from "../../platform";
+import { Painter } from "../core/painter";
+import { platform } from "../core/platform";
 
 export class ResourceManager {
   /**

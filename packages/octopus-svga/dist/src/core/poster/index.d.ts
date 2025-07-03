@@ -1,4 +1,4 @@
-import { ResourceManager } from "../extensions";
+import { ResourceManager } from "../../extensions";
 import { Painter } from "../painter";
 export declare class Poster {
     /**

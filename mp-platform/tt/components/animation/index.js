@@ -44,6 +44,12 @@ const playerAwait = async (scope) => {
     },
     scope
   );
+
+  benchmark.time("创建 100 个 Image 元素的总时长", () => {
+    for (let i = 0; i < 100; i++) {
+      player.painter.X.createImage();
+    }
+  });
 };
 const worker = new EnhancedWorker();
 const readyGo = new ReadyGo();

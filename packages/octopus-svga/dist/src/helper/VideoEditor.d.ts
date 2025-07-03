@@ -1,6 +1,6 @@
 import { IQrCodeImgOptions } from "./qrcode";
-import type { ResourceManager } from "src/extensions";
-import type { Painter } from "src/painter";
+import type { ResourceManager } from "../extensions";
+import type { Painter } from "../core/painter";
 interface VideoEditorOptions {
     mode?: "R" | "A";
 }

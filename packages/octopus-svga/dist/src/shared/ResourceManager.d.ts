@@ -1,4 +1,4 @@
-import { Painter } from "../../painter";
+import { Painter } from "../core/painter";
 export declare class ResourceManager {
     private readonly painter;
     /**
