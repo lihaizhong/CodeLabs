@@ -244,6 +244,7 @@ export class VideoManager {
       promise: null,
     };
 
+    this.buckets[point] = bucket;
     if (needDownloadAndParse) {
       bucket.entity = await this.downloadAndParseVideo(bucket, true);
     } else if (this.includeRemainRange(point)) {
@@ -264,6 +265,7 @@ export class VideoManager {
     point: number = 0,
     maxRemain: number = 3
   ): Promise<void> {
+    this.clear();
     this.updateRemainRange(point, maxRemain, urls.length);
 
     const { loadMode, point: currentPoint } = this;
