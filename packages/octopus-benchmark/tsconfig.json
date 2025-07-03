@@ -71,6 +71,7 @@
   },
   "exclude": [
     "__mocks__/**",
-    "__tests__/**"
+    "__tests__/**",
+    "types/**"
   ]
 }

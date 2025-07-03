@@ -1,17 +1,5 @@
-import { OffscreenCanvasOptions, PlatformOffscreenCanvas } from "../typings";
+import type { OffscreenCanvasOptions } from "../typings";
 import { definePlugin } from "../definePlugin";
-
-export interface GetOffscreenCanvasResult {
-  canvas: PlatformOffscreenCanvas;
-  context: OffscreenCanvasRenderingContext2D;
-}
-
-// 扩展OctopusPlatformPlugins接口
-declare module "../definePlugin" {
-  interface OctopusPlatformPlugins {
-    getOfsCanvas: (options: OffscreenCanvasOptions) => GetOffscreenCanvasResult;
-  }
-}
 
 /**
  * 用于创建离屏canvas

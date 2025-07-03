@@ -1,10 +1,5 @@
 import type { OctopusPlatformWithDependencies } from "./platform";
-
-/**
- * 平台插件接口
- * 各个插件通过 declare module 语法扩展此接口
- */
-export interface OctopusPlatformPlugins {}
+import type { OctopusPlatformPlugins } from "./typings";
 
 /**
  * 平台插件选项接口
@@ -22,8 +17,8 @@ export interface OctopusPlatformPluginOptions<
  * 定义平台插件
  */
 export const definePlugin = <
-  N extends keyof OctopusPlatformPlugins,
-  D extends keyof OctopusPlatformPlugins = never
+  N extends keyof import("octopus-platform").OctopusPlatformPlugins,
+  D extends keyof import("octopus-platform").OctopusPlatformPlugins = never
 >(
   plugin: OctopusPlatformPluginOptions<N, D>
 ) => plugin;

@@ -1,15 +1,4 @@
-import { definePlugin, OctopusPlatformPlugins } from "../definePlugin";
-
-// 扩展OctopusPlatformPlugins接口
-declare module "../definePlugin" {
-  interface OctopusPlatformPlugins {
-    local: {
-      write: (data: ArrayBufferLike, filepath: string) => Promise<string>;
-      read: (filepath: string) => Promise<ArrayBuffer>;
-      remove: (filepath: string) => Promise<string>;
-    } | null;
-  }
-}
+import { definePlugin } from "../definePlugin";
 
 /**
  * 用于处理本地文件存储
@@ -55,6 +44,6 @@ export default definePlugin<"local">({
           });
         });
       },
-    } satisfies OctopusPlatformPlugins["local"];
+    };
   },
 });

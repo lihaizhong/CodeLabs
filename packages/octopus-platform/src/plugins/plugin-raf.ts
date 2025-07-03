@@ -1,12 +1,5 @@
-import { MiniProgramCanvas, PlatformCanvas } from "../typings";
+import type { MiniProgramCanvas, PlatformCanvas } from "../typings";
 import { definePlugin } from "../definePlugin";
-
-// 扩展OctopusPlatformPlugins接口
-declare module "../definePlugin" {
-  interface OctopusPlatformPlugins {
-    rAF: (canvas: PlatformCanvas, callback: () => void) => number;
-  }
-}
 
 /**
  * 用于处理requestAnimationFrame

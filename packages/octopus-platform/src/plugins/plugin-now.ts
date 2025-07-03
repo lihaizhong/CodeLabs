@@ -1,12 +1,5 @@
 import { definePlugin } from "../definePlugin";
 
-// 扩展OctopusPlatformPlugins接口
-declare module "../definePlugin" {
-  interface OctopusPlatformPlugins {
-    now: () => number;
-  }
-}
-
 export default definePlugin<"now">({  
   name: "now",
   install() {

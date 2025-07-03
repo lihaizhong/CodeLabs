@@ -1,23 +1,11 @@
-import { definePlugin, OctopusPlatformPlugins } from "../definePlugin";
+import { definePlugin } from "../definePlugin";
 import { utf8 } from "../extensions/utf8";
-
-// 扩展OctopusPlatformPlugins接口
-declare module "../definePlugin" {
-  interface OctopusPlatformPlugins {
-    decode: {
-      toDataURL: (data: Uint8Array) => string;
-      toBuffer: (data: Uint8Array) => ArrayBuffer;
-      bytesToString: (data: Uint8Array) => string;
-      utf8: (data: Uint8Array, start: number, end: number) => string;
-    };
-  }
-}
 
 /**
  * 用于处理数据解码
  * @returns
  */
-export default definePlugin<"decode">({  
+export default definePlugin<"decode">({
   name: "decode",
   install() {
     const { env, br } = this.globals;
@@ -51,21 +39,25 @@ export default definePlugin<"decode">({
 
         return result;
       },
-    } as OctopusPlatformPlugins["decode"];
+    };
 
     if (env === "h5") {
       const textDecoder = new TextDecoder("utf-8", { fatal: true });
 
-      decode.toDataURL = (data: Uint8Array) =>
-        b64Wrap(btoa(decode.bytesToString(data)));
-      decode.utf8 = (data: Uint8Array, start: number, end: number) =>
-        textDecoder.decode(data.subarray(start, end));
-    } else {
-      decode.toDataURL = (data: Uint8Array) =>
-        b64Wrap((br as any).arrayBufferToBase64(decode.toBuffer(data)));
-      decode.utf8 = utf8;
+      return {
+        ...decode,
+        toDataURL: (data: Uint8Array) =>
+          b64Wrap(btoa(decode.bytesToString(data))),
+        utf8: (data: Uint8Array, start: number, end: number) =>
+          textDecoder.decode(data.subarray(start, end)),
+      };
     }
 
-    return decode;
+    return {
+      ...decode,
+      toDataURL: (data: Uint8Array) =>
+        b64Wrap((br as any).arrayBufferToBase64(decode.toBuffer(data))),
+      utf8,
+    };
   },
 });

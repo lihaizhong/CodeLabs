@@ -1,17 +1,5 @@
-import { PlatformCanvas } from "../typings";
+import type { GetCanvasResult, PlatformCanvas } from "../typings";
 import { definePlugin } from "../definePlugin";
-
-export interface GetCanvasResult {
-  canvas: PlatformCanvas;
-  context: CanvasRenderingContext2D;
-}
-
-// 扩展OctopusPlatformPlugins接口
-declare module "../definePlugin" {
-  interface OctopusPlatformPlugins {
-    getCanvas: (selector: string, component?: any) => Promise<GetCanvasResult>;
-  }
-}
 
 /**
  * 通过选择器匹配获取canvas实例

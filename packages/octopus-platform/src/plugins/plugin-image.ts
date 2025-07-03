@@ -1,26 +1,11 @@
-import {
+import type {
   MiniProgramCanvas,
   MiniProgramOffscreenCanvas,
   PlatformCanvas,
   PlatformImage,
   PlatformOffscreenCanvas,
 } from "../typings";
-import { definePlugin, OctopusPlatformPlugins } from "../definePlugin";
-
-// 扩展OctopusPlatformPlugins接口
-declare module "../definePlugin" {
-  interface OctopusPlatformPlugins {
-    image: {
-      create: (canvas: PlatformCanvas | PlatformOffscreenCanvas) => PlatformImage;
-      load: (
-        createImage: () => HTMLImageElement,
-        data: ImageBitmap | Uint8Array | string,
-        filepath: string
-      ) => Promise<ImageBitmap | PlatformImage>;
-      release: (img: PlatformImage) => void;
-    };
-  }
-}
+import { definePlugin } from "../definePlugin";
 
 /**
  * 图片加载插件
@@ -85,7 +70,7 @@ export default definePlugin<"image", "local" | "decode">({
           );
         },
         release: releaseImage,
-      } satisfies OctopusPlatformPlugins["image"];
+      };
     }
 
     // FIXME: 支付宝小程序IDE保存临时文件会失败;抖音最大用户文件大小为10M
@@ -122,6 +107,6 @@ export default definePlugin<"image", "local" | "decode">({
           await genImageSource(data as Uint8Array | string, filepath)
         ),
       release: releaseImage,
-    } satisfies OctopusPlatformPlugins["image"];
+    };
   },
 });

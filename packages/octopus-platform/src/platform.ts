@@ -1,9 +1,6 @@
 import { noop, retry } from "./extensions";
 import { version } from "../package.json";
-import type {
-  OctopusPlatformPluginOptions,
-  OctopusPlatformPlugins,
-} from "./definePlugin";
+import type { OctopusPlatformPluginOptions } from "./definePlugin";
 
 export type OctopusSupportedPlatform =
   | "weapp"
@@ -20,13 +17,15 @@ export interface OctopusPlatformGlobals {
 }
 
 export type OctopusPlatformWithDependencies<
-  N extends keyof OctopusPlatformPlugins,
-  D extends keyof OctopusPlatformPlugins = never
+  N extends keyof import("octopus-platform").OctopusPlatformPlugins,
+  D extends keyof import("octopus-platform").OctopusPlatformPlugins = never
 > = OctopusPlatform<N> & {
-  [K in D]: OctopusPlatformPlugins[K];
+  [K in D]: import("octopus-platform").OctopusPlatformPlugins[K];
 };
 
-export abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
+export abstract class OctopusPlatform<
+  N extends keyof import("octopus-platform").OctopusPlatformPlugins
+> {
   /**
    * 插件列表
    */
@@ -79,7 +78,7 @@ export abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
     }
 
     this.usePlugins(collection, names, installedPlugins);
-    installedPlugins.clear()
+    installedPlugins.clear();
   }
 
   private autoEnv() {
@@ -143,13 +142,13 @@ export abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
 
     switch (env) {
       case "weapp":
-        system = (wx.getDeviceInfo().platform as string);
+        system = wx.getDeviceInfo().platform as string;
         break;
       case "alipay":
-        system = (my.getDeviceBaseInfo().platform as string);
+        system = my.getDeviceBaseInfo().platform as string;
         break;
       case "tt":
-        system = (tt.getDeviceInfoSync().platform as string);
+        system = tt.getDeviceInfoSync().platform as string;
         break;
       default:
         system = "unknown";

@@ -1,10 +1,15 @@
-import { OctopusPlatform, OctopusPlatformPlugins, pluginNow } from "octopus-platform";
+import {
+  OctopusPlatform,
+  type OctopusPlatformPlugins,
+  type OctopusPlatformPluginOptions,
+  pluginNow,
+} from "octopus-platform";
 import { version } from "../package.json";
 
 export type PlatformProperties = "now";
 
-class EnhancedPlatform extends OctopusPlatform<"now"> {
-  now!: OctopusPlatformPlugins;
+class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
+  now!: OctopusPlatformPlugins["now"];
 
   constructor() {
     super([pluginNow], version);
@@ -12,14 +17,8 @@ class EnhancedPlatform extends OctopusPlatform<"now"> {
     this.init();
   }
 
-  installPlugin(
-    plugin: OctopusPlatform.PlatformPluginOptions<PlatformProperties>
-  ) {
-    const value = plugin.install.call<
-      EnhancedPlatform,
-      [],
-      OctopusPlatform.PlatformPluginValue<PlatformProperties>
-    >(this);
+  installPlugin(plugin: OctopusPlatformPluginOptions<PlatformProperties>) {
+    const value = plugin.install.call(this);
 
     Object.defineProperty(this, plugin.name, {
       get: () => value,
