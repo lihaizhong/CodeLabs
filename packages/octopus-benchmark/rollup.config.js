@@ -56,11 +56,13 @@ export default defineConfig([
         file: pkg.main,
         format: "umd",
         name: "benchmark",
+        esModule: true,
       },
       {
         file: minifyFileName(pkg.main),
         format: "umd",
         name: "benchmark",
+        esModule: true,
         sourcemap: true,
         plugins: [terser()],
       },

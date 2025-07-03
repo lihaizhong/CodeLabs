@@ -1,6 +1,11 @@
 import { Renderer2D, ResourceManager } from "../../extensions";
 import { getBufferFromImageData, getDataURLFromImageData } from "../../helper";
 import { Painter } from "../painter";
+import {
+  type PlatformVideo,
+  type PosterConfig,
+  PLAYER_CONTENT_MODE,
+} from "../../types";
 
 export class Poster {
   /**
@@ -39,7 +44,10 @@ export class Poster {
     this.painter = new Painter("poster", width, height);
   }
 
-  private async register(selector: string = "", component?: any): Promise<void> {
+  private async register(
+    selector: string = "",
+    component?: any
+  ): Promise<void> {
     await this.painter.register(selector, "", component);
     this.renderer = new Renderer2D(this.painter.YC!);
     this.resource = new ResourceManager(this.painter);
@@ -73,9 +81,7 @@ export class Poster {
    * 修改内容模式
    * @param contentMode
    */
-  public setContentMode(
-    contentMode: PLAYER_CONTENT_MODE
-  ): void {
+  public setContentMode(contentMode: PLAYER_CONTENT_MODE): void {
     this.contentMode = contentMode;
   }
 
@@ -134,7 +140,7 @@ export class Poster {
 
   public toBuffer() {
     if (this.imageData === null) {
-      throw new Error("please call the draw method first.")
+      throw new Error("please call the draw method first.");
     }
 
     return getBufferFromImageData(this.imageData);
@@ -146,10 +152,10 @@ export class Poster {
    */
   public toDataURL(): string {
     if (this.imageData === null) {
-      throw new Error("please call the draw method first.")
+      throw new Error("please call the draw method first.");
     }
 
-    return getDataURLFromImageData(this.imageData)
+    return getDataURLFromImageData(this.imageData);
   }
 
   /**

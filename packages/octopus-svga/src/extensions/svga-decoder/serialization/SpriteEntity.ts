@@ -1,5 +1,6 @@
 import Reader from "../io/Reader";
 import FrameEntity from "./FrameEntity";
+import { PlatformVideo } from "../../../types/video";
 
 export default class SpriteEntity {
   /**

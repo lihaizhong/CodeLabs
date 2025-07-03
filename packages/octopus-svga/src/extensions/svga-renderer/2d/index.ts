@@ -1,4 +1,12 @@
+import { type Bitmap } from "octopus-platform";
 import { PointPool, CurrentPoint } from "../../../shared/PointPool";
+import {
+  PlatformVideo,
+  type TransformScale,
+  type PlatformRenderingContext2D,
+  type CanvasSize,
+  PLAYER_CONTENT_MODE
+} from "../../../types";
 
 export interface ICommand {
   command: string;
@@ -154,8 +162,7 @@ export class Renderer2D {
   ): TransformScale {
     const imageRatio = videoSize.width / videoSize.height;
     const viewRatio = canvasSize.width / canvasSize.height;
-    const isAspectFit =
-      contentMode === PLAYER_CONTENT_MODE.ASPECT_FIT;
+    const isAspectFit = contentMode === PLAYER_CONTENT_MODE.ASPECT_FIT;
     const shouldUseWidth =
       (imageRatio >= viewRatio && isAspectFit) ||
       (imageRatio <= viewRatio && !isAspectFit);
@@ -197,9 +204,7 @@ export class Renderer2D {
 
   private globalTransform?: PlatformVideo.Transform = undefined;
 
-  constructor(
-    private context: PlatformRenderingContext2D | null
-  ) {
+  constructor(private context: PlatformRenderingContext2D | null) {
     this.currentPoint = this.pointPool.acquire();
   }
 
@@ -532,13 +537,14 @@ export class Renderer2D {
 
   private drawSprite(
     frame: PlatformVideo.VideoFrame | PlatformVideo.HiddenVideoFrame,
-    bitmap?: OctopusPlatform.Bitmap,
-    dynamicElement?: OctopusPlatform.Bitmap
+    bitmap?: Bitmap,
+    dynamicElement?: Bitmap
   ): void {
     if (frame.alpha === 0) return;
 
     const { context } = this;
-    const { alpha, transform, layout, shapes } = frame as PlatformVideo.VideoFrame;
+    const { alpha, transform, layout, shapes } =
+      frame as PlatformVideo.VideoFrame;
     const { a = 1, b = 0, c = 0, d = 1, tx = 0, ty = 0 } = transform ?? {};
 
     context!.save();
@@ -619,16 +625,16 @@ export class Renderer2D {
 
   public render(
     videoEntity: PlatformVideo.Video,
-    materials: Map<string, OctopusPlatform.Bitmap>,
-    dynamicMaterials: Map<string, OctopusPlatform.Bitmap>,
+    materials: Map<string, Bitmap>,
+    dynamicMaterials: Map<string, Bitmap>,
     currentFrame: number,
     head: number,
     tail: number
   ): void {
     let sprite: PlatformVideo.VideoSprite;
     let imageKey: string;
-    let bitmap: OctopusPlatform.Bitmap | undefined;
-    let dynamicElement: OctopusPlatform.Bitmap | undefined;
+    let bitmap: Bitmap | undefined;
+    let dynamicElement: Bitmap | undefined;
 
     for (let i = head; i < tail; i++) {
       sprite = videoEntity.sprites[i];

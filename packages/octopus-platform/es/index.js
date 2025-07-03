@@ -1,4 +1,4 @@
-const noop = () => { };
+const noop = (() => { });
 
 function delay(callback, interval) {
     return new Promise((resolve) => setTimeout(() => resolve(callback()), interval));

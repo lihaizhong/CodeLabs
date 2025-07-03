@@ -1,7 +1,17 @@
+import type { PlatformCanvas } from "octopus-platform";
 import { platform } from "../platform";
 import { Painter } from "../painter";
 import { Config } from "./config";
 import { Animator, Renderer2D, ResourceManager } from "../../extensions";
+import {
+  type PlatformVideo,
+  type PlayerConfigOptions,
+  type PlayerConfig,
+  type PlayerEventCallback,
+  type PlayerProcessEventCallback,
+  PLAYER_PLAY_MODE,
+  PLAYER_FILL_MODE,
+} from "../../types";
 
 /**
  * SVGA 播放器
@@ -65,7 +75,7 @@ export class Player {
     this.resource = new ResourceManager(this.painter);
     this.animator.onAnimate = platform.rAF.bind(
       null,
-      this.painter.X as OctopusPlatform.PlatformCanvas
+      this.painter.X as PlatformCanvas
     );
   }
 
@@ -224,7 +234,7 @@ export class Player {
       frame = frames - 1;
     }
 
-    debugger
+    debugger;
     this.stepToFrame(frame, andPlay);
   }
 

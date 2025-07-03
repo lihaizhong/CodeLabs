@@ -4,7 +4,7 @@
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.OctopusPlatform = {}));
 })(this, (function (exports) { 'use strict';
 
-    var noop = function () { };
+    var noop = (function () { });
 
     /******************************************************************************
     Copyright (c) Microsoft Corporation.
@@ -796,5 +796,7 @@
     exports.pluginOfsCanvas = pluginOfsCanvas;
     exports.pluginPath = pluginPath;
     exports.pluginRAF = pluginRaf;
+
+    Object.defineProperty(exports, '__esModule', { value: true });
 
 }));

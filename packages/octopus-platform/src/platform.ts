@@ -29,7 +29,7 @@ export abstract class OctopusPlatform<
   /**
    * 插件列表
    */
-  private plugins: OctopusPlatformPluginOptions<N>[] = [];
+  private plugins: OctopusPlatformPluginOptions<N, N>[] = [];
 
   /**
    * 平台版本
@@ -55,7 +55,7 @@ export abstract class OctopusPlatform<
 
   public retry = retry;
 
-  constructor(plugins: OctopusPlatformPluginOptions<N>[], version?: string) {
+  constructor(plugins: OctopusPlatformPluginOptions<N, N>[], version?: string) {
     this.version = version || "";
     this.plugins = plugins;
     this.globals.env = this.autoEnv();
@@ -63,7 +63,7 @@ export abstract class OctopusPlatform<
 
   protected init() {
     const { globals, plugins } = this;
-    const collection: Map<N, OctopusPlatformPluginOptions<N>> = new Map();
+    const collection: Map<N, OctopusPlatformPluginOptions<N, N>> = new Map();
     const names: N[] = [];
     const installedPlugins: Set<N> = new Set();
 
@@ -157,7 +157,7 @@ export abstract class OctopusPlatform<
   }
 
   private usePlugins(
-    plugins: Map<N, OctopusPlatformPluginOptions<N>>,
+    plugins: Map<N, OctopusPlatformPluginOptions<N, N>>,
     pluginNames: N[],
     installedPlugins: Set<N>
   ): void {
@@ -170,7 +170,7 @@ export abstract class OctopusPlatform<
         return;
       }
 
-      const plugin = plugins.get(pluginName) as OctopusPlatformPluginOptions<N>;
+      const plugin = plugins.get(pluginName) as OctopusPlatformPluginOptions<N, N>;
 
       // 递归调用依赖
       if (Array.isArray(plugin.dependencies)) {
@@ -191,7 +191,7 @@ export abstract class OctopusPlatform<
     }
   }
 
-  abstract installPlugin(plugin: OctopusPlatformPluginOptions<N>): void;
+  abstract installPlugin(plugin: OctopusPlatformPluginOptions<N, N>): void;
 
   public switch(env: OctopusSupportedPlatform): void {
     this.globals.env = env;

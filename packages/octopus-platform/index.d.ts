@@ -106,16 +106,16 @@ declare abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
      * 全局变量
      */
     globals: OctopusPlatformGlobals;
-    noop: <T = any>() => T | void;
+    noop: <T = void>() => T;
     retry: typeof retry;
-    constructor(plugins: OctopusPlatformPluginOptions<N>[], version?: string);
+    constructor(plugins: OctopusPlatformPluginOptions<N, N>[], version?: string);
     protected init(): void;
     private autoEnv;
     private useBridge;
     private usePixelRatio;
     private useSystem;
     private usePlugins;
-    abstract installPlugin(plugin: OctopusPlatformPluginOptions<N>): void;
+    abstract installPlugin(plugin: OctopusPlatformPluginOptions<N, N>): void;
     switch(env: OctopusSupportedPlatform): void;
 }
 

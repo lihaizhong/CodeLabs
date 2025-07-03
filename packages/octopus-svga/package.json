@@ -3,16 +3,19 @@
   "version": "0.2.0",
   "description": "高性能SVGA动效播放器",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/src/index.d.ts",
+  "module": "es/index.js",
+  "main": "lib/index.js",
+  "types": "index.d.ts",
   "exports": {
-    ".": "./dist/index.js"
+    "import": "./es/index.js",
+    "default": "./lib/index.js",
+    "types": "./index.d.ts"
   },
-  "files": [
-    "types"
-  ],
   "scripts": {
-    "build": "rimraf -rf dist && rollup -c",
+    "declare": "tsc",
+    "cleanup": "rimraf -rf es lib types index.d.ts",
+    "generate": "rollup -c",
+    "build": "npm run cleanup && npm run declare && npm run generate",
     "compiler": "pbjs -t static-module -w es6 -o protos/svga.js protos/svga.proto",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -21,8 +24,8 @@
   "miniprogram": "dist",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.6",
-    "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-replace": "^6.0.2",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "12.1.2",
     "@types/jest": "^30.0.0",
@@ -34,7 +37,9 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "fflate": "^0.8.2",
+    "fflate": "^0.8.2"
+  },
+  "peerDependencies": {
     "octopus-benchmark": "workspace:^",
     "octopus-platform": "workspace:^"
   }

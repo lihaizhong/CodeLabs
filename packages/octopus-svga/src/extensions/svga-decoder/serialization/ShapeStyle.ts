@@ -1,5 +1,6 @@
 import Reader from "../io/Reader";
 import RGBAColor from "./RGBAColor";
+import { PlatformVideo } from "../../../types/video";
 
 export default class ShapeStyle {
   /**

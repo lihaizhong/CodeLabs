@@ -1,6 +1,7 @@
 // import { unzlibSync } from "fflate";
 import { unzlibSync, createVideoEntity, calculateHash } from "../../extensions";
 import { platform } from "../platform";
+import type { PlatformVideo } from "../../types";
 
 /**
  * SVGA 下载解析器

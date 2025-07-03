@@ -1,3 +1,11 @@
+import {
+  type PlatformVideo,
+  type PlayerConfig,
+  PLAYER_FILL_MODE,
+  PLAYER_PLAY_MODE,
+  PLAYER_CONTENT_MODE,
+} from "../../types";
+
 export class Config {
   /**
    * 最后停留的目标模式，类似于 animation-fill-mode，默认值 forwards。

@@ -1,6 +1,7 @@
 import Reader from "../io/Reader";
 import SpriteEntity from "./SpriteEntity";
 import MovieParams from "./MovieParams";
+import { PlatformVideo } from "../../../types/video";
 
 export default class MovieEntity {
   static EMPTY_U8 = new Uint8Array(0);

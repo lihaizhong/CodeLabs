@@ -2,6 +2,7 @@
   "name": "miniprogram-www",
   "version": "1.0.0",
   "private": "true",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,6 +12,8 @@
     "excelsior-channel": "workspace:^",
     "fflate": "^0.8.2",
     "jsqr": "^1.4.0",
+    "octopus-benchmark": "workspace:^",
+    "octopus-platform": "workspace:^",
     "octopus-svga": "workspace:^",
     "weui": "^2.6.22"
   }

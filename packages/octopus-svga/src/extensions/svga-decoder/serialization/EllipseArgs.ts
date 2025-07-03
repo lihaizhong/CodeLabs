@@ -1,4 +1,5 @@
 import Reader from "../io/Reader";
+import { PlatformVideo } from "../../../types/video";
 
 export default class EllipseArgs {
   /**

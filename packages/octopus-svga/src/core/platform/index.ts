@@ -1,5 +1,7 @@
 import {
-  Platform,
+  OctopusPlatform,
+  type OctopusPlatformPlugins,
+  type OctopusPlatformPluginOptions,
   pluginCanvas,
   pluginDecode,
   pluginDownload,
@@ -10,7 +12,6 @@ import {
   pluginPath,
   pluginRAF,
 } from "octopus-platform";
-import { version } from "../../../package.json";
 
 export type PlatformProperties =
   | "now"
@@ -23,24 +24,24 @@ export type PlatformProperties =
   | "getCanvas"
   | "getOfsCanvas";
 
-class EnhancedPlatform extends Platform<PlatformProperties> {
-  now!: OctopusPlatform.PlatformPlugin["now"];
+class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
+  now!: OctopusPlatformPlugins["now"];
 
-  path!: OctopusPlatform.PlatformPlugin["path"];
+  path!: OctopusPlatformPlugins["path"];
 
-  remote!: OctopusPlatform.PlatformPlugin["remote"];
+  remote!: OctopusPlatformPlugins["remote"];
 
-  local!: OctopusPlatform.PlatformPlugin["local"];
+  local!: OctopusPlatformPlugins["local"];
 
-  decode!: OctopusPlatform.PlatformPlugin["decode"];
+  decode!: OctopusPlatformPlugins["decode"];
 
-  image!: OctopusPlatform.PlatformPlugin["image"];
+  image!: OctopusPlatformPlugins["image"];
 
-  rAF!: OctopusPlatform.PlatformPlugin["rAF"];
+  rAF!: OctopusPlatformPlugins["rAF"];
 
-  getCanvas!: OctopusPlatform.PlatformPlugin["getCanvas"];
+  getCanvas!: OctopusPlatformPlugins["getCanvas"];
 
-  getOfsCanvas!: OctopusPlatform.PlatformPlugin["getOfsCanvas"];
+  getOfsCanvas!: OctopusPlatformPlugins["getOfsCanvas"];
 
   constructor() {
     super(
@@ -55,20 +56,16 @@ class EnhancedPlatform extends Platform<PlatformProperties> {
         pluginPath,
         pluginRAF,
       ],
-      version
+      __VERSION__
     );
 
     this.init();
   }
 
   installPlugin(
-    plugin: OctopusPlatform.PlatformPluginOptions<PlatformProperties>
+    plugin: OctopusPlatformPluginOptions<PlatformProperties>
   ) {
-    const value = plugin.install.call<
-      EnhancedPlatform,
-      [],
-      OctopusPlatform.PlatformPluginValue<PlatformProperties>
-    >(this);
+    const value = plugin.install.call(this);
 
     Object.defineProperty(this, plugin.name, {
       get: () => value,

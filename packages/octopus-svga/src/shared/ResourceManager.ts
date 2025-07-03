@@ -1,5 +1,7 @@
+import type { RawImage, PlatformImage, Bitmap } from "octopus-platform";
 import { Painter } from "../core/painter";
 import { platform } from "../core/platform";
+import type { RawImages } from "../types";
 
 export class ResourceManager {
   /**
@@ -15,37 +17,37 @@ export class ResourceManager {
    * 释放内存资源（图片）
    * @param img
    */
-  private static releaseOne(img: OctopusPlatform.PlatformImage | ImageBitmap) {
+  private static releaseOne(img: PlatformImage | ImageBitmap) {
     if (ResourceManager.isBitmap(img)) {
       (img as ImageBitmap).close();
-    } else if ((img as OctopusPlatform.PlatformImage).src !== "") {
+    } else if ((img as PlatformImage).src !== "") {
       // 【微信】将存在本地的文件删除，防止用户空间被占满
       if (
         platform.globals.env === "weapp" &&
-        (img as OctopusPlatform.PlatformImage).src.includes(
+        (img as PlatformImage).src.includes(
           platform.path.USER_DATA_PATH
         )
       ) {
-        platform.local!.remove((img as OctopusPlatform.PlatformImage).src);
+        platform.local!.remove((img as PlatformImage).src);
       }
 
-      platform.image.release(img as OctopusPlatform.PlatformImage);
+      platform.image.release(img as PlatformImage);
     }
   }
 
   // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
-  private caches: Array<OctopusPlatform.PlatformImage | ImageBitmap> = [];
+  private caches: Array<PlatformImage | ImageBitmap> = [];
 
   /**
    * 动态素材
    */
-  public readonly dynamicMaterials: Map<string, OctopusPlatform.Bitmap> =
+  public readonly dynamicMaterials: Map<string, Bitmap> =
     new Map();
 
   /**
    * 素材
    */
-  public readonly materials: Map<string, OctopusPlatform.Bitmap> = new Map();
+  public readonly materials: Map<string, Bitmap> = new Map();
 
   /**
    * 已清理Image对象的坐标
@@ -58,12 +60,12 @@ export class ResourceManager {
    * 创建图片标签
    * @returns
    */
-  private createImage(): OctopusPlatform.PlatformImage {
-    let img: OctopusPlatform.PlatformImage | null = null;
+  private createImage(): PlatformImage {
+    let img: PlatformImage | null = null;
 
     if (this.point > 0) {
       this.point--;
-      img = this.caches.shift() as OctopusPlatform.PlatformImage;
+      img = this.caches.shift() as PlatformImage;
     }
 
     if (!img) {
@@ -80,7 +82,7 @@ export class ResourceManager {
    * @param img
    */
   private inertBitmapIntoCaches(
-    img: OctopusPlatform.PlatformImage | ImageBitmap
+    img: PlatformImage | ImageBitmap
   ) {
     if (ResourceManager.isBitmap(img)) {
       this.caches.push(img);
@@ -96,7 +98,7 @@ export class ResourceManager {
   public loadExtImage(
     source: string | Uint8Array,
     filename: string
-  ): Promise<OctopusPlatform.PlatformImage | ImageBitmap> {
+  ): Promise<PlatformImage | ImageBitmap> {
     return platform.image
       .load(
         () => this.createImage(),
@@ -132,7 +134,7 @@ export class ResourceManager {
       const p = platform.image
         .load(
           () => this.createImage(),
-          image as OctopusPlatform.RawImage,
+          image as RawImage,
           platform.path.resolve(
             `${filename.replace(/\.svga$/g, "")}.png`,
             type === "dynamic" ? `dyn_${name}` : name

@@ -25,7 +25,7 @@ export class Animator {
    */
   private loopDuration: number = 0;
 
-  public onAnimate: (callback: () => void) => number = platform.noop;
+  public onAnimate: (callback: () => void) => number = platform.noop<number>;
 
   /* ---- 事件钩子 ---- */
   public onStart: () => void = platform.noop;

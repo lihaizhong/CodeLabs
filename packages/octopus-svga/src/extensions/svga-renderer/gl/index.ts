@@ -1,8 +1,11 @@
+import type { Bitmap } from "octopus-platform";
+import type { PlatformVideo } from "../../../types";
+
 export class RendererGL {
   render(
     videoEntity: PlatformVideo.Video,
-    materials: Map<string, OctopusPlatform.Bitmap>,
-    dynamicMaterials: Map<string, OctopusPlatform.Bitmap>,
+    materials: Map<string, Bitmap>,
+    dynamicMaterials: Map<string, Bitmap>,
     currentFrame: number,
     head: number,
     tail: number

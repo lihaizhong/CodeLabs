@@ -1,4 +1,6 @@
+import type { PlatformCanvas, PlatformOffscreenCanvas } from "octopus-platform";
 import { platform } from "../platform";
+import type { PaintModel, PaintMode } from "../../types";
 
 const { noop } = platform;
 
@@ -7,10 +9,7 @@ export class Painter {
    * 主屏的 Canvas 元素
    * Main Screen
    */
-  public X:
-    | OctopusPlatform.PlatformCanvas
-    | OctopusPlatform.PlatformOffscreenCanvas
-    | null = null;
+  public X: PlatformCanvas | PlatformOffscreenCanvas | null = null;
   /**
    * 主屏的 Context 对象
    * Main Context
@@ -23,10 +22,7 @@ export class Painter {
    * 副屏的 Canvas 元素
    * Secondary Screen
    */
-  public Y:
-    | OctopusPlatform.PlatformCanvas
-    | OctopusPlatform.PlatformOffscreenCanvas
-    | null = null;
+  public Y: PlatformCanvas | PlatformOffscreenCanvas | null = null;
   /**
    * 副屏的 Context 对象
    * Secondary Context

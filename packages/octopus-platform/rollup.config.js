@@ -56,11 +56,13 @@ export default defineConfig([
         file: pkg.main,
         format: "umd",
         name: "OctopusPlatform",
+        esModule: true,
       },
       {
         file: minifyFileName(pkg.main),
         format: "umd",
         name: "OctopusPlatform",
+        esModule: true,
         compact: true,
         sourcemap: true,
         plugins: [terser()],

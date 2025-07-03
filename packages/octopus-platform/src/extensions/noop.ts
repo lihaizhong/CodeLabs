@@ -1,1 +1,1 @@
-export const noop: <T = any>() => T | void = () => {};
+export const noop = (() => {}) as <T = void>() => T;

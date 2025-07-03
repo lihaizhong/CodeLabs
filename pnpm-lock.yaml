@@ -111,6 +111,12 @@ importers:
       jsqr:
         specifier: ^1.4.0
         version: 1.4.0
+      octopus-benchmark:
+        specifier: workspace:^
+        version: link:../../packages/octopus-benchmark
+      octopus-platform:
+        specifier: workspace:^
+        version: link:../../packages/octopus-platform
       octopus-svga:
         specifier: workspace:^
         version: link:../../packages/octopus-svga
@@ -269,12 +275,12 @@ importers:
       '@rollup/plugin-commonjs':
         specifier: ^28.0.6
         version: 28.0.6(rollup@4.44.0)
-      '@rollup/plugin-json':
-        specifier: ^6.1.0
-        version: 6.1.0(rollup@4.44.0)
       '@rollup/plugin-node-resolve':
         specifier: ^16.0.1
         version: 16.0.1(rollup@4.44.0)
+      '@rollup/plugin-replace':
+        specifier: ^6.0.2
+        version: 6.0.2(rollup@4.44.0)
       '@rollup/plugin-terser':
         specifier: ^0.4.4
         version: 0.4.4(rollup@4.44.0)

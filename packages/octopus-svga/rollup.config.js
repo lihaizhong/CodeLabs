@@ -1,25 +1,99 @@
+import { defineConfig } from "rollup";
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from "@rollup/plugin-typescript";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
-import json from "@rollup/plugin-json";
+import { dts } from "rollup-plugin-dts";
+import del from "rollup-plugin-delete";
+import replace from "@rollup/plugin-replace";
 import terser from "@rollup/plugin-terser";
+import pkg from "./package.json" with { type: "json" };
 
-export default {
+function minifyFileName(fileName) {
+  return fileName.replace(/\.js$/, ".min.js");
+}
+
+const config = {
   input: "src/index.ts",
-  output: {
-    file: "dist/index.js",
-    // dir: "dist",
-    format: "es",
-    sourcemap: true,
-  },
   plugins: [
     nodeResolve(),
-    json({
-      include: ["./package.json"],
-      compact: true,
+    replace({
+      preventAssignment: true,
+      include: ["./src/**/*.ts"],
+      values: {
+        __VERSION__: JSON.stringify(pkg.version),
+      },
     }),
-    commonjs(),
-    typescript({ tsconfig: "./tsconfig.build.json" }),
-    terser(),
   ],
 };
+
+export default defineConfig([
+  {
+    input: config.input,
+    output: [
+      {
+        file: pkg.module,
+        format: "es",
+      },
+      {
+        file: minifyFileName(pkg.module),
+        format: "es",
+        compact: true,
+        sourcemap: true,
+        plugins: [terser()],
+      },
+    ],
+    external: ["octopus-platform", "octopus-benchmark"],
+    plugins: [
+      ...config.plugins,
+      typescript({
+        declaration: false,
+        declarationDir: undefined,
+      }),
+    ],
+  },
+  {
+    input: config.input,
+    output: [
+      {
+        file: pkg.main,
+        format: "umd",
+        name: "OctopusSvga",
+        esModule: true,
+      },
+      {
+        file: minifyFileName(pkg.main),
+        format: "umd",
+        name: "OctopusSvga",
+        esModule: true,
+        compact: true,
+        sourcemap: true,
+        plugins: [terser()],
+      },
+    ],
+    plugins: [
+      ...config.plugins,
+      typescript({
+        declaration: false,
+        declarationDir: undefined,
+        // strictPropertyInitialization: false,
+        target: "ES5",
+      }),
+    ],
+  },
+  // 归并 .d.ts 文件
+  {
+    input: "types/index.d.ts",
+    output: {
+      file: pkg.types,
+      format: "es",
+    },
+    plugins: [
+      // 将类型文件全部集中到一个文件中
+      dts(),
+      // 在构建完成后，删除 types 文件夹
+      del({
+        targets: "types",
+        hook: "buildEnd",
+      }),
+    ],
+  },
+]);

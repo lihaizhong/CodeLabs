@@ -1,8 +1,10 @@
+import type { RawImage, PlatformImage } from "octopus-platform";
 import { platform } from "../core/platform";
 import { generateImageBufferFromCode, IQrCodeImgOptions } from "./qrcode";
 import { getBufferFromImageData } from "./png";
 import type { ResourceManager } from "../extensions";
 import type { Painter } from "../core/painter";
+import type { PlatformVideo, PlatformRenderingContext2D } from "../types";
 
 interface VideoEditorOptions {
   // 模式: R 替换, A 追加
@@ -18,7 +20,7 @@ export class VideoEditor {
 
   private async set(
     key: string,
-    value: OctopusPlatform.RawImage,
+    value: RawImage,
     mode: VideoEditorOptions["mode"] = "R"
   ) {
     const { entity, resource } = this;
@@ -66,7 +68,7 @@ export class VideoEditor {
   loadImage(
     source: Uint8Array | string,
     url: string
-  ): Promise<OctopusPlatform.PlatformImage | ImageBitmap> {
+  ): Promise<PlatformImage | ImageBitmap> {
     return this.resource.loadExtImage(source, platform.path.filename(url));
   }
 

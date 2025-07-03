@@ -2,6 +2,7 @@ import Reader from "../io/Reader";
 import Layout from "./Layout";
 import Transform from "./Transform";
 import ShapeEntity from "./ShapeEntity";
+import { PlatformVideo } from "../../../types/video";
 
 export default class FrameEntity {
   private static HIDDEN_FRAME: PlatformVideo.HiddenVideoFrame = {
