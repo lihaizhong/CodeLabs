@@ -4914,13 +4914,13 @@ class VideoManager {
     buckets = [];
     options = {
         /**
-         * 预处理视频数据
+         * 预处理动效数据
          * @param url
          * @returns
          */
         preprocess: (url) => benchmark.time(`${url} 下载时间`, () => Parser.download(url)),
         /**
-         * 解压动效数据
+         * 后处理动效数据
          * @param data
          * @returns
          */

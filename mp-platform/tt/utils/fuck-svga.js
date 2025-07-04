@@ -5789,7 +5789,7 @@
             this.buckets = [];
             this.options = {
                 /**
-                 * 预处理视频数据
+                 * 预处理动效数据
                  * @param url
                  * @returns
                  */
@@ -5799,7 +5799,7 @@
                     });
                 },
                 /**
-                 * 解压动效数据
+                 * 后处理动效数据
                  * @param data
                  * @returns
                  */
