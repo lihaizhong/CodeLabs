@@ -109,7 +109,7 @@ export class VideoManager {
 
   private readonly options: VideoManagerOptions = {
     /**
-     * 预处理视频数据
+     * 预处理动效数据
      * @param url
      * @returns
      */
@@ -118,7 +118,7 @@ export class VideoManager {
         Parser.download(url)
       ) as Promise<ArrayBufferLike>,
     /**
-     * 解压动效数据
+     * 后处理动效数据
      * @param data
      * @returns
      */
