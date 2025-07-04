@@ -168,7 +168,7 @@ export class VideoManager {
       } else if (maxRemain > totalCount) {
         this.maxRemain = totalCount;
       } else {
-        this.maxRemain = 3;
+        this.maxRemain = maxRemain;
       }
 
       this.remainStart = this.point - Math.floor(this.maxRemain / 2);
@@ -328,7 +328,7 @@ export class VideoManager {
     }
 
     this.updateRemainRange(point, this.maxRemain, buckets.length);
-    if (loadMode !== "whole" || this.maxRemain !== buckets.length) {
+    if (loadMode === "fast" && this.maxRemain !== buckets.length) {
       buckets.forEach((bucket: Bucket, index: number) => {
         if (this.includeRemainRange(index)) {
           if (bucket.entity === null && bucket.promise === null) {

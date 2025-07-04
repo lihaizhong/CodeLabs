@@ -5918,7 +5918,7 @@
                     this.maxRemain = totalCount;
                 }
                 else {
-                    this.maxRemain = 3;
+                    this.maxRemain = maxRemain;
                 }
                 this.remainStart = this.point - Math.floor(this.maxRemain / 2);
                 if (this.remainStart < 0) {
@@ -6092,7 +6092,7 @@
                         return [2 /*return*/, buckets[this.point]];
                     }
                     this.updateRemainRange(point, this.maxRemain, buckets.length);
-                    if (loadMode !== "whole" || this.maxRemain !== buckets.length) {
+                    if (loadMode === "fast" && this.maxRemain !== buckets.length) {
                         buckets.forEach(function (bucket, index) {
                             if (_this.includeRemainRange(index)) {
                                 if (bucket.entity === null && bucket.promise === null) {

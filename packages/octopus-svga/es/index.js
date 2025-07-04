@@ -4963,7 +4963,7 @@ class VideoManager {
                 this.maxRemain = totalCount;
             }
             else {
-                this.maxRemain = 3;
+                this.maxRemain = maxRemain;
             }
             this.remainStart = this.point - Math.floor(this.maxRemain / 2);
             if (this.remainStart < 0) {
@@ -5074,7 +5074,7 @@ class VideoManager {
             return buckets[this.point];
         }
         this.updateRemainRange(point, this.maxRemain, buckets.length);
-        if (loadMode !== "whole" || this.maxRemain !== buckets.length) {
+        if (loadMode === "fast" && this.maxRemain !== buckets.length) {
             buckets.forEach((bucket, index) => {
                 if (this.includeRemainRange(index)) {
                     if (bucket.entity === null && bucket.promise === null) {

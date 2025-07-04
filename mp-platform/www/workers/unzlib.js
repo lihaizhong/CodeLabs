@@ -175,6 +175,9 @@ const err = (ind, msg, nt) => {
   return e
 }
 
+const flrm = /*#__PURE__*/ hMap(flt, 9, 1);
+const fdrm = /*#__PURE__*/ hMap(fdt, 5, 1);
+
 // expands raw DEFLATE data
 const inflt = (dat, st, buf, dict) => {
   // source length       dict length

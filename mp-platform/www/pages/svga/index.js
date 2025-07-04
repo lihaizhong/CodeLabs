@@ -173,7 +173,7 @@ Page({
     );
 
     benchmark.log("准备资源中");
-    await videoManager.prepare(urls);
+    await videoManager.prepare(urls, 0, urls.length);
     benchmark.log("组件准备就绪");
     readyGo.go();
     this.setData({ current: 0 });
