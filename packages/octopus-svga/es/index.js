@@ -4914,18 +4914,17 @@ class VideoManager {
     buckets = [];
     options = {
         /**
-         * 下载动效数据
+         * 预处理视频数据
          * @param url
          * @returns
          */
-        download: (url) => benchmark.time(`${url} 下载时间`, () => Parser.download(url)),
+        preprocess: (url) => benchmark.time(`${url} 下载时间`, () => Parser.download(url)),
         /**
          * 解压动效数据
-         * @param buff
+         * @param data
          * @returns
          */
-        decompress: (url, buff) => benchmark.time(`${url} 解压时间`, () => Parser.decompress(buff)),
-        parse: (url, buff) => benchmark.time(`${url} 解析时间`, () => Parser.parseVideo(buff, url, false)),
+        postprocess: (url, data) => benchmark.time(`${url} 解析时间`, () => Parser.parseVideo(data, url, true)),
     };
     /**
      * 获取视频池大小
@@ -4992,11 +4991,10 @@ class VideoManager {
     }
     async downloadAndParseVideo(bucket, needParse = false) {
         const { options } = this;
-        const rawData = await options.download(bucket.local || bucket.origin);
-        const data = await options.decompress(bucket.origin, rawData);
-        VideoManager.writeFileToUserDirectory(bucket, rawData);
+        const data = await options.preprocess(bucket.local || bucket.origin);
+        VideoManager.writeFileToUserDirectory(bucket, data);
         if (needParse) {
-            return options.parse(bucket.origin, data);
+            return options.postprocess(bucket.origin, data);
         }
         return data;
     }
@@ -5050,7 +5048,7 @@ class VideoManager {
     async get() {
         const bucket = this.buckets[this.point];
         if (bucket.promise) {
-            bucket.entity = await bucket.promise.then((data) => this.options.parse(bucket.origin, data));
+            bucket.entity = await bucket.promise.then((data) => this.options.postprocess(bucket.origin, data));
             bucket.promise = null;
         }
         else if (!bucket.entity) {

@@ -23,9 +23,11 @@ export interface NeedUpdatePoint {
 export type LoadMode = "fast" | "whole";
 
 export interface VideoManagerOptions {
-  download: (url: string) => Promise<ArrayBufferLike>;
-  decompress: (url: string, buff: ArrayBufferLike) => Promise<ArrayBufferLike> | ArrayBufferLike;
-  parse: (url: string, buff: ArrayBufferLike) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
+  preprocess: (url: string) => Promise<ArrayBufferLike>;
+  postprocess: (
+    url: string,
+    buff: ArrayBufferLike
+  ) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
 }
 
 export class VideoManager {
@@ -107,26 +109,22 @@ export class VideoManager {
 
   private readonly options: VideoManagerOptions = {
     /**
-     * 下载动效数据
+     * 预处理视频数据
      * @param url
      * @returns
      */
-    download: (url: string) =>
-      benchmark.time(`${url} 下载时间`, () =>
+    preprocess: (url: string) =>
+      benchmark.time<ArrayBufferLike>(`${url} 下载时间`, () =>
         Parser.download(url)
       ) as Promise<ArrayBufferLike>,
     /**
      * 解压动效数据
-     * @param buff
+     * @param data
      * @returns
      */
-    decompress: (url: string, buff: ArrayBufferLike) =>
-      benchmark.time(`${url} 解压时间`, () =>
-        Parser.decompress(buff)
-      ) as Promise<ArrayBufferLike>,
-    parse: (url: string, buff: ArrayBufferLike) =>
-      benchmark.time(`${url} 解析时间`, () =>
-        Parser.parseVideo(buff, url, false)
+    postprocess: (url: string, data: ArrayBufferLike) =>
+      benchmark.time<PlatformVideo.Video>(`${url} 解析时间`, () =>
+        Parser.parseVideo(data, url, true)
       ) as PlatformVideo.Video,
   };
 
@@ -137,7 +135,7 @@ export class VideoManager {
     return this.buckets.length;
   }
 
-  constructor(loadMode: LoadMode, options?: VideoManagerOptions) {
+  constructor(loadMode: LoadMode, options?: Partial<VideoManagerOptions>) {
     if (typeof loadMode === "string") {
       this.loadMode = loadMode;
     }
@@ -215,12 +213,11 @@ export class VideoManager {
     needParse: boolean = false
   ) {
     const { options } = this;
-    const rawData = await options.download(bucket.local || bucket.origin);
-    const data = await options.decompress(bucket.origin, rawData);
+    const data = await options.preprocess(bucket.local || bucket.origin);
 
-    VideoManager.writeFileToUserDirectory(bucket, rawData);
+    VideoManager.writeFileToUserDirectory(bucket, data);
     if (needParse) {
-      return options.parse(bucket.origin, data);
+      return options.postprocess(bucket.origin, data);
     }
 
     return data;
@@ -300,7 +297,7 @@ export class VideoManager {
 
     if (bucket.promise) {
       bucket.entity = await bucket.promise.then((data: ArrayBufferLike) =>
-        this.options.parse(bucket.origin, data)
+        this.options.postprocess(bucket.origin, data)
       );
       bucket.promise = null;
     } else if (!bucket.entity) {

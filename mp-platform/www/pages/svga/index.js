@@ -1,4 +1,10 @@
-import { Player, VideoEditor, VideoManager, benchmark } from "octopus-svga";
+import {
+  Player,
+  Parser,
+  VideoEditor,
+  VideoManager,
+  benchmark,
+} from "octopus-svga";
 import Page from "../../utils/Page";
 import {
   svgaSources,
@@ -58,12 +64,12 @@ const playerAwait = async () => {
 const worker = new EnhancedWorker();
 const readyGo = new ReadyGo();
 const videoManager = new VideoManager("fast", {
-  download: (url) =>
+  preprocess: (url) =>
     new Promise((resolve) => {
       worker.once(url, (data) => resolve(data));
       worker.emit(url, url);
     }),
-  decompress: (_, buff) => Promise.resolve(buff),
+  postprocess: (url, buff) => Parser.parseVideo(buff, url, false),
 });
 
 Page({

@@ -5789,28 +5789,23 @@
             this.buckets = [];
             this.options = {
                 /**
-                 * 下载动效数据
+                 * 预处理视频数据
                  * @param url
                  * @returns
                  */
-                download: function (url) {
+                preprocess: function (url) {
                     return benchmark.time("".concat(url, " \u4E0B\u8F7D\u65F6\u95F4"), function () {
                         return Parser.download(url);
                     });
                 },
                 /**
                  * 解压动效数据
-                 * @param buff
+                 * @param data
                  * @returns
                  */
-                decompress: function (url, buff) {
-                    return benchmark.time("".concat(url, " \u89E3\u538B\u65F6\u95F4"), function () {
-                        return Parser.decompress(buff);
-                    });
-                },
-                parse: function (url, buff) {
+                postprocess: function (url, data) {
                     return benchmark.time("".concat(url, " \u89E3\u6790\u65F6\u95F4"), function () {
-                        return Parser.parseVideo(buff, url, false);
+                        return Parser.parseVideo(data, url, true);
                     });
                 },
             };
@@ -5951,21 +5946,18 @@
         };
         VideoManager.prototype.downloadAndParseVideo = function (bucket_1) {
             return __awaiter(this, arguments, void 0, function (bucket, needParse) {
-                var options, rawData, data;
+                var options, data;
                 if (needParse === void 0) { needParse = false; }
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             options = this.options;
-                            return [4 /*yield*/, options.download(bucket.local || bucket.origin)];
+                            return [4 /*yield*/, options.preprocess(bucket.local || bucket.origin)];
                         case 1:
-                            rawData = _a.sent();
-                            return [4 /*yield*/, options.decompress(bucket.origin, rawData)];
-                        case 2:
                             data = _a.sent();
-                            VideoManager.writeFileToUserDirectory(bucket, rawData);
+                            VideoManager.writeFileToUserDirectory(bucket, data);
                             if (needParse) {
-                                return [2 /*return*/, options.parse(bucket.origin, data)];
+                                return [2 /*return*/, options.postprocess(bucket.origin, data)];
                             }
                             return [2 /*return*/, data];
                     }
@@ -6060,7 +6052,7 @@
                             if (!bucket.promise) return [3 /*break*/, 2];
                             _a = bucket;
                             return [4 /*yield*/, bucket.promise.then(function (data) {
-                                    return _this.options.parse(bucket.origin, data);
+                                    return _this.options.postprocess(bucket.origin, data);
                                 })];
                         case 1:
                             _a.entity = _c.sent();

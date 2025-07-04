@@ -1,5 +1,6 @@
 import {
   Player,
+  Parser,
   VideoEditor,
   VideoManager,
   benchmark,
@@ -53,12 +54,17 @@ const playerAwait = async (scope) => {
 };
 const worker = new EnhancedWorker();
 const readyGo = new ReadyGo();
-const decompress = (url, buff) =>
-  new Promise((resolve) => {
-    worker.once(url, (data) => resolve(data));
-    worker.emit(url, buff);
-  });
-const videoManager = new VideoManager("fast", { decompress });
+const videoManager = new VideoManager("fast", {
+  preprocess: async (url) => {
+    const buff = await Parser.download(url);
+
+    return new Promise((resolve) => {
+      worker.once(url, (data) => resolve(data));
+      worker.emit(url, buff);
+    });
+  },
+  postprocess: (url, data) => Parser.parseVideo(data, url, false),
+});
 
 Component({
   properties: {

@@ -682,9 +682,8 @@ interface Bucket {
 }
 type LoadMode = "fast" | "whole";
 interface VideoManagerOptions {
-    download: (url: string) => Promise<ArrayBufferLike>;
-    decompress: (url: string, buff: ArrayBufferLike) => Promise<ArrayBufferLike> | ArrayBufferLike;
-    parse: (url: string, buff: ArrayBufferLike) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
+    preprocess: (url: string) => Promise<ArrayBufferLike>;
+    postprocess: (url: string, buff: ArrayBufferLike) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
 }
 declare class VideoManager {
     /**
@@ -730,7 +729,7 @@ declare class VideoManager {
      * 获取视频池大小
      */
     get size(): number;
-    constructor(loadMode: LoadMode, options?: VideoManagerOptions);
+    constructor(loadMode: LoadMode, options?: Partial<VideoManagerOptions>);
     /**
      * 更新留存指针位置
      */
