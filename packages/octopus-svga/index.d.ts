@@ -835,5 +835,5 @@ declare class VideoEditor {
     setQRCode(key: string, code: string, options: VideoEditorOptions & Omit<IQrCodeImgOptions, "code">): Promise<void>;
 }
 
-export { PLAYER_CONTENT_MODE, PLAYER_FILL_MODE, PLAYER_PLAY_MODE, Parser, PlatformVideo, Player, Poster, VideoEditor, VideoManager, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, platform };
+export { PLAYER_CONTENT_MODE, PLAYER_FILL_MODE, PLAYER_PLAY_MODE, Painter, Parser, PlatformVideo, Player, Poster, VideoEditor, VideoManager, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, platform };
 export type { CanvasSize, PaintMode, PaintModel, PlatformImages, PlatformRenderingContext2D, PlayerConfig, PlayerConfigOptions, PlayerEventCallback, PlayerProcessEventCallback, PosterConfig, PosterEventCallback, RawImages, TransformScale };

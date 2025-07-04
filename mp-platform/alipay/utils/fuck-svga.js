@@ -6431,6 +6431,7 @@
         return Poster;
     }());
 
+    exports.Painter = Painter;
     exports.Parser = Parser;
     exports.Player = Player;
     exports.Poster = Poster;

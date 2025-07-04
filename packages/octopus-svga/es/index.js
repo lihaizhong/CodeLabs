@@ -5322,4 +5322,4 @@ class Poster {
     }
 }
 
-export { Parser, Player, Poster, VideoEditor, VideoManager, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, platform };
+export { Painter, Parser, Player, Poster, VideoEditor, VideoManager, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, platform };
