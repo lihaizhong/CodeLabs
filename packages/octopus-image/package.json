@@ -3,10 +3,20 @@
   "version": "0.0.1",
   "type": "module",
   "description": "图片生成器",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "module": "es/index.js",
+  "main": "lib/index.js",
+  "types": "index.d.ts",
+  "exports": {
+    "import": "./es/index.js",
+    "default": "./lib/index.js",
+    "types": "./index.d.ts"
+  },
   "scripts": {
-    "build": "rimraf -rf dist && rollup -c",
+    "declare": "tsc",
+    "cleanup": "rimraf -rf es lib types index.d.ts",
+    "generate": "rollup -c",
+    "build": "npm run cleanup && npm run declare && npm run generate",
+    "compiler": "pbjs -t static-module -w es6 -o protos/svga.js protos/svga.proto",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
