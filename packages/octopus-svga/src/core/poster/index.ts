@@ -1,5 +1,4 @@
 import { Renderer2D, ResourceManager } from "../../extensions";
-import { getBufferFromImageData, getDataURLFromImageData } from "../../helper";
 import { Painter } from "../painter";
 import {
   type PlatformVideo,
@@ -29,21 +28,30 @@ export class Poster {
    */
   private isConfigured = false;
 
-  private imageData: ImageData | null = null;
-
   /**
    * 刷头实例
    */
   public readonly painter: Painter;
 
+  /**
+   * 资源管理器
+   */
   public resource: ResourceManager | null = null;
 
+  /**
+   * 渲染器实例
+   */
   private renderer: Renderer2D | null = null;
 
   constructor(width: number, height: number) {
     this.painter = new Painter("poster", width, height);
   }
 
+  /**
+   * 注册 SVGA 海报
+   * @param selector 容器选择器
+   * @param component 组件
+   */
   private async register(
     selector: string = "",
     component?: any
@@ -135,27 +143,15 @@ export class Poster {
       0,
       entity!.sprites.length
     );
-    this.imageData = painter.XC!.getImageData(0, 0, painter.W, painter.H);
-  }
-
-  public toBuffer() {
-    if (this.imageData === null) {
-      throw new Error("please call the draw method first.");
-    }
-
-    return getBufferFromImageData(this.imageData);
   }
 
   /**
-   * 获取海报元数据
-   * @returns
+   * 获取海报的 ImageData 数据
    */
-  public toDataURL(): string {
-    if (this.imageData === null) {
-      throw new Error("please call the draw method first.");
-    }
+  public toImageData(): ImageData {
+    const { XC: context, W: width, H: height } = this.painter;
 
-    return getDataURLFromImageData(this.imageData);
+    return context!.getImageData(0, 0, width, height);
   }
 
   /**

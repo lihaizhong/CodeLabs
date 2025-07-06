@@ -1,4 +1,4 @@
-import { Parser, Poster, VideoEditor, benchmark } from "octopus-svga";
+import { Parser, Poster, VideoEditor, benchmark, getDataURLFromImageData } from "octopus-svga";
 import { EMPTY_PLACEHOLDER, posterSources } from "../../utils/constants";
 
 const posterFiles = posterSources;
@@ -41,7 +41,9 @@ async function generatePoster(point) {
   poster.setContentMode("aspect-fit");
   poster.draw();
 
-  $elem.src = poster.toDataURL();
+  const imageData = poster.toImageData();
+
+  $elem.src = getDataURLFromImageData(imageData);
   benchmark.log("data url", $elem.src);
 }
 

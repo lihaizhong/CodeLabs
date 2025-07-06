@@ -626,15 +626,15 @@
         install() {
             const { env, br } = this.globals;
             const filename = (path) => path.substring(path.lastIndexOf("/") + 1);
-            if (env === "h5") {
+            if (env === "h5" || env === "tt") {
                 return {
                     USER_DATA_PATH: "",
                     is: (_) => false,
                     filename,
-                    resolve: (filename, prefix) => `${prefix ? `${prefix}__` : ""}${filename}`,
+                    resolve: (filename, prefix) => "",
                 };
             }
-            const { USER_DATA_PATH } = env === "tt" ? tt.getEnvInfoSync().common : br.env;
+            const { USER_DATA_PATH } = br.env;
             return {
                 USER_DATA_PATH,
                 is: (filepath) => filepath?.startsWith(USER_DATA_PATH),
@@ -5684,6 +5684,157 @@
         return Player;
     }());
 
+    var Poster = /** @class */ (function () {
+        function Poster(width, height) {
+            /**
+             * 当前的帧，默认值 0
+             */
+            this.frame = 0;
+            /**
+             * 填充模式，类似于 content-mode。
+             */
+            this.contentMode = "fill" /* PLAYER_CONTENT_MODE.FILL */;
+            /**
+             * 是否配置完成
+             */
+            this.isConfigured = false;
+            /**
+             * 资源管理器
+             */
+            this.resource = null;
+            /**
+             * 渲染器实例
+             */
+            this.renderer = null;
+            this.painter = new Painter("poster", width, height);
+        }
+        /**
+         * 注册 SVGA 海报
+         * @param selector 容器选择器
+         * @param component 组件
+         */
+        Poster.prototype.register = function () {
+            return __awaiter(this, arguments, void 0, function (selector, component) {
+                if (selector === void 0) { selector = ""; }
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, this.painter.register(selector, "", component)];
+                        case 1:
+                            _a.sent();
+                            this.renderer = new Renderer2D(this.painter.YC);
+                            this.resource = new ResourceManager(this.painter);
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        /**
+         * 设置配置项
+         * @param options 可配置项
+         */
+        Poster.prototype.setConfig = function () {
+            return __awaiter(this, arguments, void 0, function (options, component) {
+                var config;
+                if (options === void 0) { options = {}; }
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            config = typeof options === "string" ? { container: options } : options;
+                            if (config.container === undefined) {
+                                config.container = "";
+                            }
+                            if (config.contentMode !== undefined) {
+                                this.contentMode = config.contentMode;
+                            }
+                            this.frame = typeof config.frame === "number" ? config.frame : 0;
+                            this.isConfigured = true;
+                            return [4 /*yield*/, this.register(config.container, component)];
+                        case 1:
+                            _a.sent();
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        /**
+         * 修改内容模式
+         * @param contentMode
+         */
+        Poster.prototype.setContentMode = function (contentMode) {
+            this.contentMode = contentMode;
+        };
+        /**
+         * 设置当前帧
+         * @param frame
+         */
+        Poster.prototype.setFrame = function (frame) {
+            this.frame = frame;
+        };
+        /**
+         * 装载 SVGA 数据元
+         * @param videoEntity SVGA 数据源
+         * @param currFrame
+         * @returns
+         */
+        Poster.prototype.mount = function (videoEntity) {
+            return __awaiter(this, void 0, void 0, function () {
+                var images, filename;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (!videoEntity) {
+                                throw new Error("videoEntity undefined");
+                            }
+                            if (!!this.isConfigured) return [3 /*break*/, 2];
+                            return [4 /*yield*/, this.register()];
+                        case 1:
+                            _a.sent();
+                            this.isConfigured = true;
+                            _a.label = 2;
+                        case 2:
+                            images = videoEntity.images, filename = videoEntity.filename;
+                            this.painter.clearContainer();
+                            this.resource.release();
+                            this.entity = videoEntity;
+                            return [4 /*yield*/, this.resource.loadImagesWithRecord(images, filename)];
+                        case 3:
+                            _a.sent();
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        };
+        /**
+         * 绘制海报
+         */
+        Poster.prototype.draw = function () {
+            if (!this.entity)
+                return;
+            var _a = this, painter = _a.painter, renderer = _a.renderer, resource = _a.resource, entity = _a.entity, contentMode = _a.contentMode, frame = _a.frame;
+            renderer.resize(contentMode, entity.size, painter.X);
+            renderer.render(entity, resource.materials, resource.dynamicMaterials, frame, 0, entity.sprites.length);
+        };
+        /**
+         * 获取海报的 ImageData 数据
+         */
+        Poster.prototype.toImageData = function () {
+            var _a = this.painter, context = _a.XC, width = _a.W, height = _a.H;
+            return context.getImageData(0, 0, width, height);
+        };
+        /**
+         * 销毁海报
+         */
+        Poster.prototype.destroy = function () {
+            var _a, _b, _c;
+            this.painter.destroy();
+            (_a = this.renderer) === null || _a === void 0 ? void 0 : _a.destroy();
+            (_b = this.resource) === null || _b === void 0 ? void 0 : _b.release();
+            (_c = this.resource) === null || _c === void 0 ? void 0 : _c.cleanup();
+            this.entity = undefined;
+        };
+        return Poster;
+    }());
+
     function parseOptions(options) {
         var _a, _b, _c, _d;
         var typeNumber = (_a = options.typeNumber) !== null && _a !== void 0 ? _a : 4;
@@ -6295,157 +6446,6 @@
             });
         };
         return VideoEditor;
-    }());
-
-    var Poster = /** @class */ (function () {
-        function Poster(width, height) {
-            /**
-             * 当前的帧，默认值 0
-             */
-            this.frame = 0;
-            /**
-             * 填充模式，类似于 content-mode。
-             */
-            this.contentMode = "fill" /* PLAYER_CONTENT_MODE.FILL */;
-            /**
-             * 是否配置完成
-             */
-            this.isConfigured = false;
-            this.imageData = null;
-            this.resource = null;
-            this.renderer = null;
-            this.painter = new Painter("poster", width, height);
-        }
-        Poster.prototype.register = function () {
-            return __awaiter(this, arguments, void 0, function (selector, component) {
-                if (selector === void 0) { selector = ""; }
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.painter.register(selector, "", component)];
-                        case 1:
-                            _a.sent();
-                            this.renderer = new Renderer2D(this.painter.YC);
-                            this.resource = new ResourceManager(this.painter);
-                            return [2 /*return*/];
-                    }
-                });
-            });
-        };
-        /**
-         * 设置配置项
-         * @param options 可配置项
-         */
-        Poster.prototype.setConfig = function () {
-            return __awaiter(this, arguments, void 0, function (options, component) {
-                var config;
-                if (options === void 0) { options = {}; }
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            config = typeof options === "string" ? { container: options } : options;
-                            if (config.container === undefined) {
-                                config.container = "";
-                            }
-                            if (config.contentMode !== undefined) {
-                                this.contentMode = config.contentMode;
-                            }
-                            this.frame = typeof config.frame === "number" ? config.frame : 0;
-                            this.isConfigured = true;
-                            return [4 /*yield*/, this.register(config.container, component)];
-                        case 1:
-                            _a.sent();
-                            return [2 /*return*/];
-                    }
-                });
-            });
-        };
-        /**
-         * 修改内容模式
-         * @param contentMode
-         */
-        Poster.prototype.setContentMode = function (contentMode) {
-            this.contentMode = contentMode;
-        };
-        /**
-         * 设置当前帧
-         * @param frame
-         */
-        Poster.prototype.setFrame = function (frame) {
-            this.frame = frame;
-        };
-        /**
-         * 装载 SVGA 数据元
-         * @param videoEntity SVGA 数据源
-         * @param currFrame
-         * @returns
-         */
-        Poster.prototype.mount = function (videoEntity) {
-            return __awaiter(this, void 0, void 0, function () {
-                var images, filename;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            if (!videoEntity) {
-                                throw new Error("videoEntity undefined");
-                            }
-                            if (!!this.isConfigured) return [3 /*break*/, 2];
-                            return [4 /*yield*/, this.register()];
-                        case 1:
-                            _a.sent();
-                            this.isConfigured = true;
-                            _a.label = 2;
-                        case 2:
-                            images = videoEntity.images, filename = videoEntity.filename;
-                            this.painter.clearContainer();
-                            this.resource.release();
-                            this.entity = videoEntity;
-                            return [4 /*yield*/, this.resource.loadImagesWithRecord(images, filename)];
-                        case 3:
-                            _a.sent();
-                            return [2 /*return*/];
-                    }
-                });
-            });
-        };
-        /**
-         * 绘制海报
-         */
-        Poster.prototype.draw = function () {
-            if (!this.entity)
-                return;
-            var _a = this, painter = _a.painter, renderer = _a.renderer, resource = _a.resource, entity = _a.entity, contentMode = _a.contentMode, frame = _a.frame;
-            renderer.resize(contentMode, entity.size, painter.X);
-            renderer.render(entity, resource.materials, resource.dynamicMaterials, frame, 0, entity.sprites.length);
-            this.imageData = painter.XC.getImageData(0, 0, painter.W, painter.H);
-        };
-        Poster.prototype.toBuffer = function () {
-            if (this.imageData === null) {
-                throw new Error("please call the draw method first.");
-            }
-            return getBufferFromImageData(this.imageData);
-        };
-        /**
-         * 获取海报元数据
-         * @returns
-         */
-        Poster.prototype.toDataURL = function () {
-            if (this.imageData === null) {
-                throw new Error("please call the draw method first.");
-            }
-            return getDataURLFromImageData(this.imageData);
-        };
-        /**
-         * 销毁海报
-         */
-        Poster.prototype.destroy = function () {
-            var _a, _b, _c;
-            this.painter.destroy();
-            (_a = this.renderer) === null || _a === void 0 ? void 0 : _a.destroy();
-            (_b = this.resource) === null || _b === void 0 ? void 0 : _b.release();
-            (_c = this.resource) === null || _c === void 0 ? void 0 : _c.cleanup();
-            this.entity = undefined;
-        };
-        return Poster;
     }());
 
     exports.Painter = Painter;

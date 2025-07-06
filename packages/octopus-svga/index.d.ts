@@ -575,14 +575,24 @@ declare class Poster {
      * 是否配置完成
      */
     private isConfigured;
-    private imageData;
     /**
      * 刷头实例
      */
     readonly painter: Painter;
+    /**
+     * 资源管理器
+     */
     resource: ResourceManager | null;
+    /**
+     * 渲染器实例
+     */
     private renderer;
     constructor(width: number, height: number);
+    /**
+     * 注册 SVGA 海报
+     * @param selector 容器选择器
+     * @param component 组件
+     */
     private register;
     /**
      * 设置配置项
@@ -610,12 +620,10 @@ declare class Poster {
      * 绘制海报
      */
     draw(): void;
-    toBuffer(): Uint8Array<ArrayBufferLike>;
     /**
-     * 获取海报元数据
-     * @returns
+     * 获取海报的 ImageData 数据
      */
-    toDataURL(): string;
+    toImageData(): ImageData;
     /**
      * 销毁海报
      */
@@ -679,6 +687,11 @@ interface Bucket {
     local: string;
     entity: PlatformVideo.Video | null;
     promise: Promise<ArrayBuffer> | null;
+}
+interface NeedUpdatePoint {
+    action: "remove" | "add";
+    start: number;
+    end: number;
 }
 type LoadMode = "fast" | "whole";
 interface VideoManagerOptions {
@@ -836,4 +849,4 @@ declare class VideoEditor {
 }
 
 export { PLAYER_CONTENT_MODE, PLAYER_FILL_MODE, PLAYER_PLAY_MODE, Painter, Parser, PlatformVideo, Player, Poster, VideoEditor, VideoManager, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, platform };
-export type { CanvasSize, PaintMode, PaintModel, PlatformImages, PlatformRenderingContext2D, PlayerConfig, PlayerConfigOptions, PlayerEventCallback, PlayerProcessEventCallback, PosterConfig, PosterEventCallback, RawImages, TransformScale };
+export type { Bucket, CanvasSize, IQrCodeImgOptions, LoadMode, NeedUpdatePoint, PaintMode, PaintModel, PlatformImages, PlatformRenderingContext2D, PlayerConfig, PlayerConfigOptions, PlayerEventCallback, PlayerProcessEventCallback, PosterConfig, PosterEventCallback, RawImages, TransformScale, VideoManagerOptions };

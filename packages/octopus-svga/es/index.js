@@ -4761,6 +4761,128 @@ class Player {
     }
 }
 
+class Poster {
+    /**
+     * SVGA 元数据
+     * Video Entity
+     */
+    entity;
+    /**
+     * 当前的帧，默认值 0
+     */
+    frame = 0;
+    /**
+     * 填充模式，类似于 content-mode。
+     */
+    contentMode = "fill" /* PLAYER_CONTENT_MODE.FILL */;
+    /**
+     * 是否配置完成
+     */
+    isConfigured = false;
+    /**
+     * 刷头实例
+     */
+    painter;
+    /**
+     * 资源管理器
+     */
+    resource = null;
+    /**
+     * 渲染器实例
+     */
+    renderer = null;
+    constructor(width, height) {
+        this.painter = new Painter("poster", width, height);
+    }
+    /**
+     * 注册 SVGA 海报
+     * @param selector 容器选择器
+     * @param component 组件
+     */
+    async register(selector = "", component) {
+        await this.painter.register(selector, "", component);
+        this.renderer = new Renderer2D(this.painter.YC);
+        this.resource = new ResourceManager(this.painter);
+    }
+    /**
+     * 设置配置项
+     * @param options 可配置项
+     */
+    async setConfig(options = {}, component) {
+        const config = typeof options === "string" ? { container: options } : options;
+        if (config.container === undefined) {
+            config.container = "";
+        }
+        if (config.contentMode !== undefined) {
+            this.contentMode = config.contentMode;
+        }
+        this.frame = typeof config.frame === "number" ? config.frame : 0;
+        this.isConfigured = true;
+        await this.register(config.container, component);
+    }
+    /**
+     * 修改内容模式
+     * @param contentMode
+     */
+    setContentMode(contentMode) {
+        this.contentMode = contentMode;
+    }
+    /**
+     * 设置当前帧
+     * @param frame
+     */
+    setFrame(frame) {
+        this.frame = frame;
+    }
+    /**
+     * 装载 SVGA 数据元
+     * @param videoEntity SVGA 数据源
+     * @param currFrame
+     * @returns
+     */
+    async mount(videoEntity) {
+        if (!videoEntity) {
+            throw new Error("videoEntity undefined");
+        }
+        if (!this.isConfigured) {
+            await this.register();
+            this.isConfigured = true;
+        }
+        const { images, filename } = videoEntity;
+        this.painter.clearContainer();
+        this.resource.release();
+        this.entity = videoEntity;
+        await this.resource.loadImagesWithRecord(images, filename);
+    }
+    /**
+     * 绘制海报
+     */
+    draw() {
+        if (!this.entity)
+            return;
+        const { painter, renderer, resource, entity, contentMode, frame } = this;
+        renderer.resize(contentMode, entity.size, painter.X);
+        renderer.render(entity, resource.materials, resource.dynamicMaterials, frame, 0, entity.sprites.length);
+    }
+    /**
+     * 获取海报的 ImageData 数据
+     */
+    toImageData() {
+        const { XC: context, W: width, H: height } = this.painter;
+        return context.getImageData(0, 0, width, height);
+    }
+    /**
+     * 销毁海报
+     */
+    destroy() {
+        this.painter.destroy();
+        this.renderer?.destroy();
+        this.resource?.release();
+        this.resource?.cleanup();
+        this.entity = undefined;
+    }
+}
+
 function parseOptions(options) {
     const typeNumber = options.typeNumber ?? 4;
     const correctLevel = options.correctLevel ?? "H";
@@ -5192,128 +5314,6 @@ class VideoEditor {
             return;
         const buff = generateImageBufferFromCode({ ...options, code });
         await this.set(key, new Uint8Array(buff), options?.mode);
-    }
-}
-
-class Poster {
-    /**
-     * SVGA 元数据
-     * Video Entity
-     */
-    entity;
-    /**
-     * 当前的帧，默认值 0
-     */
-    frame = 0;
-    /**
-     * 填充模式，类似于 content-mode。
-     */
-    contentMode = "fill" /* PLAYER_CONTENT_MODE.FILL */;
-    /**
-     * 是否配置完成
-     */
-    isConfigured = false;
-    imageData = null;
-    /**
-     * 刷头实例
-     */
-    painter;
-    resource = null;
-    renderer = null;
-    constructor(width, height) {
-        this.painter = new Painter("poster", width, height);
-    }
-    async register(selector = "", component) {
-        await this.painter.register(selector, "", component);
-        this.renderer = new Renderer2D(this.painter.YC);
-        this.resource = new ResourceManager(this.painter);
-    }
-    /**
-     * 设置配置项
-     * @param options 可配置项
-     */
-    async setConfig(options = {}, component) {
-        const config = typeof options === "string" ? { container: options } : options;
-        if (config.container === undefined) {
-            config.container = "";
-        }
-        if (config.contentMode !== undefined) {
-            this.contentMode = config.contentMode;
-        }
-        this.frame = typeof config.frame === "number" ? config.frame : 0;
-        this.isConfigured = true;
-        await this.register(config.container, component);
-    }
-    /**
-     * 修改内容模式
-     * @param contentMode
-     */
-    setContentMode(contentMode) {
-        this.contentMode = contentMode;
-    }
-    /**
-     * 设置当前帧
-     * @param frame
-     */
-    setFrame(frame) {
-        this.frame = frame;
-    }
-    /**
-     * 装载 SVGA 数据元
-     * @param videoEntity SVGA 数据源
-     * @param currFrame
-     * @returns
-     */
-    async mount(videoEntity) {
-        if (!videoEntity) {
-            throw new Error("videoEntity undefined");
-        }
-        if (!this.isConfigured) {
-            await this.register();
-            this.isConfigured = true;
-        }
-        const { images, filename } = videoEntity;
-        this.painter.clearContainer();
-        this.resource.release();
-        this.entity = videoEntity;
-        await this.resource.loadImagesWithRecord(images, filename);
-    }
-    /**
-     * 绘制海报
-     */
-    draw() {
-        if (!this.entity)
-            return;
-        const { painter, renderer, resource, entity, contentMode, frame } = this;
-        renderer.resize(contentMode, entity.size, painter.X);
-        renderer.render(entity, resource.materials, resource.dynamicMaterials, frame, 0, entity.sprites.length);
-        this.imageData = painter.XC.getImageData(0, 0, painter.W, painter.H);
-    }
-    toBuffer() {
-        if (this.imageData === null) {
-            throw new Error("please call the draw method first.");
-        }
-        return getBufferFromImageData(this.imageData);
-    }
-    /**
-     * 获取海报元数据
-     * @returns
-     */
-    toDataURL() {
-        if (this.imageData === null) {
-            throw new Error("please call the draw method first.");
-        }
-        return getDataURLFromImageData(this.imageData);
-    }
-    /**
-     * 销毁海报
-     */
-    destroy() {
-        this.painter.destroy();
-        this.renderer?.destroy();
-        this.resource?.release();
-        this.resource?.cleanup();
-        this.entity = undefined;
     }
 }
 
