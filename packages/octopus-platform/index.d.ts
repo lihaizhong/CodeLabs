@@ -49,6 +49,7 @@ interface OctopusPlatformPlugins {
         fetch: (url: string) => Promise<ArrayBuffer>;
     };
     local: {
+        exists: (filepath: string) => Promise<boolean>;
         write: (data: ArrayBufferLike, filepath: string) => Promise<string>;
         read: (filepath: string) => Promise<ArrayBuffer>;
         remove: (filepath: string) => Promise<string>;

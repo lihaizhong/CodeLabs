@@ -9,15 +9,19 @@ import type { PlatformVideo } from "../../types";
 export class Parser {
   static hash(buff: ArrayBufferLike) {
     const view = new Uint8Array(buff);
-    const step = Math.max(1, Math.floor(view.byteLength / 100));
 
-    return calculateHash(view, 0, view.byteLength, step);
+    return calculateHash(
+      view,
+      0,
+      view.byteLength,
+      Math.max(1, Math.floor(view.byteLength / 100))
+    );
   }
-  
+
   /**
    * 解压视频源文件
-   * @param data 
-   * @returns 
+   * @param data
+   * @returns
    */
   static decompress(data: ArrayBufferLike): ArrayBufferLike {
     return unzlibSync(new Uint8Array(data)).buffer;
@@ -47,15 +51,9 @@ export class Parser {
    * @returns
    */
   static download(url: string): Promise<ArrayBufferLike> {
-    const { remote, path, local, globals } = platform;
+    const { remote, path, local } = platform;
 
-    // 读取本地文件
-    if (globals.env !== "h5" && path.is(url)) {
-      return local!.read(url);
-    }
-
-    // 读取远程文件
-    return remote.fetch(url);
+    return path.is(url) ? local!.read(url) : remote.fetch(url);
   }
 
   /**

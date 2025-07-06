@@ -439,11 +439,20 @@ var pluginFsm = definePlugin({
     name: "local",
     install() {
         const { env, br } = this.globals;
-        if (env === "h5") {
+        if (env === "h5" || env === "tt") {
             return null;
         }
         const fsm = br.getFileSystemManager();
         return {
+            exists: (filepath) => {
+                return new Promise((resolve) => {
+                    fsm.access({
+                        path: filepath,
+                        success: () => resolve(true),
+                        fail: () => resolve(false),
+                    });
+                });
+            },
             write: (data, filePath) => {
                 return new Promise((resolve, reject) => {
                     fsm.writeFile({
@@ -611,15 +620,15 @@ var pluginPath = definePlugin({
     install() {
         const { env, br } = this.globals;
         const filename = (path) => path.substring(path.lastIndexOf("/") + 1);
-        if (env === "h5") {
+        if (env === "h5" || env === "tt") {
             return {
                 USER_DATA_PATH: "",
                 is: (_) => false,
                 filename,
-                resolve: (filename, prefix) => `${prefix ? `${prefix}__` : ""}${filename}`,
+                resolve: (filename, prefix) => "",
             };
         }
-        const { USER_DATA_PATH } = env === "tt" ? tt.getEnvInfoSync().common : br.env;
+        const { USER_DATA_PATH } = br.env;
         return {
             USER_DATA_PATH,
             is: (filepath) => filepath?.startsWith(USER_DATA_PATH),

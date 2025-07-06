@@ -64,12 +64,12 @@ const playerAwait = async () => {
 const worker = new EnhancedWorker();
 const readyGo = new ReadyGo();
 const videoManager = new VideoManager("fast", {
-  preprocess: (url) =>
+  preprocess: (bucket) =>
     new Promise((resolve) => {
-      worker.once(url, (data) => resolve(data));
-      worker.emit(url, url);
+      worker.once(bucket.origin, (data) => resolve(data));
+      worker.emit(bucket.origin, bucket.origin);
     }),
-  postprocess: (url, buff) => Parser.parseVideo(buff, url, false),
+  postprocess: (bucket, buff) => Parser.parseVideo(buff, bucket.origin, false),
 });
 
 Page({

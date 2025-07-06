@@ -678,12 +678,12 @@ interface Bucket {
     origin: string;
     local: string;
     entity: PlatformVideo.Video | null;
-    promise: Promise<ArrayBufferLike> | null;
+    promise: Promise<ArrayBuffer> | null;
 }
 type LoadMode = "fast" | "whole";
 interface VideoManagerOptions {
-    preprocess: (url: string) => Promise<ArrayBufferLike>;
-    postprocess: (url: string, buff: ArrayBufferLike) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
+    preprocess: (bucket: Bucket) => Promise<ArrayBuffer>;
+    postprocess: (bucket: Bucket, buff: ArrayBuffer) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
 }
 declare class VideoManager {
     /**
@@ -776,7 +776,7 @@ declare class VideoManager {
      * 清理所有的bucket
      * @returns
      */
-    clear(): Promise<void>;
+    clear(needRemoveFiles?: boolean): Promise<void>;
 }
 
 interface VideoEditorOptions {

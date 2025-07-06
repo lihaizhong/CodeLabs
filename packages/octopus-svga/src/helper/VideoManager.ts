@@ -11,7 +11,7 @@ export interface Bucket {
   // 实例
   entity: PlatformVideo.Video | null;
   // 下载实例中
-  promise: Promise<ArrayBufferLike> | null;
+  promise: Promise<ArrayBuffer> | null;
 }
 
 export interface NeedUpdatePoint {
@@ -23,10 +23,10 @@ export interface NeedUpdatePoint {
 export type LoadMode = "fast" | "whole";
 
 export interface VideoManagerOptions {
-  preprocess: (url: string) => Promise<ArrayBufferLike>;
+  preprocess: (bucket: Bucket) => Promise<ArrayBuffer>;
   postprocess: (
-    url: string,
-    buff: ArrayBufferLike
+    bucket: Bucket,
+    buff: ArrayBuffer
   ) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
 }
 
@@ -40,21 +40,15 @@ export class VideoManager {
     bucket: Bucket,
     buff: ArrayBufferLike
   ): Promise<void> {
-    const { globals, path, local } = platform;
-    const { env } = globals;
+    const { path, local } = platform;
 
-    if (env === "h5" || env === "tt" || !path.is(bucket.local)) {
-      return;
-    }
-
-    try {
-      const filepath = path.resolve(path.filename(bucket.origin), "full");
-
-      await local!.write(buff, filepath);
-      bucket.local = filepath;
-    } catch (ex) {
-      // eslint-disable-next-line no-console
-      console.error(ex);
+    if (path.is(bucket.local)) {
+      try {
+        await local!.write(buff, bucket.local);
+      } catch (ex) {
+        // eslint-disable-next-line no-console
+        console.error(ex);
+      }
     }
   }
 
@@ -64,19 +58,15 @@ export class VideoManager {
    * @returns
    */
   private static async removeFileFromUserDirectory(bucket: Bucket) {
-    const { globals, path, local } = platform;
-    const { env } = globals;
+    const { path, local } = platform;
 
-    if (env === "h5" || env === "tt" || !path.is(bucket.local)) {
-      return;
-    }
-
-    try {
-      await local!.remove(bucket.local);
-      bucket.local = "";
-    } catch (ex) {
-      // eslint-disable-next-line no-console
-      console.error(ex);
+    if (path.is(bucket.local)) {
+      try {
+        await local!.remove(bucket.local);
+      } catch (ex) {
+        // eslint-disable-next-line no-console
+        console.error(ex);
+      }
     }
   }
 
@@ -113,19 +103,28 @@ export class VideoManager {
      * @param url
      * @returns
      */
-    preprocess: (url: string) =>
-      benchmark.time<ArrayBufferLike>(`${url} 下载时间`, () =>
-        Parser.download(url)
-      ) as Promise<ArrayBufferLike>,
+    preprocess: async (bucket: Bucket) => {
+      const { path, local, remote } = platform;
+
+      if (local && (await local.exists(bucket.local))) {
+        return benchmark.time<ArrayBuffer>(`${bucket.local} 读取时间`, () =>
+          local.read(bucket.local)
+        );
+      }
+
+      return benchmark.time<ArrayBuffer>(`${bucket.origin} 下载时间`, () =>
+        remote.fetch(bucket.origin)
+      );
+    },
     /**
      * 后处理动效数据
      * @param data
      * @returns
      */
-    postprocess: (url: string, data: ArrayBufferLike) =>
-      benchmark.time<PlatformVideo.Video>(`${url} 解析时间`, () =>
-        Parser.parseVideo(data, url, true)
-      ) as PlatformVideo.Video,
+    postprocess: (bucket: Bucket, data: ArrayBufferLike) =>
+      benchmark.time<PlatformVideo.Video>(`${bucket.origin} 解析时间`, () =>
+        Parser.parseVideo(data, bucket.origin, true)
+      ),
   };
 
   /**
@@ -203,7 +202,7 @@ export class VideoManager {
   private async downloadAndParseVideo(
     bucket: Bucket,
     needParse?: false
-  ): Promise<ArrayBufferLike>;
+  ): Promise<ArrayBuffer>;
   private async downloadAndParseVideo(
     bucket: Bucket,
     needParse: true
@@ -213,11 +212,11 @@ export class VideoManager {
     needParse: boolean = false
   ) {
     const { options } = this;
-    const data = await options.preprocess(bucket.local || bucket.origin);
+    const data = await options.preprocess(bucket);
 
     VideoManager.writeFileToUserDirectory(bucket, data);
     if (needParse) {
-      return options.postprocess(bucket.origin, data);
+      return options.postprocess(bucket, data);
     }
 
     return data;
@@ -235,9 +234,10 @@ export class VideoManager {
     point: number,
     needDownloadAndParse: boolean
   ): Promise<Bucket> {
+    const { path } = platform;
     const bucket: Bucket = {
       origin: url,
-      local: "",
+      local: path.resolve(path.filename(url), "full"),
       entity: null,
       promise: null,
     };
@@ -263,7 +263,6 @@ export class VideoManager {
     point: number = 0,
     maxRemain: number = 3
   ): Promise<void> {
-    this.clear();
     this.updateRemainRange(point, maxRemain, urls.length);
 
     const { loadMode, point: currentPoint } = this;
@@ -296,8 +295,8 @@ export class VideoManager {
     const bucket = this.buckets[this.point];
 
     if (bucket.promise) {
-      bucket.entity = await bucket.promise.then((data: ArrayBufferLike) =>
-        this.options.postprocess(bucket.origin, data)
+      bucket.entity = await bucket.promise.then((data: ArrayBuffer) =>
+        this.options.postprocess(bucket, data)
       );
       bucket.promise = null;
     } else if (!bucket.entity) {
@@ -348,7 +347,7 @@ export class VideoManager {
    * 清理所有的bucket
    * @returns
    */
-  async clear(): Promise<void> {
+  async clear(needRemoveFiles: boolean = true): Promise<void> {
     const { buckets } = this;
 
     this.point = 0;
@@ -357,6 +356,8 @@ export class VideoManager {
     this.maxRemain = 3;
     this.buckets = [];
 
-    await Promise.all(buckets.map(VideoManager.removeFileFromUserDirectory));
+    if (needRemoveFiles) {
+      await Promise.all(buckets.map(VideoManager.removeFileFromUserDirectory));
+    }
   }
 }

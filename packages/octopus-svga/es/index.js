@@ -4099,8 +4099,7 @@ class ResourceManager {
 class Parser {
     static hash(buff) {
         const view = new Uint8Array(buff);
-        const step = Math.max(1, Math.floor(view.byteLength / 100));
-        return calculateHash(view, 0, view.byteLength, step);
+        return calculateHash(view, 0, view.byteLength, Math.max(1, Math.floor(view.byteLength / 100)));
     }
     /**
      * 解压视频源文件
@@ -4126,13 +4125,8 @@ class Parser {
      * @returns
      */
     static download(url) {
-        const { remote, path, local, globals } = platform;
-        // 读取本地文件
-        if (globals.env !== "h5" && path.is(url)) {
-            return local.read(url);
-        }
-        // 读取远程文件
-        return remote.fetch(url);
+        const { remote, path, local } = platform;
+        return path.is(url) ? local.read(url) : remote.fetch(url);
     }
     /**
      * 通过 url 下载并解析 SVGA 文件
@@ -4851,19 +4845,15 @@ class VideoManager {
      * @param buff
      */
     static async writeFileToUserDirectory(bucket, buff) {
-        const { globals, path, local } = platform;
-        const { env } = globals;
-        if (env === "h5" || env === "tt" || !path.is(bucket.local)) {
-            return;
-        }
-        try {
-            const filepath = path.resolve(path.filename(bucket.origin), "full");
-            await local.write(buff, filepath);
-            bucket.local = filepath;
-        }
-        catch (ex) {
-            // eslint-disable-next-line no-console
-            console.error(ex);
+        const { path, local } = platform;
+        if (path.is(bucket.local)) {
+            try {
+                await local.write(buff, bucket.local);
+            }
+            catch (ex) {
+                // eslint-disable-next-line no-console
+                console.error(ex);
+            }
         }
     }
     /**
@@ -4872,18 +4862,15 @@ class VideoManager {
      * @returns
      */
     static async removeFileFromUserDirectory(bucket) {
-        const { globals, path, local } = platform;
-        const { env } = globals;
-        if (env === "h5" || env === "tt" || !path.is(bucket.local)) {
-            return;
-        }
-        try {
-            await local.remove(bucket.local);
-            bucket.local = "";
-        }
-        catch (ex) {
-            // eslint-disable-next-line no-console
-            console.error(ex);
+        const { path, local } = platform;
+        if (path.is(bucket.local)) {
+            try {
+                await local.remove(bucket.local);
+            }
+            catch (ex) {
+                // eslint-disable-next-line no-console
+                console.error(ex);
+            }
         }
     }
     /**
@@ -4918,13 +4905,19 @@ class VideoManager {
          * @param url
          * @returns
          */
-        preprocess: (url) => benchmark.time(`${url} 下载时间`, () => Parser.download(url)),
+        preprocess: async (bucket) => {
+            const { path, local, remote } = platform;
+            if (local && (await local.exists(bucket.local))) {
+                return benchmark.time(`${bucket.local} 读取时间`, () => local.read(bucket.local));
+            }
+            return benchmark.time(`${bucket.origin} 下载时间`, () => remote.fetch(bucket.origin));
+        },
         /**
          * 后处理动效数据
          * @param data
          * @returns
          */
-        postprocess: (url, data) => benchmark.time(`${url} 解析时间`, () => Parser.parseVideo(data, url, true)),
+        postprocess: (bucket, data) => benchmark.time(`${bucket.origin} 解析时间`, () => Parser.parseVideo(data, bucket.origin, true)),
     };
     /**
      * 获取视频池大小
@@ -4991,10 +4984,10 @@ class VideoManager {
     }
     async downloadAndParseVideo(bucket, needParse = false) {
         const { options } = this;
-        const data = await options.preprocess(bucket.local || bucket.origin);
+        const data = await options.preprocess(bucket);
         VideoManager.writeFileToUserDirectory(bucket, data);
         if (needParse) {
-            return options.postprocess(bucket.origin, data);
+            return options.postprocess(bucket, data);
         }
         return data;
     }
@@ -5006,9 +4999,10 @@ class VideoManager {
      * @returns
      */
     async createBucket(url, point, needDownloadAndParse) {
+        const { path } = platform;
         const bucket = {
             origin: url,
-            local: "",
+            local: path.resolve(path.filename(url), "full"),
             entity: null,
             promise: null,
         };
@@ -5028,7 +5022,6 @@ class VideoManager {
      * @param maxRemain 最大留存数量
      */
     async prepare(urls, point = 0, maxRemain = 3) {
-        this.clear();
         this.updateRemainRange(point, maxRemain, urls.length);
         const { loadMode, point: currentPoint } = this;
         // 优先加载当前动效
@@ -5048,7 +5041,7 @@ class VideoManager {
     async get() {
         const bucket = this.buckets[this.point];
         if (bucket.promise) {
-            bucket.entity = await bucket.promise.then((data) => this.options.postprocess(bucket.origin, data));
+            bucket.entity = await bucket.promise.then((data) => this.options.postprocess(bucket, data));
             bucket.promise = null;
         }
         else if (!bucket.entity) {
@@ -5093,14 +5086,16 @@ class VideoManager {
      * 清理所有的bucket
      * @returns
      */
-    async clear() {
+    async clear(needRemoveFiles = true) {
         const { buckets } = this;
         this.point = 0;
         this.remainStart = 0;
         this.remainEnd = 0;
         this.maxRemain = 3;
         this.buckets = [];
-        await Promise.all(buckets.map(VideoManager.removeFileFromUserDirectory));
+        if (needRemoveFiles) {
+            await Promise.all(buckets.map(VideoManager.removeFileFromUserDirectory));
+        }
     }
 }
 

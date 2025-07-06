@@ -445,11 +445,20 @@
         name: "local",
         install() {
             const { env, br } = this.globals;
-            if (env === "h5") {
+            if (env === "h5" || env === "tt") {
                 return null;
             }
             const fsm = br.getFileSystemManager();
             return {
+                exists: (filepath) => {
+                    return new Promise((resolve) => {
+                        fsm.access({
+                            path: filepath,
+                            success: () => resolve(true),
+                            fail: () => resolve(false),
+                        });
+                    });
+                },
                 write: (data, filePath) => {
                     return new Promise((resolve, reject) => {
                         fsm.writeFile({
@@ -4991,8 +5000,7 @@
         }
         Parser.hash = function (buff) {
             var view = new Uint8Array(buff);
-            var step = Math.max(1, Math.floor(view.byteLength / 100));
-            return calculateHash(view, 0, view.byteLength, step);
+            return calculateHash(view, 0, view.byteLength, Math.max(1, Math.floor(view.byteLength / 100)));
         };
         /**
          * 解压视频源文件
@@ -5019,13 +5027,8 @@
          * @returns
          */
         Parser.download = function (url) {
-            var remote = platform.remote, path = platform.path, local = platform.local, globals = platform.globals;
-            // 读取本地文件
-            if (globals.env !== "h5" && path.is(url)) {
-                return local.read(url);
-            }
-            // 读取远程文件
-            return remote.fetch(url);
+            var remote = platform.remote, path = platform.path, local = platform.local;
+            return path.is(url) ? local.read(url) : remote.fetch(url);
         };
         /**
          * 通过 url 下载并解析 SVGA 文件
@@ -5761,6 +5764,7 @@
 
     var VideoManager = /** @class */ (function () {
         function VideoManager(loadMode, options) {
+            var _this = this;
             /**
              * 视频池的当前指针位置
              */
@@ -5793,19 +5797,38 @@
                  * @param url
                  * @returns
                  */
-                preprocess: function (url) {
-                    return benchmark.time("".concat(url, " \u4E0B\u8F7D\u65F6\u95F4"), function () {
-                        return Parser.download(url);
+                preprocess: function (bucket) { return __awaiter(_this, void 0, void 0, function () {
+                    var local, remote, _a;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                platform.path, local = platform.local, remote = platform.remote;
+                                _a = local;
+                                if (!_a) return [3 /*break*/, 2];
+                                return [4 /*yield*/, local.exists(bucket.local)];
+                            case 1:
+                                _a = (_b.sent());
+                                _b.label = 2;
+                            case 2:
+                                if (_a) {
+                                    return [2 /*return*/, benchmark.time("".concat(bucket.local, " \u8BFB\u53D6\u65F6\u95F4"), function () {
+                                            return local.read(bucket.local);
+                                        })];
+                                }
+                                return [2 /*return*/, benchmark.time("".concat(bucket.origin, " \u4E0B\u8F7D\u65F6\u95F4"), function () {
+                                        return remote.fetch(bucket.origin);
+                                    })];
+                        }
                     });
-                },
+                }); },
                 /**
                  * 后处理动效数据
                  * @param data
                  * @returns
                  */
-                postprocess: function (url, data) {
-                    return benchmark.time("".concat(url, " \u89E3\u6790\u65F6\u95F4"), function () {
-                        return Parser.parseVideo(data, url, true);
+                postprocess: function (bucket, data) {
+                    return benchmark.time("".concat(bucket.origin, " \u89E3\u6790\u65F6\u95F4"), function () {
+                        return Parser.parseVideo(data, bucket.origin, true);
                     });
                 },
             };
@@ -5821,23 +5844,18 @@
          */
         VideoManager.writeFileToUserDirectory = function (bucket, buff) {
             return __awaiter(this, void 0, void 0, function () {
-                var globals, path, local, env, filepath, ex_1;
+                var path, local, ex_1;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            globals = platform.globals, path = platform.path, local = platform.local;
-                            env = globals.env;
-                            if (env === "h5" || env === "tt" || !path.is(bucket.local)) {
-                                return [2 /*return*/];
-                            }
+                            path = platform.path, local = platform.local;
+                            if (!path.is(bucket.local)) return [3 /*break*/, 4];
                             _a.label = 1;
                         case 1:
                             _a.trys.push([1, 3, , 4]);
-                            filepath = path.resolve(path.filename(bucket.origin), "full");
-                            return [4 /*yield*/, local.write(buff, filepath)];
+                            return [4 /*yield*/, local.write(buff, bucket.local)];
                         case 2:
                             _a.sent();
-                            bucket.local = filepath;
                             return [3 /*break*/, 4];
                         case 3:
                             ex_1 = _a.sent();
@@ -5856,22 +5874,18 @@
          */
         VideoManager.removeFileFromUserDirectory = function (bucket) {
             return __awaiter(this, void 0, void 0, function () {
-                var globals, path, local, env, ex_2;
+                var path, local, ex_2;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            globals = platform.globals, path = platform.path, local = platform.local;
-                            env = globals.env;
-                            if (env === "h5" || env === "tt" || !path.is(bucket.local)) {
-                                return [2 /*return*/];
-                            }
+                            path = platform.path, local = platform.local;
+                            if (!path.is(bucket.local)) return [3 /*break*/, 4];
                             _a.label = 1;
                         case 1:
                             _a.trys.push([1, 3, , 4]);
                             return [4 /*yield*/, local.remove(bucket.local)];
                         case 2:
                             _a.sent();
-                            bucket.local = "";
                             return [3 /*break*/, 4];
                         case 3:
                             ex_2 = _a.sent();
@@ -5952,12 +5966,12 @@
                     switch (_a.label) {
                         case 0:
                             options = this.options;
-                            return [4 /*yield*/, options.preprocess(bucket.local || bucket.origin)];
+                            return [4 /*yield*/, options.preprocess(bucket)];
                         case 1:
                             data = _a.sent();
                             VideoManager.writeFileToUserDirectory(bucket, data);
                             if (needParse) {
-                                return [2 /*return*/, options.postprocess(bucket.origin, data)];
+                                return [2 /*return*/, options.postprocess(bucket, data)];
                             }
                             return [2 /*return*/, data];
                     }
@@ -5973,13 +5987,14 @@
          */
         VideoManager.prototype.createBucket = function (url, point, needDownloadAndParse) {
             return __awaiter(this, void 0, void 0, function () {
-                var bucket, _a;
+                var path, bucket, _a;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
+                            path = platform.path;
                             bucket = {
                                 origin: url,
-                                local: "",
+                                local: path.resolve(path.filename(url), "full"),
                                 entity: null,
                                 promise: null,
                             };
@@ -6015,7 +6030,6 @@
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
-                            this.clear();
                             this.updateRemainRange(point, maxRemain, urls.length);
                             _a = this, loadMode = _a.loadMode, currentPoint = _a.point;
                             return [4 /*yield*/, this.createBucket(urls[currentPoint], currentPoint, true)];
@@ -6052,7 +6066,7 @@
                             if (!bucket.promise) return [3 /*break*/, 2];
                             _a = bucket;
                             return [4 /*yield*/, bucket.promise.then(function (data) {
-                                    return _this.options.postprocess(bucket.origin, data);
+                                    return _this.options.postprocess(bucket, data);
                                 })];
                         case 1:
                             _a.entity = _c.sent();
@@ -6114,8 +6128,9 @@
          * @returns
          */
         VideoManager.prototype.clear = function () {
-            return __awaiter(this, void 0, void 0, function () {
+            return __awaiter(this, arguments, void 0, function (needRemoveFiles) {
                 var buckets;
+                if (needRemoveFiles === void 0) { needRemoveFiles = true; }
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -6125,10 +6140,12 @@
                             this.remainEnd = 0;
                             this.maxRemain = 3;
                             this.buckets = [];
+                            if (!needRemoveFiles) return [3 /*break*/, 2];
                             return [4 /*yield*/, Promise.all(buckets.map(VideoManager.removeFileFromUserDirectory))];
                         case 1:
                             _a.sent();
-                            return [2 /*return*/];
+                            _a.label = 2;
+                        case 2: return [2 /*return*/];
                     }
                 });
             });

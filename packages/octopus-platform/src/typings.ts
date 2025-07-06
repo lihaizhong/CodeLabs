@@ -72,6 +72,7 @@ export interface OctopusPlatformPlugins {
   };
 
   local: {
+    exists: (filepath: string) => Promise<boolean>;
     write: (data: ArrayBufferLike, filepath: string) => Promise<string>;
     read: (filepath: string) => Promise<ArrayBuffer>;
     remove: (filepath: string) => Promise<string>;
@@ -82,7 +83,7 @@ export interface OctopusPlatformPlugins {
     load: (
       createImage: () => HTMLImageElement,
       data: ImageBitmap | Uint8Array | string,
-      filepath: string
+      filepath: string,
     ) => Promise<ImageBitmap | PlatformImage>;
     release: (img: PlatformImage) => void;
   };

@@ -11,18 +11,16 @@ export default definePlugin<"path">({
     const filename = (path: string) =>
       path.substring(path.lastIndexOf("/") + 1);
 
-    if (env === "h5") {
+    if (env === "h5" || env === "tt") {
       return {
         USER_DATA_PATH: "",
         is: (_: string) => false,
         filename,
-        resolve: (filename: string, prefix?: string) =>
-          `${prefix ? `${prefix}__` : ""}${filename}`,
+        resolve: (filename: string, prefix?: string) => "",
       };
     }
 
-    const { USER_DATA_PATH } =
-      env === "tt" ? tt.getEnvInfoSync().common : br.env;
+    const { USER_DATA_PATH } = br.env;
 
     return {
       USER_DATA_PATH,

@@ -55,15 +55,15 @@ const playerAwait = async (scope) => {
 const worker = new EnhancedWorker();
 const readyGo = new ReadyGo();
 const videoManager = new VideoManager("fast", {
-  preprocess: async (url) => {
-    const buff = await Parser.download(url);
+  preprocess: async (bucket) => {
+    const buff = await remote.fetch(bucket.origin);
 
     return new Promise((resolve) => {
-      worker.once(url, (data) => resolve(data));
-      worker.emit(url, buff);
+      worker.once(bucket.origin, (data) => resolve(data));
+      worker.emit(bucket.origin, buff);
     });
   },
-  postprocess: (url, data) => Parser.parseVideo(data, url, false),
+  postprocess: (bucket, data) => Parser.parseVideo(data, bucket.origin, false),
 });
 
 Component({

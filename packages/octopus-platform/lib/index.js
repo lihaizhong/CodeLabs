@@ -541,11 +541,20 @@
         name: "local",
         install: function () {
             var _a = this.globals, env = _a.env, br = _a.br;
-            if (env === "h5") {
+            if (env === "h5" || env === "tt") {
                 return null;
             }
             var fsm = br.getFileSystemManager();
             return {
+                exists: function (filepath) {
+                    return new Promise(function (resolve) {
+                        fsm.access({
+                            path: filepath,
+                            success: function () { return resolve(true); },
+                            fail: function () { return resolve(false); },
+                        });
+                    });
+                },
                 write: function (data, filePath) {
                     return new Promise(function (resolve, reject) {
                         fsm.writeFile({
@@ -731,17 +740,15 @@
             var filename = function (path) {
                 return path.substring(path.lastIndexOf("/") + 1);
             };
-            if (env === "h5") {
+            if (env === "h5" || env === "tt") {
                 return {
                     USER_DATA_PATH: "",
                     is: function (_) { return false; },
                     filename: filename,
-                    resolve: function (filename, prefix) {
-                        return "".concat(prefix ? "".concat(prefix, "__") : "").concat(filename);
-                    },
+                    resolve: function (filename, prefix) { return ""; },
                 };
             }
-            var USER_DATA_PATH = (env === "tt" ? tt.getEnvInfoSync().common : br.env).USER_DATA_PATH;
+            var USER_DATA_PATH = br.env.USER_DATA_PATH;
             return {
                 USER_DATA_PATH: USER_DATA_PATH,
                 is: function (filepath) { return filepath === null || filepath === void 0 ? void 0 : filepath.startsWith(USER_DATA_PATH); },
