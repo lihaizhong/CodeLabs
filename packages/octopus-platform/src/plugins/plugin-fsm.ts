@@ -16,43 +16,39 @@ export default definePlugin<"local">({
     const fsm = br.getFileSystemManager();
 
     return {
-      exists: (filepath: string) => {
-        return new Promise<boolean>((resolve) => {
+      exists: (filepath: string) =>
+        new Promise<boolean>((resolve) => {
           fsm!.access({
             path: filepath,
             success: () => resolve(true),
             fail: () => resolve(false),
           });
-        });
-      },
-      write: (data: ArrayBufferLike, filePath: string) => {
-        return new Promise<string>((resolve, reject) => {
+        }),
+      write: (data: ArrayBufferLike, filePath: string) =>
+        new Promise<string>((resolve, reject) => {
           fsm!.writeFile({
             filePath,
             data,
             success: () => resolve(filePath),
             fail: reject,
           });
-        });
-      },
-      read: (filePath: string) => {
-        return new Promise((resolve, reject) => {
+        }),
+      read: (filePath: string) =>
+        new Promise((resolve, reject) => {
           fsm!.readFile({
             filePath,
             success: (res: any) => resolve(res.data),
             fail: reject,
           });
-        });
-      },
-      remove: (filePath: string) => {
-        return new Promise((resolve, reject) => {
+        }),
+      remove: (filePath: string) =>
+        new Promise((resolve, reject) => {
           fsm!.unlink({
             filePath,
             success: () => resolve(filePath),
             fail: reject,
           });
-        });
-      },
+        }),
     };
   },
 });

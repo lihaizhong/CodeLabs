@@ -104,7 +104,7 @@ export class VideoManager {
      * @returns
      */
     preprocess: async (bucket: Bucket) => {
-      const { path, local, remote } = platform;
+      const { local, remote } = platform;
 
       if (local && (await local.exists(bucket.local))) {
         return benchmark.time<ArrayBuffer>(`${bucket.local} 读取时间`, () =>
