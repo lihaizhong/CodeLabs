@@ -4113,11 +4113,11 @@ class Parser {
      * 解析视频实体
      * @param data 视频二进制数据
      * @param url 视频地址
-     * @param decompression 是否解压
+     * @param needDecompress 是否解压
      * @returns
      */
-    static parseVideo(data, url, decompression = true) {
-        return createVideoEntity(new Uint8Array(decompression ? this.decompress(data) : data), platform.path.filename(url));
+    static parseVideo(data, url, needDecompress = true) {
+        return createVideoEntity(new Uint8Array(needDecompress ? this.decompress(data) : data), platform.path.filename(url));
     }
     /**
      * 读取文件资源
@@ -5028,7 +5028,7 @@ class VideoManager {
          * @returns
          */
         preprocess: async (bucket) => {
-            const { path, local, remote } = platform;
+            const { local, remote } = platform;
             if (local && (await local.exists(bucket.local))) {
                 return benchmark.time(`${bucket.local} 读取时间`, () => local.read(bucket.local));
             }

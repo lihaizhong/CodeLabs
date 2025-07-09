@@ -5014,12 +5014,12 @@
          * 解析视频实体
          * @param data 视频二进制数据
          * @param url 视频地址
-         * @param decompression 是否解压
+         * @param needDecompress 是否解压
          * @returns
          */
-        Parser.parseVideo = function (data, url, decompression) {
-            if (decompression === void 0) { decompression = true; }
-            return createVideoEntity(new Uint8Array(decompression ? this.decompress(data) : data), platform.path.filename(url));
+        Parser.parseVideo = function (data, url, needDecompress) {
+            if (needDecompress === void 0) { needDecompress = true; }
+            return createVideoEntity(new Uint8Array(needDecompress ? this.decompress(data) : data), platform.path.filename(url));
         };
         /**
          * 读取文件资源
@@ -5953,7 +5953,7 @@
                     return __generator(this, function (_b) {
                         switch (_b.label) {
                             case 0:
-                                platform.path, local = platform.local, remote = platform.remote;
+                                local = platform.local, remote = platform.remote;
                                 _a = local;
                                 if (!_a) return [3 /*break*/, 2];
                                 return [4 /*yield*/, local.exists(bucket.local)];

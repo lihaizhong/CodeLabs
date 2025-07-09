@@ -31,16 +31,16 @@ export class Parser {
    * 解析视频实体
    * @param data 视频二进制数据
    * @param url 视频地址
-   * @param decompression 是否解压
+   * @param needDecompress 是否解压
    * @returns
    */
   static parseVideo(
     data: ArrayBufferLike,
     url: string,
-    decompression: boolean = true
+    needDecompress: boolean = true
   ): PlatformVideo.Video {
     return createVideoEntity(
-      new Uint8Array(decompression ? this.decompress(data) : data),
+      new Uint8Array(needDecompress ? this.decompress(data) : data),
       platform.path.filename(url)
     );
   }

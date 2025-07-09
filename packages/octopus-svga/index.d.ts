@@ -292,10 +292,10 @@ declare class Parser {
      * 解析视频实体
      * @param data 视频二进制数据
      * @param url 视频地址
-     * @param decompression 是否解压
+     * @param needDecompress 是否解压
      * @returns
      */
-    static parseVideo(data: ArrayBufferLike, url: string, decompression?: boolean): PlatformVideo.Video;
+    static parseVideo(data: ArrayBufferLike, url: string, needDecompress?: boolean): PlatformVideo.Video;
     /**
      * 读取文件资源
      * @param url 文件资源地址
