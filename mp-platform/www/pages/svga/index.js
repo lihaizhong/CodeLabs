@@ -1,3 +1,4 @@
+import "weui";
 import {
   Player,
   Parser,
@@ -31,7 +32,7 @@ const playerAwait = async () => {
       "每帧期望消耗时长",
       1000 / bucket.entity.fps,
       "预期总消耗时长",
-      (bucket.entity.frames / bucket.entity.fps) * 1000
+      (bucket.entity.frames / bucket.entity.fps) * 1000,
     );
   };
   player.onProcess = (percent, frame) => {
@@ -140,16 +141,16 @@ Page({
         const editor = new VideoEditor(
           player.painter,
           player.resource,
-          bucket.entity
+          bucket.entity,
         );
 
         this.setData({ message: "文件编辑中" });
         await benchmark.time("replace images", () =>
           Promise.all(
             Object.keys(source.replace).map((key) =>
-              editor.setImage(key, source.replace[key])
-            )
-          )
+              editor.setImage(key, source.replace[key]),
+            ),
+          ),
         );
       }
 
@@ -169,7 +170,7 @@ Page({
     worker.open();
     await playerAwait();
     const urls = this.data.sources.map((item) =>
-      typeof item === "string" ? item : item.url
+      typeof item === "string" ? item : item.url,
     );
 
     benchmark.log("准备资源中");

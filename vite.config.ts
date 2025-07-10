@@ -6,11 +6,14 @@ import { globSync } from "tinyglobby";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const __root = path.resolve(__dirname, "mp-platform/www");
+/**
+ * 获取所有页面入口文件
+ */
 const findAllEntries = () => {
   const entries = globSync("pages/**/index.html", {
     cwd: __root,
     absolute: true,
-    onlyFiles: true
+    onlyFiles: true,
   });
 
   const inputEntries = entries.reduce((entries, entry) => {
@@ -21,7 +24,7 @@ const findAllEntries = () => {
 
     if (basename === "pages") {
       // pages/index/index.html => index
-      basename = path.basename(entry, '.html')
+      basename = path.basename(entry, ".html");
       entries["index"] = entry;
     }
 
@@ -33,7 +36,7 @@ const findAllEntries = () => {
   // console.log("inputEntries", inputEntries);
 
   return inputEntries;
-}
+};
 
 /**
  * vite 配置
@@ -44,9 +47,7 @@ export default defineConfig({
 
   publicDir: path.resolve(__dirname, "public"),
 
-  plugins: [
-    commonjs()
-  ],
+  plugins: [commonjs()],
 
   resolve: {
     alias: {
@@ -63,10 +64,16 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: findAllEntries(),
-    }
+    },
   },
 
   server: {
-    open: "/pages/index.html"
-  }
+    open: "/pages/index.html",
+    // headers: {
+    //   // SharedArrayBuffer 支持
+    //   "Cross-Origin-Opener-Policy": "same-origin",
+    //   "Cross-Origin-Embedder-Policy": "require-corp",
+    //   "Cross-Origin-Resource-Policy": "same-origin",
+    // },
+  },
 });

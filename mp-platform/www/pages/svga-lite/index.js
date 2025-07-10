@@ -1,3 +1,4 @@
+import "weui";
 import { Parser, Player } from "../../utils/svga-lite";
 import Page from "../../utils/Page";
 import {
@@ -20,7 +21,7 @@ Page({
   bindEvents: {
     "#prevbtn:click": "handleSwitchPrev",
     "#nextbtn:click": "handleSwitchNext",
-    "#trybtn:click": "handleSwitchAtRandom"
+    "#trybtn:click": "handleSwitchAtRandom",
   },
 
   observers: {

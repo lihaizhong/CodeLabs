@@ -1,4 +1,11 @@
-import { Parser, Poster, VideoEditor, benchmark, getDataURLFromImageData } from "octopus-svga";
+import "weui";
+import {
+  Parser,
+  Poster,
+  VideoEditor,
+  benchmark,
+  getDataURLFromImageData,
+} from "octopus-svga";
 import { EMPTY_PLACEHOLDER, posterSources } from "../../utils/constants";
 
 const posterFiles = posterSources;
@@ -25,13 +32,13 @@ async function generatePoster(point) {
     const videoEditor = new VideoEditor(
       poster.painter,
       poster.resource,
-      posterItem
+      posterItem,
     );
 
     await Promise.all(
       Object.keys(data.replace).map((key) =>
-        videoEditor.setImage(key, data.replace[key])
-      )
+        videoEditor.setImage(key, data.replace[key]),
+      ),
     );
   }
 

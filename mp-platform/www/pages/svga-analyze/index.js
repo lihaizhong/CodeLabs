@@ -1,3 +1,4 @@
+import "weui";
 import { Parser, platform } from "octopus-svga";
 import { EMPTY_PLACEHOLDER, yySources } from "../../utils/constants";
 
@@ -70,10 +71,10 @@ async function render(current) {
 function toggleHalfScreenDialog() {
   const $operateBtn = document.getElementById("oper-btn");
   const $analyzeHalfScreenDialog = document.getElementById(
-    "analyze-half-screen-dialog"
+    "analyze-half-screen-dialog",
   );
   const $analyzeHalfScreenDialogCloseBtn = document.getElementById(
-    "analyze-half-screen-dialog-close"
+    "analyze-half-screen-dialog-close",
   );
 
   $operateBtn.addEventListener("click", () => {

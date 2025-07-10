@@ -1,3 +1,5 @@
+import "weui";
+
 const VERSION = "1.0.0";
 const PageUtils = {
   injectVersion(version) {
@@ -22,7 +24,7 @@ const ServiceWorkerUtils = {
       new URL("sw.js", import.meta.url),
       {
         type: "module",
-      }
+      },
     );
 
     return registration;

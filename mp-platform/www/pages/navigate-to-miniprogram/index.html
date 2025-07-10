@@ -1,44 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>跳转微信小程序</title>
-  <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.21/weui.min.css">
-  <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      background-color: var(--weui-BG-0);
-    }
-  </style>
-  <script async src="http://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
-  <script type="module" src="./index.js"></script>
-</head>
-<body>
-  <div class="weui-bottom-fixed-opr-page">
-    <div class="weui-bottom-fixed-opr-page__content">
-      <div class="weui-cells">
-        <div id="navigate-to-miniprogram-btn" class="weui-cell weui-cell_access">
-          <div class="weui-cell__bd">跳转小程序</div>
-          <div class="weui-cell__ft"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>跳转微信小程序</title>
+    <!-- <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.21/weui.min.css"> -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        background-color: var(--weui-BG-0);
+      }
+    </style>
+    <script async src="http://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+    <script type="module" src="./index.js"></script>
+  </head>
+  <body>
+    <div class="weui-bottom-fixed-opr-page">
+      <div class="weui-bottom-fixed-opr-page__content">
+        <div class="weui-cells">
+          <div
+            id="navigate-to-miniprogram-btn"
+            class="weui-cell weui-cell_access"
+          >
+            <div class="weui-cell__bd">跳转小程序</div>
+            <div class="weui-cell__ft"></div>
+          </div>
+          <div
+            id="navigate-to-miniprogram-of-error-path-btn"
+            class="weui-cell weui-cell_access"
+          >
+            <div class="weui-cell__bd">跳转小程序（不完整地址）</div>
+            <div class="weui-cell__ft"></div>
+          </div>
         </div>
-        <div id="navigate-to-miniprogram-of-error-path-btn" class="weui-cell weui-cell_access">
-          <div class="weui-cell__bd">跳转小程序（不完整地址）</div>
-          <div class="weui-cell__ft"></div>
+      </div>
+      <div class="weui-bottom-fixed-opr-page__tool">
+        <div class="weui-bottom-fixed-opr-page__tips weui-agree__text">
+          本网站动画文件仅供学习使用，禁止商用
+        </div>
+        <div class="weui-bottom-fixed-opr">
+          <button id="back-btn" class="weui-btn weui-btn_primary">
+            返回上一页
+          </button>
         </div>
       </div>
     </div>
-    <div class="weui-bottom-fixed-opr-page__tool">
-      <div class="weui-bottom-fixed-opr-page__tips weui-agree__text">
-        本网站动画文件仅供学习使用，禁止商用
-      </div>
-      <div class="weui-bottom-fixed-opr">
-        <button id="back-btn" class="weui-btn weui-btn_primary">返回上一页</button>
-      </div>
-    </div>
-  </div>
-</body>
+  </body>
 </html>

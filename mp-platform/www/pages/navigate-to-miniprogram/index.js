@@ -1,7 +1,9 @@
+import "weui";
+
 window.addEventListener("DOMContentLoaded", () => {
   const $btn1 = document.getElementById("navigate-to-miniprogram-btn");
   const $btn2 = document.getElementById(
-    "navigate-to-miniprogram-of-error-path-btn"
+    "navigate-to-miniprogram-of-error-path-btn",
   );
   const $btn3 = document.getElementById("back-btn");
 

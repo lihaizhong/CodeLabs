@@ -2,7 +2,12 @@
 import { unzlibSync } from "./unzlib";
 
 onmessage = (event) => {
-  const { method, data } = event.data || {};
+  // Transferable 检测器
+  if (event.data instanceof ArrayBuffer) {
+    return;
+  }
+
+  const { method, data, ref } = event.data || {};
 
   if (typeof method === "string" && method !== "") {
     fetch(data || method).then(async (response) => {
@@ -10,13 +15,25 @@ onmessage = (event) => {
         const buff = await response.arrayBuffer();
         const { buffer } = unzlibSync(new Uint8Array(buff));
 
-        postMessage(
-          {
-            method,
-            data: buffer,
-          },
-          [buffer]
-        );
+        if (ref) {
+          ref.grow(buffer.byteLength);
+
+          const u8a = new Uint8Array(ref);
+
+          for (let i = 0; i < buffer.byteLength; i++) {
+            Atomics.store(u8a, i, buffer[i]);
+          }
+
+          postMessage({ method, data: ref });
+        } else {
+          postMessage(
+            {
+              method,
+              data: buffer,
+            },
+            [buffer],
+          );
+        }
       }
     });
   }

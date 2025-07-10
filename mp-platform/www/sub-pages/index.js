@@ -1,3 +1,4 @@
+import "weui";
 import { initBatteryStatus } from "./utils/battery";
 import { initNetworkStatus } from "./utils/network";
 
@@ -6,4 +7,4 @@ window.onload = function main() {
   initBatteryStatus();
   // 初始化网络状态
   initNetworkStatus();
-}
+};
