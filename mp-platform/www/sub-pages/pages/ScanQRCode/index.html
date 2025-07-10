@@ -1,59 +1,60 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>扫描二维码</title>
-  <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.21/weui.min.css">
-  <style>
-    html,body {
-      margin: 0;
-      padding: 0;
-      background-color: var(--weui-BG-0);
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>扫描二维码</title>
+    <!-- <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.21/weui.min.css"> -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--weui-BG-0);
+      }
 
-    .mask {
-      position: fixed;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      border-left: calc((100vw - 253px) / 2) solid;
-      border-right: calc((100vw - 253px) / 2) solid;
-      border-top: calc((100vh - 253px) / 3) solid;
-      border-bottom: calc((100vh - 253px) / 3 * 2) solid;
-      border-color: rgba(0, 0, 0, 0.99);
-    }
+      .mask {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        border-left: calc((100vw - 253px) / 2) solid;
+        border-right: calc((100vw - 253px) / 2) solid;
+        border-top: calc((100vh - 253px) / 3) solid;
+        border-bottom: calc((100vh - 253px) / 3 * 2) solid;
+        border-color: rgba(0, 0, 0, 0.99);
+      }
 
-    .mask::before {
-      content: "";
-      display: block;
-      width: 250px;
-      height: 250px;
-      border: 3px solid rgb(227, 55, 59);
-    }
+      .mask::before {
+        content: "";
+        display: block;
+        width: 250px;
+        height: 250px;
+        border: 3px solid rgb(227, 55, 59);
+      }
 
-    .mask::after {
-      content: attr(content);
-      position: absolute;
-      bottom: -50px;
-      left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap;
-      color: #fff;
-    }
+      .mask::after {
+        content: attr(content);
+        position: absolute;
+        bottom: -50px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        color: #fff;
+      }
 
-    .scan-stage {
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      object-position: center;
-    }
-  </style>
-  <script type="module" src="./index.js"></script>
-</head>
-<body>
-  <div class="mask" content="请将二维码放置扫描框中"></div>
-  <video id="video-scanner" class="scan-stage"></video>
-</body>
+      .scan-stage {
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+        object-position: center;
+      }
+    </style>
+    <script type="module" src="./index.js"></script>
+  </head>
+  <body>
+    <div class="mask" content="请将二维码放置扫描框中"></div>
+    <video id="video-scanner" class="scan-stage"></video>
+  </body>
 </html>
