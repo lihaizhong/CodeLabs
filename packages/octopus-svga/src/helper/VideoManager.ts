@@ -11,7 +11,7 @@ export interface Bucket {
   // 实例
   entity: PlatformVideo.Video | null;
   // 下载实例中
-  promise: Promise<ArrayBuffer> | null;
+  promise: Promise<ArrayBufferLike> | null;
 }
 
 export interface NeedUpdatePoint {
@@ -23,10 +23,10 @@ export interface NeedUpdatePoint {
 export type LoadMode = "fast" | "whole";
 
 export interface VideoManagerOptions {
-  preprocess: (bucket: Bucket) => Promise<ArrayBuffer>;
+  preprocess: (bucket: Bucket) => Promise<ArrayBufferLike>;
   postprocess: (
     bucket: Bucket,
-    buff: ArrayBuffer
+    buff: ArrayBufferLike
   ) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
 }
 
@@ -295,7 +295,7 @@ export class VideoManager {
     const bucket = this.buckets[this.point];
 
     if (bucket.promise) {
-      bucket.entity = await bucket.promise.then((data: ArrayBuffer) =>
+      bucket.entity = await bucket.promise.then((data: ArrayBufferLike) =>
         this.options.postprocess(bucket, data)
       );
       bucket.promise = null;

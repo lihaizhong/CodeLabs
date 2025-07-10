@@ -50,7 +50,7 @@ export class Parser {
    * @param url 文件资源地址
    * @returns
    */
-  static download(url: string): Promise<ArrayBufferLike> {
+  static download(url: string): Promise<ArrayBuffer> {
     const { remote, path, local } = platform;
 
     return path.is(url) ? local!.read(url) : remote.fetch(url);

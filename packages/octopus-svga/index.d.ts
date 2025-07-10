@@ -301,7 +301,7 @@ declare class Parser {
      * @param url 文件资源地址
      * @returns
      */
-    static download(url: string): Promise<ArrayBufferLike>;
+    static download(url: string): Promise<ArrayBuffer>;
     /**
      * 通过 url 下载并解析 SVGA 文件
      * @param url SVGA 文件的下载链接
@@ -686,7 +686,7 @@ interface Bucket {
     origin: string;
     local: string;
     entity: PlatformVideo.Video | null;
-    promise: Promise<ArrayBuffer> | null;
+    promise: Promise<ArrayBufferLike> | null;
 }
 interface NeedUpdatePoint {
     action: "remove" | "add";
@@ -695,8 +695,8 @@ interface NeedUpdatePoint {
 }
 type LoadMode = "fast" | "whole";
 interface VideoManagerOptions {
-    preprocess: (bucket: Bucket) => Promise<ArrayBuffer>;
-    postprocess: (bucket: Bucket, buff: ArrayBuffer) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
+    preprocess: (bucket: Bucket) => Promise<ArrayBufferLike>;
+    postprocess: (bucket: Bucket, buff: ArrayBufferLike) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
 }
 declare class VideoManager {
     /**
