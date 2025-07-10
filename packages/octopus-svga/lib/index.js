@@ -357,10 +357,9 @@
                     if (buffer instanceof ArrayBuffer) {
                         return buffer.slice(byteOffset, byteOffset + byteLength);
                     }
-                    const buff = new ArrayBuffer(byteLength);
-                    const view = new Uint8Array(buff);
+                    const view = new Uint8Array(byteLength);
                     view.set(data);
-                    return buff;
+                    return view.buffer;
                 },
                 bytesToString(data) {
                     const chunkSize = 8192; // 安全的块大小
@@ -450,43 +449,35 @@
             }
             const fsm = br.getFileSystemManager();
             return {
-                exists: (filepath) => {
-                    return new Promise((resolve) => {
-                        fsm.access({
-                            path: filepath,
-                            success: () => resolve(true),
-                            fail: () => resolve(false),
-                        });
+                exists: (filepath) => new Promise((resolve) => {
+                    fsm.access({
+                        path: filepath,
+                        success: () => resolve(true),
+                        fail: () => resolve(false),
                     });
-                },
-                write: (data, filePath) => {
-                    return new Promise((resolve, reject) => {
-                        fsm.writeFile({
-                            filePath,
-                            data,
-                            success: () => resolve(filePath),
-                            fail: reject,
-                        });
+                }),
+                write: (data, filePath) => new Promise((resolve, reject) => {
+                    fsm.writeFile({
+                        filePath,
+                        data,
+                        success: () => resolve(filePath),
+                        fail: reject,
                     });
-                },
-                read: (filePath) => {
-                    return new Promise((resolve, reject) => {
-                        fsm.readFile({
-                            filePath,
-                            success: (res) => resolve(res.data),
-                            fail: reject,
-                        });
+                }),
+                read: (filePath) => new Promise((resolve, reject) => {
+                    fsm.readFile({
+                        filePath,
+                        success: (res) => resolve(res.data),
+                        fail: reject,
                     });
-                },
-                remove: (filePath) => {
-                    return new Promise((resolve, reject) => {
-                        fsm.unlink({
-                            filePath,
-                            success: () => resolve(filePath),
-                            fail: reject,
-                        });
+                }),
+                remove: (filePath) => new Promise((resolve, reject) => {
+                    fsm.unlink({
+                        filePath,
+                        success: () => resolve(filePath),
+                        fail: reject,
                     });
-                },
+                }),
             };
         },
     });

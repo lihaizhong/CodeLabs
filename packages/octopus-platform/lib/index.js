@@ -453,10 +453,9 @@
                     if (buffer instanceof ArrayBuffer) {
                         return buffer.slice(byteOffset, byteOffset + byteLength);
                     }
-                    var buff = new ArrayBuffer(byteLength);
-                    var view = new Uint8Array(buff);
+                    var view = new Uint8Array(byteLength);
                     view.set(data);
-                    return buff;
+                    return view.buffer;
                 },
                 bytesToString: function (data) {
                     var chunkSize = 8192; // 安全的块大小

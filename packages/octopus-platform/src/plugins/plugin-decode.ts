@@ -19,12 +19,11 @@ export default definePlugin<"decode">({
           return buffer.slice(byteOffset, byteOffset + byteLength);
         }
 
-        const buff = new ArrayBuffer(byteLength);
-        const view = new Uint8Array(buff);
+        const view = new Uint8Array(byteLength);
 
         view.set(data);
 
-        return buff;
+        return view.buffer;
       },
       bytesToString(data: Uint8Array): string {
         const chunkSize = 8192; // 安全的块大小
