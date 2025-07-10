@@ -40,8 +40,8 @@ const playerAwait = async (scope) => {
     {
       container: "#palette",
       loop: 1,
-      playMode: "forwards",
-      fillMode: "backwards",
+      // playMode: "forwards",
+      // fillMode: "backwards",
       contentMode: "aspect-fit",
     },
     scope
@@ -60,7 +60,7 @@ const videoManager = new VideoManager("fast", {
     const { local, remote } = platform;
 
     if (await local.exists(bucket.local)) {
-      return await local!.read(bucket.local);
+      return await local.read(bucket.local);
     }
     
     const buff = await remote.fetch(bucket.origin);

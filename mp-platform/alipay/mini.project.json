@@ -12,7 +12,8 @@
     }
   },
   "developOptions": {
-    "skipTranspile": true,
-    "hotReload": true
+    "skipTranspile": false,
+    "hotReload": false,
+    "minify": true
   }
 }
