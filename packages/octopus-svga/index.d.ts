@@ -679,6 +679,13 @@ declare function generateImageFromCode(options: IQrCodeImgOptions): string;
 declare function getBufferFromImageData(imageData: ImageData): Uint8Array<ArrayBufferLike>;
 declare function getDataURLFromImageData(imageData: ImageData): string;
 
+/**
+ * 检查数据是否为zlib压缩格式
+ * @param data 待检查的二进制数据
+ * @returns 是否为zlib压缩格式
+ */
+declare function isZlibCompressed(data: Uint8Array): boolean;
+
 interface Bucket {
     origin: string;
     local: string;
@@ -845,5 +852,5 @@ declare class VideoEditor {
     setQRCode(key: string, code: string, options: VideoEditorOptions & Omit<IQrCodeImgOptions, "code">): Promise<void>;
 }
 
-export { PLAYER_CONTENT_MODE, PLAYER_FILL_MODE, PLAYER_PLAY_MODE, Painter, Parser, PlatformVideo, Player, Poster, VideoEditor, VideoManager, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, platform };
+export { PLAYER_CONTENT_MODE, PLAYER_FILL_MODE, PLAYER_PLAY_MODE, Painter, Parser, PlatformVideo, Player, Poster, VideoEditor, VideoManager, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
 export type { Bucket, CanvasSize, IQrCodeImgOptions, LoadMode, NeedUpdatePoint, PaintMode, PaintModel, PlatformImages, PlatformRenderingContext2D, PlayerConfig, PlayerConfigOptions, PlayerEventCallback, PlayerProcessEventCallback, PosterConfig, PosterConfigOptions, PosterEventCallback, RawImages, TransformScale, VideoManagerOptions };
