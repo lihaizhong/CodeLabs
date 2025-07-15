@@ -1,5 +1,6 @@
 import {
   OctopusPlatform,
+  installPlugin,
   type OctopusPlatformPlugins,
   type OctopusPlatformPluginOptions,
   pluginCanvas,
@@ -65,13 +66,7 @@ class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
   installPlugin(
     plugin: OctopusPlatformPluginOptions<PlatformProperties>
   ) {
-    const value = plugin.install.call(this);
-
-    Object.defineProperty(this, plugin.name, {
-      get: () => value,
-      enumerable: true,
-      configurable: true,
-    });
+    installPlugin<PlatformProperties>(this, plugin);
   }
 }
 

@@ -69,6 +69,6 @@ git submodule update --init --recursive
 
 - [佳维动效文件处理工具](https://eff-tools.17ae.com/)
 
-### changeset
+## changeset
 
 [changeset文档](https://github.com/changesets/changesets/tree/main)

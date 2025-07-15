@@ -10,9 +10,14 @@ npm install octopus-platform -S
 
 ## 使用
 
+### 创建 platform 类
+
 ```ts
 import {
-  Platform,
+  OctopusPlatform,
+  installPlugin,
+  type OctopusPlatformPlugins,
+  type OctopusPlatformPluginOptions,
   pluginCanvas,
   pluginDecode,
   pluginDownload,
@@ -23,7 +28,6 @@ import {
   pluginPath,
   pluginRAF,
 } from "octopus-platform";
-import { version } from "../../package.json";
 
 export type PlatformProperties =
   | "now"
@@ -36,24 +40,24 @@ export type PlatformProperties =
   | "getCanvas"
   | "getOfsCanvas";
 
-class EnhancedPlatform extends Platform<PlatformProperties> {
-  now!: OctopusPlatform.PlatformPlugin["now"];
+class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
+  now!: OctopusPlatformPlugins["now"];
 
-  path!: OctopusPlatform.PlatformPlugin["path"];
+  path!: OctopusPlatformPlugins["path"];
 
-  remote!: OctopusPlatform.PlatformPlugin["remote"];
+  remote!: OctopusPlatformPlugins["remote"];
 
-  local!: OctopusPlatform.PlatformPlugin["local"];
+  local!: OctopusPlatformPlugins["local"];
 
-  decode!: OctopusPlatform.PlatformPlugin["decode"];
+  decode!: OctopusPlatformPlugins["decode"];
 
-  image!: OctopusPlatform.PlatformPlugin["image"];
+  image!: OctopusPlatformPlugins["image"];
 
-  rAF!: OctopusPlatform.PlatformPlugin["rAF"];
+  rAF!: OctopusPlatformPlugins["rAF"];
 
-  getCanvas!: OctopusPlatform.PlatformPlugin["getCanvas"];
+  getCanvas!: OctopusPlatformPlugins["getCanvas"];
 
-  getOfsCanvas!: OctopusPlatform.PlatformPlugin["getOfsCanvas"];
+  getOfsCanvas!: OctopusPlatformPlugins["getOfsCanvas"];
 
   constructor() {
     super(
@@ -68,32 +72,74 @@ class EnhancedPlatform extends Platform<PlatformProperties> {
         pluginPath,
         pluginRAF,
       ],
-      version
+      __VERSION__
     );
 
     this.init();
   }
 
   installPlugin(
-    plugin: OctopusPlatform.PlatformPluginOptions<PlatformProperties>
+    plugin: OctopusPlatformPluginOptions<PlatformProperties>
   ) {
-    const value = plugin.install.call<
-      EnhancedPlatform,
-      [],
-      OctopusPlatform.PlatformPluginValue<PlatformProperties>
-    >(this);
-
-    Object.defineProperty(this, plugin.name, {
-      get() {
-        return value;
-      },
-      enumerable: true,
-      configurable: true,
-    });
+    installPlugin<PlatformProperties>(this, plugin);
   }
 }
 
 export const platform = new EnhancedPlatform();
+```
+
+### platform 版本信息
+
+```ts
+// 当前库的版本
+platform.platformVersion
+// 使用这个库的应用版本
+platform.version
+```
+
+### platform 全局信息
+
+```ts
+// 当前在哪个平台（微信小程序、支付宝小程序、H5）
+platform.globals.env
+// 当前平台的全局对象（wx、my、window）
+platform.globals.br
+// 当前设备的设备像素比
+platform.globals.dpr
+// 当前设备的系统名称（仅小程序支持）
+platform.globals.system
+```
+
+### 自定义 platform 插件
+
+```ts
+import { definePlugin } from "octopus-platform";
+
+export default definePlugin<"now">({  
+  name: "now",
+  install() {
+    const { env, br } = this.globals;
+    // performance可以提供更高精度的时间测量，且不受系统时间的调整（如更改系统时间或同步时间）的影响
+    const perf =
+      env === "h5" || env === "tt" ? performance : br.getPerformance();
+
+    if (typeof perf?.now === "function") {
+      // 支付宝小程序的performance.now()获取的是当前时间戳，单位是微秒。
+      if (perf.now() - Date.now() > 1) {
+        return () => perf.now() / 1000;
+      }
+
+      // H5环境下，performance.now()获取的不是当前时间戳，而是从页面加载开始的时间戳，单位是毫秒。
+      return () => perf.now();
+    }
+
+    return () => Date.now();
+  },
+});
+
+// 安装插件参考上面的 OctopusPlatform 实现
+
+platform.now()
 ```
 
 ## LICENSE

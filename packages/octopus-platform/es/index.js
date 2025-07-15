@@ -270,6 +270,15 @@ class OctopusPlatform {
  */
 const definePlugin = (plugin) => plugin;
 
+function installPlugin(platform, plugin) {
+    const value = plugin.install.call(platform);
+    Object.defineProperty(platform, plugin.name, {
+        get: () => value,
+        enumerable: true,
+        configurable: true,
+    });
+}
+
 /**
  * 通过选择器匹配获取canvas实例
  * @returns
@@ -659,4 +668,4 @@ var pluginRaf = definePlugin({
     },
 });
 
-export { OctopusPlatform, definePlugin, pluginCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginOfsCanvas, pluginPath, pluginRaf as pluginRAF };
+export { OctopusPlatform, definePlugin, installPlugin, pluginCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginOfsCanvas, pluginPath, pluginRaf as pluginRAF };

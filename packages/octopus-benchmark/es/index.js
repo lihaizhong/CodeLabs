@@ -1,4 +1,4 @@
-import { OctopusPlatform, pluginNow } from 'octopus-platform';
+import { OctopusPlatform, pluginNow, installPlugin } from 'octopus-platform';
 
 class EnhancedPlatform extends OctopusPlatform {
     now;
@@ -7,12 +7,7 @@ class EnhancedPlatform extends OctopusPlatform {
         this.init();
     }
     installPlugin(plugin) {
-        const value = plugin.install.call(this);
-        Object.defineProperty(this, plugin.name, {
-            get: () => value,
-            enumerable: true,
-            configurable: true,
-        });
+        installPlugin(this, plugin);
     }
 }
 const platform = new EnhancedPlatform();

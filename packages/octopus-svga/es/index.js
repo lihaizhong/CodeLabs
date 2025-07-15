@@ -1,6 +1,6 @@
 import benchmark from 'octopus-benchmark';
 export { default as benchmark } from 'octopus-benchmark';
-import { OctopusPlatform, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF } from 'octopus-platform';
+import { OctopusPlatform, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF, installPlugin } from 'octopus-platform';
 
 class EnhancedPlatform extends OctopusPlatform {
     now;
@@ -27,12 +27,7 @@ class EnhancedPlatform extends OctopusPlatform {
         this.init();
     }
     installPlugin(plugin) {
-        const value = plugin.install.call(this);
-        Object.defineProperty(this, plugin.name, {
-            get: () => value,
-            enumerable: true,
-            configurable: true,
-        });
+        installPlugin(this, plugin);
     }
 }
 const platform = new EnhancedPlatform();

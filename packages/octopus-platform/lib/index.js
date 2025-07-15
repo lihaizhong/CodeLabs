@@ -361,6 +361,15 @@
      */
     var definePlugin = function (plugin) { return plugin; };
 
+    function installPlugin(platform, plugin) {
+        var value = plugin.install.call(platform);
+        Object.defineProperty(platform, plugin.name, {
+            get: function () { return value; },
+            enumerable: true,
+            configurable: true,
+        });
+    }
+
     /**
      * 通过选择器匹配获取canvas实例
      * @returns
@@ -793,6 +802,7 @@
 
     exports.OctopusPlatform = OctopusPlatform;
     exports.definePlugin = definePlugin;
+    exports.installPlugin = installPlugin;
     exports.pluginCanvas = pluginCanvas;
     exports.pluginDecode = pluginDecode;
     exports.pluginDownload = pluginDownload;

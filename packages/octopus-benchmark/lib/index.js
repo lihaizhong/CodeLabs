@@ -247,6 +247,15 @@
      */
     const definePlugin = (plugin) => plugin;
 
+    function installPlugin(platform, plugin) {
+        const value = plugin.install.call(platform);
+        Object.defineProperty(platform, plugin.name, {
+            get: () => value,
+            enumerable: true,
+            configurable: true,
+        });
+    }
+
     var pluginNow = definePlugin({
         name: "now",
         install() {
@@ -273,12 +282,7 @@
             return _this;
         }
         EnhancedPlatform.prototype.installPlugin = function (plugin) {
-            var value = plugin.install.call(this);
-            Object.defineProperty(this, plugin.name, {
-                get: function () { return value; },
-                enumerable: true,
-                configurable: true,
-            });
+            installPlugin(this, plugin);
         };
         return EnhancedPlatform;
     }(OctopusPlatform));

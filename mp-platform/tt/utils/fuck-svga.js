@@ -276,6 +276,15 @@
      */
     const definePlugin = (plugin) => plugin;
 
+    function installPlugin(platform, plugin) {
+        const value = plugin.install.call(platform);
+        Object.defineProperty(platform, plugin.name, {
+            get: () => value,
+            enumerable: true,
+            configurable: true,
+        });
+    }
+
     /**
      * 通过选择器匹配获取canvas实例
      * @returns
@@ -672,12 +681,7 @@
             this.init();
         }
         installPlugin(plugin) {
-            const value = plugin.install.call(this);
-            Object.defineProperty(this, plugin.name, {
-                get: () => value,
-                enumerable: true,
-                configurable: true,
-            });
+            installPlugin(this, plugin);
         }
     };
     const platform$1 = new EnhancedPlatform$1();
@@ -835,12 +839,7 @@
             return _this;
         }
         EnhancedPlatform.prototype.installPlugin = function (plugin) {
-            var value = plugin.install.call(this);
-            Object.defineProperty(this, plugin.name, {
-                get: function () { return value; },
-                enumerable: true,
-                configurable: true,
-            });
+            installPlugin(this, plugin);
         };
         return EnhancedPlatform;
     }(OctopusPlatform));

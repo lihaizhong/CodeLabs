@@ -120,6 +120,8 @@ declare abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
     switch(env: OctopusSupportedPlatform): void;
 }
 
+declare function installPlugin<Props extends keyof OctopusPlatformPlugins>(platform: OctopusPlatformWithDependencies<Props, never>, plugin: OctopusPlatformPluginOptions<Props>): void;
+
 /**
  * 通过选择器匹配获取canvas实例
  * @returns
@@ -172,5 +174,5 @@ declare const _default$1: OctopusPlatformPluginOptions<"path", never>;
  */
 declare const _default: OctopusPlatformPluginOptions<"rAF", never>;
 
-export { OctopusPlatform, definePlugin, _default$8 as pluginCanvas, _default$7 as pluginDecode, _default$6 as pluginDownload, _default$5 as pluginFsm, _default$4 as pluginImage, _default$3 as pluginNow, _default$2 as pluginOfsCanvas, _default$1 as pluginPath, _default as pluginRAF };
+export { OctopusPlatform, definePlugin, installPlugin, _default$8 as pluginCanvas, _default$7 as pluginDecode, _default$6 as pluginDownload, _default$5 as pluginFsm, _default$4 as pluginImage, _default$3 as pluginNow, _default$2 as pluginOfsCanvas, _default$1 as pluginPath, _default as pluginRAF };
 export type { Bitmap, GetCanvasResult, GetOffscreenCanvasResult, MiniProgramCanvas, MiniProgramImage, MiniProgramOffscreenCanvas, OctopusPlatformGlobals, OctopusPlatformPluginOptions, OctopusPlatformPlugins, OctopusPlatformWithDependencies, OctopusSupportedPlatform, OffscreenCanvasOptions, PlatformCanvas, PlatformImage, PlatformOffscreenCanvas, RawImage };
