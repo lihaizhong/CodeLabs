@@ -95,3 +95,7 @@ class EnhancedPlatform extends Platform<PlatformProperties> {
 
 export const platform = new EnhancedPlatform();
 ```
+
+## LICENSE
+
+[MIT](./LICENSE)

@@ -24,6 +24,8 @@ Svga动效播放器，是一个高性能、多端兼容（Web端、微信小程�
   - 添加了海报生成器，添加了二维码生成器，以及自研了png图片生成器
   - `VideoEditor` 帮助修改海报内容
 
+[查看这里](/packages/octopus-svga/README.md)
+
 #### 演示代码
 
 在 `mp-platform` 中，可通过对应小程序开发者工具查看（*抖音小程序，请在真机中查看*）。
@@ -31,6 +33,14 @@ Svga动效播放器，是一个高性能、多端兼容（Web端、微信小程�
 ### OctopusPlatform
 
 多平台兼容工具，主要用于Svga播放器多端兼容处理，提高代码的可维护性。通过插件方式，方便兼容能力按需接入。
+
+[查看这里](/packages/octopus-platform/README.md)
+
+### OctopusBenchmark
+
+性能测试工具。
+
+[查看这里](/packages/octopus-benchmark/README.md)
 
 ## 工具指令
 

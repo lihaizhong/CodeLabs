@@ -27,9 +27,7 @@
 npm i octopus-svga -S
 ```
 
-## 使用
-
-### 配置项
+## 配置项
 
 ### PlayerConfigOptions
 
@@ -132,6 +130,8 @@ export interface PosterConfig {
 
 export type PosterConfigOptions = Partial<PosterConfig>;
 ```
+
+## 使用
 
 ### 简单使用
 
@@ -281,4 +281,4 @@ SVGA AE设计插件
 
 ## LICENSE
 
-[Apache License 2.0](./LICENSE)
+[MIT](./LICENSE)
