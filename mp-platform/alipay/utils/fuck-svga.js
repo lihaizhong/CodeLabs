@@ -2351,12 +2351,13 @@
         return MovieEntity;
     }());
 
+    // import benchmark from "octopus-benchmark";
     function createVideoEntity(data, filename) {
         if (data instanceof Uint8Array) {
             var reader = new Reader(data);
             var video = MovieEntity.decode(reader);
-            benchmark.log('preflight cache size', reader.preflight.size);
-            benchmark.log('preflight hit count', reader.preflight.hitCount);
+            // benchmark.log('preflight cache size', reader.preflight.size);
+            // benchmark.log('preflight hit count', reader.preflight.hitCount);
             video.filename = filename;
             reader.preflight.clear();
             return video;
@@ -5909,6 +5910,54 @@
         return platform.decode.toDataURL(buff);
     }
 
+    /**
+     * 检查数据是否为zlib压缩格式
+     * @param data 待检查的二进制数据
+     * @returns 是否为zlib压缩格式
+     */
+    function isZlibCompressed(data) {
+        // 检查数据长度是否足够（至少需要2字节头部和4字节ADLER-32校验和）
+        if (data.length < 6) {
+            return false;
+        }
+        // 获取CMF和FLG字节
+        var cmf = data[0];
+        var flg = data[1];
+        // 检查CMF的压缩方法（低4位为8表示DEFLATE）
+        // eslint-disable-next-line no-bitwise
+        if ((cmf & 0x0F) !== 8) {
+            return false;
+        }
+        // 检查窗口大小（高4位通常为7，但不是严格要求）
+        // 这里不强制检查，因为理论上可以是其他值
+        // 验证头部校验（CMF * 256 + FLG必须是31的倍数）
+        if (((cmf * 256 + flg) % 31) !== 0) {
+            return false;
+        }
+        // 检查字典标志位（如果设置了字典，需要额外验证，但这种情况很少见）
+        // eslint-disable-next-line no-bitwise
+        var fdict = (flg & 0x20) !== 0;
+        if (fdict) {
+            // 标准zlib压缩通常不使用预定义字典
+            // 这里假设不使用字典，若检测到字典标志则认为不是标准zlib格式
+            return false;
+        }
+        // 尝试提取ADLER-32校验和并验证其格式
+        // 虽然无法验证校验和值（需要解压后计算），但可以检查其是否为合理的数值
+        var adler32Bytes = data.slice(-4);
+        if (adler32Bytes.length !== 4) {
+            return false;
+        }
+        // eslint-disable-next-line no-bitwise
+        var adler32 = (adler32Bytes[0] << 24) | (adler32Bytes[1] << 16) | (adler32Bytes[2] << 8) | adler32Bytes[3];
+        // 有效的ADLER-32值应大于0（除非是空数据）
+        if (data.length > 2 && adler32 === 0) {
+            return false;
+        }
+        // 所有检查都通过，数据可能是zlib压缩格式
+        return true;
+    }
+
     var VideoManager = /** @class */ (function () {
         function VideoManager(loadMode, options) {
             var _this = this;
@@ -5958,13 +6007,9 @@
                                 _b.label = 2;
                             case 2:
                                 if (_a) {
-                                    return [2 /*return*/, benchmark.time("".concat(bucket.local, " \u8BFB\u53D6\u65F6\u95F4"), function () {
-                                            return local.read(bucket.local);
-                                        })];
+                                    return [2 /*return*/, local.read(bucket.local)];
                                 }
-                                return [2 /*return*/, benchmark.time("".concat(bucket.origin, " \u4E0B\u8F7D\u65F6\u95F4"), function () {
-                                        return remote.fetch(bucket.origin);
-                                    })];
+                                return [2 /*return*/, remote.fetch(bucket.origin)];
                         }
                     });
                 }); },
@@ -5974,9 +6019,7 @@
                  * @returns
                  */
                 postprocess: function (bucket, data) {
-                    return benchmark.time("".concat(bucket.origin, " \u89E3\u6790\u65F6\u95F4"), function () {
-                        return Parser.parseVideo(data, bucket.origin, true);
-                    });
+                    return Parser.parseVideo(data, bucket.origin, true);
                 },
             };
             if (typeof loadMode === "string") {
@@ -6182,15 +6225,13 @@
                             return [4 /*yield*/, this.createBucket(urls[currentPoint], currentPoint, true)];
                         case 1:
                             preloadBucket = _b.sent();
-                            return [4 /*yield*/, benchmark.time("资源加载时间", function () {
-                                    return Promise.all(urls.map(function (url, index) {
-                                        // 当前帧的视频已经预加载到内存中
-                                        if (index === currentPoint) {
-                                            return preloadBucket;
-                                        }
-                                        return _this.createBucket(url, index, loadMode === "whole");
-                                    }));
-                                })];
+                            return [4 /*yield*/, Promise.all(urls.map(function (url, index) {
+                                    // 当前帧的视频已经预加载到内存中
+                                    if (index === currentPoint) {
+                                        return preloadBucket;
+                                    }
+                                    return _this.createBucket(url, index, loadMode === "whole");
+                                }))];
                         case 2:
                             _b.sent();
                             return [2 /*return*/];
@@ -6455,6 +6496,7 @@
     exports.generateImageFromCode = generateImageFromCode;
     exports.getBufferFromImageData = getBufferFromImageData;
     exports.getDataURLFromImageData = getDataURLFromImageData;
+    exports.isZlibCompressed = isZlibCompressed;
     exports.platform = platform;
 
     Object.defineProperty(exports, '__esModule', { value: true });

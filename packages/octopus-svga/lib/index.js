@@ -2351,12 +2351,13 @@
         return MovieEntity;
     }());
 
+    // import benchmark from "octopus-benchmark";
     function createVideoEntity(data, filename) {
         if (data instanceof Uint8Array) {
             var reader = new Reader(data);
             var video = MovieEntity.decode(reader);
-            benchmark.log('preflight cache size', reader.preflight.size);
-            benchmark.log('preflight hit count', reader.preflight.hitCount);
+            // benchmark.log('preflight cache size', reader.preflight.size);
+            // benchmark.log('preflight hit count', reader.preflight.hitCount);
             video.filename = filename;
             reader.preflight.clear();
             return video;
@@ -6006,13 +6007,9 @@
                                 _b.label = 2;
                             case 2:
                                 if (_a) {
-                                    return [2 /*return*/, benchmark.time("".concat(bucket.local, " \u8BFB\u53D6\u65F6\u95F4"), function () {
-                                            return local.read(bucket.local);
-                                        })];
+                                    return [2 /*return*/, local.read(bucket.local)];
                                 }
-                                return [2 /*return*/, benchmark.time("".concat(bucket.origin, " \u4E0B\u8F7D\u65F6\u95F4"), function () {
-                                        return remote.fetch(bucket.origin);
-                                    })];
+                                return [2 /*return*/, remote.fetch(bucket.origin)];
                         }
                     });
                 }); },
@@ -6022,9 +6019,7 @@
                  * @returns
                  */
                 postprocess: function (bucket, data) {
-                    return benchmark.time("".concat(bucket.origin, " \u89E3\u6790\u65F6\u95F4"), function () {
-                        return Parser.parseVideo(data, bucket.origin, true);
-                    });
+                    return Parser.parseVideo(data, bucket.origin, true);
                 },
             };
             if (typeof loadMode === "string") {
@@ -6230,15 +6225,13 @@
                             return [4 /*yield*/, this.createBucket(urls[currentPoint], currentPoint, true)];
                         case 1:
                             preloadBucket = _b.sent();
-                            return [4 /*yield*/, benchmark.time("资源加载时间", function () {
-                                    return Promise.all(urls.map(function (url, index) {
-                                        // 当前帧的视频已经预加载到内存中
-                                        if (index === currentPoint) {
-                                            return preloadBucket;
-                                        }
-                                        return _this.createBucket(url, index, loadMode === "whole");
-                                    }));
-                                })];
+                            return [4 /*yield*/, Promise.all(urls.map(function (url, index) {
+                                    // 当前帧的视频已经预加载到内存中
+                                    if (index === currentPoint) {
+                                        return preloadBucket;
+                                    }
+                                    return _this.createBucket(url, index, loadMode === "whole");
+                                }))];
                         case 2:
                             _b.sent();
                             return [2 /*return*/];

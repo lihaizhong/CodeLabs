@@ -1,4 +1,3 @@
-import benchmark from 'octopus-benchmark';
 export { default as benchmark } from 'octopus-benchmark';
 import { OctopusPlatform, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF, installPlugin } from 'octopus-platform';
 
@@ -1505,12 +1504,13 @@ class MovieEntity {
     sprites = [];
 }
 
+// import benchmark from "octopus-benchmark";
 function createVideoEntity(data, filename) {
     if (data instanceof Uint8Array) {
         const reader = new Reader(data);
         const video = MovieEntity.decode(reader);
-        benchmark.log('preflight cache size', reader.preflight.size);
-        benchmark.log('preflight hit count', reader.preflight.hitCount);
+        // benchmark.log('preflight cache size', reader.preflight.size);
+        // benchmark.log('preflight hit count', reader.preflight.hitCount);
         video.filename = filename;
         reader.preflight.clear();
         return video;
@@ -5080,16 +5080,16 @@ class VideoManager {
         preprocess: async (bucket) => {
             const { local, remote } = platform;
             if (local && (await local.exists(bucket.local))) {
-                return benchmark.time(`${bucket.local} 读取时间`, () => local.read(bucket.local));
+                return local.read(bucket.local);
             }
-            return benchmark.time(`${bucket.origin} 下载时间`, () => remote.fetch(bucket.origin));
+            return remote.fetch(bucket.origin);
         },
         /**
          * 后处理动效数据
          * @param data
          * @returns
          */
-        postprocess: (bucket, data) => benchmark.time(`${bucket.origin} 解析时间`, () => Parser.parseVideo(data, bucket.origin, true)),
+        postprocess: (bucket, data) => Parser.parseVideo(data, bucket.origin, true),
     };
     /**
      * 获取视频池大小
@@ -5198,13 +5198,13 @@ class VideoManager {
         const { loadMode, point: currentPoint } = this;
         // 优先加载当前动效
         const preloadBucket = await this.createBucket(urls[currentPoint], currentPoint, true);
-        await benchmark.time("资源加载时间", () => Promise.all(urls.map((url, index) => {
+        await Promise.all(urls.map((url, index) => {
             // 当前帧的视频已经预加载到内存中
             if (index === currentPoint) {
                 return preloadBucket;
             }
             return this.createBucket(url, index, loadMode === "whole");
-        })));
+        }));
     }
     /**
      * 获取当前帧的bucket

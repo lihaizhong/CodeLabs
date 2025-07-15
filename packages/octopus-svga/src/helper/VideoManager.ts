@@ -107,14 +107,10 @@ export class VideoManager {
       const { local, remote } = platform;
 
       if (local && (await local.exists(bucket.local))) {
-        return benchmark.time<ArrayBuffer>(`${bucket.local} 读取时间`, () =>
-          local.read(bucket.local)
-        );
+        return local.read(bucket.local);
       }
 
-      return benchmark.time<ArrayBuffer>(`${bucket.origin} 下载时间`, () =>
-        remote.fetch(bucket.origin)
-      );
+      return remote.fetch(bucket.origin);
     },
     /**
      * 后处理动效数据
@@ -122,9 +118,7 @@ export class VideoManager {
      * @returns
      */
     postprocess: (bucket: Bucket, data: ArrayBufferLike) =>
-      benchmark.time<PlatformVideo.Video>(`${bucket.origin} 解析时间`, () =>
-        Parser.parseVideo(data, bucket.origin, true)
-      ),
+      Parser.parseVideo(data, bucket.origin, true),
   };
 
   /**
@@ -273,17 +267,15 @@ export class VideoManager {
       true
     );
 
-    await benchmark.time("资源加载时间", () =>
-      Promise.all(
-        urls.map((url: string, index: number) => {
-          // 当前帧的视频已经预加载到内存中
-          if (index === currentPoint) {
-            return preloadBucket;
-          }
+    await Promise.all(
+      urls.map((url: string, index: number) => {
+        // 当前帧的视频已经预加载到内存中
+        if (index === currentPoint) {
+          return preloadBucket;
+        }
 
-          return this.createBucket(url, index, loadMode === "whole");
-        })
-      )
+        return this.createBucket(url, index, loadMode === "whole");
+      })
     );
   }
 
