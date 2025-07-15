@@ -3,6 +3,7 @@ import { Painter } from "../painter";
 import {
   type PlatformVideo,
   type PosterConfig,
+  type PosterConfigOptions,
   PLAYER_CONTENT_MODE,
 } from "../../types";
 
@@ -14,14 +15,22 @@ export class Poster {
   private entity: PlatformVideo.Video | undefined;
 
   /**
-   * 当前的帧，默认值 0
+   * 海报配置项
    */
-  private frame: number = 0;
-
-  /**
-   * 填充模式，类似于 content-mode。
-   */
-  private contentMode = PLAYER_CONTENT_MODE.FILL;
+  private readonly config: PosterConfig = {
+    /**
+     * 主屏，绘制海报的 Canvas 元素
+     */
+    container: "",
+    /**
+     * 填充模式，类似于 content-mode。
+     */
+    contentMode: PLAYER_CONTENT_MODE.FILL,
+    /**
+     * 绘制成海报的帧，默认是0。
+     */
+    frame: 0,
+  };
 
   /**
    * 是否配置完成
@@ -66,23 +75,17 @@ export class Poster {
    * @param options 可配置项
    */
   public async setConfig(
-    options: string | PosterConfig = {},
+    options: string | PosterConfigOptions = {},
     component?: any
   ): Promise<void> {
-    const config: PosterConfig =
-      typeof options === "string" ? { container: options } : options;
-
-    if (config.container === undefined) {
-      config.container = "";
+    if (typeof options === "string") {
+      this.config.container = options;
+    } else {
+      Object.assign(this.config, options);
     }
 
-    if (config.contentMode !== undefined) {
-      this.contentMode = config.contentMode;
-    }
-
-    this.frame = typeof config.frame === "number" ? config.frame : 0;
     this.isConfigured = true;
-    await this.register(config.container, component);
+    await this.register(this.config.container, component);
   }
 
   /**
@@ -90,7 +93,7 @@ export class Poster {
    * @param contentMode
    */
   public setContentMode(contentMode: PLAYER_CONTENT_MODE): void {
-    this.contentMode = contentMode;
+    this.config.contentMode = contentMode;
   }
 
   /**
@@ -98,7 +101,7 @@ export class Poster {
    * @param frame
    */
   public setFrame(frame: number): void {
-    this.frame = frame;
+    this.config.frame = frame;
   }
 
   /**
@@ -132,14 +135,14 @@ export class Poster {
   public draw(): void {
     if (!this.entity) return;
 
-    const { painter, renderer, resource, entity, contentMode, frame } = this;
+    const { painter, renderer, resource, entity, config } = this;
 
-    renderer!.resize(contentMode, entity!.size, painter.X!);
+    renderer!.resize(config.contentMode, entity!.size, painter.X!);
     renderer!.render(
       entity!,
       resource!.materials,
       resource!.dynamicMaterials,
-      frame,
+      config.frame,
       0,
       entity!.sprites.length
     );

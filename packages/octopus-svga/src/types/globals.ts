@@ -135,13 +135,15 @@ export interface PosterConfig {
   /**
    * 主屏，绘制海报的 Canvas 元素
    */
-  container?: string;
+  container: string;
   /**
    * 填充模式，类似于 content-mode。
    */
-  contentMode?: PLAYER_CONTENT_MODE;
+  contentMode: PLAYER_CONTENT_MODE;
   /**
    * 绘制成海报的帧，默认是0。
    */
-  frame?: number;
+  frame: number;
 }
+
+export type PosterConfigOptions = Partial<PosterConfig>;

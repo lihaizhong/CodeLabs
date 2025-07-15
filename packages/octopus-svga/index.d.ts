@@ -112,16 +112,17 @@ interface PosterConfig {
     /**
      * 主屏，绘制海报的 Canvas 元素
      */
-    container?: string;
+    container: string;
     /**
      * 填充模式，类似于 content-mode。
      */
-    contentMode?: PLAYER_CONTENT_MODE;
+    contentMode: PLAYER_CONTENT_MODE;
     /**
      * 绘制成海报的帧，默认是0。
      */
-    frame?: number;
+    frame: number;
 }
+type PosterConfigOptions = Partial<PosterConfig>;
 
 declare namespace PlatformVideo {
     interface VideoSize {
@@ -564,13 +565,9 @@ declare class Poster {
      */
     private entity;
     /**
-     * 当前的帧，默认值 0
+     * 海报配置项
      */
-    private frame;
-    /**
-     * 填充模式，类似于 content-mode。
-     */
-    private contentMode;
+    private readonly config;
     /**
      * 是否配置完成
      */
@@ -598,7 +595,7 @@ declare class Poster {
      * 设置配置项
      * @param options 可配置项
      */
-    setConfig(options?: string | PosterConfig, component?: any): Promise<void>;
+    setConfig(options?: string | PosterConfigOptions, component?: any): Promise<void>;
     /**
      * 修改内容模式
      * @param contentMode
@@ -849,4 +846,4 @@ declare class VideoEditor {
 }
 
 export { PLAYER_CONTENT_MODE, PLAYER_FILL_MODE, PLAYER_PLAY_MODE, Painter, Parser, PlatformVideo, Player, Poster, VideoEditor, VideoManager, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, platform };
-export type { Bucket, CanvasSize, IQrCodeImgOptions, LoadMode, NeedUpdatePoint, PaintMode, PaintModel, PlatformImages, PlatformRenderingContext2D, PlayerConfig, PlayerConfigOptions, PlayerEventCallback, PlayerProcessEventCallback, PosterConfig, PosterEventCallback, RawImages, TransformScale, VideoManagerOptions };
+export type { Bucket, CanvasSize, IQrCodeImgOptions, LoadMode, NeedUpdatePoint, PaintMode, PaintModel, PlatformImages, PlatformRenderingContext2D, PlayerConfig, PlayerConfigOptions, PlayerEventCallback, PlayerProcessEventCallback, PosterConfig, PosterConfigOptions, PosterEventCallback, RawImages, TransformScale, VideoManagerOptions };

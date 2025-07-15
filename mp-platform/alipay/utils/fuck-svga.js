@@ -5678,13 +5678,22 @@
     var Poster = /** @class */ (function () {
         function Poster(width, height) {
             /**
-             * 当前的帧，默认值 0
+             * 海报配置项
              */
-            this.frame = 0;
-            /**
-             * 填充模式，类似于 content-mode。
-             */
-            this.contentMode = "fill" /* PLAYER_CONTENT_MODE.FILL */;
+            this.config = {
+                /**
+                 * 主屏，绘制海报的 Canvas 元素
+                 */
+                container: "",
+                /**
+                 * 填充模式，类似于 content-mode。
+                 */
+                contentMode: "fill" /* PLAYER_CONTENT_MODE.FILL */,
+                /**
+                 * 绘制成海报的帧，默认是0。
+                 */
+                frame: 0,
+            };
             /**
              * 是否配置完成
              */
@@ -5725,21 +5734,18 @@
          */
         Poster.prototype.setConfig = function () {
             return __awaiter(this, arguments, void 0, function (options, component) {
-                var config;
                 if (options === void 0) { options = {}; }
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            config = typeof options === "string" ? { container: options } : options;
-                            if (config.container === undefined) {
-                                config.container = "";
+                            if (typeof options === "string") {
+                                this.config.container = options;
                             }
-                            if (config.contentMode !== undefined) {
-                                this.contentMode = config.contentMode;
+                            else {
+                                Object.assign(this.config, options);
                             }
-                            this.frame = typeof config.frame === "number" ? config.frame : 0;
                             this.isConfigured = true;
-                            return [4 /*yield*/, this.register(config.container, component)];
+                            return [4 /*yield*/, this.register(this.config.container, component)];
                         case 1:
                             _a.sent();
                             return [2 /*return*/];
@@ -5752,14 +5758,14 @@
          * @param contentMode
          */
         Poster.prototype.setContentMode = function (contentMode) {
-            this.contentMode = contentMode;
+            this.config.contentMode = contentMode;
         };
         /**
          * 设置当前帧
          * @param frame
          */
         Poster.prototype.setFrame = function (frame) {
-            this.frame = frame;
+            this.config.frame = frame;
         };
         /**
          * 装载 SVGA 数据元
@@ -5801,9 +5807,9 @@
         Poster.prototype.draw = function () {
             if (!this.entity)
                 return;
-            var _a = this, painter = _a.painter, renderer = _a.renderer, resource = _a.resource, entity = _a.entity, contentMode = _a.contentMode, frame = _a.frame;
-            renderer.resize(contentMode, entity.size, painter.X);
-            renderer.render(entity, resource.materials, resource.dynamicMaterials, frame, 0, entity.sprites.length);
+            var _a = this, painter = _a.painter, renderer = _a.renderer, resource = _a.resource, entity = _a.entity, config = _a.config;
+            renderer.resize(config.contentMode, entity.size, painter.X);
+            renderer.render(entity, resource.materials, resource.dynamicMaterials, config.frame, 0, entity.sprites.length);
         };
         /**
          * 获取海报的 ImageData 数据
