@@ -2,7 +2,8 @@ import type { PlatformCanvas } from "octopus-platform";
 import { platform } from "../platform";
 import { Painter } from "../painter";
 import { Config } from "./config";
-import { Animator, Renderer2D, ResourceManager } from "../../extensions";
+import { Animator, Renderer2D } from "../../extensions";
+import { ResourceManager } from "../../helper";
 import {
   type PlatformVideo,
   type PlayerConfigOptions,

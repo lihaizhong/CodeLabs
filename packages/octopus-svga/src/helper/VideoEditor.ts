@@ -3,7 +3,7 @@ import { platform } from "../core/platform";
 import { Parser } from "../core/parser";
 import { generateImageBufferFromCode, IQrCodeImgOptions } from "./qrcode";
 import { getBufferFromImageData } from "./png";
-import type { ResourceManager } from "../extensions";
+import type { ResourceManager } from "./ResourceManager";
 import type { Painter } from "../core/painter";
 import type { PlatformVideo, PlatformRenderingContext2D } from "../types";
 
