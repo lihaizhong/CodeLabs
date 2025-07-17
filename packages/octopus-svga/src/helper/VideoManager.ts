@@ -27,8 +27,8 @@ export interface VideoManagerOptions {
   postprocess: (
     bucket: Bucket,
     buff: ArrayBufferLike
-  ) => Awaited<PlatformVideo.Video>;
-  cleanup: (buckets: Bucket[]) => Awaited<void>;
+  ) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
+  cleanup: (buckets: Bucket[]) => Promise<void> | void;
 }
 
 export class VideoManager {
@@ -65,7 +65,7 @@ export class VideoManager {
      * @param url
      * @returns
      */
-    preprocess: async (bucket: Bucket) => Parser.download(bucket.origin),
+    preprocess: (bucket: Bucket) => Parser.download(bucket.origin),
     /**
      * 后处理动效数据
      * @param bucket

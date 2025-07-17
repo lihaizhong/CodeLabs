@@ -5066,7 +5066,7 @@ class VideoManager {
          * @param url
          * @returns
          */
-        preprocess: async (bucket) => Parser.download(bucket.origin),
+        preprocess: (bucket) => Parser.download(bucket.origin),
         /**
          * 后处理动效数据
          * @param bucket

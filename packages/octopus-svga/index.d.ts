@@ -700,8 +700,8 @@ interface NeedUpdatePoint {
 type LoadMode = "fast" | "whole";
 interface VideoManagerOptions {
     preprocess: (bucket: Bucket) => Promise<ArrayBufferLike>;
-    postprocess: (bucket: Bucket, buff: ArrayBufferLike) => Awaited<PlatformVideo.Video>;
-    cleanup: (buckets: Bucket[]) => Awaited<void>;
+    postprocess: (bucket: Bucket, buff: ArrayBufferLike) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
+    cleanup: (buckets: Bucket[]) => Promise<void> | void;
 }
 declare class VideoManager {
     /**

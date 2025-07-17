@@ -5999,7 +5999,6 @@
 
     var VideoManager = /** @class */ (function () {
         function VideoManager(loadMode, options) {
-            var _this = this;
             /**
              * 视频池的当前指针位置
              */
@@ -6032,9 +6031,7 @@
                  * @param url
                  * @returns
                  */
-                preprocess: function (bucket) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
-                    return [2 /*return*/, Parser.download(bucket.origin)];
-                }); }); },
+                preprocess: function (bucket) { return Parser.download(bucket.origin); },
                 /**
                  * 后处理动效数据
                  * @param bucket
