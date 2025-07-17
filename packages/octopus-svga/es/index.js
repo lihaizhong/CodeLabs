@@ -4037,13 +4037,14 @@ class ResourceManager {
      */
     async loadImagesWithRecord(images, filename, type = "normal") {
         const imageAwaits = [];
+        const imageFilename = `${filename.replace(/\.svga$/g, "")}.png`;
         Object.entries(images).forEach(([name, image]) => {
             // 过滤 1px 透明图
             if (image instanceof Uint8Array && image.byteLength < 70) {
                 return;
             }
             const p = platform.image
-                .load(() => this.createImage(), image, platform.path.resolve(`${filename.replace(/\.svga$/g, "")}.png`, type === "dynamic" ? `dyn_${name}` : name))
+                .load(() => this.createImage(), image, platform.path.resolve(imageFilename, type === "dynamic" ? `dyn_${name}` : name))
                 .then((img) => {
                 this.inertBitmapIntoCaches(img);
                 if (type === "dynamic") {
@@ -5279,7 +5280,7 @@ class VideoEditor {
     async set(key, value, mode = "R") {
         const { entity, resource } = this;
         if (mode === "A") {
-            await resource.loadImagesWithRecord({ [key]: value }, `${entity.filename.replace(/\.svga$/g, "")}.png`, "dynamic");
+            await resource.loadImagesWithRecord({ [key]: value }, entity.filename, "dynamic");
         }
         else {
             entity.images[key] = value;
@@ -5327,8 +5328,7 @@ class VideoEditor {
         const width = options?.width ?? canvas.width;
         const height = options?.height ?? canvas.height;
         const imageData = context.getImageData(0, 0, width, height);
-        const buff = getBufferFromImageData(imageData);
-        await this.set(key, new Uint8Array(buff), options?.mode);
+        await this.set(key, new Uint8Array(getBufferFromImageData(imageData)), options?.mode);
     }
     /**
      * 创建二进制图片
@@ -5344,8 +5344,7 @@ class VideoEditor {
             await this.set(key, url, options?.mode);
         }
         else {
-            const buff = await Parser.download(url);
-            await this.set(key, new Uint8Array(buff), options?.mode);
+            await this.set(key, new Uint8Array(await Parser.download(url)), options?.mode);
         }
     }
     /**
@@ -5358,8 +5357,7 @@ class VideoEditor {
     async setQRCode(key, code, options) {
         if (this.entity.locked)
             return;
-        const buff = generateImageBufferFromCode({ ...options, code });
-        await this.set(key, new Uint8Array(buff), options?.mode);
+        await this.set(key, new Uint8Array(generateImageBufferFromCode({ ...options, code })), options?.mode);
     }
 }
 

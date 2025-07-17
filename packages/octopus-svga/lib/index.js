@@ -4920,13 +4920,14 @@
          */
         ResourceManager.prototype.loadImagesWithRecord = function (images_1, filename_1) {
             return __awaiter(this, arguments, void 0, function (images, filename, type) {
-                var imageAwaits;
+                var imageAwaits, imageFilename;
                 var _this = this;
                 if (type === void 0) { type = "normal"; }
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             imageAwaits = [];
+                            imageFilename = "".concat(filename.replace(/\.svga$/g, ""), ".png");
                             Object.entries(images).forEach(function (_a) {
                                 var name = _a[0], image = _a[1];
                                 // 过滤 1px 透明图
@@ -4934,7 +4935,7 @@
                                     return;
                                 }
                                 var p = platform.image
-                                    .load(function () { return _this.createImage(); }, image, platform.path.resolve("".concat(filename.replace(/\.svga$/g, ""), ".png"), type === "dynamic" ? "dyn_".concat(name) : name))
+                                    .load(function () { return _this.createImage(); }, image, platform.path.resolve(imageFilename, type === "dynamic" ? "dyn_".concat(name) : name))
                                     .then(function (img) {
                                     _this.inertBitmapIntoCaches(img);
                                     if (type === "dynamic") {
@@ -6329,7 +6330,7 @@
                         case 0:
                             _a = this, entity = _a.entity, resource = _a.resource;
                             if (!(mode === "A")) return [3 /*break*/, 2];
-                            return [4 /*yield*/, resource.loadImagesWithRecord((_b = {}, _b[key] = value, _b), "".concat(entity.filename.replace(/\.svga$/g, ""), ".png"), "dynamic")];
+                            return [4 /*yield*/, resource.loadImagesWithRecord((_b = {}, _b[key] = value, _b), entity.filename, "dynamic")];
                         case 1:
                             _c.sent();
                             return [3 /*break*/, 3];
@@ -6378,7 +6379,7 @@
          */
         VideoEditor.prototype.setCanvas = function (key, context, options) {
             return __awaiter(this, void 0, void 0, function () {
-                var canvas, width, height, imageData, buff;
+                var canvas, width, height, imageData;
                 var _a, _b;
                 return __generator(this, function (_c) {
                     switch (_c.label) {
@@ -6389,8 +6390,7 @@
                             width = (_a = options === null || options === void 0 ? void 0 : options.width) !== null && _a !== void 0 ? _a : canvas.width;
                             height = (_b = options === null || options === void 0 ? void 0 : options.height) !== null && _b !== void 0 ? _b : canvas.height;
                             imageData = context.getImageData(0, 0, width, height);
-                            buff = getBufferFromImageData(imageData);
-                            return [4 /*yield*/, this.set(key, new Uint8Array(buff), options === null || options === void 0 ? void 0 : options.mode)];
+                            return [4 /*yield*/, this.set(key, new Uint8Array(getBufferFromImageData(imageData)), options === null || options === void 0 ? void 0 : options.mode)];
                         case 1:
                             _c.sent();
                             return [2 /*return*/];
@@ -6407,24 +6407,26 @@
          */
         VideoEditor.prototype.setImage = function (key, url, options) {
             return __awaiter(this, void 0, void 0, function () {
-                var buff;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
+                var _a, _b, _c;
+                return __generator(this, function (_d) {
+                    switch (_d.label) {
                         case 0:
                             if (this.entity.locked)
                                 return [2 /*return*/];
                             if (!url.startsWith("data:image")) return [3 /*break*/, 2];
                             return [4 /*yield*/, this.set(key, url, options === null || options === void 0 ? void 0 : options.mode)];
                         case 1:
-                            _a.sent();
+                            _d.sent();
                             return [3 /*break*/, 5];
-                        case 2: return [4 /*yield*/, Parser.download(url)];
-                        case 3:
-                            buff = _a.sent();
-                            return [4 /*yield*/, this.set(key, new Uint8Array(buff), options === null || options === void 0 ? void 0 : options.mode)];
+                        case 2:
+                            _a = this.set;
+                            _b = [key];
+                            _c = Uint8Array.bind;
+                            return [4 /*yield*/, Parser.download(url)];
+                        case 3: return [4 /*yield*/, _a.apply(this, _b.concat([new (_c.apply(Uint8Array, [void 0, _d.sent()]))(), options === null || options === void 0 ? void 0 : options.mode]))];
                         case 4:
-                            _a.sent();
-                            _a.label = 5;
+                            _d.sent();
+                            _d.label = 5;
                         case 5: return [2 /*return*/];
                     }
                 });
@@ -6439,14 +6441,12 @@
          */
         VideoEditor.prototype.setQRCode = function (key, code, options) {
             return __awaiter(this, void 0, void 0, function () {
-                var buff;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             if (this.entity.locked)
                                 return [2 /*return*/];
-                            buff = generateImageBufferFromCode(__assign(__assign({}, options), { code: code }));
-                            return [4 /*yield*/, this.set(key, new Uint8Array(buff), options === null || options === void 0 ? void 0 : options.mode)];
+                            return [4 /*yield*/, this.set(key, new Uint8Array(generateImageBufferFromCode(__assign(__assign({}, options), { code: code }))), options === null || options === void 0 ? void 0 : options.mode)];
                         case 1:
                             _a.sent();
                             return [2 /*return*/];

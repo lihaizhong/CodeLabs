@@ -124,6 +124,7 @@ export class ResourceManager {
     type: "normal" | "dynamic" = "normal"
   ): Promise<void> {
     const imageAwaits: Promise<void>[] = [];
+    const imageFilename = `${filename.replace(/\.svga$/g, "")}.png`;
 
     Object.entries(images).forEach(([name, image]) => {
       // 过滤 1px 透明图
@@ -136,7 +137,7 @@ export class ResourceManager {
           () => this.createImage(),
           image as RawImage,
           platform.path.resolve(
-            `${filename.replace(/\.svga$/g, "")}.png`,
+            imageFilename,
             type === "dynamic" ? `dyn_${name}` : name
           )
         )

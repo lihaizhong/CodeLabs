@@ -29,7 +29,7 @@ export class VideoEditor {
     if (mode === "A") {
       await resource.loadImagesWithRecord(
         { [key]: value },
-        `${entity.filename.replace(/\.svga$/g, "")}.png`,
+        entity.filename,
         "dynamic"
       );
     } else {
@@ -91,9 +91,12 @@ export class VideoEditor {
     const width = options?.width ?? canvas.width;
     const height = options?.height ?? canvas.height;
     const imageData = context.getImageData(0, 0, width, height);
-    const buff = getBufferFromImageData(imageData);
 
-    await this.set(key, new Uint8Array(buff), options?.mode);
+    await this.set(
+      key,
+      new Uint8Array(getBufferFromImageData(imageData)),
+      options?.mode
+    );
   }
 
   /**
@@ -109,9 +112,11 @@ export class VideoEditor {
     if (url.startsWith("data:image")) {
       await this.set(key, url, options?.mode);
     } else {
-      const buff = await Parser.download(url);
-
-      await this.set(key, new Uint8Array(buff), options?.mode);
+      await this.set(
+        key,
+        new Uint8Array(await Parser.download(url)),
+        options?.mode
+      );
     }
   }
 
@@ -129,8 +134,10 @@ export class VideoEditor {
   ) {
     if (this.entity.locked) return;
 
-    const buff = generateImageBufferFromCode({ ...options, code });
-
-    await this.set(key, new Uint8Array(buff), options?.mode);
+    await this.set(
+      key,
+      new Uint8Array(generateImageBufferFromCode({ ...options, code })),
+      options?.mode
+    );
   }
 }

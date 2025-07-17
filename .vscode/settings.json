@@ -21,6 +21,7 @@
     "protobuf",
     "protoc",
     "protos",
+    "qrcode",
     "sfixed",
     "ungap",
     "unzlib",
