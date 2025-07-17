@@ -27,49 +27,11 @@ export interface VideoManagerOptions {
   postprocess: (
     bucket: Bucket,
     buff: ArrayBufferLike
-  ) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
+  ) => Awaited<PlatformVideo.Video>;
+  cleanup: (buckets: Bucket[]) => Awaited<void>;
 }
 
 export class VideoManager {
-  /**
-   * 将文件写入用户目录中
-   * @param bucket
-   * @param buff
-   */
-  private static async writeFileToUserDirectory(
-    bucket: Bucket,
-    buff: ArrayBufferLike
-  ): Promise<void> {
-    const { path, local } = platform;
-
-    if (path.is(bucket.local)) {
-      try {
-        await local!.write(buff, bucket.local);
-      } catch (ex) {
-        // eslint-disable-next-line no-console
-        console.error(ex);
-      }
-    }
-  }
-
-  /**
-   * 从用户目录中移除文件
-   * @param bucket
-   * @returns
-   */
-  private static async removeFileFromUserDirectory(bucket: Bucket) {
-    const { path, local } = platform;
-
-    if (path.is(bucket.local)) {
-      try {
-        await local!.remove(bucket.local);
-      } catch (ex) {
-        // eslint-disable-next-line no-console
-        console.error(ex);
-      }
-    }
-  }
-
   /**
    * 视频池的当前指针位置
    */
@@ -103,22 +65,21 @@ export class VideoManager {
      * @param url
      * @returns
      */
-    preprocess: async (bucket: Bucket) => {
-      const { local, remote } = platform;
-
-      if (local && (await local.exists(bucket.local))) {
-        return local.read(bucket.local);
-      }
-
-      return remote.fetch(bucket.origin);
-    },
+    preprocess: async (bucket: Bucket) => Parser.download(bucket.origin),
     /**
      * 后处理动效数据
+     * @param bucket
      * @param data
      * @returns
      */
     postprocess: (bucket: Bucket, data: ArrayBufferLike) =>
       Parser.parseVideo(data, bucket.origin, true),
+    /**
+     * 清理数据
+     * @param buckets
+     * @returns
+     */
+    cleanup: (buckets: Bucket[]) => Promise.resolve()
   };
 
   /**
@@ -208,7 +169,6 @@ export class VideoManager {
     const { options } = this;
     const data = await options.preprocess(bucket);
 
-    VideoManager.writeFileToUserDirectory(bucket, data);
     if (needParse) {
       return options.postprocess(bucket, data);
     }
@@ -231,7 +191,7 @@ export class VideoManager {
     const { path } = platform;
     const bucket: Bucket = {
       origin: url,
-      local: path.resolve(path.filename(url), "full"),
+      local: path.resolve(path.filename(url)),
       entity: null,
       promise: null,
     };
@@ -349,7 +309,7 @@ export class VideoManager {
     this.buckets = [];
 
     if (needRemoveFiles) {
-      await Promise.all(buckets.map(VideoManager.removeFileFromUserDirectory));
+      await this.options.cleanup(buckets);
     }
   }
 }

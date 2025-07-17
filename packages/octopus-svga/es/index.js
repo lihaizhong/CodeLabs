@@ -4119,9 +4119,32 @@ class Parser {
      * @param url 文件资源地址
      * @returns
      */
-    static download(url) {
-        const { remote, path, local } = platform;
-        return path.is(url) ? local.read(url) : remote.fetch(url);
+    static async download(url) {
+        const { globals, remote, path, local } = platform;
+        const { env } = globals;
+        const supportLocal = env !== "h5" && env !== "tt";
+        const filepath = path.is(url)
+            ? url
+            : path.resolve(path.filename(url));
+        // 本地读取
+        if (supportLocal) {
+            if (await local.exists(filepath)) {
+                return local.read(filepath);
+            }
+        }
+        // 远程读取
+        const buff = await remote.fetch(url);
+        // 本地缓存
+        if (supportLocal) {
+            try {
+                await local.write(buff, filepath);
+            }
+            catch (ex) {
+                // eslint-disable-next-line no-console
+                console.error(ex);
+            }
+        }
+        return buff;
     }
     /**
      * 通过 url 下载并解析 SVGA 文件
@@ -5012,40 +5035,6 @@ function isZlibCompressed(data) {
 
 class VideoManager {
     /**
-     * 将文件写入用户目录中
-     * @param bucket
-     * @param buff
-     */
-    static async writeFileToUserDirectory(bucket, buff) {
-        const { path, local } = platform;
-        if (path.is(bucket.local)) {
-            try {
-                await local.write(buff, bucket.local);
-            }
-            catch (ex) {
-                // eslint-disable-next-line no-console
-                console.error(ex);
-            }
-        }
-    }
-    /**
-     * 从用户目录中移除文件
-     * @param bucket
-     * @returns
-     */
-    static async removeFileFromUserDirectory(bucket) {
-        const { path, local } = platform;
-        if (path.is(bucket.local)) {
-            try {
-                await local.remove(bucket.local);
-            }
-            catch (ex) {
-                // eslint-disable-next-line no-console
-                console.error(ex);
-            }
-        }
-    }
-    /**
      * 视频池的当前指针位置
      */
     point = 0;
@@ -5077,19 +5066,20 @@ class VideoManager {
          * @param url
          * @returns
          */
-        preprocess: async (bucket) => {
-            const { local, remote } = platform;
-            if (local && (await local.exists(bucket.local))) {
-                return local.read(bucket.local);
-            }
-            return remote.fetch(bucket.origin);
-        },
+        preprocess: async (bucket) => Parser.download(bucket.origin),
         /**
          * 后处理动效数据
+         * @param bucket
          * @param data
          * @returns
          */
         postprocess: (bucket, data) => Parser.parseVideo(data, bucket.origin, true),
+        /**
+         * 清理数据
+         * @param buckets
+         * @returns
+         */
+        cleanup: (buckets) => Promise.resolve()
     };
     /**
      * 获取视频池大小
@@ -5157,7 +5147,6 @@ class VideoManager {
     async downloadAndParseVideo(bucket, needParse = false) {
         const { options } = this;
         const data = await options.preprocess(bucket);
-        VideoManager.writeFileToUserDirectory(bucket, data);
         if (needParse) {
             return options.postprocess(bucket, data);
         }
@@ -5174,7 +5163,7 @@ class VideoManager {
         const { path } = platform;
         const bucket = {
             origin: url,
-            local: path.resolve(path.filename(url), "full"),
+            local: path.resolve(path.filename(url)),
             entity: null,
             promise: null,
         };
@@ -5266,7 +5255,7 @@ class VideoManager {
         this.maxRemain = 3;
         this.buckets = [];
         if (needRemoveFiles) {
-            await Promise.all(buckets.map(VideoManager.removeFileFromUserDirectory));
+            await this.options.cleanup(buckets);
         }
     }
 }
@@ -5283,7 +5272,7 @@ class VideoEditor {
     async set(key, value, mode = "R") {
         const { entity, resource } = this;
         if (mode === "A") {
-            await resource.loadImagesWithRecord({ [key]: value }, entity.filename, "dynamic");
+            await resource.loadImagesWithRecord({ [key]: value }, `${entity.filename.replace(/\.svga$/g, "")}.png`, "dynamic");
         }
         else {
             entity.images[key] = value;
@@ -5348,7 +5337,7 @@ class VideoEditor {
             await this.set(key, url, options?.mode);
         }
         else {
-            const buff = await platform.remote.fetch(url);
+            const buff = await Parser.download(url);
             await this.set(key, new Uint8Array(buff), options?.mode);
         }
     }

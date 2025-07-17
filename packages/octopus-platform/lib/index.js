@@ -746,7 +746,8 @@
         install: function () {
             var _a = this.globals, env = _a.env, br = _a.br;
             var filename = function (path) {
-                return path.substring(path.lastIndexOf("/") + 1);
+                var filepath = path.split(/\?#/g)[0];
+                return filepath.substring(filepath.lastIndexOf("/") + 1);
             };
             if (env === "h5" || env === "tt") {
                 return {

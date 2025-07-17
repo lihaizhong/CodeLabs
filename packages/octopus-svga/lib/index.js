@@ -625,7 +625,10 @@
         name: "path",
         install() {
             const { env, br } = this.globals;
-            const filename = (path) => path.substring(path.lastIndexOf("/") + 1);
+            const filename = (path) => {
+                const filepath = path.split(/\?#/g)[0];
+                return filepath.substring(filepath.lastIndexOf("/") + 1);
+            };
             if (env === "h5" || env === "tt") {
                 return {
                     USER_DATA_PATH: "",
@@ -5018,8 +5021,44 @@
          * @returns
          */
         Parser.download = function (url) {
-            var remote = platform.remote, path = platform.path, local = platform.local;
-            return path.is(url) ? local.read(url) : remote.fetch(url);
+            return __awaiter(this, void 0, void 0, function () {
+                var globals, remote, path, local, env, supportLocal, filepath, buff, ex_1;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            globals = platform.globals, remote = platform.remote, path = platform.path, local = platform.local;
+                            env = globals.env;
+                            supportLocal = env !== "h5" && env !== "tt";
+                            filepath = path.is(url)
+                                ? url
+                                : path.resolve(path.filename(url));
+                            if (!supportLocal) return [3 /*break*/, 2];
+                            return [4 /*yield*/, local.exists(filepath)];
+                        case 1:
+                            if (_a.sent()) {
+                                return [2 /*return*/, local.read(filepath)];
+                            }
+                            _a.label = 2;
+                        case 2: return [4 /*yield*/, remote.fetch(url)];
+                        case 3:
+                            buff = _a.sent();
+                            if (!supportLocal) return [3 /*break*/, 7];
+                            _a.label = 4;
+                        case 4:
+                            _a.trys.push([4, 6, , 7]);
+                            return [4 /*yield*/, local.write(buff, filepath)];
+                        case 5:
+                            _a.sent();
+                            return [3 /*break*/, 7];
+                        case 6:
+                            ex_1 = _a.sent();
+                            // eslint-disable-next-line no-console
+                            console.error(ex_1);
+                            return [3 /*break*/, 7];
+                        case 7: return [2 /*return*/, buff];
+                    }
+                });
+            });
         };
         /**
          * 通过 url 下载并解析 SVGA 文件
@@ -5993,100 +6032,30 @@
                  * @param url
                  * @returns
                  */
-                preprocess: function (bucket) { return __awaiter(_this, void 0, void 0, function () {
-                    var local, remote, _a;
-                    return __generator(this, function (_b) {
-                        switch (_b.label) {
-                            case 0:
-                                local = platform.local, remote = platform.remote;
-                                _a = local;
-                                if (!_a) return [3 /*break*/, 2];
-                                return [4 /*yield*/, local.exists(bucket.local)];
-                            case 1:
-                                _a = (_b.sent());
-                                _b.label = 2;
-                            case 2:
-                                if (_a) {
-                                    return [2 /*return*/, local.read(bucket.local)];
-                                }
-                                return [2 /*return*/, remote.fetch(bucket.origin)];
-                        }
-                    });
-                }); },
+                preprocess: function (bucket) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
+                    return [2 /*return*/, Parser.download(bucket.origin)];
+                }); }); },
                 /**
                  * 后处理动效数据
+                 * @param bucket
                  * @param data
                  * @returns
                  */
                 postprocess: function (bucket, data) {
                     return Parser.parseVideo(data, bucket.origin, true);
                 },
+                /**
+                 * 清理数据
+                 * @param buckets
+                 * @returns
+                 */
+                cleanup: function (buckets) { return Promise.resolve(); }
             };
             if (typeof loadMode === "string") {
                 this.loadMode = loadMode;
             }
             Object.assign(this.options, options);
         }
-        /**
-         * 将文件写入用户目录中
-         * @param bucket
-         * @param buff
-         */
-        VideoManager.writeFileToUserDirectory = function (bucket, buff) {
-            return __awaiter(this, void 0, void 0, function () {
-                var path, local, ex_1;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            path = platform.path, local = platform.local;
-                            if (!path.is(bucket.local)) return [3 /*break*/, 4];
-                            _a.label = 1;
-                        case 1:
-                            _a.trys.push([1, 3, , 4]);
-                            return [4 /*yield*/, local.write(buff, bucket.local)];
-                        case 2:
-                            _a.sent();
-                            return [3 /*break*/, 4];
-                        case 3:
-                            ex_1 = _a.sent();
-                            // eslint-disable-next-line no-console
-                            console.error(ex_1);
-                            return [3 /*break*/, 4];
-                        case 4: return [2 /*return*/];
-                    }
-                });
-            });
-        };
-        /**
-         * 从用户目录中移除文件
-         * @param bucket
-         * @returns
-         */
-        VideoManager.removeFileFromUserDirectory = function (bucket) {
-            return __awaiter(this, void 0, void 0, function () {
-                var path, local, ex_2;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            path = platform.path, local = platform.local;
-                            if (!path.is(bucket.local)) return [3 /*break*/, 4];
-                            _a.label = 1;
-                        case 1:
-                            _a.trys.push([1, 3, , 4]);
-                            return [4 /*yield*/, local.remove(bucket.local)];
-                        case 2:
-                            _a.sent();
-                            return [3 /*break*/, 4];
-                        case 3:
-                            ex_2 = _a.sent();
-                            // eslint-disable-next-line no-console
-                            console.error(ex_2);
-                            return [3 /*break*/, 4];
-                        case 4: return [2 /*return*/];
-                    }
-                });
-            });
-        };
         Object.defineProperty(VideoManager.prototype, "size", {
             /**
              * 获取视频池大小
@@ -6159,7 +6128,6 @@
                             return [4 /*yield*/, options.preprocess(bucket)];
                         case 1:
                             data = _a.sent();
-                            VideoManager.writeFileToUserDirectory(bucket, data);
                             if (needParse) {
                                 return [2 /*return*/, options.postprocess(bucket, data)];
                             }
@@ -6184,7 +6152,7 @@
                             path = platform.path;
                             bucket = {
                                 origin: url,
-                                local: path.resolve(path.filename(url), "full"),
+                                local: path.resolve(path.filename(url)),
                                 entity: null,
                                 promise: null,
                             };
@@ -6329,7 +6297,7 @@
                             this.maxRemain = 3;
                             this.buckets = [];
                             if (!needRemoveFiles) return [3 /*break*/, 2];
-                            return [4 /*yield*/, Promise.all(buckets.map(VideoManager.removeFileFromUserDirectory))];
+                            return [4 /*yield*/, this.options.cleanup(buckets)];
                         case 1:
                             _a.sent();
                             _a.label = 2;
@@ -6357,7 +6325,7 @@
                         case 0:
                             _a = this, entity = _a.entity, resource = _a.resource;
                             if (!(mode === "A")) return [3 /*break*/, 2];
-                            return [4 /*yield*/, resource.loadImagesWithRecord((_b = {}, _b[key] = value, _b), entity.filename, "dynamic")];
+                            return [4 /*yield*/, resource.loadImagesWithRecord((_b = {}, _b[key] = value, _b), "".concat(entity.filename.replace(/\.svga$/g, ""), ".png"), "dynamic")];
                         case 1:
                             _c.sent();
                             return [3 /*break*/, 3];
@@ -6446,7 +6414,7 @@
                         case 1:
                             _a.sent();
                             return [3 /*break*/, 5];
-                        case 2: return [4 /*yield*/, platform.remote.fetch(url)];
+                        case 2: return [4 /*yield*/, Parser.download(url)];
                         case 3:
                             buff = _a.sent();
                             return [4 /*yield*/, this.set(key, new Uint8Array(buff), options === null || options === void 0 ? void 0 : options.mode)];

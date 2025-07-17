@@ -50,10 +50,35 @@ export class Parser {
    * @param url 文件资源地址
    * @returns
    */
-  static download(url: string): Promise<ArrayBuffer> {
-    const { remote, path, local } = platform;
+  static async download(url: string): Promise<ArrayBuffer> {
+    const { globals, remote, path, local } = platform;
+    const { env } = globals;
+    const supportLocal = env !== "h5" && env !== "tt";
+    const filepath = path.is(url)
+        ? url
+        : path.resolve(path.filename(url));
 
-    return path.is(url) ? local!.read(url) : remote.fetch(url);
+    // 本地读取
+    if (supportLocal) {
+      if (await local!.exists(filepath)) {
+        return local!.read(filepath);
+      }
+    }
+
+    // 远程读取
+    const buff = await remote.fetch(url);
+
+    // 本地缓存
+    if (supportLocal) {
+      try {
+        await local!.write(buff, filepath);
+      } catch (ex) {
+        // eslint-disable-next-line no-console
+        console.error(ex);
+      }
+    }
+
+    return buff;
   }
 
   /**

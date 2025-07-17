@@ -1,5 +1,6 @@
 import type { RawImage, PlatformImage } from "octopus-platform";
 import { platform } from "../core/platform";
+import { Parser } from "../core/parser";
 import { generateImageBufferFromCode, IQrCodeImgOptions } from "./qrcode";
 import { getBufferFromImageData } from "./png";
 import type { ResourceManager } from "../extensions";
@@ -28,7 +29,7 @@ export class VideoEditor {
     if (mode === "A") {
       await resource.loadImagesWithRecord(
         { [key]: value },
-        entity.filename,
+        `${entity.filename.replace(/\.svga$/g, "")}.png`,
         "dynamic"
       );
     } else {
@@ -108,7 +109,7 @@ export class VideoEditor {
     if (url.startsWith("data:image")) {
       await this.set(key, url, options?.mode);
     } else {
-      const buff = await platform.remote.fetch(url);
+      const buff = await Parser.download(url);
 
       await this.set(key, new Uint8Array(buff), options?.mode);
     }

@@ -700,21 +700,10 @@ interface NeedUpdatePoint {
 type LoadMode = "fast" | "whole";
 interface VideoManagerOptions {
     preprocess: (bucket: Bucket) => Promise<ArrayBufferLike>;
-    postprocess: (bucket: Bucket, buff: ArrayBufferLike) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
+    postprocess: (bucket: Bucket, buff: ArrayBufferLike) => Awaited<PlatformVideo.Video>;
+    cleanup: (buckets: Bucket[]) => Awaited<void>;
 }
 declare class VideoManager {
-    /**
-     * 将文件写入用户目录中
-     * @param bucket
-     * @param buff
-     */
-    private static writeFileToUserDirectory;
-    /**
-     * 从用户目录中移除文件
-     * @param bucket
-     * @returns
-     */
-    private static removeFileFromUserDirectory;
     /**
      * 视频池的当前指针位置
      */

@@ -619,7 +619,10 @@ var pluginPath = definePlugin({
     name: "path",
     install() {
         const { env, br } = this.globals;
-        const filename = (path) => path.substring(path.lastIndexOf("/") + 1);
+        const filename = (path) => {
+            const filepath = path.split(/\?#/g)[0];
+            return filepath.substring(filepath.lastIndexOf("/") + 1);
+        };
         if (env === "h5" || env === "tt") {
             return {
                 USER_DATA_PATH: "",
