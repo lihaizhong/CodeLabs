@@ -89,10 +89,11 @@ export class SchedulerQueue {
 	}
 
 	flush(value) {
-		while ((fn = fns.shift())) {
+    let fn;
+
+		while ((fn = this.queue.shift())) {
 			fn(value);
 		}
-		this.queue = [];
 	}
 }
 
@@ -180,14 +181,14 @@ export default class IPromise {
 		if (this.#status !== PROMISE_STATUS.PENDING) return;
 
 		const run = () => {
-			const onFulfilled = (value) => this._fulfilledQueues.flush(value);
+			const onFulfilled = (value) => this.#fulfilledQueues.flush(value);
 			const onRejected = (error) => this.#rejectedQueues.flush(error);
 
 			if (isThenable(val)) {
 				val.then(
 					(value) => {
 						this.#status = PROMISE_STATUS.FULFILLED;
-						this.this.#value = value;
+						this.#value = value;
 						onFulfilled(value);
 					},
 					(error) => {
@@ -277,7 +278,7 @@ export default class IPromise {
 
 			switch (this.#status) {
 				case PROMISE_STATUS.PENDING:
-					this._fulfilledQueues.push(onFulfilled);
+					this.#fulfilledQueues.push(onFulfilled);
 					this.#rejectedQueues.push(onRejected);
 					break;
 				case PROMISE_STATUS.FULFILLED:
