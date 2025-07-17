@@ -6049,7 +6049,14 @@
                  * @param buckets
                  * @returns
                  */
-                cleanup: function (buckets) { return Promise.resolve(); }
+                cleanup: function (buckets) {
+                    platform.globals; var local = platform.local, path = platform.path;
+                    buckets.forEach(function (bucket) {
+                        if (path.is(bucket.local)) {
+                            local.remove(bucket.local);
+                        }
+                    });
+                },
             };
             if (typeof loadMode === "string") {
                 this.loadMode = loadMode;

@@ -5079,7 +5079,14 @@ class VideoManager {
          * @param buckets
          * @returns
          */
-        cleanup: (buckets) => Promise.resolve()
+        cleanup: (buckets) => {
+            const { globals, local, path } = platform;
+            buckets.forEach((bucket) => {
+                if (path.is(bucket.local)) {
+                    local.remove(bucket.local);
+                }
+            });
+        },
     };
     /**
      * 获取视频池大小
