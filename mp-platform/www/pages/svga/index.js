@@ -103,8 +103,8 @@ Page({
   },
 
   handleSwitchAtRandom() {
-    const { sources } = this;
-    const { ranIndex } = getOneAtRandom(sources);
+    const { sources } = this.data;
+    const { ranIndex } = getOneAtRandom(sources.length);
 
     this.setData({ current: ranIndex });
   },

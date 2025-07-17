@@ -131,7 +131,7 @@ export const posterSources = [
 ].map((filename) => `${LOCAL_SVGA_URL}/poster/${filename}`);
 
 export function getOneAtRandom(size) {
-  const ranIndex = Math.floor(Math.random() * size);
-
-  return { ranIndex };
+  return {
+    ranIndex: Math.floor(Math.random() * size),
+  };
 }
