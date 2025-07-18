@@ -6,10 +6,12 @@
 
 - [x] 兼容 Android 4.4+ / iOS 9+
 - [x] 整体大小在**70Kb**左右（核心动效播放器体积40Kb左右）
-- [x] 支持**双缓冲渲染机制** + **分片渲染机制**提升渲染性能
-- [x] 支持基于SVGA格式的**模版海报**绘制 *（需配合内置png图片生成器使用）*
-- [x] 支持动效**文件管理器**
-- [x] 支持动效**文件编辑器**
+- [x] 支持**双缓冲渲染机制** + **指数退避算法**提升渲染性能
+- [x] 支持基于SVGA格式的**模版海报**绘制 *（需配合png图片生成器使用）*
+- [x] 支持动效文件**管理器** *（支持自定义下载、解压、解析的策略）*
+- [x] 支持动效文件**编辑器** *（支持图片和二维码生成和替换，也可以自定义绘图）*
+- [x] 内置二维码生成器
+- [x] 内置png图片生成器
 
 ## 注意事项
 
@@ -254,6 +256,7 @@ player.start();
 ### VideoManager 动效管理器（worker加速）
 
 ```ts
+import { VideoManager, isZlibCompressed } from "octopus-svga";
 import { EnhancedWorker } from "../../utils/EnhancedWorker";
 
 const worker = new EnhancedWorker();
@@ -266,7 +269,12 @@ const videoManager = new VideoManager("fast", {
       worker.once(bucket.origin, (data) => resolve(data));
       worker.emit(bucket.origin, bucket.origin);
     }),
-  postprocess: (bucket, buff) => Parser.parseVideo(buff, bucket.origin, false),
+  postprocess: (bucket, buff) => Parser.parseVideo(
+    buff,
+    bucket.origin,
+    // 检查数据是否已经解压
+    isZlibCompressed(buff)
+  ),
 });
 ```
 
