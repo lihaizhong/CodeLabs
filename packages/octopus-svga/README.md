@@ -254,6 +254,9 @@ player.start();
 ### VideoManager 动效管理器（worker加速）
 
 ```ts
+import { EnhancedWorker } from "../../utils/EnhancedWorker";
+
+const worker = new EnhancedWorker();
 // mode: fast模式可以尽快播放当前选中的动效文件，whole模式可以等待动效文件全部下载完成。
 const videoManager = new VideoManager("fast", {
   // 这里的预进程使用了worker处理，减少主进程卡顿，加快动效文件解压。
@@ -267,7 +270,7 @@ const videoManager = new VideoManager("fast", {
 });
 ```
 
-Worker实现具体可参考[这里](/mp-platform/)
+具体可参考[这里](/mp-platform/)，了解各个端的 Worker 实现。
 
 ## 画布清理方案
 
