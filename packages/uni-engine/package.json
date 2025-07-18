@@ -1,6 +1,7 @@
 {
   "name": "uni-engine",
   "version": "1.0.0",
+  "private": true,
   "description": "web端模拟小程序引擎",
   "main": "index.js",
   "scripts": {

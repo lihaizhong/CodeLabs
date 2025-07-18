@@ -1,6 +1,7 @@
 {
   "name": "octopus-image",
   "version": "0.0.1",
+  "private": true,
   "type": "module",
   "description": "图片生成器",
   "module": "es/index.js",
