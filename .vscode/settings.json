@@ -23,6 +23,7 @@
     "protos",
     "qrcode",
     "sfixed",
+    "svgaplayer",
     "ungap",
     "unzlib",
     "Varint",

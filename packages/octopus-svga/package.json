@@ -1,6 +1,7 @@
 {
   "name": "octopus-svga",
   "version": "0.2.0",
+  "keywords": ["svgaplayer", "svga"],
   "description": "高性能SVGA动效播放器",
   "type": "module",
   "module": "es/index.js",
@@ -27,7 +28,17 @@
   },
   "author": "lihzsky",
   "license": "MIT",
-  "miniprogram": "dist",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lihaizhong/CodeLabs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lihaizhong/CodeLabs/issues"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.1",

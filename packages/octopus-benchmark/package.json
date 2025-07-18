@@ -2,6 +2,7 @@
   "name": "octopus-benchmark",
   "version": "0.0.1",
   "type": "module",
+  "keywords": ["benchmark"],
   "description": "基准测试工具",
   "module": "es/index.js",
   "main": "lib/index.js",
@@ -24,11 +25,19 @@
     "build": "npm run cleanup && npm run declare && npm run generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "benchmark"
-  ],
   "author": "lihzsky",
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lihaizhong/CodeLabs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lihaizhong/CodeLabs/issues"
+  },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-replace": "^6.0.2",

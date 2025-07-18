@@ -21,12 +21,6 @@
     "index.d.ts",
     "README.md"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lihaizhong/CodeSnippets.git"
-  },
-  "author": "lihzsky",
-  "license": "MIT",
   "scripts": {
     "declare": "tsc",
     "cleanup": "rimraf -rf es lib types index.d.ts",
@@ -34,12 +28,18 @@
     "build": "npm run cleanup && npm run declare && npm run generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "author": "lihzsky",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lihaizhong/CodeLabs.git"
+  },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
   "bugs": {
-    "url": "https://github.com/lihaizhong/CodeSnippets/issues"
+    "url": "https://github.com/lihaizhong/CodeLabs/issues"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.6",
