@@ -167,7 +167,7 @@ export class DistanceCalculator {
   }
 }
 
-export const compareAdaptor =
+export const adaptor =
   (options?: DistanceWeightOptions) =>
   (inputValue: string, comparedValue: string) =>
     new DistanceCalculator(options).get(inputValue, comparedValue);

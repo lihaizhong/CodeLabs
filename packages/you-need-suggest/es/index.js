@@ -131,7 +131,7 @@ class DistanceCalculator {
         return this.calc(inputValue.length, comparedValue.length);
     }
 }
-const compareAdaptor = (options) => (inputValue, comparedValue) => new DistanceCalculator(options).get(inputValue, comparedValue);
+const adaptor = (options) => (inputValue, comparedValue) => new DistanceCalculator(options).get(inputValue, comparedValue);
 
 class YouNeedSuggestion {
     keyNameList;
@@ -145,8 +145,8 @@ class YouNeedSuggestion {
         caseSensitive: false,
         // 最小相似度
         minSimilarity: 0,
-        // 计算算法
-        compare: compareAdaptor(),
+        // 计算器
+        calc: adaptor(),
     };
     constructor(dataSource, options) {
         Object.assign(this.options, options);
@@ -177,11 +177,11 @@ class YouNeedSuggestion {
             return 100;
         }
         if (typeof match === "string") {
-            return this.options.compare(this.parseValue(match), value);
+            return this.options.calc(this.parseValue(match), value);
         }
         return this.keyNameList.reduce((lastSimilarity, key) => {
             const sourceStr = this.parseValue(match[key]);
-            const currentSimilarity = this.options.compare(sourceStr, value);
+            const currentSimilarity = this.options.calc(sourceStr, value);
             return Math.max(lastSimilarity, currentSimilarity);
         }, Number.NEGATIVE_INFINITY);
     }
@@ -199,4 +199,4 @@ class YouNeedSuggestion {
     }
 }
 
-export { YouNeedSuggestion, compareAdaptor as compareOfLevenshteinDistanceAdaptor };
+export { YouNeedSuggestion, adaptor as calcOfLevenshteinDistanceAdaptor };

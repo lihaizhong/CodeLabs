@@ -1,11 +1,11 @@
-import { compareAdaptor } from "./compare/levenshtein-distance";
+import { adaptor } from "./calculations/levenshtein-distance";
 
 export interface YouNeedSuggestionOptions {
   keyNameList: string | string[];
   filterEmptyValue: boolean;
   caseSensitive: boolean;
   minSimilarity: number;
-  compare: (sourceStr: string, targetStr: string) => number;
+  calc: (sourceStr: string, targetStr: string) => number;
 }
 
 export interface YouNeedSuggestResult<T> {
@@ -25,8 +25,8 @@ export class YouNeedSuggestion<T> {
     caseSensitive: false,
     // 最小相似度
     minSimilarity: 0,
-    // 计算算法
-    compare: compareAdaptor(),
+    // 计算器
+    calc: adaptor(),
   };
 
   constructor(dataSource: T[], options: Partial<YouNeedSuggestionOptions>) {
@@ -68,12 +68,12 @@ export class YouNeedSuggestion<T> {
     }
 
     if (typeof match === "string") {
-      return this.options.compare(this.parseValue(match), value);
+      return this.options.calc(this.parseValue(match), value);
     }
 
     return this.keyNameList.reduce((lastSimilarity, key) => {
       const sourceStr: string = this.parseValue((match as any)[key]);
-      const currentSimilarity: number = this.options.compare(sourceStr, value);
+      const currentSimilarity: number = this.options.calc(sourceStr, value);
 
       return Math.max(lastSimilarity, currentSimilarity);
     }, Number.NEGATIVE_INFINITY);
@@ -98,4 +98,4 @@ export class YouNeedSuggestion<T> {
   }
 }
 
-export { compareAdaptor as compareOfLevenshteinDistanceAdaptor };
+export { adaptor as calcOfLevenshteinDistanceAdaptor };

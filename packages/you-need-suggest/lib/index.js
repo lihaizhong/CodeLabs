@@ -138,7 +138,7 @@
         };
         return DistanceCalculator;
     }());
-    var compareAdaptor = function (options) {
+    var adaptor = function (options) {
         return function (inputValue, comparedValue) {
             return new DistanceCalculator(options).get(inputValue, comparedValue);
         };
@@ -155,8 +155,8 @@
                 caseSensitive: false,
                 // 最小相似度
                 minSimilarity: 0,
-                // 计算算法
-                compare: compareAdaptor(),
+                // 计算器
+                calc: adaptor(),
             };
             Object.assign(this.options, options);
             this.dataSource = dataSource;
@@ -187,11 +187,11 @@
                 return 100;
             }
             if (typeof match === "string") {
-                return this.options.compare(this.parseValue(match), value);
+                return this.options.calc(this.parseValue(match), value);
             }
             return this.keyNameList.reduce(function (lastSimilarity, key) {
                 var sourceStr = _this.parseValue(match[key]);
-                var currentSimilarity = _this.options.compare(sourceStr, value);
+                var currentSimilarity = _this.options.calc(sourceStr, value);
                 return Math.max(lastSimilarity, currentSimilarity);
             }, Number.NEGATIVE_INFINITY);
         };
@@ -213,7 +213,7 @@
     }());
 
     exports.YouNeedSuggestion = YouNeedSuggestion;
-    exports.compareOfLevenshteinDistanceAdaptor = compareAdaptor;
+    exports.calcOfLevenshteinDistanceAdaptor = adaptor;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
