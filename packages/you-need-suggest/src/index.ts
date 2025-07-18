@@ -97,3 +97,5 @@ export class YouNeedSuggestion<T> {
     );
   }
 }
+
+export { compareAdaptor as compareOfLevenshteinDistanceAdaptor };

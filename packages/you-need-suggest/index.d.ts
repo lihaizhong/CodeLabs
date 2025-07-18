@@ -1,3 +1,11 @@
+interface DistanceWeightOptions {
+    continuous: number;
+    count: number;
+    position: number;
+    distance: number;
+}
+declare const compareAdaptor: (options?: DistanceWeightOptions) => (inputValue: string, comparedValue: string) => number;
+
 interface YouNeedSuggestionOptions {
     keyNameList: string | string[];
     filterEmptyValue: boolean;
@@ -20,5 +28,5 @@ declare class YouNeedSuggestion<T> {
     get(val: string): YouNeedSuggestResult<T>[];
 }
 
-export { YouNeedSuggestion };
+export { YouNeedSuggestion, compareAdaptor as compareOfLevenshteinDistanceAdaptor };
 export type { YouNeedSuggestResult, YouNeedSuggestionOptions };

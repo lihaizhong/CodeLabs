@@ -213,6 +213,7 @@
     }());
 
     exports.YouNeedSuggestion = YouNeedSuggestion;
+    exports.compareOfLevenshteinDistanceAdaptor = compareAdaptor;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

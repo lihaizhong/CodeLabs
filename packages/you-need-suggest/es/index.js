@@ -199,4 +199,4 @@ class YouNeedSuggestion {
     }
 }
 
-export { YouNeedSuggestion };
+export { YouNeedSuggestion, compareAdaptor as compareOfLevenshteinDistanceAdaptor };
