@@ -1,15 +1,15 @@
-export interface YouNeedSuggestionOptions {
+interface YouNeedSuggestionOptions {
     keyNameList: string | string[];
     filterEmptyValue: boolean;
     caseSensitive: boolean;
     minSimilarity: number;
     compare: (sourceStr: string, targetStr: string) => number;
 }
-export interface YouNeedSuggestResult<T> {
+interface YouNeedSuggestResult<T> {
     data: T;
     similarity: number;
 }
-export declare class YouNeedSuggestion<T> {
+declare class YouNeedSuggestion<T> {
     private keyNameList;
     private dataSource;
     private options;
@@ -19,3 +19,6 @@ export declare class YouNeedSuggestion<T> {
     private getMaxSimilarity;
     get(val: string): YouNeedSuggestResult<T>[];
 }
+
+export { YouNeedSuggestion };
+export type { YouNeedSuggestResult, YouNeedSuggestionOptions };

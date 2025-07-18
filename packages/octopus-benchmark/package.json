@@ -11,6 +11,12 @@
     "default": "./lib/index.js",
     "types": "./index.d.ts"
   },
+  "files": [
+    "es",
+    "lib",
+    "index.d.ts",
+    "README.md"
+  ],
   "scripts": {
     "declare": "tsc",
     "cleanup": "rimraf -rf es lib types index.d.ts",
