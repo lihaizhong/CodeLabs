@@ -232,16 +232,7 @@ await player.setConfig({
 });
 
 // mode: fast模式可以尽快播放当前选中的动效文件，whole模式可以等待动效文件全部下载完成。
-const videoManager = new VideoManager("fast", {
-  // 这里的预进程使用了worker处理，减少主进程卡顿，加快动效文件解压。
-  // 注意：VideoManager本身不提供worker能力，需要自己实现并接入。
-  preprocess: (bucket) =>
-    new Promise((resolve) => {
-      worker.once(bucket.origin, (data) => resolve(data));
-      worker.emit(bucket.origin, bucket.origin);
-    }),
-  postprocess: (bucket, buff) => Parser.parseVideo(buff, bucket.origin, false),
-});
+const videoManager = new VideoManager("fast");
 
 videoManager.prepare([
   "https://assets.xxx.com/frontend/9ce0cce7205fbebba380ed44879e5660.svga",
@@ -259,6 +250,24 @@ await player.mount(bucket.entity);
 
 player.start();
 ```
+
+### VideoManager 动效管理器（worker加速）
+
+```ts
+// mode: fast模式可以尽快播放当前选中的动效文件，whole模式可以等待动效文件全部下载完成。
+const videoManager = new VideoManager("fast", {
+  // 这里的预进程使用了worker处理，减少主进程卡顿，加快动效文件解压。
+  // 注意：VideoManager本身不提供worker能力，需要自己实现并接入。
+  preprocess: (bucket) =>
+    new Promise((resolve) => {
+      worker.once(bucket.origin, (data) => resolve(data));
+      worker.emit(bucket.origin, bucket.origin);
+    }),
+  postprocess: (bucket, buff) => Parser.parseVideo(buff, bucket.origin, false),
+});
+```
+
+Worker实现具体可参考[这里](/mp-platform/)
 
 ## 画布清理方案
 
