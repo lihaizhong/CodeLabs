@@ -9,7 +9,7 @@ declare class Stopwatch {
 }
 interface Benchmark extends Stopwatch {
     now: () => number;
-    time: <T extends any = any>(label: string, callback: () => Promise<T> | T) => Promise<T> | T;
+    time: <T extends any = any>(label: string, callback: () => Promise<T> | T) => Promise<T>;
     line: (size: number) => void;
     log: (...message: unknown[]) => void;
 }
