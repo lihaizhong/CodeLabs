@@ -1,4 +1,3 @@
-import benchmark from "octopus-benchmark";
 import { platform } from "../core/platform";
 import { Parser } from "../core/parser";
 import type { PlatformVideo } from "../types/video";
