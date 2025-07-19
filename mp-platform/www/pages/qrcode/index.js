@@ -27,7 +27,7 @@ function insertContainer(title, source, size, type = "img") {
       throw new Error(`not support type: ${type}`);
   }
 
-  console.log(type, source);
+  benchmark.log(type, source);
   $title.classList.add("qr-img-title");
   $title.innerText = `---- ${title.toUpperCase()} ----`;
   $root.appendChild($title);
