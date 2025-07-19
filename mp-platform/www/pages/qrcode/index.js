@@ -1,5 +1,6 @@
 import "weui";
 import { generateImageFromCode } from "octopus-svga";
+import { benchmark } from "octopus-benchmark";
 import { createQrCodeImg } from "../../utils/qrcode";
 
 function insertContainer(title, source, size, type = "img") {
@@ -39,63 +40,37 @@ const QRCodeUtils = {
     return 258;
   },
 
-  // --- insertQrCodeImg
+  // --- insertQrCodeToGif
 
-  insertQrCodeImg(size) {
-    console.time("createQrCodeImg");
-    const img = createQrCodeImg("this is a test");
-    console.timeEnd("createQrCodeImg");
-
-    insertContainer("origin gif", img, size);
+  insertQrCodeToGif(size) {
+    benchmark.time("create qr-code image", () =>
+      insertContainer("gif", createQrCodeImg("this is a test"), size)
+    );
   },
 
   // --- insertQrCodeToPNG
 
   insertQrCodeToPNG(size) {
-    console.time("generateImageFromCode");
-    const img = generateImageFromCode({
-      code: "this is a test",
-      size: 500,
-    });
-    console.timeEnd("generateImageFromCode");
-
-    insertContainer("png", img, size);
+    benchmark.time("create image from qr-code", () =>
+      insertContainer(
+        "png",
+        generateImageFromCode({
+          code: "this is a test",
+          size: 500,
+        }),
+        size
+      )
+    );
   },
-
-  // --- insertQrCodeToGIF
-
-  // insertQrCodeToGIF(size) {
-  //   console.time('createQRCodeToGIF');
-  //   const img = createQRCodeToGIF("i generate a gif");
-  //   console.timeEnd('createQRCodeToGIF');
-
-  //   insertContainer('gif', img, size);
-  // },
-
-  // --- insertQrCodeToHTML
-
-  // insertQrCodeToHTML(size) {
-  //   console.time('createQRCodeToHTML');
-  //   const img = createQRCodeToHTML("i generate a table tag", { size });
-  //   console.timeEnd('createQRCodeToHTML');
-
-  //   insertContainer('html table', img, size, 'html');
-  // }
 };
 
 window.onload = () => {
   const size = QRCodeUtils.getSize();
 
   setTimeout(() => {
-    QRCodeUtils.insertQrCodeImg(size);
+    QRCodeUtils.insertQrCodeToGif(size);
   }, 0);
   setTimeout(() => {
     QRCodeUtils.insertQrCodeToPNG(size);
   }, 0);
-  // setTimeout(() => {
-  //   QRCodeUtils.insertQrCodeToGIF(size);
-  // }, 0);
-  // setTimeout(() => {
-  //   QRCodeUtils.insertQrCodeToHTML(size);
-  // }, 0);
 };

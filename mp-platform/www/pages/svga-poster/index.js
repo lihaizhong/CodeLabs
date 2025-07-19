@@ -32,25 +32,25 @@ async function generatePoster(point) {
     const videoEditor = new VideoEditor(
       poster.painter,
       poster.resource,
-      posterItem,
+      posterItem
     );
 
     await Promise.all(
       Object.keys(data.replace).map((key) =>
-        videoEditor.setImage(key, data.replace[key]),
-      ),
+        videoEditor.setImage(key, data.replace[key])
+      )
     );
   }
 
   benchmark.log("poster item", posterItem);
   await poster.mount(posterItem);
-
   poster.setContentMode("aspect-fit");
   poster.draw();
+  $elem.src = await benchmark.time("generate png data", () => {
+    const imageData = poster.toImageData();
 
-  const imageData = poster.toImageData();
-
-  $elem.src = getDataURLFromImageData(imageData);
+    return getDataURLFromImageData(imageData);
+  });
   benchmark.log("data url", $elem.src);
 }
 
