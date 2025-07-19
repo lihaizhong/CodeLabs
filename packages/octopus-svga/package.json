@@ -1,6 +1,6 @@
 {
   "name": "octopus-svga",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "keywords": ["svgaplayer", "svga"],
   "description": "高性能SVGA动效播放器",
   "type": "module",

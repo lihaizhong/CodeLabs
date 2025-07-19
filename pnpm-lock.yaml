@@ -238,9 +238,6 @@ importers:
       fflate:
         specifier: ^0.8.2
         version: 0.8.2
-      octopus-benchmark:
-        specifier: workspace:^
-        version: link:../octopus-benchmark
       octopus-platform:
         specifier: workspace:^
         version: link:../octopus-platform
