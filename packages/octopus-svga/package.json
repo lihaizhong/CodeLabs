@@ -57,7 +57,6 @@
     "fflate": "^0.8.2"
   },
   "peerDependencies": {
-    "octopus-benchmark": "workspace:^",
     "octopus-platform": "workspace:^"
   }
 }

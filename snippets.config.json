@@ -2,17 +2,20 @@
   "sync": {
     "miniprogram-weapp": {
       "dependencies": {
-        "octopus-svga": "./utils/fuck-svga.js"
+        "octopus-svga": "./utils/fuck-svga.js",
+        "octopus-benchmark": "./utils/fuck-benchmark.js"
       }
     },
     "miniprogram-alipay": {
       "dependencies": {
-        "octopus-svga": "./utils/fuck-svga.js"
+        "octopus-svga": "./utils/fuck-svga.js",
+        "octopus-benchmark": "./utils/fuck-benchmark.js"
       }
     },
     "miniprogram-tt": {
       "dependencies": {
-        "octopus-svga": "./utils/fuck-svga.js"
+        "octopus-svga": "./utils/fuck-svga.js",
+        "octopus-benchmark": "./utils/fuck-benchmark.js"
       }
     }
   }

@@ -3,7 +3,7 @@ import { OctopusPlatform, pluginNow, installPlugin } from 'octopus-platform';
 class EnhancedPlatform extends OctopusPlatform {
     now;
     constructor() {
-        super([pluginNow], "0.0.1");
+        super([pluginNow], "0.0.2");
         this.init();
     }
     installPlugin(plugin) {
@@ -62,4 +62,4 @@ benchmark.log = (...message) => {
     console.log(...badge, ...message);
 };
 
-export { benchmark as default };
+export { benchmark };

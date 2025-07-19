@@ -1,4 +1,3 @@
-export { default as benchmark } from "octopus-benchmark";
 export { Parser } from "./core/parser";
 export { Painter } from "./core/painter";
 export { Player } from "./core/player";

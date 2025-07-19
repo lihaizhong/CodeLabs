@@ -3,9 +3,9 @@ import {
   Parser,
   Poster,
   VideoEditor,
-  benchmark,
   getDataURLFromImageData,
 } from "octopus-svga";
+import { benchmark } from "octopus-benchmark";
 import { EMPTY_PLACEHOLDER, posterSources } from "../../utils/constants";
 
 const posterFiles = posterSources;

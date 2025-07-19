@@ -1,4 +1,3 @@
-export { default as benchmark } from 'octopus-benchmark';
 import { RawImage, PlatformImage, PlatformCanvas, PlatformOffscreenCanvas, Bitmap, OctopusPlatform, OctopusPlatformPlugins, OctopusPlatformPluginOptions } from 'octopus-platform';
 
 type PlatformRenderingContext2D = OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D;

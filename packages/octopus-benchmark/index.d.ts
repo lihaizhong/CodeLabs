@@ -15,5 +15,5 @@ interface Benchmark extends Stopwatch {
 }
 declare const benchmark: Benchmark;
 
-export { benchmark as default };
+export { benchmark };
 export type { Benchmark };

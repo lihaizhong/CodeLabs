@@ -1,4 +1,4 @@
-import { benchmark } from "octopus-svga";
+import { benchmark } from "octopus-benchmark";
 
 export class EnhancedWorker {
   /**

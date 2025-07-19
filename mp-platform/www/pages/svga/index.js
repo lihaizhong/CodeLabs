@@ -4,8 +4,8 @@ import {
   Parser,
   VideoEditor,
   VideoManager,
-  benchmark,
 } from "octopus-svga";
+import { benchmark } from "octopus-benchmark";
 import Page from "../../utils/Page";
 import {
   svgaSources,

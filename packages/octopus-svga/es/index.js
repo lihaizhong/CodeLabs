@@ -1,4 +1,3 @@
-export { default as benchmark } from 'octopus-benchmark';
 import { OctopusPlatform, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF, installPlugin } from 'octopus-platform';
 
 class EnhancedPlatform extends OctopusPlatform {

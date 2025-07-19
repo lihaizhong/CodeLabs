@@ -2,7 +2,19 @@
 
 为 `Octopus Svga` 动效播放器测试开发的一款性能测试工具。
 
+## 安装
+
+```bash
+npm install octopus-benchmark -S
+```
+
 ## 使用
+
+### 引入方式
+
+```ts
+import { benchmark } from "octopus-benchmark";
+```
 
 ### benchmark.now()
 

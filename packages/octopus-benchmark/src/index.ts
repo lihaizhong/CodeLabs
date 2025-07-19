@@ -76,4 +76,4 @@ benchmark.log = (...message) => {
   console.log(...badge, ...message);
 };
 
-export default benchmark;
+export { benchmark };

@@ -1,4 +1,4 @@
-import { benchmark } from "./fuck-svga";
+import { benchmark } from "./fuck-benchmark";
 
 export class EnhancedWorker {
   constructor() {

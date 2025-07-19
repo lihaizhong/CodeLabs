@@ -4,8 +4,8 @@ import {
   VideoEditor,
   VideoManager,
   platform,
-  benchmark,
 } from "../../utils/fuck-svga";
+import { benchmark } from "../../utils/fuck-benchmark";
 import ReadyGo from "../../utils/ReadyGo";
 import { EnhancedWorker } from "../../utils/EnhancedWorker";
 
