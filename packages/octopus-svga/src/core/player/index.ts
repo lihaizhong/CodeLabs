@@ -1,5 +1,5 @@
 import type { PlatformCanvas } from "octopus-platform";
-import { platform } from "../platform";
+import { platform } from "../../platform";
 import { Painter } from "../painter";
 import { Config } from "./config";
 import { Animator, Renderer2D } from "../../extensions";

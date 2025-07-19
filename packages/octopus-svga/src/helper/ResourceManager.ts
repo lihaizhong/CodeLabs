@@ -1,6 +1,6 @@
 import type { RawImage, PlatformImage, Bitmap } from "octopus-platform";
 import { Painter } from "../core/painter";
-import { platform } from "../core/platform";
+import { platform } from "../platform";
 import type { RawImages } from "../types";
 
 export class ResourceManager {

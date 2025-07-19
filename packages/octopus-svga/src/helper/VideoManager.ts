@@ -1,4 +1,4 @@
-import { platform } from "../core/platform";
+import { platform } from "../platform";
 import { Parser } from "../core/parser";
 import type { PlatformVideo } from "../types/video";
 

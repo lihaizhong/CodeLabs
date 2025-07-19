@@ -1,6 +1,7 @@
 // import { unzlibSync } from "fflate";
-import { unzlibSync, createVideoEntity, calculateHash } from "../../extensions";
-import { platform } from "../platform";
+import { unzlibSync, createVideoEntity } from "../../extensions";
+import { calculateHash } from "../../shared";
+import { platform } from "../../platform";
 import type { PlatformVideo } from "../../types";
 
 /**

@@ -1,5 +1,5 @@
 import type { RawImage, PlatformImage } from "octopus-platform";
-import { platform } from "../core/platform";
+import { platform } from "../platform";
 import { Parser } from "../core/parser";
 import { generateImageBufferFromCode, IQrCodeImgOptions } from "./qrcode";
 import { getBufferFromImageData } from "./png";

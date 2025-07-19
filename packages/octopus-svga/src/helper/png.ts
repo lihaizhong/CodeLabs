@@ -1,4 +1,4 @@
-import { platform } from "../core/platform";
+import { platform } from "../platform";
 import { PNGEncoder } from "../extensions";
 
 export function getBufferFromImageData(imageData: ImageData) {

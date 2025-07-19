@@ -1,4 +1,4 @@
-import { platform } from "../../../core/platform";
+import { platform } from "../../../platform";
 import { readFloatLE } from "./float";
 import { Preflight } from "./preflight";
 

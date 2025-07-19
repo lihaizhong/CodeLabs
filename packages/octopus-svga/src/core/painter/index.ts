@@ -1,5 +1,5 @@
 import type { PlatformCanvas, PlatformOffscreenCanvas } from "octopus-platform";
-import { platform } from "../platform";
+import { platform } from "../../platform";
 import type { PaintModel, PaintMode } from "../../types";
 
 const { noop } = platform;
