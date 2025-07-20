@@ -1,4 +1,4 @@
-import { adaptor } from "./calculations/levenshtein-distance";
+import { calcAdaptor } from "./calculations/levenshtein-distance";
 
 export interface YouNeedSuggestionOptions {
   keyNameList: string | string[];
@@ -26,7 +26,7 @@ export class YouNeedSuggestion<T> {
     // 最小相似度
     minSimilarity: 0,
     // 计算器
-    calc: adaptor(),
+    calc: calcAdaptor(),
   };
 
   constructor(dataSource: T[], options: Partial<YouNeedSuggestionOptions>) {
@@ -97,5 +97,3 @@ export class YouNeedSuggestion<T> {
     );
   }
 }
-
-export { adaptor as calcOfLevenshteinDistanceAdaptor };

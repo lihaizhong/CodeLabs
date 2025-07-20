@@ -1,3 +1,5 @@
+import { defineAdaptor } from "../defineAdaptor";
+
 export interface DistanceWeightOptions {
   // 最大的匹配词长度权重
   continuous: number;
@@ -167,7 +169,11 @@ export class DistanceCalculator {
   }
 }
 
-export const adaptor =
-  (options?: DistanceWeightOptions) =>
-  (inputValue: string, comparedValue: string) =>
-    new DistanceCalculator(options).get(inputValue, comparedValue);
+export const calcAdaptor = defineAdaptor<DistanceWeightOptions>(
+  (options?: DistanceWeightOptions) => {
+    const calculator = new DistanceCalculator(options);
+
+    return (inputValue: string, comparedValue: string) =>
+      calculator.get(inputValue, comparedValue);
+  }
+);
