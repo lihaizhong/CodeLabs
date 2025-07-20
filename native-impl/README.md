@@ -1,3 +1,4 @@
 # 源码实现
 
-[各种源码实现，你想要的这里都有](https://juejin.im/post/6844903989083897870)
+- [core-js](https://github.com/zloirock/core-js/tree/master)
+- [EcmaScript](https://ecma-international.org/technical-committees/tc39/)
