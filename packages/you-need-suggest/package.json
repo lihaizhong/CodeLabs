@@ -1,6 +1,6 @@
 {
   "name": "you-need-suggest",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "keywords": [
     "suggest",
@@ -9,10 +9,12 @@
   "description": "本地动态筛选功能",
   "module": "es/index.js",
   "main": "lib/index.js",
+  "unpkg": "./lib/index.min.js",
   "types": "index.d.ts",
   "exports": {
     "import": "./es/index.js",
     "default": "./lib/index.js",
+    "unpkg": "./lib/index.min.js",
     "types": "./index.d.ts"
   },
   "files": [
