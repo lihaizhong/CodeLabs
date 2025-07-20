@@ -775,7 +775,7 @@
                 pluginNow,
                 pluginPath,
                 pluginRaf,
-            ], "0.2.2") || this;
+            ], "0.2.3") || this;
             _this.init();
             return _this;
         }

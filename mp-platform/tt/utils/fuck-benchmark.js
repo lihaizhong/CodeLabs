@@ -277,7 +277,7 @@
     var EnhancedPlatform = /** @class */ (function (_super) {
         __extends(EnhancedPlatform, _super);
         function EnhancedPlatform() {
-            var _this = _super.call(this, [pluginNow], "0.0.2") || this;
+            var _this = _super.call(this, [pluginNow], "0.1.1") || this;
             _this.init();
             return _this;
         }
@@ -288,9 +288,13 @@
     }(OctopusPlatform));
     var platform = new EnhancedPlatform();
 
-    var badge = [
+    var logBadge = [
         "%cBENCHMARK",
         "padding: 2px 4px; background: #68B984; color: #FFFFFF; border-radius: 4px;",
+    ];
+    var infoBadge = [
+        "%cBENCHMARK",
+        "padding: 2px 4px; background: #89CFF0; color: #FFFFFF; border-radius: 4px;",
     ];
     var Stopwatch = /** @class */ (function () {
         function Stopwatch() {
@@ -351,7 +355,14 @@
         for (var _i = 0; _i < arguments.length; _i++) {
             message[_i] = arguments[_i];
         }
-        console.log.apply(console, __spreadArray(__spreadArray([], badge, false), message, false));
+        console.log.apply(console, __spreadArray(__spreadArray([], logBadge, false), message, false));
+    };
+    benchmark.info = function () {
+        var message = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            message[_i] = arguments[_i];
+        }
+        console.info.apply(console, __spreadArray(__spreadArray([], infoBadge, false), message, false));
     };
 
     exports.benchmark = benchmark;

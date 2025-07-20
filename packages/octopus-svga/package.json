@@ -1,6 +1,6 @@
 {
   "name": "octopus-svga",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "keywords": ["svgaplayer", "svga"],
   "description": "高性能SVGA动效播放器",
   "type": "module",
@@ -52,9 +52,6 @@
     "rollup-plugin-dts": "^6.2.1",
     "tslib": "^2.8.1",
     "typescript": "^5.8.3"
-  },
-  "dependencies": {
-    "fflate": "^0.8.2"
   },
   "peerDependencies": {
     "octopus-platform": "workspace:^"

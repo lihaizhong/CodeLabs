@@ -1,6 +1,6 @@
 {
   "name": "octopus-benchmark",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "keywords": ["benchmark"],
   "description": "基准测试工具",
