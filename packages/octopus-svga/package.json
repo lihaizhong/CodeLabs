@@ -1,8 +1,8 @@
 {
   "name": "octopus-svga",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "keywords": ["svgaplayer", "svga"],
-  "description": "高性能SVGA动效播放器",
+  "description": "高性能SVGA动效播放器，设计目标是 解析速度更快、体积更小、性能更高、兼容性更高、功能更丰富。",
   "type": "module",
   "module": "es/index.js",
   "main": "lib/index.js",
