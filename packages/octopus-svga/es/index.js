@@ -21,7 +21,7 @@ class EnhancedPlatform extends OctopusPlatform {
             pluginNow,
             pluginPath,
             pluginRAF,
-        ], "0.2.5");
+        ], "0.3.0");
         this.init();
     }
     installPlugin(plugin) {
@@ -3950,10 +3950,6 @@ class QRCode {
  * SVGA 下载解析器
  */
 class Parser {
-    static hash(buff) {
-        const view = new Uint8Array(buff);
-        return calculateHash(view, 0, view.byteLength, Math.max(1, Math.floor(view.byteLength / 100)));
-    }
     /**
      * 解压视频源文件
      * @param data

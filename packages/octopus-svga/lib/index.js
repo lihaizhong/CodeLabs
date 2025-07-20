@@ -775,7 +775,7 @@
                 pluginNow,
                 pluginPath,
                 pluginRaf,
-            ], "0.2.5") || this;
+            ], "0.3.0") || this;
             _this.init();
             return _this;
         }
@@ -4773,10 +4773,6 @@
     var Parser = /** @class */ (function () {
         function Parser() {
         }
-        Parser.hash = function (buff) {
-            var view = new Uint8Array(buff);
-            return calculateHash(view, 0, view.byteLength, Math.max(1, Math.floor(view.byteLength / 100)));
-        };
         /**
          * 解压视频源文件
          * @param data
