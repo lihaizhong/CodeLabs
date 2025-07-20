@@ -30,6 +30,8 @@
 npm i octopus-svga -S
 ```
 
+注意：**如果你使用 `ESM` 模块，需要安装 `npm i octopus-platform -S`。**
+
 ## 配置项
 
 ### PlayerConfigOptions
