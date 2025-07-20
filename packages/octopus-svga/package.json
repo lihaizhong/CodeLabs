@@ -1,15 +1,17 @@
 {
   "name": "octopus-svga",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "keywords": ["svgaplayer", "svga"],
   "description": "高性能SVGA动效播放器，支持Web/微信小程序/支付宝小程序/抖音小程序，设计目标是 解析速度更快、体积更小、性能更高、兼容性更高、功能更丰富。",
   "type": "module",
   "module": "es/index.js",
   "main": "lib/index.js",
+  "unpkg": "./lib/index.min.js",
   "types": "index.d.ts",
   "exports": {
     "import": "./es/index.js",
     "default": "./lib/index.js",
+    "unpkg": "./lib/index.min.js",
     "types": "./index.d.ts"
   },
   "files": [

@@ -1,15 +1,17 @@
 {
   "name": "octopus-platform",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "keywords": [],
   "description": "平台兼容性磨平",
   "module": "es/index.js",
   "main": "lib/index.js",
+  "unpkg": "./lib/index.min.js",
   "types": "index.d.ts",
   "exports": {
     "import": "./es/index.js",
     "default": "./lib/index.js",
+    "unpkg": "./lib/index.min.js",
     "types": "./index.d.ts"
   },
   "files": [

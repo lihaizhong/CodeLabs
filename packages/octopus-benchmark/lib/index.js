@@ -117,7 +117,7 @@
         /**
          * 平台版本
          */
-        platformVersion = "0.0.1";
+        platformVersion = "0.0.2";
         /**
          * 应用版本
          */
@@ -277,7 +277,7 @@
     var EnhancedPlatform = /** @class */ (function (_super) {
         __extends(EnhancedPlatform, _super);
         function EnhancedPlatform() {
-            var _this = _super.call(this, [pluginNow], "0.1.1") || this;
+            var _this = _super.call(this, [pluginNow], "0.1.2") || this;
             _this.init();
             return _this;
         }
