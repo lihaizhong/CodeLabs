@@ -12,6 +12,7 @@ interface Benchmark extends Stopwatch {
     time: <T extends any = any>(label: string, callback: () => Promise<T> | T) => Promise<T>;
     line: (size: number) => void;
     log: (...message: unknown[]) => void;
+    info: (...message: unknown[]) => void;
 }
 declare const benchmark: Benchmark;
 

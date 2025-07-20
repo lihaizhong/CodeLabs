@@ -1,9 +1,13 @@
 import { platform } from "./platform";
 
-const badge = [
+const logBadge = [
   "%cBENCHMARK",
   "padding: 2px 4px; background: #68B984; color: #FFFFFF; border-radius: 4px;",
 ];
+const infoBadge = [
+  "%cBENCHMARK",
+  "padding: 2px 4px; background: #89CFF0; color: #FFFFFF; border-radius: 4px;",
+]
 
 class Stopwatch {
   private readonly timeLabels: Map<string, number> = new Map();
@@ -53,6 +57,7 @@ export interface Benchmark extends Stopwatch {
   ) => Promise<T>;
   line: (size: number) => void;
   log: (...message: unknown[]) => void;
+  info: (...message: unknown[]) => void;
 }
 
 const stopwatch = new Stopwatch();
@@ -73,7 +78,11 @@ benchmark.line = (size = 40) => {
 };
 
 benchmark.log = (...message) => {
-  console.log(...badge, ...message);
+  console.log(...logBadge, ...message);
+};
+
+benchmark.info = (...message) => {
+  console.info(...infoBadge, ...message);
 };
 
 export { benchmark };
