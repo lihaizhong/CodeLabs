@@ -1,6 +1,5 @@
 // import { unzlibSync } from "fflate";
 import { unzlibSync, createVideoEntity } from "../../extensions";
-import { calculateHash } from "../../shared";
 import { platform } from "../../platform";
 import type { PlatformVideo } from "../../types";
 
@@ -8,17 +7,6 @@ import type { PlatformVideo } from "../../types";
  * SVGA 下载解析器
  */
 export class Parser {
-  static hash(buff: ArrayBufferLike) {
-    const view = new Uint8Array(buff);
-
-    return calculateHash(
-      view,
-      0,
-      view.byteLength,
-      Math.max(1, Math.floor(view.byteLength / 100))
-    );
-  }
-
   /**
    * 解压视频源文件
    * @param data

@@ -277,7 +277,7 @@
     var EnhancedPlatform = /** @class */ (function (_super) {
         __extends(EnhancedPlatform, _super);
         function EnhancedPlatform() {
-            var _this = _super.call(this, [pluginNow], "0.0.3") || this;
+            var _this = _super.call(this, [pluginNow], "0.1.1") || this;
             _this.init();
             return _this;
         }

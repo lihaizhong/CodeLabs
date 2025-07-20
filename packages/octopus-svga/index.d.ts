@@ -281,7 +281,6 @@ declare namespace PlatformVideo {
  * SVGA 下载解析器
  */
 declare class Parser {
-    static hash(buff: ArrayBufferLike): string;
     /**
      * 解压视频源文件
      * @param data

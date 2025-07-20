@@ -235,9 +235,6 @@ importers:
 
   packages/octopus-svga:
     dependencies:
-      fflate:
-        specifier: ^0.8.2
-        version: 0.8.2
       octopus-platform:
         specifier: workspace:^
         version: link:../octopus-platform
