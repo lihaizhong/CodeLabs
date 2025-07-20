@@ -1,11 +1,7 @@
-# @lihzsky/you-need-suggest
+# you-need-suggest
 
-## 0.0.2
+## 0.1.1
+
 ### Patch Changes
 
-- 优化最短编辑距离算法
-
-## 0.0.1
-### Patch Changes
-
-- 新版本发布
+- 优化本地模糊搜索工具构建
