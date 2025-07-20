@@ -21,7 +21,7 @@ class EnhancedPlatform extends OctopusPlatform {
             pluginNow,
             pluginPath,
             pluginRAF,
-        ], "0.2.4");
+        ], "0.2.5");
         this.init();
     }
     installPlugin(plugin) {
