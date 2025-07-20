@@ -3,7 +3,7 @@ import { OctopusPlatform, pluginNow, installPlugin } from 'octopus-platform';
 class EnhancedPlatform extends OctopusPlatform {
     now;
     constructor() {
-        super([pluginNow], "0.0.2");
+        super([pluginNow], "0.0.3");
         this.init();
     }
     installPlugin(plugin) {
@@ -12,9 +12,13 @@ class EnhancedPlatform extends OctopusPlatform {
 }
 const platform = new EnhancedPlatform();
 
-const badge = [
+const logBadge = [
     "%cBENCHMARK",
     "padding: 2px 4px; background: #68B984; color: #FFFFFF; border-radius: 4px;",
+];
+const infoBadge = [
+    "%cBENCHMARK",
+    "padding: 2px 4px; background: #89CFF0; color: #FFFFFF; border-radius: 4px;",
 ];
 class Stopwatch {
     timeLabels = new Map();
@@ -59,7 +63,10 @@ benchmark.line = (size = 40) => {
     console.log("-".repeat(size));
 };
 benchmark.log = (...message) => {
-    console.log(...badge, ...message);
+    console.log(...logBadge, ...message);
+};
+benchmark.info = (...message) => {
+    console.info(...infoBadge, ...message);
 };
 
 export { benchmark };

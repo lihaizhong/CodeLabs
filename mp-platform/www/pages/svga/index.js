@@ -7,6 +7,7 @@ import {
 } from "octopus-svga";
 import { benchmark } from "octopus-benchmark";
 import Page from "../../utils/Page";
+import { checkIdleTime } from "../../utils/checkIdleTime";
 import {
   svgaSources,
   svgaCustomSources,
@@ -18,7 +19,7 @@ import {
 import ReadyGo from "../../utils/ReadyGo";
 import { EnhancedWorker } from "../../utils/EnhancedWorker";
 
-let player;
+let player, stopIdleTime = null;
 const playerAwait = async () => {
   player = new Player();
   player.onStart = async () => {
@@ -34,12 +35,21 @@ const playerAwait = async () => {
       "预期总消耗时长",
       (bucket.entity.frames / bucket.entity.fps) * 1000,
     );
+
+    if (stopIdleTime) {
+      stopIdleTime();
+    }
+    stopIdleTime = checkIdleTime();
   };
   player.onProcess = (percent, frame) => {
     benchmark.log("---- UPDATE ----", "当前进度", percent, "当前帧数", frame);
     benchmark.mark("持续时间");
   };
   player.onEnd = () => {
+    if (stopIdleTime) {
+      stopIdleTime();
+    }
+
     benchmark.log("---- END ----");
     benchmark.mark("总消耗时间");
     benchmark.reset("持续时间");
