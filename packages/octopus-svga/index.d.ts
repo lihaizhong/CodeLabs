@@ -658,6 +658,9 @@ declare class Player {
      * 动画实例
      */
     private readonly animator;
+    /**
+     * 渲染器实例
+     */
     private renderer;
     /**
      * 设置配置项
@@ -670,6 +673,7 @@ declare class Player {
      * @property startFrame 单个循环周期内开始播放的帧数，默认值 0
      * @property endFrame 单个循环周期内结束播放的帧数，默认值 0
      * @property loopStartFrame 循环播放的开始帧，仅影响第一个周期的开始帧，默认值 0
+     * @property enableInObserver 是否启用 IntersectionObserver 监听容器是否处于浏览器视窗内，默认值 false
      */
     setConfig(options: string | PlayerConfigOptions, component?: any): Promise<void>;
     /**

@@ -4,7 +4,6 @@ export { default as pluginDecode } from "./plugin-decode";
 export { default as pluginDownload } from "./plugin-download";
 export { default as pluginFsm } from "./plugin-fsm";
 export { default as pluginImage } from "./plugin-image";
-export { default as pluginIntersectionObserver } from "./plugin-intersection-observer";
 export { default as pluginNow } from "./plugin-now";
 export { default as pluginOfsCanvas } from "./plugin-ofs-canvas";
 export { default as pluginPath } from "./plugin-path";

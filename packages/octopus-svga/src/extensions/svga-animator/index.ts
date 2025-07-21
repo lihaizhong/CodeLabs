@@ -21,6 +21,10 @@ export class Animator {
    */
   private loopStart: number = 0;
   /**
+   * 动画暂停时的时间偏差
+   */
+  private pauseTime: number = 0;
+  /**
    * 循环持续时间
    */
   private loopDuration: number = 0;
@@ -53,25 +57,36 @@ export class Animator {
   public start(): void {
     this.isRunning = true;
     this.startTime = platform.now();
+    this.pauseTime = 0;
     this.onStart();
     this.doFrame();
   }
 
-  public resume(): void {
-    this.isRunning = true
-    this.startTime = platform.now()
-    this.doFrame()
+  public resume(): boolean {
+    if (this.startTime === 0) {
+      return false;
+    }
+
+    this.isRunning = true;
+    this.doFrame();
+    return true;
   }
 
-  public pause(): void {
-    this.isRunning = false
+  public pause(): boolean {
+    if (this.startTime === 0) {
+      return false;
+    }
+
+    this.isRunning = false;
     // 设置暂停的位置
-    this.loopStart = (platform.now() - this.startTime + this.loopStart) % this.duration
+    this.pauseTime =
+      (platform.now() - this.startTime) % this.duration;
+    return true;
   }
 
   public stop(): void {
     this.isRunning = false;
-    this.loopStart = 0;
+    this.startTime = 0;
   }
 
   private doFrame(): void {
@@ -83,28 +98,24 @@ export class Animator {
     }
   }
 
-  private doDeltaTime(DT: number): void {
-    const {
-      duration: D,
-      loopStart: LS,
-      loopDuration: LD,
-    } = this;
+  private doDeltaTime(deltaTime: number): void {
+    const { duration, loopStart, pauseTime, loopDuration } = this;
     // 本轮动画已消耗的时间比例（Percentage of speed time）
-    let TP: number;
+    let percent: number;
     let ended = false;
 
     // 运行时间 大于等于 循环持续时间
-    if (DT >= LD) {
+    if (deltaTime >= loopDuration) {
       // 动画已结束
-      TP = 1.0;
+      percent = 1.0;
       ended = true;
       this.stop();
     } else {
       // 本轮动画已消耗的时间比例 = 本轮动画已消耗的时间 / 动画持续时间
-      TP = ((DT + LS) % D) / D;
+      percent = ((deltaTime + loopStart + pauseTime) % duration) / duration;
     }
 
-    this.onUpdate(TP)
+    this.onUpdate(percent);
     if (!this.isRunning && ended) {
       this.onEnd();
     }

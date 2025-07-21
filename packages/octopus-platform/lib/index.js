@@ -694,42 +694,6 @@
         },
     });
 
-    var pluginIntersectionObserver = definePlugin({
-        name: "intersectionObserver",
-        dependencies: ["getSelector"],
-        install: function () {
-            var getSelector = this.getSelector;
-            var _a = this.globals, env = _a.env, br = _a.br;
-            var thresholds = [0, 0.5, 1];
-            if (env === "h5") {
-                return function (selector, callback) {
-                    var observer = new IntersectionObserver(function (entries) {
-                        callback(entries[0].intersectionRatio > 0);
-                    }, { threshold: thresholds });
-                    var element = getSelector(selector);
-                    if (element) {
-                        observer.observe(element);
-                    }
-                    return function () {
-                        observer.disconnect();
-                    };
-                };
-            }
-            return function (selector, callback, component) {
-                var observer = br.createIntersectionObserver(component, {
-                    thresholds: thresholds,
-                    initialRatio: 0,
-                });
-                observer.observe(selector, function (res) {
-                    callback(res.intersectionRatio > 0);
-                });
-                return function () {
-                    observer.disconnect();
-                };
-            };
-        },
-    });
-
     var pluginNow = definePlugin({
         name: "now",
         install: function () {
@@ -858,7 +822,6 @@
     exports.pluginDownload = pluginDownload;
     exports.pluginFsm = pluginFsm;
     exports.pluginImage = pluginImage;
-    exports.pluginIntersectionObserver = pluginIntersectionObserver;
     exports.pluginNow = pluginNow;
     exports.pluginOfsCanvas = pluginOfsCanvas;
     exports.pluginPath = pluginPath;

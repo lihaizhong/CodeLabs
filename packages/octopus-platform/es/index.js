@@ -568,42 +568,6 @@ var pluginImage = definePlugin({
     },
 });
 
-var pluginIntersectionObserver = definePlugin({
-    name: "intersectionObserver",
-    dependencies: ["getSelector"],
-    install() {
-        const { getSelector } = this;
-        const { env, br } = this.globals;
-        const thresholds = [0, 0.5, 1];
-        if (env === "h5") {
-            return (selector, callback) => {
-                const observer = new IntersectionObserver((entries) => {
-                    callback(entries[0].intersectionRatio > 0);
-                }, { threshold: thresholds });
-                const element = getSelector(selector);
-                if (element) {
-                    observer.observe(element);
-                }
-                return () => {
-                    observer.disconnect();
-                };
-            };
-        }
-        return (selector, callback, component) => {
-            const observer = br.createIntersectionObserver(component, {
-                thresholds: thresholds,
-                initialRatio: 0,
-            });
-            observer.observe(selector, (res) => {
-                callback(res.intersectionRatio > 0);
-            });
-            return () => {
-                observer.disconnect();
-            };
-        };
-    },
-});
-
 var pluginNow = definePlugin({
     name: "now",
     install() {
@@ -720,4 +684,4 @@ var pluginRaf = definePlugin({
     },
 });
 
-export { OctopusPlatform, definePlugin, installPlugin, pluginCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginIntersectionObserver, pluginNow, pluginOfsCanvas, pluginPath, pluginRaf as pluginRAF, pluginSelector };
+export { OctopusPlatform, definePlugin, installPlugin, pluginCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginOfsCanvas, pluginPath, pluginRaf as pluginRAF, pluginSelector };

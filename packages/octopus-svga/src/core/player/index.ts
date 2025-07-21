@@ -44,10 +44,10 @@ export class Player {
    */
   private readonly animator: Animator = new Animator();
 
+  /**
+   * 渲染器实例
+   */
   private renderer: Renderer2D | null = null;
-
-  // private isBeIntersection = true;
-  // private intersectionObserver: IntersectionObserver | null = null
 
   /**
    * 设置配置项
@@ -60,6 +60,7 @@ export class Player {
    * @property startFrame 单个循环周期内开始播放的帧数，默认值 0
    * @property endFrame 单个循环周期内结束播放的帧数，默认值 0
    * @property loopStartFrame 循环播放的开始帧，仅影响第一个周期的开始帧，默认值 0
+   * @property enableInObserver 是否启用 IntersectionObserver 监听容器是否处于浏览器视窗内，默认值 false
    */
   public async setConfig(
     options: string | PlayerConfigOptions,
@@ -67,11 +68,12 @@ export class Player {
   ): Promise<void> {
     const config: PlayerConfigOptions =
       typeof options === "string" ? { container: options } : options;
+    const { container, secondary } = config;
 
     this.config.register(config);
     // 监听容器是否处于浏览器视窗内
     // this.setIntersectionObserver()
-    await this.painter.register(config.container, config.secondary, component);
+    await this.painter.register(container, secondary, component);
     this.renderer = new Renderer2D(this.painter.YC!);
     this.resource = new ResourceManager(this.painter);
     this.animator.onAnimate = platform.rAF.bind(
@@ -91,22 +93,6 @@ export class Player {
   ): void {
     this.config.setItem<T>(key, value);
   }
-
-  // private setIntersectionObserver (): void {
-  //   if (hasIntersectionObserver && this.config.isUseIntersectionObserver) {
-  //     this.intersectionObserver = new IntersectionObserver(entries => {
-  //       this.isBeIntersection = !(entries[0].intersectionRatio <= 0)
-  //     }, {
-  //       rootMargin: '0px',
-  //       threshold: [0, 0.5, 1]
-  //     })
-  //     this.intersectionObserver.observe(this.config.container)
-  //   } else {
-  //     if (this.intersectionObserver !== null) this.intersectionObserver.disconnect()
-  //     this.config.isUseIntersectionObserver = false
-  //     this.isBeIntersection = true
-  //   }
-  // }
 
   /**
    * 装载 SVGA 数据元
@@ -171,16 +157,18 @@ export class Player {
    * 重新播放
    */
   public resume(): void {
-    this.animator.resume();
-    this.onResume?.();
+    if (this.animator.resume()) {
+      this.onResume?.();
+    }
   }
 
   /**
    * 暂停播放
    */
   public pause(): void {
-    this.animator.pause();
-    this.onPause?.();
+    if (this.animator.pause()) {
+      this.onPause?.();
+    }
   }
 
   /**

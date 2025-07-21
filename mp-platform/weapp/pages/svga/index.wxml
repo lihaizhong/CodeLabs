@@ -5,4 +5,5 @@
     <button class="foot-btn" type="primary" bindtap="handleSwitchAtRandom">试一试</button>
     <button class="foot-btn" type="primary" bindtap="handleSwitchNext">下一张</button>
   </cover-view>
+  <view class="empty-space"></view>
 </page-meta>

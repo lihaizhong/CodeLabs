@@ -30,6 +30,15 @@ const playerAwait = async (scope) => {
     benchmark.log("---- UPDATE ----", "当前进度", percent, "当前帧", frame);
     benchmark.mark("持续时间");
   };
+  player.onResume = () => {
+    benchmark.log("---- RESUME ----");
+  };
+  player.onPause = () => {
+    benchmark.log("---- PAUSE ----");
+  };
+  player.onStop = () => {
+    benchmark.log("---- STOP ----");
+  };
   player.onEnd = () => {
     benchmark.log("---- END ----");
     benchmark.mark("总消耗时间");
@@ -40,8 +49,8 @@ const playerAwait = async (scope) => {
     {
       container: "#palette",
       loop: 1,
-      // playMode: "forwards",
-      // fillMode: "backwards",
+      playMode: "forwards",
+      fillMode: "backwards",
       contentMode: "aspect-fit",
     },
     scope

@@ -61,12 +61,6 @@ export interface OctopusPlatformPlugins {
 
   rAF: (canvas: PlatformCanvas, callback: () => void) => number;
 
-  intersectionObserver: (
-    selector: string,
-    callback: (isBeIntersection: boolean) => void,
-    component?: any
-  ) => () => void;
-
   decode: {
     toDataURL: (data: Uint8Array) => string;
     toBuffer: (data: Uint8Array) => ArrayBuffer;
