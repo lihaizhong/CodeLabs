@@ -140,7 +140,7 @@ class OctopusPlatform {
     /**
      * 平台版本
      */
-    platformVersion = "0.0.2";
+    platformVersion = "0.1.0";
     /**
      * 应用版本
      */

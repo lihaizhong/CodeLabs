@@ -227,7 +227,7 @@
             /**
              * 平台版本
              */
-            this.platformVersion = "0.0.2";
+            this.platformVersion = "0.1.0";
             /**
              * 应用版本
              */

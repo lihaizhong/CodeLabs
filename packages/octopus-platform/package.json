@@ -1,6 +1,6 @@
 {
   "name": "octopus-platform",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "type": "module",
   "keywords": [],
   "description": "平台兼容性磨平",

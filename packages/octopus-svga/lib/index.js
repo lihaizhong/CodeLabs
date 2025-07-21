@@ -231,7 +231,7 @@
         /**
          * 平台版本
          */
-        platformVersion = "0.0.2";
+        platformVersion = "0.1.0";
         /**
          * 应用版本
          */
@@ -789,7 +789,7 @@
                 pluginNow,
                 pluginPath,
                 pluginRaf,
-            ], "0.3.1") || this;
+            ], "1.0.0") || this;
             _this.init();
             return _this;
         }
