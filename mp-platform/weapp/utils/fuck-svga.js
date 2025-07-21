@@ -231,7 +231,7 @@
         /**
          * 平台版本
          */
-        platformVersion = "0.0.1";
+        platformVersion = "0.0.2";
         /**
          * 应用版本
          */
@@ -370,14 +370,34 @@
         });
     }
 
+    var pluginSelector = definePlugin({
+        name: "getSelector",
+        install() {
+            const { env, br } = this.globals;
+            if (env === "h5") {
+                return (selector) => document.querySelector(selector);
+            }
+            return (selector, component) => {
+                let query = br.createSelectorQuery();
+                if (component) {
+                    query = query.in(component);
+                }
+                return query
+                    .select(selector)
+                    .fields({ node: true, size: true });
+            };
+        }
+    });
+
     /**
      * 通过选择器匹配获取canvas实例
      * @returns
      */
     var pluginCanvas = definePlugin({
         name: "getCanvas",
+        dependencies: ["getSelector"],
         install() {
-            const { retry } = this;
+            const { retry, getSelector } = this;
             const { env, br, dpr } = this.globals;
             const intervals = [50, 100, 100];
             function initCanvas(canvas, width, height) {
@@ -408,30 +428,23 @@
                 return { canvas, context };
             }
             if (env === "h5") {
-                const querySelector = (selector) => document.querySelector(selector);
                 return (selector) => retry(() => {
                     // FIXME: Taro 对 canvas 做了特殊处理，canvas 元素的 id 会被加上 canvas-id 的前缀
-                    const canvas = (querySelector(`canvas[canvas-id=${selector.slice(1)}]`) || querySelector(selector));
+                    const canvas = (getSelector(`canvas[canvas-id=${selector.slice(1)}]`) || getSelector(selector));
                     return initCanvas(canvas, canvas?.clientWidth, canvas?.clientHeight);
                 }, intervals);
             }
             return (selector, component) => retry(() => new Promise((resolve, reject) => {
-                let query = br.createSelectorQuery();
-                if (component) {
-                    query = query.in(component);
-                }
-                query
-                    .select(selector)
-                    .fields({ node: true, size: true }, (res) => {
-                    const { node, width, height } = res || {};
+                let query = getSelector(selector, component);
+                query.exec((res) => {
+                    const { node, width, height } = res[0] || {};
                     try {
                         resolve(initCanvas(node, width, height));
                     }
                     catch (e) {
                         reject(e);
                     }
-                })
-                    .exec();
+                });
             }), intervals);
         },
     });
@@ -766,6 +779,7 @@
         __extends(EnhancedPlatform, _super);
         function EnhancedPlatform() {
             var _this = _super.call(this, [
+                pluginSelector,
                 pluginCanvas,
                 pluginOfsCanvas,
                 pluginDecode,
@@ -775,7 +789,7 @@
                 pluginNow,
                 pluginPath,
                 pluginRaf,
-            ], "0.3.0") || this;
+            ], "0.3.1") || this;
             _this.init();
             return _this;
         }

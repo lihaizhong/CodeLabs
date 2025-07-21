@@ -823,7 +823,7 @@ declare class Poster {
     destroy(): void;
 }
 
-type PlatformProperties = "now" | "path" | "remote" | "local" | "decode" | "image" | "rAF" | "getCanvas" | "getOfsCanvas";
+type PlatformProperties = "now" | "path" | "remote" | "local" | "decode" | "image" | "rAF" | "getSelector" | "getCanvas" | "getOfsCanvas";
 declare class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
     now: OctopusPlatformPlugins["now"];
     path: OctopusPlatformPlugins["path"];
@@ -832,6 +832,7 @@ declare class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
     decode: OctopusPlatformPlugins["decode"];
     image: OctopusPlatformPlugins["image"];
     rAF: OctopusPlatformPlugins["rAF"];
+    getSelector: OctopusPlatformPlugins["getSelector"];
     getCanvas: OctopusPlatformPlugins["getCanvas"];
     getOfsCanvas: OctopusPlatformPlugins["getOfsCanvas"];
     constructor();

@@ -279,14 +279,34 @@ function installPlugin(platform, plugin) {
     });
 }
 
+var pluginSelector = definePlugin({
+    name: "getSelector",
+    install() {
+        const { env, br } = this.globals;
+        if (env === "h5") {
+            return (selector) => document.querySelector(selector);
+        }
+        return (selector, component) => {
+            let query = br.createSelectorQuery();
+            if (component) {
+                query = query.in(component);
+            }
+            return query
+                .select(selector)
+                .fields({ node: true, size: true });
+        };
+    }
+});
+
 /**
  * 通过选择器匹配获取canvas实例
  * @returns
  */
 var pluginCanvas = definePlugin({
     name: "getCanvas",
+    dependencies: ["getSelector"],
     install() {
-        const { retry } = this;
+        const { retry, getSelector } = this;
         const { env, br, dpr } = this.globals;
         const intervals = [50, 100, 100];
         function initCanvas(canvas, width, height) {
@@ -317,30 +337,23 @@ var pluginCanvas = definePlugin({
             return { canvas, context };
         }
         if (env === "h5") {
-            const querySelector = (selector) => document.querySelector(selector);
             return (selector) => retry(() => {
                 // FIXME: Taro 对 canvas 做了特殊处理，canvas 元素的 id 会被加上 canvas-id 的前缀
-                const canvas = (querySelector(`canvas[canvas-id=${selector.slice(1)}]`) || querySelector(selector));
+                const canvas = (getSelector(`canvas[canvas-id=${selector.slice(1)}]`) || getSelector(selector));
                 return initCanvas(canvas, canvas?.clientWidth, canvas?.clientHeight);
             }, intervals);
         }
         return (selector, component) => retry(() => new Promise((resolve, reject) => {
-            let query = br.createSelectorQuery();
-            if (component) {
-                query = query.in(component);
-            }
-            query
-                .select(selector)
-                .fields({ node: true, size: true }, (res) => {
-                const { node, width, height } = res || {};
+            let query = getSelector(selector, component);
+            query.exec((res) => {
+                const { node, width, height } = res[0] || {};
                 try {
                     resolve(initCanvas(node, width, height));
                 }
                 catch (e) {
                     reject(e);
                 }
-            })
-                .exec();
+            });
         }), intervals);
     },
 });
@@ -555,6 +568,42 @@ var pluginImage = definePlugin({
     },
 });
 
+var pluginIntersectionObserver = definePlugin({
+    name: "intersectionObserver",
+    dependencies: ["getSelector"],
+    install() {
+        const { getSelector } = this;
+        const { env, br } = this.globals;
+        const thresholds = [0, 0.5, 1];
+        if (env === "h5") {
+            return (selector, callback) => {
+                const observer = new IntersectionObserver((entries) => {
+                    callback(entries[0].intersectionRatio > 0);
+                }, { threshold: thresholds });
+                const element = getSelector(selector);
+                if (element) {
+                    observer.observe(element);
+                }
+                return () => {
+                    observer.disconnect();
+                };
+            };
+        }
+        return (selector, callback, component) => {
+            const observer = br.createIntersectionObserver(component, {
+                thresholds: thresholds,
+                initialRatio: 0,
+            });
+            observer.observe(selector, (res) => {
+                callback(res.intersectionRatio > 0);
+            });
+            return () => {
+                observer.disconnect();
+            };
+        };
+    },
+});
+
 var pluginNow = definePlugin({
     name: "now",
     install() {
@@ -671,4 +720,4 @@ var pluginRaf = definePlugin({
     },
 });
 
-export { OctopusPlatform, definePlugin, installPlugin, pluginCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginOfsCanvas, pluginPath, pluginRaf as pluginRAF };
+export { OctopusPlatform, definePlugin, installPlugin, pluginCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginIntersectionObserver, pluginNow, pluginOfsCanvas, pluginPath, pluginRaf as pluginRAF, pluginSelector };

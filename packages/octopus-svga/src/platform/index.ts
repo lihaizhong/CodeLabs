@@ -3,6 +3,7 @@ import {
   installPlugin,
   type OctopusPlatformPlugins,
   type OctopusPlatformPluginOptions,
+  pluginSelector,
   pluginCanvas,
   pluginDecode,
   pluginDownload,
@@ -22,6 +23,7 @@ export type PlatformProperties =
   | "decode"
   | "image"
   | "rAF"
+  | "getSelector"
   | "getCanvas"
   | "getOfsCanvas";
 
@@ -40,6 +42,8 @@ class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
 
   rAF!: OctopusPlatformPlugins["rAF"];
 
+  getSelector!: OctopusPlatformPlugins["getSelector"];
+
   getCanvas!: OctopusPlatformPlugins["getCanvas"];
 
   getOfsCanvas!: OctopusPlatformPlugins["getOfsCanvas"];
@@ -47,6 +51,7 @@ class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
   constructor() {
     super(
       [
+        pluginSelector,
         pluginCanvas,
         pluginOfsCanvas,
         pluginDecode,

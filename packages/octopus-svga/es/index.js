@@ -1,4 +1,4 @@
-import { OctopusPlatform, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF, installPlugin } from 'octopus-platform';
+import { OctopusPlatform, pluginSelector, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF, installPlugin } from 'octopus-platform';
 
 class EnhancedPlatform extends OctopusPlatform {
     now;
@@ -8,10 +8,12 @@ class EnhancedPlatform extends OctopusPlatform {
     decode;
     image;
     rAF;
+    getSelector;
     getCanvas;
     getOfsCanvas;
     constructor() {
         super([
+            pluginSelector,
             pluginCanvas,
             pluginOfsCanvas,
             pluginDecode,
