@@ -9,7 +9,7 @@
   "description": "本地动态筛选功能",
   "module": "es/index.js",
   "main": "lib/index.js",
-  "unpkg": "./lib/index.min.js",
+  "unpkg": "lib/index.min.js",
   "types": "index.d.ts",
   "exports": {
     "import": "./es/index.js",
@@ -20,8 +20,7 @@
   "files": [
     "es",
     "lib",
-    "index.d.ts",
-    "README.md"
+    "index.d.ts"
   ],
   "scripts": {
     "declare": "tsc",

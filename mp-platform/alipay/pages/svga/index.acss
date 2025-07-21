@@ -29,3 +29,8 @@ page {
 .foot-btn + .foot-btn {
   margin-left: 20rpx;
 }
+
+/* .empty-space {
+  width: 100vw;
+  height: 200vh;
+} */

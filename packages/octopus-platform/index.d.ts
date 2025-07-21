@@ -34,6 +34,7 @@ interface GetOffscreenCanvasResult {
  * 各个插件通过 declare module 语法扩展此接口
  */
 interface OctopusPlatformPlugins {
+    getSelector: (selector: string, component?: any) => any;
     getCanvas: (selector: string, component?: any) => Promise<GetCanvasResult>;
     getOfsCanvas: (options: OffscreenCanvasOptions) => GetOffscreenCanvasResult;
     now: () => number;
@@ -122,11 +123,13 @@ declare abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
 
 declare function installPlugin<Props extends keyof OctopusPlatformPlugins>(platform: OctopusPlatformWithDependencies<Props, never>, plugin: OctopusPlatformPluginOptions<Props>): void;
 
+declare const _default$9: OctopusPlatformPluginOptions<"getSelector", never>;
+
 /**
  * 通过选择器匹配获取canvas实例
  * @returns
  */
-declare const _default$8: OctopusPlatformPluginOptions<"getCanvas", never>;
+declare const _default$8: OctopusPlatformPluginOptions<"getCanvas", "getSelector">;
 
 /**
  * 用于处理数据解码
@@ -174,5 +177,5 @@ declare const _default$1: OctopusPlatformPluginOptions<"path", never>;
  */
 declare const _default: OctopusPlatformPluginOptions<"rAF", never>;
 
-export { OctopusPlatform, definePlugin, installPlugin, _default$8 as pluginCanvas, _default$7 as pluginDecode, _default$6 as pluginDownload, _default$5 as pluginFsm, _default$4 as pluginImage, _default$3 as pluginNow, _default$2 as pluginOfsCanvas, _default$1 as pluginPath, _default as pluginRAF };
+export { OctopusPlatform, definePlugin, installPlugin, _default$8 as pluginCanvas, _default$7 as pluginDecode, _default$6 as pluginDownload, _default$5 as pluginFsm, _default$4 as pluginImage, _default$3 as pluginNow, _default$2 as pluginOfsCanvas, _default$1 as pluginPath, _default as pluginRAF, _default$9 as pluginSelector };
 export type { Bitmap, GetCanvasResult, GetOffscreenCanvasResult, MiniProgramCanvas, MiniProgramImage, MiniProgramOffscreenCanvas, OctopusPlatformGlobals, OctopusPlatformPluginOptions, OctopusPlatformPlugins, OctopusPlatformWithDependencies, OctopusSupportedPlatform, OffscreenCanvasOptions, PlatformCanvas, PlatformImage, PlatformOffscreenCanvas, RawImage };

@@ -1,4 +1,4 @@
-import { adaptor } from "./calculations/levenshtein-distance";
+import { calcAdaptor } from "./calculations/levenshtein-distance";
 
 export interface YouNeedSuggestionOptions {
   keyNameList: string | string[];
@@ -15,7 +15,9 @@ export interface YouNeedSuggestResult<T> {
 
 export class YouNeedSuggestion<T> {
   private keyNameList: string[];
+
   private dataSource: T[];
+
   private options: YouNeedSuggestionOptions = {
     // 进行匹配的字段
     keyNameList: ["text"],
@@ -26,7 +28,7 @@ export class YouNeedSuggestion<T> {
     // 最小相似度
     minSimilarity: 0,
     // 计算器
-    calc: adaptor(),
+    calc: calcAdaptor(),
   };
 
   constructor(dataSource: T[], options: Partial<YouNeedSuggestionOptions>) {
@@ -43,7 +45,7 @@ export class YouNeedSuggestion<T> {
     }
 
     // 不区分大小写时，需要将字符串转换为小写
-    return caseSensitive ? value : value.toLowerCase();
+    return caseSensitive ? value : value.toLocaleLowerCase();
   }
 
   private parseKeyNameList(keyNameList?: string | string[]): string[] {
@@ -55,7 +57,7 @@ export class YouNeedSuggestion<T> {
       return keyNameList;
     }
 
-    return ["value"];
+    return ["text"];
   }
 
   private getMaxSimilarity(value: string, match: T): number {
@@ -97,5 +99,3 @@ export class YouNeedSuggestion<T> {
     );
   }
 }
-
-export { adaptor as calcOfLevenshteinDistanceAdaptor };

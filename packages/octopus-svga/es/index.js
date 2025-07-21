@@ -1,4 +1,4 @@
-import { OctopusPlatform, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF, installPlugin } from 'octopus-platform';
+import { OctopusPlatform, pluginSelector, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF, installPlugin } from 'octopus-platform';
 
 class EnhancedPlatform extends OctopusPlatform {
     now;
@@ -8,10 +8,12 @@ class EnhancedPlatform extends OctopusPlatform {
     decode;
     image;
     rAF;
+    getSelector;
     getCanvas;
     getOfsCanvas;
     constructor() {
         super([
+            pluginSelector,
             pluginCanvas,
             pluginOfsCanvas,
             pluginDecode,
@@ -21,7 +23,7 @@ class EnhancedPlatform extends OctopusPlatform {
             pluginNow,
             pluginPath,
             pluginRAF,
-        ], "0.3.1");
+        ], "1.0.0");
         this.init();
     }
     installPlugin(plugin) {
@@ -1987,6 +1989,10 @@ class Animator {
      */
     loopStart = 0;
     /**
+     * 动画暂停时的时间偏差
+     */
+    pauseTime = 0;
+    /**
      * 循环持续时间
      */
     loopDuration = 0;
@@ -2010,22 +2016,31 @@ class Animator {
     start() {
         this.isRunning = true;
         this.startTime = platform.now();
+        this.pauseTime = 0;
         this.onStart();
         this.doFrame();
     }
     resume() {
+        if (this.startTime === 0) {
+            return false;
+        }
         this.isRunning = true;
-        this.startTime = platform.now();
         this.doFrame();
+        return true;
     }
     pause() {
+        if (this.startTime === 0) {
+            return false;
+        }
         this.isRunning = false;
         // 设置暂停的位置
-        this.loopStart = (platform.now() - this.startTime + this.loopStart) % this.duration;
+        this.pauseTime =
+            (platform.now() - this.startTime) % this.duration;
+        return true;
     }
     stop() {
         this.isRunning = false;
-        this.loopStart = 0;
+        this.startTime = 0;
     }
     doFrame() {
         if (this.isRunning) {
@@ -2035,23 +2050,23 @@ class Animator {
             }
         }
     }
-    doDeltaTime(DT) {
-        const { duration: D, loopStart: LS, loopDuration: LD, } = this;
+    doDeltaTime(deltaTime) {
+        const { duration, loopStart, pauseTime, loopDuration } = this;
         // 本轮动画已消耗的时间比例（Percentage of speed time）
-        let TP;
+        let percent;
         let ended = false;
         // 运行时间 大于等于 循环持续时间
-        if (DT >= LD) {
+        if (deltaTime >= loopDuration) {
             // 动画已结束
-            TP = 1.0;
+            percent = 1.0;
             ended = true;
             this.stop();
         }
         else {
             // 本轮动画已消耗的时间比例 = 本轮动画已消耗的时间 / 动画持续时间
-            TP = ((DT + LS) % D) / D;
+            percent = ((deltaTime + loopStart + pauseTime) % duration) / duration;
         }
-        this.onUpdate(TP);
+        this.onUpdate(percent);
         if (!this.isRunning && ended) {
             this.onEnd();
         }
@@ -4239,11 +4254,6 @@ class Config {
      * 循环次数，默认值 0（无限循环）
      */
     loop = 0;
-    /**
-     * 是否开启动画容器视窗检测，默认值 false
-     * 开启后利用 Intersection Observer API 检测动画容器是否处于视窗内，若处于视窗外，停止描绘渲染帧避免造成资源消耗
-     */
-    // public isUseIntersectionObserver = false;
     register(config) {
         if (typeof config.loop === "number" && config.loop >= 0) {
             this.loop = config.loop;
@@ -4273,9 +4283,6 @@ class Config {
         if (typeof config.contentMode === "string") {
             this.contentMode = config.contentMode;
         }
-        // if (typeof config.isUseIntersectionObserver === 'boolean') {
-        //   this.isUseIntersectionObserver = config.isUseIntersectionObserver
-        // }
     }
     setItem(key, value) {
         this.register({ [key]: value });
@@ -4961,9 +4968,10 @@ class Player {
      * 动画实例
      */
     animator = new Animator();
+    /**
+     * 渲染器实例
+     */
     renderer = null;
-    // private isBeIntersection = true;
-    // private intersectionObserver: IntersectionObserver | null = null
     /**
      * 设置配置项
      * @param options 可配置项
@@ -4975,13 +4983,15 @@ class Player {
      * @property startFrame 单个循环周期内开始播放的帧数，默认值 0
      * @property endFrame 单个循环周期内结束播放的帧数，默认值 0
      * @property loopStartFrame 循环播放的开始帧，仅影响第一个周期的开始帧，默认值 0
+     * @property enableInObserver 是否启用 IntersectionObserver 监听容器是否处于浏览器视窗内，默认值 false
      */
     async setConfig(options, component) {
         const config = typeof options === "string" ? { container: options } : options;
+        const { container, secondary } = config;
         this.config.register(config);
         // 监听容器是否处于浏览器视窗内
         // this.setIntersectionObserver()
-        await this.painter.register(config.container, config.secondary, component);
+        await this.painter.register(container, secondary, component);
         this.renderer = new Renderer2D(this.painter.YC);
         this.resource = new ResourceManager(this.painter);
         this.animator.onAnimate = platform.rAF.bind(null, this.painter.X);
@@ -4994,21 +5004,6 @@ class Player {
     setItem(key, value) {
         this.config.setItem(key, value);
     }
-    // private setIntersectionObserver (): void {
-    //   if (hasIntersectionObserver && this.config.isUseIntersectionObserver) {
-    //     this.intersectionObserver = new IntersectionObserver(entries => {
-    //       this.isBeIntersection = !(entries[0].intersectionRatio <= 0)
-    //     }, {
-    //       rootMargin: '0px',
-    //       threshold: [0, 0.5, 1]
-    //     })
-    //     this.intersectionObserver.observe(this.config.container)
-    //   } else {
-    //     if (this.intersectionObserver !== null) this.intersectionObserver.disconnect()
-    //     this.config.isUseIntersectionObserver = false
-    //     this.isBeIntersection = true
-    //   }
-    // }
     /**
      * 装载 SVGA 数据元
      * @param videoEntity SVGA 数据源
@@ -5067,15 +5062,17 @@ class Player {
      * 重新播放
      */
     resume() {
-        this.animator.resume();
-        this.onResume?.();
+        if (this.animator.resume()) {
+            this.onResume?.();
+        }
     }
     /**
      * 暂停播放
      */
     pause() {
-        this.animator.pause();
-        this.onPause?.();
+        if (this.animator.pause()) {
+            this.onPause?.();
+        }
     }
     /**
      * 停止播放

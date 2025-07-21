@@ -231,7 +231,7 @@
         /**
          * 平台版本
          */
-        platformVersion = "0.0.2";
+        platformVersion = "0.1.0";
         /**
          * 应用版本
          */
@@ -370,14 +370,34 @@
         });
     }
 
+    var pluginSelector = definePlugin({
+        name: "getSelector",
+        install() {
+            const { env, br } = this.globals;
+            if (env === "h5") {
+                return (selector) => document.querySelector(selector);
+            }
+            return (selector, component) => {
+                let query = br.createSelectorQuery();
+                if (component) {
+                    query = query.in(component);
+                }
+                return query
+                    .select(selector)
+                    .fields({ node: true, size: true });
+            };
+        }
+    });
+
     /**
      * 通过选择器匹配获取canvas实例
      * @returns
      */
     var pluginCanvas = definePlugin({
         name: "getCanvas",
+        dependencies: ["getSelector"],
         install() {
-            const { retry } = this;
+            const { retry, getSelector } = this;
             const { env, br, dpr } = this.globals;
             const intervals = [50, 100, 100];
             function initCanvas(canvas, width, height) {
@@ -408,30 +428,23 @@
                 return { canvas, context };
             }
             if (env === "h5") {
-                const querySelector = (selector) => document.querySelector(selector);
                 return (selector) => retry(() => {
                     // FIXME: Taro 对 canvas 做了特殊处理，canvas 元素的 id 会被加上 canvas-id 的前缀
-                    const canvas = (querySelector(`canvas[canvas-id=${selector.slice(1)}]`) || querySelector(selector));
+                    const canvas = (getSelector(`canvas[canvas-id=${selector.slice(1)}]`) || getSelector(selector));
                     return initCanvas(canvas, canvas?.clientWidth, canvas?.clientHeight);
                 }, intervals);
             }
             return (selector, component) => retry(() => new Promise((resolve, reject) => {
-                let query = br.createSelectorQuery();
-                if (component) {
-                    query = query.in(component);
-                }
-                query
-                    .select(selector)
-                    .fields({ node: true, size: true }, (res) => {
-                    const { node, width, height } = res || {};
+                let query = getSelector(selector, component);
+                query.exec((res) => {
+                    const { node, width, height } = res[0] || {};
                     try {
                         resolve(initCanvas(node, width, height));
                     }
                     catch (e) {
                         reject(e);
                     }
-                })
-                    .exec();
+                });
             }), intervals);
         },
     });
@@ -766,6 +779,7 @@
         __extends(EnhancedPlatform, _super);
         function EnhancedPlatform() {
             var _this = _super.call(this, [
+                pluginSelector,
                 pluginCanvas,
                 pluginOfsCanvas,
                 pluginDecode,
@@ -775,7 +789,7 @@
                 pluginNow,
                 pluginPath,
                 pluginRaf,
-            ], "0.3.1") || this;
+            ], "1.0.0") || this;
             _this.init();
             return _this;
         }
@@ -2781,6 +2795,10 @@
              */
             this.loopStart = 0;
             /**
+             * 动画暂停时的时间偏差
+             */
+            this.pauseTime = 0;
+            /**
              * 循环持续时间
              */
             this.loopDuration = 0;
@@ -2805,22 +2823,31 @@
         Animator.prototype.start = function () {
             this.isRunning = true;
             this.startTime = platform.now();
+            this.pauseTime = 0;
             this.onStart();
             this.doFrame();
         };
         Animator.prototype.resume = function () {
+            if (this.startTime === 0) {
+                return false;
+            }
             this.isRunning = true;
-            this.startTime = platform.now();
             this.doFrame();
+            return true;
         };
         Animator.prototype.pause = function () {
+            if (this.startTime === 0) {
+                return false;
+            }
             this.isRunning = false;
             // 设置暂停的位置
-            this.loopStart = (platform.now() - this.startTime + this.loopStart) % this.duration;
+            this.pauseTime =
+                (platform.now() - this.startTime) % this.duration;
+            return true;
         };
         Animator.prototype.stop = function () {
             this.isRunning = false;
-            this.loopStart = 0;
+            this.startTime = 0;
         };
         Animator.prototype.doFrame = function () {
             var _this = this;
@@ -2831,23 +2858,23 @@
                 }
             }
         };
-        Animator.prototype.doDeltaTime = function (DT) {
-            var _a = this, D = _a.duration, LS = _a.loopStart, LD = _a.loopDuration;
+        Animator.prototype.doDeltaTime = function (deltaTime) {
+            var _a = this, duration = _a.duration, loopStart = _a.loopStart, pauseTime = _a.pauseTime, loopDuration = _a.loopDuration;
             // 本轮动画已消耗的时间比例（Percentage of speed time）
-            var TP;
+            var percent;
             var ended = false;
             // 运行时间 大于等于 循环持续时间
-            if (DT >= LD) {
+            if (deltaTime >= loopDuration) {
                 // 动画已结束
-                TP = 1.0;
+                percent = 1.0;
                 ended = true;
                 this.stop();
             }
             else {
                 // 本轮动画已消耗的时间比例 = 本轮动画已消耗的时间 / 动画持续时间
-                TP = ((DT + LS) % D) / D;
+                percent = ((deltaTime + loopStart + pauseTime) % duration) / duration;
             }
-            this.onUpdate(TP);
+            this.onUpdate(percent);
             if (!this.isRunning && ended) {
                 this.onEnd();
             }
@@ -5095,11 +5122,6 @@
              */
             this.loop = 0;
         }
-        /**
-         * 是否开启动画容器视窗检测，默认值 false
-         * 开启后利用 Intersection Observer API 检测动画容器是否处于视窗内，若处于视窗外，停止描绘渲染帧避免造成资源消耗
-         */
-        // public isUseIntersectionObserver = false;
         Config.prototype.register = function (config) {
             if (typeof config.loop === "number" && config.loop >= 0) {
                 this.loop = config.loop;
@@ -5129,9 +5151,6 @@
             if (typeof config.contentMode === "string") {
                 this.contentMode = config.contentMode;
             }
-            // if (typeof config.isUseIntersectionObserver === 'boolean') {
-            //   this.isUseIntersectionObserver = config.isUseIntersectionObserver
-            // }
         };
         Config.prototype.setItem = function (key, value) {
             var _a;
@@ -5964,10 +5983,11 @@
              * 动画实例
              */
             this.animator = new Animator();
+            /**
+             * 渲染器实例
+             */
             this.renderer = null;
         }
-        // private isBeIntersection = true;
-        // private intersectionObserver: IntersectionObserver | null = null
         /**
          * 设置配置项
          * @param options 可配置项
@@ -5979,18 +5999,20 @@
          * @property startFrame 单个循环周期内开始播放的帧数，默认值 0
          * @property endFrame 单个循环周期内结束播放的帧数，默认值 0
          * @property loopStartFrame 循环播放的开始帧，仅影响第一个周期的开始帧，默认值 0
+         * @property enableInObserver 是否启用 IntersectionObserver 监听容器是否处于浏览器视窗内，默认值 false
          */
         Player.prototype.setConfig = function (options, component) {
             return __awaiter(this, void 0, void 0, function () {
-                var config;
+                var config, container, secondary;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             config = typeof options === "string" ? { container: options } : options;
+                            container = config.container, secondary = config.secondary;
                             this.config.register(config);
                             // 监听容器是否处于浏览器视窗内
                             // this.setIntersectionObserver()
-                            return [4 /*yield*/, this.painter.register(config.container, config.secondary, component)];
+                            return [4 /*yield*/, this.painter.register(container, secondary, component)];
                         case 1:
                             // 监听容器是否处于浏览器视窗内
                             // this.setIntersectionObserver()
@@ -6011,21 +6033,6 @@
         Player.prototype.setItem = function (key, value) {
             this.config.setItem(key, value);
         };
-        // private setIntersectionObserver (): void {
-        //   if (hasIntersectionObserver && this.config.isUseIntersectionObserver) {
-        //     this.intersectionObserver = new IntersectionObserver(entries => {
-        //       this.isBeIntersection = !(entries[0].intersectionRatio <= 0)
-        //     }, {
-        //       rootMargin: '0px',
-        //       threshold: [0, 0.5, 1]
-        //     })
-        //     this.intersectionObserver.observe(this.config.container)
-        //   } else {
-        //     if (this.intersectionObserver !== null) this.intersectionObserver.disconnect()
-        //     this.config.isUseIntersectionObserver = false
-        //     this.isBeIntersection = true
-        //   }
-        // }
         /**
          * 装载 SVGA 数据元
          * @param videoEntity SVGA 数据源
@@ -6065,16 +6072,18 @@
          */
         Player.prototype.resume = function () {
             var _a;
-            this.animator.resume();
-            (_a = this.onResume) === null || _a === void 0 ? void 0 : _a.call(this);
+            if (this.animator.resume()) {
+                (_a = this.onResume) === null || _a === void 0 ? void 0 : _a.call(this);
+            }
         };
         /**
          * 暂停播放
          */
         Player.prototype.pause = function () {
             var _a;
-            this.animator.pause();
-            (_a = this.onPause) === null || _a === void 0 ? void 0 : _a.call(this);
+            if (this.animator.pause()) {
+                (_a = this.onPause) === null || _a === void 0 ? void 0 : _a.call(this);
+            }
         };
         /**
          * 停止播放

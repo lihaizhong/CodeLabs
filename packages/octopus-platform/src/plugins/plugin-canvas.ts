@@ -5,10 +5,11 @@ import { definePlugin } from "../definePlugin";
  * 通过选择器匹配获取canvas实例
  * @returns
  */
-export default definePlugin<"getCanvas">({  
+export default definePlugin<"getCanvas", "getSelector">({  
   name: "getCanvas",
+  dependencies: ["getSelector"],
   install() {
-    const { retry } = this;
+    const { retry, getSelector } = this;
     const { env, br, dpr } = this.globals;
     const intervals = [50, 100, 100];
 
@@ -50,15 +51,12 @@ export default definePlugin<"getCanvas">({
     }
 
     if (env === "h5") {
-      const querySelector = (selector: string) =>
-        document.querySelector(selector);
-
       return (selector: string) =>
         retry<GetCanvasResult>(() => {
           // FIXME: Taro 对 canvas 做了特殊处理，canvas 元素的 id 会被加上 canvas-id 的前缀
-          const canvas = (querySelector(
+          const canvas = (getSelector(
             `canvas[canvas-id=${selector.slice(1)}]`
-          ) || querySelector(selector)) as HTMLCanvasElement;
+          ) || getSelector(selector)) as HTMLCanvasElement;
 
           return initCanvas(canvas, canvas?.clientWidth, canvas?.clientHeight);
         }, intervals);
@@ -68,23 +66,17 @@ export default definePlugin<"getCanvas">({
       retry<GetCanvasResult>(
         () =>
           new Promise<GetCanvasResult>((resolve, reject) => {
-            let query = br.createSelectorQuery();
-            if (component) {
-              query = query.in(component);
-            }
+            let query = getSelector(selector, component);
 
-            query
-              .select(selector)
-              .fields({ node: true, size: true }, (res: any) => {
-                const { node, width, height } = res || {};
+            query.exec((res: any) => {
+              const { node, width, height } = res[0] || {};
 
-                try {
-                  resolve(initCanvas(node, width, height));
-                } catch (e) {
-                  reject(e);
-                }
-              })
-              .exec();
+              try {
+                resolve(initCanvas(node, width, height));
+              } catch (e) {
+                reject(e);
+              }
+            });
           }),
         intervals
       );

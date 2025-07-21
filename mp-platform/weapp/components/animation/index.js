@@ -30,6 +30,15 @@ const playerAwait = async (scope) => {
     benchmark.log("---- UPDATE ----", "当前进度", percent, "当前帧", frame);
     benchmark.mark("持续时间");
   };
+  player.onResume = () => {
+    benchmark.log("---- RESUME ----");
+  };
+  player.onPause = () => {
+    benchmark.log("---- PAUSE ----");
+  };
+  player.onStop = () => {
+    benchmark.log("---- STOP ----");
+  };
   player.onEnd = () => {
     benchmark.log("---- END ----");
     benchmark.mark("总消耗时间");
@@ -64,7 +73,7 @@ const videoManager = new VideoManager("fast", {
     if (await local.exists(bucket.local)) {
       return local.read(bucket.local);
     }
-    
+
     const buff = await remote.fetch(bucket.origin);
 
     return new Promise((resolve) => {

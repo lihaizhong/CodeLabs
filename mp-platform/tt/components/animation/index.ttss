@@ -1,6 +1,7 @@
 .svga-palette {
   width: 85vw;
   height: 88vh;
+  margin: 0 auto;
 }
 
 .svga-secondary {

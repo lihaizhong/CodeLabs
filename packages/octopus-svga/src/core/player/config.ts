@@ -35,11 +35,6 @@ export class Config {
    * 循环次数，默认值 0（无限循环）
    */
   public loop = 0;
-  /**
-   * 是否开启动画容器视窗检测，默认值 false
-   * 开启后利用 Intersection Observer API 检测动画容器是否处于视窗内，若处于视窗外，停止描绘渲染帧避免造成资源消耗
-   */
-  // public isUseIntersectionObserver = false;
 
   public register(config: Partial<PlayerConfig>) {
     if (typeof config.loop === "number" && config.loop >= 0) {
@@ -84,10 +79,6 @@ export class Config {
     if (typeof config.contentMode === "string") {
       this.contentMode = config.contentMode;
     }
-
-    // if (typeof config.isUseIntersectionObserver === 'boolean') {
-    //   this.isUseIntersectionObserver = config.isUseIntersectionObserver
-    // }
   }
 
   public setItem<T extends keyof PlayerConfig>(key: T, value: PlayerConfig[T]) {

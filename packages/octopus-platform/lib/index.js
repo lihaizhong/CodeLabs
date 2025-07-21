@@ -227,7 +227,7 @@
             /**
              * 平台版本
              */
-            this.platformVersion = "0.0.2";
+            this.platformVersion = "0.1.0";
             /**
              * 应用版本
              */
@@ -370,15 +370,37 @@
         });
     }
 
+    var pluginSelector = definePlugin({
+        name: "getSelector",
+        install: function () {
+            var _a = this.globals, env = _a.env, br = _a.br;
+            if (env === "h5") {
+                return function (selector) {
+                    return document.querySelector(selector);
+                };
+            }
+            return function (selector, component) {
+                var query = br.createSelectorQuery();
+                if (component) {
+                    query = query.in(component);
+                }
+                return query
+                    .select(selector)
+                    .fields({ node: true, size: true });
+            };
+        }
+    });
+
     /**
      * 通过选择器匹配获取canvas实例
      * @returns
      */
     var pluginCanvas = definePlugin({
         name: "getCanvas",
+        dependencies: ["getSelector"],
         install: function () {
-            var retry = this.retry;
-            var _a = this.globals, env = _a.env, br = _a.br, dpr = _a.dpr;
+            var _a = this, retry = _a.retry, getSelector = _a.getSelector;
+            var _b = this.globals, env = _b.env; _b.br; var dpr = _b.dpr;
             var intervals = [50, 100, 100];
             function initCanvas(canvas, width, height) {
                 if (!canvas) {
@@ -408,13 +430,10 @@
                 return { canvas: canvas, context: context };
             }
             if (env === "h5") {
-                var querySelector_1 = function (selector) {
-                    return document.querySelector(selector);
-                };
                 return function (selector) {
                     return retry(function () {
                         // FIXME: Taro 对 canvas 做了特殊处理，canvas 元素的 id 会被加上 canvas-id 的前缀
-                        var canvas = (querySelector_1("canvas[canvas-id=".concat(selector.slice(1), "]")) || querySelector_1(selector));
+                        var canvas = (getSelector("canvas[canvas-id=".concat(selector.slice(1), "]")) || getSelector(selector));
                         return initCanvas(canvas, canvas === null || canvas === void 0 ? void 0 : canvas.clientWidth, canvas === null || canvas === void 0 ? void 0 : canvas.clientHeight);
                     }, intervals);
                 };
@@ -422,22 +441,16 @@
             return function (selector, component) {
                 return retry(function () {
                     return new Promise(function (resolve, reject) {
-                        var query = br.createSelectorQuery();
-                        if (component) {
-                            query = query.in(component);
-                        }
-                        query
-                            .select(selector)
-                            .fields({ node: true, size: true }, function (res) {
-                            var _a = res || {}, node = _a.node, width = _a.width, height = _a.height;
+                        var query = getSelector(selector, component);
+                        query.exec(function (res) {
+                            var _a = res[0] || {}, node = _a.node, width = _a.width, height = _a.height;
                             try {
                                 resolve(initCanvas(node, width, height));
                             }
                             catch (e) {
                                 reject(e);
                             }
-                        })
-                            .exec();
+                        });
                     });
                 }, intervals);
             };
@@ -813,6 +826,7 @@
     exports.pluginOfsCanvas = pluginOfsCanvas;
     exports.pluginPath = pluginPath;
     exports.pluginRAF = pluginRaf;
+    exports.pluginSelector = pluginSelector;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

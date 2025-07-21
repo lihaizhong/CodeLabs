@@ -1,10 +1,5 @@
 import "weui";
-import {
-  Player,
-  Parser,
-  VideoEditor,
-  VideoManager,
-} from "octopus-svga";
+import { Player, Parser, VideoEditor, VideoManager } from "octopus-svga";
 import { benchmark } from "octopus-benchmark";
 import Page from "../../utils/Page";
 import { checkIdleTime } from "../../utils/checkIdleTime";
@@ -19,7 +14,8 @@ import {
 import ReadyGo from "../../utils/ReadyGo";
 import { EnhancedWorker } from "../../utils/EnhancedWorker";
 
-let player, stopIdleTime = null;
+let player,
+  stopIdleTime = null;
 const playerAwait = async () => {
   player = new Player();
   player.onStart = async () => {
@@ -33,24 +29,44 @@ const playerAwait = async () => {
       "每帧期望消耗时长",
       1000 / bucket.entity.fps,
       "预期总消耗时长",
-      (bucket.entity.frames / bucket.entity.fps) * 1000,
+      (bucket.entity.frames / bucket.entity.fps) * 1000
     );
 
-    if (stopIdleTime) {
-      stopIdleTime();
+    if (!stopIdleTime) {
+      stopIdleTime = checkIdleTime();
     }
-    stopIdleTime = checkIdleTime();
   };
   player.onProcess = (percent, frame) => {
     benchmark.log("---- UPDATE ----", "当前进度", percent, "当前帧数", frame);
     benchmark.mark("持续时间");
   };
-  player.onEnd = () => {
+  player.onResume = () => {
+    benchmark.log("---- RESUME ----");
+    if (!stopIdleTime) {
+      stopIdleTime = checkIdleTime();
+    }
+  };
+  player.onPause = () => {
+    benchmark.log("---- PAUSE ----");
     if (stopIdleTime) {
       stopIdleTime();
+      stopIdleTime = null;
+    }
+  };
+  player.onStop = () => {
+    benchmark.log("---- STOP ----");
+    if (stopIdleTime) {
+      stopIdleTime();
+      stopIdleTime = null;
+    }
+  };
+  player.onEnd = () => {
+    benchmark.log("---- END ----");
+    if (stopIdleTime) {
+      stopIdleTime();
+      stopIdleTime = null;
     }
 
-    benchmark.log("---- END ----");
     benchmark.mark("总消耗时间");
     benchmark.reset("持续时间");
     benchmark.reset("总消耗时间");
@@ -151,16 +167,16 @@ Page({
         const editor = new VideoEditor(
           player.painter,
           player.resource,
-          bucket.entity,
+          bucket.entity
         );
 
         this.setData({ message: "文件编辑中" });
         await benchmark.time("replace images", () =>
           Promise.all(
             Object.keys(source.replace).map((key) =>
-              editor.setImage(key, source.replace[key]),
-            ),
-          ),
+              editor.setImage(key, source.replace[key])
+            )
+          )
         );
       }
 
@@ -180,7 +196,7 @@ Page({
     worker.open();
     await playerAwait();
     const urls = this.data.sources.map((item) =>
-      typeof item === "string" ? item : item.url,
+      typeof item === "string" ? item : item.url
     );
 
     benchmark.log("准备资源中");

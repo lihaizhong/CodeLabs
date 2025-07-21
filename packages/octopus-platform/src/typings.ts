@@ -51,6 +51,8 @@ export interface GetOffscreenCanvasResult {
  * 各个插件通过 declare module 语法扩展此接口
  */
 export interface OctopusPlatformPlugins {
+  getSelector: (selector: string, component?: any) => any;
+
   getCanvas: (selector: string, component?: any) => Promise<GetCanvasResult>;
 
   getOfsCanvas: (options: OffscreenCanvasOptions) => GetOffscreenCanvasResult;
@@ -83,7 +85,7 @@ export interface OctopusPlatformPlugins {
     load: (
       createImage: () => HTMLImageElement,
       data: ImageBitmap | Uint8Array | string,
-      filepath: string,
+      filepath: string
     ) => Promise<ImageBitmap | PlatformImage>;
     release: (img: PlatformImage) => void;
   };

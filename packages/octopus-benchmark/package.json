@@ -1,13 +1,15 @@
 {
   "name": "octopus-benchmark",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "type": "module",
-  "keywords": ["benchmark"],
+  "keywords": [
+    "benchmark"
+  ],
   "description": "基准测试工具",
   "module": "es/index.js",
   "main": "lib/index.js",
-  "types": "index.d.ts",
   "unpkg": "lib/index.min.js",
+  "types": "index.d.ts",
   "exports": {
     "import": "./es/index.js",
     "default": "./lib/index.js",
