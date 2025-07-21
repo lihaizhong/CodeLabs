@@ -15,6 +15,7 @@ import ReadyGo from "../../utils/ReadyGo";
 import { EnhancedWorker } from "../../utils/EnhancedWorker";
 
 let player,
+  observer = null,
   stopIdleTime = null;
 const playerAwait = async () => {
   player = new Player();
@@ -87,6 +88,19 @@ const playerAwait = async () => {
       new Image();
     }
   });
+
+  const $palette = document.querySelector("#palette");
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].intersectionRatio > 0) {
+        player.resume();
+      } else {
+        player.pause();
+      }
+    },
+    { threshold: [0, 0.5, 1] }
+  );
+  observer.observe($palette);
 };
 const worker = new EnhancedWorker();
 const readyGo = new ReadyGo();
@@ -211,6 +225,8 @@ Page({
     videoManager.clear();
     worker.close();
     player?.destroy();
+    observer?.disconnect();
+    observer = null;
     player = null;
   },
 });

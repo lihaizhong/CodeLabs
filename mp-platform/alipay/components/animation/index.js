@@ -9,7 +9,8 @@ import { benchmark } from "../../utils/fuck-benchmark";
 import ReadyGo from "../../utils/ReadyGo";
 import { EnhancedWorker } from "../../utils/EnhancedWorker";
 
-let player;
+let player,
+  observer = null;
 const playerAwait = async (scope) => {
   player = new Player();
   player.onStart = async () => {
@@ -61,6 +62,19 @@ const playerAwait = async (scope) => {
       player.painter.X.createImage();
     }
   });
+
+  observer = my.createIntersectionObserver(scope, {
+    thresholds: [0, 0.5, 1],
+    initialRatio: 0,
+    nativeMode: true,
+  });
+  observer.relativeToViewport().observe("#palette", ({ intersectionRatio }) => {
+    if (intersectionRatio > 0) {
+      player.resume();
+    } else {
+      player.pause();
+    }
+  });
 };
 const worker = new EnhancedWorker();
 const readyGo = new ReadyGo();
@@ -71,7 +85,7 @@ const videoManager = new VideoManager("fast", {
     if (await local.exists(bucket.local)) {
       return await local.read(bucket.local);
     }
-    
+
     const buff = await remote.fetch(bucket.origin);
 
     return new Promise((resolve) => {
@@ -129,6 +143,9 @@ Component({
       videoManager.clear();
       worker.close();
       player?.destroy();
+      observer?.disconnect();
+      player = null;
+      observer = null;
     },
   },
 

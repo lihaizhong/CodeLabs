@@ -8,7 +8,8 @@ import { benchmark } from "../../utils/fuck-benchmark";
 import ReadyGo from "../../utils/ReadyGo";
 import { EnhancedWorker } from "../../utils/EnhancedWorker";
 
-let player;
+let player,
+  observer = null;
 const playerAwait = async (scope) => {
   player = new Player();
   player.onStart = async () => {
@@ -58,6 +59,19 @@ const playerAwait = async (scope) => {
   benchmark.time("创建 100 个 Image 元素的总时长", () => {
     for (let i = 0; i < 100; i++) {
       player.painter.X.createImage();
+    }
+  });
+
+  observer = tt.createIntersectionObserver(scope, {
+    thresholds: [0, 0.5, 1],
+    initialRatio: 0,
+    nativeMode: true,
+  });
+  observer.relativeToViewport().observe('#palette', ({ intersectionRatio }) => {
+    if (intersectionRatio > 0) {
+      player.resume();
+    } else {
+      player.pause();
     }
   });
 };
@@ -116,6 +130,9 @@ Component({
       videoManager.clear();
       worker.close();
       player?.destroy();
+      observer?.disconnect();
+      player = null;
+      observer = null;
     },
   },
 

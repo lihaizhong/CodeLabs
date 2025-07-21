@@ -1,6 +1,14 @@
 <page-meta>
   <!-- <navigation-bar></navigation-bar> -->
-  <mp-cells>
-    <mp-cell wx:for="{{ btnList }}" wx:key="path" title="{{ item.text }}" data-url="{{ item.path }}" bindtap="handleNavigateTo" link />
-  </mp-cells>
 </page-meta>
+
+<mp-cells>
+  <mp-cell
+    wx:for="{{ btnList }}"
+    wx:key="path"
+    title="{{ item.text }}"
+    data-url="{{ item.path }}"
+    bindtap="handleNavigateTo"
+    link
+  />
+</mp-cells>

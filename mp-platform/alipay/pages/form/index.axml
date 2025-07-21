@@ -1,5 +1,6 @@
-<page-meta>
-  <view class="page-description">输入框</view>
+<page-meta></page-meta>
+
+<view class="page-description">输入框</view>
   <view class="page-section">
     <view class="form-row">
       <view class="form-row-label">受控聚焦</view>
@@ -96,4 +97,4 @@
       </view>
     </view>
   </view>
-</page-meta>
+</view>
