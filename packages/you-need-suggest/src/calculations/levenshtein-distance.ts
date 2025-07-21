@@ -57,18 +57,7 @@ export class DistanceCalculator {
     this.distance = distance;
   }
 
-  private calc(sourceLength: number, targetLength: number): number {
-    const { continuous, count, position, distance, options } = this;
-
-    return (
-      (1 - distance / Math.max(sourceLength, targetLength)) * options.distance +
-      (1 - position / targetLength) * options.position +
-      (continuous / targetLength) * options.continuous +
-      (count / targetLength) * options.count
-    );
-  }
-
-  get(inputValue: string, comparedValue: string): number {
+  calc(inputValue: string, comparedValue: string): number {
     const sourceLength: number = inputValue.length;
     const targetLength: number = comparedValue.length;
     const space: number[] = new Array(targetLength);
@@ -165,7 +154,14 @@ export class DistanceCalculator {
       this.setDistance(space[targetLength - 1]);
     }
 
-    return this.calc(inputValue.length, comparedValue.length);
+    const { continuous, count, position, distance, options } = this;
+
+    return (
+      (1 - distance / Math.max(sourceLength, targetLength)) * options.distance +
+      (1 - position / targetLength) * options.position +
+      (continuous / targetLength) * options.continuous +
+      (count / targetLength) * options.count
+    );
   }
 }
 
@@ -174,6 +170,6 @@ export const calcAdaptor = defineAdaptor<DistanceWeightOptions>(
     const calculator = new DistanceCalculator(options);
 
     return (inputValue: string, comparedValue: string) =>
-      calculator.get(inputValue, comparedValue);
+      calculator.calc(inputValue, comparedValue);
   }
 );
