@@ -1,11 +1,13 @@
-import { calcAdaptor } from "./calculations/levenshtein-distance";
+import type { defineAdaptor } from "./defineAdaptor";
+
+export type CalcFunction = ReturnType<Parameters<typeof defineAdaptor>[0]>;
 
 export interface YouNeedSuggestionOptions<K> {
   keyNameList: K[];
   filterEmptyValue: boolean;
   caseSensitive: boolean;
   minSimilarity: number;
-  calc: (sourceStr: string, targetStr: string) => number;
+  calc: CalcFunction;
 }
 
 export interface YouNeedSuggestResult<T> {
@@ -26,7 +28,7 @@ export class YouNeedSuggestion<T> {
     // 最小相似度
     minSimilarity: 0,
     // 计算器
-    calc: calcAdaptor(),
+    calc: () => 0,
   };
 
   constructor(
@@ -49,7 +51,11 @@ export class YouNeedSuggestion<T> {
   private getMaxSimilarity(value: string, match: T): number {
     const { filterEmptyValue, keyNameList, calc } = this.options;
 
-    if ((filterEmptyValue && value === "") || typeof match !== "object" || match === null) {
+    if (
+      (filterEmptyValue && value === "") ||
+      typeof match !== "object" ||
+      match === null
+    ) {
       return Number.NEGATIVE_INFINITY;
     }
 
@@ -58,11 +64,15 @@ export class YouNeedSuggestion<T> {
     }
 
     return keyNameList.reduce((lastSimilarity, key) => {
-      const sourceStr: string = this.parseValue(match[key]);
-      const currentSimilarity: number = calc(sourceStr, value);
+      const sourceStr = this.parseValue(match[key]);
+      const currentSimilarity = calc(sourceStr, value);
 
       return Math.max(lastSimilarity, currentSimilarity);
     }, Number.NEGATIVE_INFINITY);
+  }
+
+  switchAdaptor(calc: CalcFunction): void {
+    this.options.calc = calc;
   }
 
   get(val: string): YouNeedSuggestResult<T>[] {
@@ -70,8 +80,8 @@ export class YouNeedSuggestion<T> {
     const value = this.parseValue(val);
 
     for (let i = 0; i < this.dataSource.length; i++) {
-      const match: T = this.dataSource[i];
-      const similarity: number = this.getMaxSimilarity(value, match);
+      const match = this.dataSource[i];
+      const similarity = this.getMaxSimilarity(value, match);
 
       if (similarity >= this.options.minSimilarity) {
         result.push({ data: match, similarity });
