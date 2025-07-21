@@ -17,6 +17,20 @@ import { EnhancedWorker } from "../../utils/EnhancedWorker";
 let player,
   observer = null,
   stopIdleTime = null;
+// 检查空闲时间
+const idleTime = {
+  start() {
+    if (!stopIdleTime) {
+      stopIdleTime = checkIdleTime();
+    }
+  },
+  stop() {
+    if (stopIdleTime) {
+      stopIdleTime();
+      stopIdleTime = null;
+    }
+  }
+}
 const playerAwait = async () => {
   player = new Player();
   player.onStart = async () => {
@@ -33,9 +47,7 @@ const playerAwait = async () => {
       (bucket.entity.frames / bucket.entity.fps) * 1000
     );
 
-    if (!stopIdleTime) {
-      stopIdleTime = checkIdleTime();
-    }
+    idleTime.start();
   };
   player.onProcess = (percent, frame) => {
     benchmark.log("---- UPDATE ----", "当前进度", percent, "当前帧数", frame);
@@ -43,31 +55,19 @@ const playerAwait = async () => {
   };
   player.onResume = () => {
     benchmark.log("---- RESUME ----");
-    if (!stopIdleTime) {
-      stopIdleTime = checkIdleTime();
-    }
+    idleTime.start();
   };
   player.onPause = () => {
     benchmark.log("---- PAUSE ----");
-    if (stopIdleTime) {
-      stopIdleTime();
-      stopIdleTime = null;
-    }
+    idleTime.stop();
   };
   player.onStop = () => {
     benchmark.log("---- STOP ----");
-    if (stopIdleTime) {
-      stopIdleTime();
-      stopIdleTime = null;
-    }
+    idleTime.stop();
   };
   player.onEnd = () => {
     benchmark.log("---- END ----");
-    if (stopIdleTime) {
-      stopIdleTime();
-      stopIdleTime = null;
-    }
-
+    idleTime.stop();
     benchmark.mark("总消耗时间");
     benchmark.reset("持续时间");
     benchmark.reset("总消耗时间");
