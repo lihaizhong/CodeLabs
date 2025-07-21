@@ -1,7 +1,7 @@
 import { calcAdaptor } from "./calculations/levenshtein-distance";
 
-export interface YouNeedSuggestionOptions {
-  keyNameList: string | string[];
+export interface YouNeedSuggestionOptions<K> {
+  keyNameList: K[];
   filterEmptyValue: boolean;
   caseSensitive: boolean;
   minSimilarity: number;
@@ -14,13 +14,11 @@ export interface YouNeedSuggestResult<T> {
 }
 
 export class YouNeedSuggestion<T> {
-  private keyNameList: string[];
-
   private dataSource: T[];
 
-  private options: YouNeedSuggestionOptions = {
+  private options: YouNeedSuggestionOptions<keyof T> = {
     // 进行匹配的字段
-    keyNameList: ["text"],
+    keyNameList: [],
     // 是否过滤空值
     filterEmptyValue: true,
     // 是否区分大小写
@@ -31,51 +29,37 @@ export class YouNeedSuggestion<T> {
     calc: calcAdaptor(),
   };
 
-  constructor(dataSource: T[], options: Partial<YouNeedSuggestionOptions>) {
+  constructor(
+    dataSource: T[],
+    options: Partial<YouNeedSuggestionOptions<keyof T>>
+  ) {
     Object.assign(this.options, options);
     this.dataSource = dataSource;
-    this.keyNameList = this.parseKeyNameList(this.options.keyNameList);
   }
 
-  private parseValue(value: any): string {
-    const { caseSensitive } = this.options;
-
+  private parseValue(value: unknown): string {
     if (typeof value !== "string") {
       return "";
     }
 
     // 不区分大小写时，需要将字符串转换为小写
-    return caseSensitive ? value : value.toLocaleLowerCase();
-  }
-
-  private parseKeyNameList(keyNameList?: string | string[]): string[] {
-    if (typeof keyNameList === "string") {
-      return keyNameList.split(",");
-    }
-
-    if (Array.isArray(keyNameList)) {
-      return keyNameList;
-    }
-
-    return ["text"];
+    return this.options.caseSensitive ? value : value.toLocaleLowerCase();
   }
 
   private getMaxSimilarity(value: string, match: T): number {
-    if (
-      typeof value === "string" &&
-      value === "" &&
-      this.options.filterEmptyValue
-    ) {
-      return 100;
+    const { filterEmptyValue, keyNameList, calc } = this.options;
+
+    if ((filterEmptyValue && value === "") || typeof match !== "object" || match === null) {
+      return Number.NEGATIVE_INFINITY;
     }
 
     if (typeof match === "string") {
-      return this.options.calc(this.parseValue(match), value);
+      return calc(this.parseValue(match), value);
     }
 
-    return this.keyNameList.reduce((lastSimilarity, key) => {
-      const sourceStr: string = this.parseValue((match as any)[key]);
-      const currentSimilarity: number = this.options.calc(sourceStr, value);
+    return keyNameList.reduce((lastSimilarity, key) => {
+      const sourceStr: string = this.parseValue(match[key]);
+      const currentSimilarity: number = calc(sourceStr, value);
 
       return Math.max(lastSimilarity, currentSimilarity);
     }, Number.NEGATIVE_INFINITY);
@@ -88,6 +72,7 @@ export class YouNeedSuggestion<T> {
     for (let i = 0; i < this.dataSource.length; i++) {
       const match: T = this.dataSource[i];
       const similarity: number = this.getMaxSimilarity(value, match);
+
       if (similarity >= this.options.minSimilarity) {
         result.push({ data: match, similarity });
       }
