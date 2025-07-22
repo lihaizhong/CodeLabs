@@ -1,5 +1,11 @@
 # octopus-svga
 
+## 1.0.3
+
+### Patch Changes
+
+- chore: 更新文档
+
 ## 1.0.2
 
 ### Patch Changes
