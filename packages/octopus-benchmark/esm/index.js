@@ -70,3 +70,4 @@ benchmark.info = (...message) => {
 };
 
 export { benchmark };
+//# sourceMappingURL=index.js.map

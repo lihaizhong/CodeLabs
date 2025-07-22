@@ -7,25 +7,25 @@
   ],
   "description": "高性能SVGA动效播放器，支持Web/微信小程序/支付宝小程序/抖音小程序，设计目标是 解析速度更快、体积更小、性能更高、兼容性更高、功能更丰富。",
   "type": "module",
-  "module": "es/index.js",
+  "module": "esm/index.js",
   "main": "lib/index.js",
   "unpkg": "lib/index.min.js",
   "types": "index.d.ts",
   "exports": {
-    "import": "./es/index.js",
+    "import": "./esm/index.js",
     "default": "./lib/index.js",
     "unpkg": "./lib/index.min.js",
     "types": "./index.d.ts"
   },
   "files": [
-    "es",
+    "esm",
     "lib",
     "index.d.ts",
     "README.md"
   ],
   "scripts": {
     "declare": "tsc",
-    "cleanup": "rimraf -rf es lib types index.d.ts",
+    "cleanup": "rimraf -rf esm lib types index.d.ts",
     "generate": "rollup -c",
     "build": "npm run cleanup && npm run declare && npm run generate",
     "compiler": "pbjs -t static-module -w es6 -o protos/svga.js protos/svga.proto",
@@ -45,6 +45,11 @@
     "url": "https://github.com/lihaizhong/CodeLabs/issues"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.0",
+    "@babel/plugin-transform-runtime": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
+    "@babel/runtime": "^7.27.6",
+    "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-replace": "^6.0.2",

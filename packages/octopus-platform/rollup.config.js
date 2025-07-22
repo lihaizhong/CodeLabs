@@ -3,6 +3,7 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from "@rollup/plugin-typescript";
 import { dts } from "rollup-plugin-dts";
 import del from "rollup-plugin-delete";
+import commonjs from "@rollup/plugin-commonjs";
 import replace from "@rollup/plugin-replace";
 import terser from "@rollup/plugin-terser";
 import pkg from "./package.json" with { type: "json" };
@@ -15,6 +16,7 @@ const config = {
   input: "src/index.ts",
   plugins: [
     nodeResolve(),
+    commonjs(),
     replace({
       preventAssignment: true,
       include: ["./src/**/*.ts"],
@@ -31,12 +33,12 @@ export default defineConfig([
     output: [
       {
         file: pkg.module,
-        format: "es",
+        format: "esm",
+        sourcemap: true,
       },
       {
         file: minifyFileName(pkg.module),
-        format: "es",
-        compact: true,
+        format: "esm",
         sourcemap: true,
         plugins: [terser()],
       },
@@ -45,6 +47,7 @@ export default defineConfig([
       ...config.plugins,
       typescript({
         declaration: false,
+        emitDeclarationOnly: false,
         declarationDir: undefined,
       }),
     ],
@@ -57,6 +60,8 @@ export default defineConfig([
         format: "umd",
         name: "OctopusPlatform",
         esModule: true,
+        compact: true,
+        sourcemap: true,
       },
       {
         file: minifyFileName(pkg.main),
@@ -71,10 +76,10 @@ export default defineConfig([
     plugins: [
       ...config.plugins,
       typescript({
-        declaration: false,
-        declarationDir: undefined,
-        // strictPropertyInitialization: false,
         target: "ES5",
+        declaration: false,
+        emitDeclarationOnly: false,
+        declarationDir: undefined,
       }),
     ],
   },

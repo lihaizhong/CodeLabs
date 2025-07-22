@@ -5352,3 +5352,4 @@ class Poster {
 }
 
 export { Painter, Parser, Player, Poster, ResourceManager, VideoEditor, VideoManager, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
+//# sourceMappingURL=index.js.map

@@ -685,3 +685,4 @@ var pluginRaf = definePlugin({
 });
 
 export { OctopusPlatform, definePlugin, installPlugin, pluginCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginOfsCanvas, pluginPath, pluginRaf as pluginRAF, pluginSelector };
+//# sourceMappingURL=index.js.map

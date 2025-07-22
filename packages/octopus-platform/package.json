@@ -4,25 +4,25 @@
   "type": "module",
   "keywords": [],
   "description": "平台兼容性磨平",
-  "module": "es/index.js",
+  "module": "esm/index.js",
   "main": "lib/index.js",
   "unpkg": "lib/index.min.js",
   "types": "index.d.ts",
   "exports": {
-    "import": "./es/index.js",
+    "import": "./esm/index.js",
     "default": "./lib/index.js",
     "unpkg": "./lib/index.min.js",
     "types": "./index.d.ts"
   },
   "files": [
-    "es",
+    "esm",
     "lib",
     "index.d.ts",
     "README.md"
   ],
   "scripts": {
     "declare": "tsc",
-    "cleanup": "rimraf -rf es lib types index.d.ts",
+    "cleanup": "rimraf -rf esm lib types index.d.ts",
     "generate": "rollup -c",
     "build": "npm run cleanup && npm run declare && npm run generate",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -41,6 +41,7 @@
     "url": "https://github.com/lihaizhong/CodeLabs/issues"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-replace": "^6.0.2",
     "@rollup/plugin-terser": "^0.4.4",
