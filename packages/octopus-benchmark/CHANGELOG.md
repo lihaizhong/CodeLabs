@@ -1,5 +1,14 @@
 # octopus-benchmark
 
+## 1.0.2
+
+### Patch Changes
+
+- fix: 更新依赖包
+
+- Updated dependencies []:
+  - octopus-platform@0.1.1
+
 ## 1.0.1
 
 ### Patch Changes

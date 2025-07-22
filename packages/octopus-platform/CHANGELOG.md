@@ -1,5 +1,11 @@
 # octopus-platform
 
+## 0.1.1
+
+### Patch Changes
+
+- refacor: 更新构建模块
+
 ## 0.1.0
 
 ### Minor Changes
