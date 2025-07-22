@@ -564,7 +564,7 @@ var pluginNow = definePlugin({
   function EnhancedPlatform() {
     var _this;
     _classCallCheck(this, EnhancedPlatform);
-    _this = _callSuper(this, EnhancedPlatform, [[pluginNow], "1.0.0"]);
+    _this = _callSuper(this, EnhancedPlatform, [[pluginNow], "1.0.1"]);
     _this.init();
     return _this;
   }
