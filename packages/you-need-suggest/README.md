@@ -1,4 +1,4 @@
-# you need suggest
+# You Need Suggestion
 
 这是一个本地搜索建议的插件。适用场景是，数据量只有固定的几百条数据但后端实现模糊搜索又显得大才小用的场景。
 
