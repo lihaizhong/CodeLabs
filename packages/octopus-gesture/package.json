@@ -1,0 +1,61 @@
+{
+  "name": "octopus-virtual-scroll",
+  "version": "1.0.0",
+  "type": "module",
+  "keywords": [
+    "virtual-scroll",
+    "scroll"
+  ],
+  "description": "基准测试工具",
+  "module": "es/index.js",
+  "main": "lib/index.js",
+  "unpkg": "lib/index.min.js",
+  "types": "index.d.ts",
+  "exports": {
+    "import": "./es/index.js",
+    "default": "./lib/index.js",
+    "unpkg": "./lib/index.min.js",
+    "types": "./index.d.ts"
+  },
+  "files": [
+    "es",
+    "lib",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "declare": "tsc",
+    "cleanup": "rimraf -rf es lib types index.d.ts",
+    "generate": "rollup -c",
+    "build": "npm run cleanup && npm run declare && npm run generate",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "lihzsky",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lihaizhong/CodeLabs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lihaizhong/CodeLabs/issues"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-replace": "^6.0.2",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "12.1.2",
+    "@types/jest": "^30.0.0",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.44.0",
+    "rollup-plugin-delete": "^3.0.1",
+    "rollup-plugin-dts": "^6.2.1",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "octopus-platform": "workspace:^"
+  }
+}
