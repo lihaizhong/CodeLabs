@@ -1,6 +1,7 @@
 {
   "name": "hello-like-redis",
   "version": "1.0.0",
+  "private": true,
   "description": "## 参考资料",
   "main": "index.js",
   "scripts": {
