@@ -353,6 +353,11 @@ declare class Painter {
      * @param H 海报模式必须传入
      */
     constructor(mode?: PaintMode, width?: number, height?: number);
+    /**
+     * 设置 Canvas 的处理模式
+     * - C：代表 Canvas
+     * - O：代表 OffscreenCanvas
+     */
     private setModel;
     /**
      * 注册画笔，根据环境判断生成最优的绘制方式

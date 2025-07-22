@@ -1,5 +1,3 @@
-<page-meta></page-meta>
-
 <view class="palette-container">
   <fuck-animation current="{{ current }}" sources="{{ sources }}" class="animation"></fuck-animation>
 

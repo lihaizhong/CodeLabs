@@ -1,5 +1,10 @@
-<page-meta>
-  <view class="page-container">
-    <button tt:for="{{ btnList }}" tt:key="path" class="btn" type="primary" data-url="{{ item.path }}" bind:tap="handleNavigateTo">{{ item.text }}</button>
-  </view>
-</page-meta>
+<view class="page-container">
+  <button
+    tt:for="{{ btnList }}"
+    tt:key="path"
+    class="btn"
+    type="primary"
+    data-url="{{ item.path }}"
+    bind:tap="handleNavigateTo"
+  >{{ item.text }}</button>
+</view>

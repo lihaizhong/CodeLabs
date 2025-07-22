@@ -4931,6 +4931,11 @@
             this.W = width * dpr;
             this.H = height * dpr;
         }
+        /**
+         * 设置 Canvas 的处理模式
+         * - C：代表 Canvas
+         * - O：代表 OffscreenCanvas
+         */
         Painter.prototype.setModel = function (type) {
             var model = this.model;
             var env = platform.globals.env;
@@ -4969,9 +4974,6 @@
                             if (!(mode === "poster" &&
                                 (env !== "h5" || "OffscreenCanvas" in globalThis))) return [3 /*break*/, 1];
                             _b = this, W = _b.W, H = _b.H;
-                            if (!(W > 0 && H > 0)) {
-                                throw new Error("Poster mode must set width and height when create Brush instance");
-                            }
                             _c = getOfsCanvas({ width: W, height: H }), canvas = _c.canvas, context = _c.context;
                             this.X = canvas;
                             this.XC = context;
@@ -4984,10 +4986,10 @@
                             // 添加主屏
                             this.X = canvas;
                             this.XC = context;
+                            this.setModel("C");
                             if (mode === "poster") {
-                                canvas.width = width;
-                                canvas.height = height;
-                                this.setModel("C");
+                                canvas.width = this.W;
+                                canvas.height = this.H;
                             }
                             else {
                                 this.W = width;
@@ -4995,9 +4997,27 @@
                             }
                             _e.label = 3;
                         case 3:
+                            // #endregion set main screen implement
+                            // #region clear main screen implement
+                            // ------- 生成主屏清理函数 -------
+                            // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
+                            if (model.clear === "CL") {
+                                this.clearContainer = function () {
+                                    var _a = _this, W = _a.W, H = _a.H, XC = _a.XC;
+                                    XC.clearRect(0, 0, W, H);
+                                };
+                            }
+                            else {
+                                this.clearContainer = function () {
+                                    var _a = _this, W = _a.W, H = _a.H, X = _a.X;
+                                    X.width = W;
+                                    X.height = H;
+                                };
+                            }
                             if (!(mode === "poster")) return [3 /*break*/, 4];
                             this.Y = this.X;
                             this.YC = this.XC;
+                            this.clearSecondary = this.stick = noop;
                             return [3 /*break*/, 8];
                         case 4:
                             ofsResult = void 0;
@@ -5016,59 +5036,35 @@
                         case 7:
                             this.Y = ofsResult.canvas;
                             this.YC = ofsResult.context;
-                            _e.label = 8;
-                        case 8:
                             // #endregion set secondary screen implement
-                            // #region clear main screen implement
-                            // ------- 生成主屏清理函数 -------
-                            // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
-                            if (model.clear === "CL") {
-                                this.clearContainer = function () {
-                                    var _a = _this, W = _a.W, H = _a.H;
-                                    _this.XC.clearRect(0, 0, W, H);
-                                };
+                            // #region clear secondary screen implement
+                            // ------- 生成副屏清理函数 --------
+                            switch (model.clear) {
+                                case "CR":
+                                    this.clearSecondary = function () {
+                                        var _a = _this, W = _a.W, H = _a.H;
+                                        // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
+                                        var _b = getOfsCanvas({ width: W, height: H }), canvas = _b.canvas, context = _b.context;
+                                        _this.Y = canvas;
+                                        _this.YC = context;
+                                    };
+                                    break;
+                                case "CL":
+                                    this.clearSecondary = function () {
+                                        var _a = _this, W = _a.W, H = _a.H, YC = _a.YC;
+                                        // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
+                                        YC.clearRect(0, 0, W, H);
+                                    };
+                                    break;
+                                default:
+                                    this.clearSecondary = function () {
+                                        var _a = _this, W = _a.W, H = _a.H, Y = _a.Y;
+                                        Y.width = W;
+                                        Y.height = H;
+                                    };
                             }
-                            else {
-                                this.clearContainer = function () {
-                                    var _a = _this, W = _a.W, H = _a.H;
-                                    _this.X.width = W;
-                                    _this.X.height = H;
-                                };
-                            }
-                            // #endregion clear main screen implement
-                            if (mode === "poster") {
-                                this.clearSecondary = this.stick = noop;
-                            }
-                            else {
-                                // #region clear secondary screen implement
-                                // ------- 生成副屏清理函数 --------
-                                switch (model.clear) {
-                                    case "CR":
-                                        this.clearSecondary = function () {
-                                            var _a = _this, W = _a.W, H = _a.H;
-                                            // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
-                                            var _b = getOfsCanvas({ width: W, height: H }), canvas = _b.canvas, context = _b.context;
-                                            _this.Y = canvas;
-                                            _this.YC = context;
-                                        };
-                                        break;
-                                    case "CL":
-                                        this.clearSecondary = function () {
-                                            var _a = _this, W = _a.W, H = _a.H;
-                                            // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
-                                            _this.YC.clearRect(0, 0, W, H);
-                                        };
-                                        break;
-                                    default:
-                                        this.clearSecondary = function () {
-                                            var _a = _this, W = _a.W, H = _a.H, Y = _a.Y;
-                                            Y.width = W;
-                                            Y.height = H;
-                                        };
-                                }
-                                // #endregion clear secondary screen implement
-                            }
-                            return [2 /*return*/];
+                            _e.label = 8;
+                        case 8: return [2 /*return*/];
                     }
                 });
             });

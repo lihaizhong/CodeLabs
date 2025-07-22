@@ -64,6 +64,11 @@ export class Painter {
     this.H = height * dpr;
   }
 
+  /**
+   * 设置 Canvas 的处理模式
+   * - C：代表 Canvas
+   * - O：代表 OffscreenCanvas
+   */
   private setModel(type: "C" | "O"): void {
     const { model } = this;
     const { env } = platform.globals;
@@ -107,13 +112,6 @@ export class Painter {
       (env !== "h5" || "OffscreenCanvas" in globalThis)
     ) {
       const { W, H } = this;
-
-      if (!(W > 0 && H > 0)) {
-        throw new Error(
-          "Poster mode must set width and height when create Brush instance"
-        );
-      }
-
       const { canvas, context } = getOfsCanvas({ width: W, height: H });
 
       this.X = canvas;
@@ -125,11 +123,11 @@ export class Painter {
       // 添加主屏
       this.X = canvas;
       this.XC = context;
+      this.setModel("C");
 
       if (mode === "poster") {
-        canvas.width = width;
-        canvas.height = height;
-        this.setModel("C");
+        canvas.width = this.W;
+        canvas.height = this.H;
       } else {
         this.W = width;
         this.H = height;
@@ -137,12 +135,32 @@ export class Painter {
     }
     // #endregion set main screen implement
 
-    // #region set secondary screen implement
-    // ------- 创建副屏 ---------
+    // #region clear main screen implement
+    // ------- 生成主屏清理函数 -------
+    // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
+    if (model.clear === "CL") {
+      this.clearContainer = () => {
+        const { W, H, XC } = this;
+
+        XC!.clearRect(0, 0, W, H);
+      };
+    } else {
+      this.clearContainer = () => {
+        const { W, H, X } = this;
+
+        X!.width = W;
+        X!.height = H;
+      };
+    }
+    // #endregion clear main screen implement
+
     if (mode === "poster") {
       this.Y = this.X;
       this.YC = this.XC;
+      this.clearSecondary = this.stick = noop;
     } else {
+      // #region set secondary screen implement
+      // ------- 创建副屏 ---------
       let ofsResult;
 
       if (typeof ofsSelector === "string" && ofsSelector !== "") {
@@ -157,29 +175,8 @@ export class Painter {
 
       this.Y = ofsResult.canvas;
       this.YC = ofsResult.context;
-    }
-    // #endregion set secondary screen implement
+      // #endregion set secondary screen implement
 
-    // #region clear main screen implement
-    // ------- 生成主屏清理函数 -------
-    // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
-    if (model.clear === "CL") {
-      this.clearContainer = () => {
-        const { W, H } = this;
-        this.XC!.clearRect(0, 0, W, H);
-      };
-    } else {
-      this.clearContainer = () => {
-        const { W, H } = this;
-        this.X!.width = W;
-        this.X!.height = H;
-      };
-    }
-    // #endregion clear main screen implement
-
-    if (mode === "poster") {
-      this.clearSecondary = this.stick = noop;
-    } else {
       // #region clear secondary screen implement
       // ------- 生成副屏清理函数 --------
       switch (model.clear) {
@@ -188,20 +185,22 @@ export class Painter {
             const { W, H } = this;
             // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
             const { canvas, context } = getOfsCanvas({ width: W, height: H });
+
             this.Y = canvas;
             this.YC = context;
           };
           break;
         case "CL":
           this.clearSecondary = () => {
-            const { W, H } = this;
+            const { W, H, YC } = this;
             // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
-            this.YC!.clearRect(0, 0, W, H);
+            YC!.clearRect(0, 0, W, H);
           };
           break;
         default:
           this.clearSecondary = () => {
             const { W, H, Y } = this;
+          
             Y!.width = W;
             Y!.height = H;
           };

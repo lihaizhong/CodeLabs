@@ -231,7 +231,7 @@
         /**
          * 平台版本
          */
-        platformVersion = "0.0.2";
+        platformVersion = "0.1.0";
         /**
          * 应用版本
          */
@@ -659,42 +659,6 @@
         },
     });
 
-    var pluginIntersectionObserver = definePlugin({
-        name: "openInObserver",
-        dependencies: ["getSelector"],
-        install() {
-            const { getSelector } = this;
-            const { env, br } = this.globals;
-            const thresholds = [0, 0.5, 1];
-            if (env === "h5") {
-                return (callback, selector) => {
-                    const observer = new IntersectionObserver((entries) => {
-                        callback(entries[0].intersectionRatio > 0);
-                    }, { threshold: thresholds });
-                    const element = getSelector(selector);
-                    if (element) {
-                        observer.observe(element);
-                    }
-                    return () => {
-                        observer.disconnect();
-                    };
-                };
-            }
-            return (callback, selector, component) => {
-                const observer = br.createIntersectionObserver(component, {
-                    thresholds: thresholds,
-                    initialRatio: 0,
-                });
-                observer.observe(selector, (res) => {
-                    callback(res.intersectionRatio > 0);
-                });
-                return () => {
-                    observer.disconnect();
-                };
-            };
-        },
-    });
-
     var pluginNow = definePlugin({
         name: "now",
         install() {
@@ -818,7 +782,6 @@
                 pluginSelector,
                 pluginCanvas,
                 pluginOfsCanvas,
-                pluginIntersectionObserver,
                 pluginDecode,
                 pluginDownload,
                 pluginFsm,
@@ -826,7 +789,7 @@
                 pluginNow,
                 pluginPath,
                 pluginRaf,
-            ], "0.3.1") || this;
+            ], "1.0.0") || this;
             _this.init();
             return _this;
         }
@@ -2834,7 +2797,7 @@
             /**
              * 动画暂停时的时间偏差
              */
-            this.pauseStart = 0;
+            this.pauseTime = 0;
             /**
              * 循环持续时间
              */
@@ -2860,7 +2823,7 @@
         Animator.prototype.start = function () {
             this.isRunning = true;
             this.startTime = platform.now();
-            this.pauseStart = 0;
+            this.pauseTime = 0;
             this.onStart();
             this.doFrame();
         };
@@ -2878,7 +2841,7 @@
             }
             this.isRunning = false;
             // 设置暂停的位置
-            this.pauseStart =
+            this.pauseTime =
                 (platform.now() - this.startTime) % this.duration;
             return true;
         };
@@ -2895,23 +2858,23 @@
                 }
             }
         };
-        Animator.prototype.doDeltaTime = function (DT) {
-            var _a = this, D = _a.duration, LS = _a.loopStart, PS = _a.pauseStart, LD = _a.loopDuration;
+        Animator.prototype.doDeltaTime = function (deltaTime) {
+            var _a = this, duration = _a.duration, loopStart = _a.loopStart, pauseTime = _a.pauseTime, loopDuration = _a.loopDuration;
             // 本轮动画已消耗的时间比例（Percentage of speed time）
-            var TP;
+            var percent;
             var ended = false;
             // 运行时间 大于等于 循环持续时间
-            if (DT >= LD) {
+            if (deltaTime >= loopDuration) {
                 // 动画已结束
-                TP = 1.0;
+                percent = 1.0;
                 ended = true;
                 this.stop();
             }
             else {
                 // 本轮动画已消耗的时间比例 = 本轮动画已消耗的时间 / 动画持续时间
-                TP = ((DT + LS + PS) % D) / D;
+                percent = ((deltaTime + loopStart + pauseTime) % duration) / duration;
             }
-            this.onUpdate(TP);
+            this.onUpdate(percent);
             if (!this.isRunning && ended) {
                 this.onEnd();
             }
@@ -4968,6 +4931,11 @@
             this.W = width * dpr;
             this.H = height * dpr;
         }
+        /**
+         * 设置 Canvas 的处理模式
+         * - C：代表 Canvas
+         * - O：代表 OffscreenCanvas
+         */
         Painter.prototype.setModel = function (type) {
             var model = this.model;
             var env = platform.globals.env;
@@ -5006,9 +4974,6 @@
                             if (!(mode === "poster" &&
                                 (env !== "h5" || "OffscreenCanvas" in globalThis))) return [3 /*break*/, 1];
                             _b = this, W = _b.W, H = _b.H;
-                            if (!(W > 0 && H > 0)) {
-                                throw new Error("Poster mode must set width and height when create Brush instance");
-                            }
                             _c = getOfsCanvas({ width: W, height: H }), canvas = _c.canvas, context = _c.context;
                             this.X = canvas;
                             this.XC = context;
@@ -5021,10 +4986,10 @@
                             // 添加主屏
                             this.X = canvas;
                             this.XC = context;
+                            this.setModel("C");
                             if (mode === "poster") {
-                                canvas.width = width;
-                                canvas.height = height;
-                                this.setModel("C");
+                                canvas.width = this.W;
+                                canvas.height = this.H;
                             }
                             else {
                                 this.W = width;
@@ -5032,9 +4997,27 @@
                             }
                             _e.label = 3;
                         case 3:
+                            // #endregion set main screen implement
+                            // #region clear main screen implement
+                            // ------- 生成主屏清理函数 -------
+                            // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
+                            if (model.clear === "CL") {
+                                this.clearContainer = function () {
+                                    var _a = _this, W = _a.W, H = _a.H, XC = _a.XC;
+                                    XC.clearRect(0, 0, W, H);
+                                };
+                            }
+                            else {
+                                this.clearContainer = function () {
+                                    var _a = _this, W = _a.W, H = _a.H, X = _a.X;
+                                    X.width = W;
+                                    X.height = H;
+                                };
+                            }
                             if (!(mode === "poster")) return [3 /*break*/, 4];
                             this.Y = this.X;
                             this.YC = this.XC;
+                            this.clearSecondary = this.stick = noop;
                             return [3 /*break*/, 8];
                         case 4:
                             ofsResult = void 0;
@@ -5053,59 +5036,35 @@
                         case 7:
                             this.Y = ofsResult.canvas;
                             this.YC = ofsResult.context;
-                            _e.label = 8;
-                        case 8:
                             // #endregion set secondary screen implement
-                            // #region clear main screen implement
-                            // ------- 生成主屏清理函数 -------
-                            // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
-                            if (model.clear === "CL") {
-                                this.clearContainer = function () {
-                                    var _a = _this, W = _a.W, H = _a.H;
-                                    _this.XC.clearRect(0, 0, W, H);
-                                };
+                            // #region clear secondary screen implement
+                            // ------- 生成副屏清理函数 --------
+                            switch (model.clear) {
+                                case "CR":
+                                    this.clearSecondary = function () {
+                                        var _a = _this, W = _a.W, H = _a.H;
+                                        // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
+                                        var _b = getOfsCanvas({ width: W, height: H }), canvas = _b.canvas, context = _b.context;
+                                        _this.Y = canvas;
+                                        _this.YC = context;
+                                    };
+                                    break;
+                                case "CL":
+                                    this.clearSecondary = function () {
+                                        var _a = _this, W = _a.W, H = _a.H, YC = _a.YC;
+                                        // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
+                                        YC.clearRect(0, 0, W, H);
+                                    };
+                                    break;
+                                default:
+                                    this.clearSecondary = function () {
+                                        var _a = _this, W = _a.W, H = _a.H, Y = _a.Y;
+                                        Y.width = W;
+                                        Y.height = H;
+                                    };
                             }
-                            else {
-                                this.clearContainer = function () {
-                                    var _a = _this, W = _a.W, H = _a.H;
-                                    _this.X.width = W;
-                                    _this.X.height = H;
-                                };
-                            }
-                            // #endregion clear main screen implement
-                            if (mode === "poster") {
-                                this.clearSecondary = this.stick = noop;
-                            }
-                            else {
-                                // #region clear secondary screen implement
-                                // ------- 生成副屏清理函数 --------
-                                switch (model.clear) {
-                                    case "CR":
-                                        this.clearSecondary = function () {
-                                            var _a = _this, W = _a.W, H = _a.H;
-                                            // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
-                                            var _b = getOfsCanvas({ width: W, height: H }), canvas = _b.canvas, context = _b.context;
-                                            _this.Y = canvas;
-                                            _this.YC = context;
-                                        };
-                                        break;
-                                    case "CL":
-                                        this.clearSecondary = function () {
-                                            var _a = _this, W = _a.W, H = _a.H;
-                                            // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
-                                            _this.YC.clearRect(0, 0, W, H);
-                                        };
-                                        break;
-                                    default:
-                                        this.clearSecondary = function () {
-                                            var _a = _this, W = _a.W, H = _a.H, Y = _a.Y;
-                                            Y.width = W;
-                                            Y.height = H;
-                                        };
-                                }
-                                // #endregion clear secondary screen implement
-                            }
-                            return [2 /*return*/];
+                            _e.label = 8;
+                        case 8: return [2 /*return*/];
                     }
                 });
             });
@@ -5158,11 +5117,6 @@
              * 循环次数，默认值 0（无限循环）
              */
             this.loop = 0;
-            /**
-             * 是否开启动画容器视窗检测，默认值 false
-             * 开启后利用 Intersection Observer API 检测动画容器是否处于视窗内，若处于视窗外，停止描绘渲染帧避免造成资源消耗
-             */
-            this.enableInObserver = false;
         }
         Config.prototype.register = function (config) {
             if (typeof config.loop === "number" && config.loop >= 0) {
@@ -5192,9 +5146,6 @@
             }
             if (typeof config.contentMode === "string") {
                 this.contentMode = config.contentMode;
-            }
-            if (typeof config.enableInObserver === 'boolean') {
-                this.enableInObserver = config.enableInObserver;
             }
         };
         Config.prototype.setItem = function (key, value) {
@@ -6049,7 +6000,6 @@
         Player.prototype.setConfig = function (options, component) {
             return __awaiter(this, void 0, void 0, function () {
                 var config, container, secondary;
-                var _this = this;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -6066,12 +6016,6 @@
                             this.renderer = new Renderer2D(this.painter.YC);
                             this.resource = new ResourceManager(this.painter);
                             this.animator.onAnimate = platform.rAF.bind(null, this.painter.X);
-                            if (this.config.enableInObserver) {
-                                platform.openInObserver(function (isBeIntersection) {
-                                    console.log("IntersectionObserver: ".concat(isBeIntersection));
-                                    isBeIntersection ? _this.resume() : _this.pause();
-                                }, container, component);
-                            }
                             return [2 /*return*/];
                     }
                 });
