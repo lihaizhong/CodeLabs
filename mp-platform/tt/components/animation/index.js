@@ -3,6 +3,7 @@ import {
   Parser,
   VideoEditor,
   VideoManager,
+  platform,
 } from "../../utils/fuck-svga";
 import { benchmark } from "../../utils/fuck-benchmark";
 import ReadyGo from "../../utils/ReadyGo";
@@ -79,7 +80,7 @@ const worker = new EnhancedWorker();
 const readyGo = new ReadyGo();
 const videoManager = new VideoManager("fast", {
   preprocess: async (bucket) => {
-    const buff = await remote.fetch(bucket.origin);
+    const buff = await platform.remote.fetch(bucket.origin);
 
     return new Promise((resolve) => {
       worker.once(bucket.origin, (data) => resolve(data));
