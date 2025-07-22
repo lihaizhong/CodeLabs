@@ -87,10 +87,10 @@ export class EnhancedWorker {
 
   emit(method, data, transfer) {
     benchmark.start(`${method} 下载并解压时间`);
-    // if (this.transferable) {
-    //   this.worker.postMessage({ method, data }, transfer);
-    // } else
-    if ("SharedArrayBuffer" in globalThis && transfer?.length > 0) {
+    if (this.transferable) {
+      this.worker.postMessage({ method, data }, transfer);
+    } else if ("SharedArrayBuffer" in globalThis && transfer?.length > 0) {
+      // FIXME: 当前内容未经验证，且实现尚未完成
       const buff = new SharedArrayBuffer(0, {
         maxByteLength: EnhancedWorker.MAX_BYTE_LENGTH,
       });
