@@ -5,7 +5,9 @@
 ## 实现
 
 - [x] 兼容 Android 4.4+ / iOS 9+
-- [x] 整体大小 **~80Kb**，核心部分大小 **~50Kb**（下载解析器 + 播放器），*做完多端兼容后，仍小于 [SVGAPlayer-Web-Lite](https://github.com/svga/SVGAPlayer-Web-Lite)*
+- [x] 整体大小 **~80Kb**，核心部分大小 **~50Kb**（解析器 + 播放器），*小于 [SVGAPlayer-Web-Lite](https://github.com/svga/SVGAPlayer-Web-Lite)*
+- [x] 实现多端兼容，目前支持 H5、微信小程序、支付宝小程序、抖音小程序
+- [x] 优化 **protobuf** 解析器体积，增强二进制解析速度
 - [x] 支持 **双缓冲渲染机制** + **指数退避算法** 提升渲染性能
 - [x] 支持基于 SVGA 格式的 **模版海报** 绘制 _（需配合 png 图片生成器使用）_
 - [x] 支持动效文件 **管理器** _（支持自定义下载、解压、解析的策略）_
