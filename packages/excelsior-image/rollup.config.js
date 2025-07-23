@@ -34,7 +34,6 @@ export default defineConfig([
         plugins: [terser()],
       },
     ],
-    external: ["octopus-platform"],
     plugins: [
       nodeResolve({ browser: true }),
       replace({
@@ -58,7 +57,7 @@ export default defineConfig([
       {
         file: pkg.main,
         format: "umd",
-        name: "OctopusImage",
+        name: "ExcelsiorImage",
         exports: "named",
         compact: true,
         esModule: true,
@@ -67,7 +66,7 @@ export default defineConfig([
       {
         file: minifyFileName(pkg.main),
         format: "umd",
-        name: "OctopusImage",
+        name: "ExcelsiorImage",
         exports: "named",
         esModule: true,
         compact: true,
@@ -86,16 +85,7 @@ export default defineConfig([
       }),
       babel({
         babelHelpers: "bundled",
-        include: [
-          "src/**",
-          // 🔥 匹配 workspace 中的 octopus-platform 包
-          "../octopus-platform/**",
-          // 🔥 匹配 pnpm 的 .pnpm 结构
-          '**/node_modules/.pnpm/*/node_modules/octopus-platform/**',
-          // 或更通用：
-          '**/node_modules/octopus-platform/**', // 通配任何层级
-          '**/node_modules/.pnpm/**/octopus-platform/**' // 精确匹配 pnpm
-        ],
+        include: ["src/**"],
         exclude: [
           "node_modules/@babel/**",
         ],
