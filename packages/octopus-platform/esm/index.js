@@ -140,7 +140,7 @@ class OctopusPlatform {
     /**
      * 平台版本
      */
-    platformVersion = "0.1.0";
+    platformVersion = "0.1.1";
     /**
      * 应用版本
      */
@@ -684,5 +684,53 @@ var pluginRaf = definePlugin({
     },
 });
 
-export { OctopusPlatform, definePlugin, installPlugin, pluginCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginOfsCanvas, pluginPath, pluginRaf as pluginRAF, pluginSelector };
+var pluginIntersectionObserver = definePlugin({
+    name: "walkIn",
+    install() {
+        const { env, br } = this.globals;
+        const thresholds = [0, 0.5, 1];
+        if (env === "h5") {
+            return (callback, selector, options = {}) => {
+                let observer = new IntersectionObserver((entries) => callback(entries[0].intersectionRatio > 0), {
+                    threshold: thresholds,
+                    root: options.root ? document.querySelector(options.root) : null,
+                });
+                if (options.observeAll) {
+                    document.querySelectorAll(selector)?.forEach((element) => observer.observe(element));
+                }
+                else {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        observer.observe(element);
+                    }
+                }
+                return () => {
+                    observer.disconnect();
+                    observer = null;
+                };
+            };
+        }
+        return (callback, selector, options = {}) => {
+            let observer = br.createIntersectionObserver(options.component, {
+                thresholds,
+                initialRatio: 0,
+                observeAll: options.observeAll,
+                // nativeMode: true,
+            });
+            if (options.root) {
+                observer.relativeTo(options.root);
+            }
+            else {
+                observer.relativeToViewport();
+            }
+            observer.observe(selector, (res) => callback(res.intersectionRatio > 0));
+            return () => {
+                observer.disconnect();
+                observer = null;
+            };
+        };
+    },
+});
+
+export { OctopusPlatform, definePlugin, installPlugin, pluginCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginIntersectionObserver, pluginNow, pluginOfsCanvas, pluginPath, pluginRaf as pluginRAF, pluginSelector };
 //# sourceMappingURL=index.js.map

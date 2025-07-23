@@ -8,4 +8,4 @@ export { default as pluginNow } from "./plugin-now";
 export { default as pluginOfsCanvas } from "./plugin-ofs-canvas";
 export { default as pluginPath } from "./plugin-path";
 export { default as pluginRAF } from "./plugin-raf";
-// export { default as pluginIntersectionObserver } from "./plugin-intersection-observer";
+export { default as pluginIntersectionObserver } from "./plugin-intersection-observer";

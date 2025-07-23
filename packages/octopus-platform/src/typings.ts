@@ -46,6 +46,19 @@ export interface GetOffscreenCanvasResult {
   context: OffscreenCanvasRenderingContext2D;
 }
 
+export interface MiniProgramIntersectionObserver {
+  relativeTo: (selector: string) => void;
+  relativeToViewport: () => void;
+  observe: (selector: string, callback: (res: any) => void) => void;
+  disconnect: () => void;
+}
+
+export interface WalkInOptions {
+  root?: string;
+  observeAll?: boolean;
+  component?: any;
+}
+
 /**
  * 平台插件接口
  * 各个插件通过 declare module 语法扩展此接口
@@ -60,6 +73,12 @@ export interface OctopusPlatformPlugins {
   now: () => number;
 
   rAF: (canvas: PlatformCanvas, callback: () => void) => number;
+
+  walkIn: (
+    callback: (isBeIntersection: boolean) => void,
+    selector: string,
+    options: WalkInOptions
+  ) => () => void;
 
   decode: {
     toDataURL: (data: Uint8Array) => string;

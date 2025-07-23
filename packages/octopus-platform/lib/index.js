@@ -213,7 +213,7 @@ function utf8(buffer, start, end) {
         /**
          * 平台版本
          */
-        this.platformVersion = "0.1.0";
+        this.platformVersion = "0.1.1";
         /**
          * 应用版本
          */
@@ -774,4 +774,55 @@ var pluginRaf = definePlugin({
             }
         };
     },
-});exports.OctopusPlatform=OctopusPlatform;exports.definePlugin=definePlugin;exports.installPlugin=installPlugin;exports.pluginCanvas=pluginCanvas;exports.pluginDecode=pluginDecode;exports.pluginDownload=pluginDownload;exports.pluginFsm=pluginFsm;exports.pluginImage=pluginImage;exports.pluginNow=pluginNow;exports.pluginOfsCanvas=pluginOfsCanvas;exports.pluginPath=pluginPath;exports.pluginRAF=pluginRaf;exports.pluginSelector=pluginSelector;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map
+});var pluginIntersectionObserver = definePlugin({
+    name: "walkIn",
+    install: function () {
+        var _a = this.globals, env = _a.env, br = _a.br;
+        var thresholds = [0, 0.5, 1];
+        if (env === "h5") {
+            return function (callback, selector, options) {
+                var _a;
+                if (options === void 0) { options = {}; }
+                var observer = new IntersectionObserver(function (entries) { return callback(entries[0].intersectionRatio > 0); }, {
+                    threshold: thresholds,
+                    root: options.root ? document.querySelector(options.root) : null,
+                });
+                if (options.observeAll) {
+                    (_a = document.querySelectorAll(selector)) === null || _a === void 0 ? void 0 : _a.forEach(function (element) { return observer.observe(element); });
+                }
+                else {
+                    var element = document.querySelector(selector);
+                    if (element) {
+                        observer.observe(element);
+                    }
+                }
+                return function () {
+                    observer.disconnect();
+                    observer = null;
+                };
+            };
+        }
+        return function (callback, selector, options) {
+            if (options === void 0) { options = {}; }
+            var observer = br.createIntersectionObserver(options.component, {
+                thresholds: thresholds,
+                initialRatio: 0,
+                observeAll: options.observeAll,
+                // nativeMode: true,
+            });
+            if (options.root) {
+                observer.relativeTo(options.root);
+            }
+            else {
+                observer.relativeToViewport();
+            }
+            observer.observe(selector, function (res) {
+                return callback(res.intersectionRatio > 0);
+            });
+            return function () {
+                observer.disconnect();
+                observer = null;
+            };
+        };
+    },
+});exports.OctopusPlatform=OctopusPlatform;exports.definePlugin=definePlugin;exports.installPlugin=installPlugin;exports.pluginCanvas=pluginCanvas;exports.pluginDecode=pluginDecode;exports.pluginDownload=pluginDownload;exports.pluginFsm=pluginFsm;exports.pluginImage=pluginImage;exports.pluginIntersectionObserver=pluginIntersectionObserver;exports.pluginNow=pluginNow;exports.pluginOfsCanvas=pluginOfsCanvas;exports.pluginPath=pluginPath;exports.pluginRAF=pluginRaf;exports.pluginSelector=pluginSelector;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map

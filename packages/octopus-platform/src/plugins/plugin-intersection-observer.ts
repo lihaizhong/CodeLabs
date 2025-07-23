@@ -1,73 +1,69 @@
-// import { definePlugin } from "../definePlugin";
+import type { MiniProgramIntersectionObserver, WalkInOptions } from "../typings";
+import { definePlugin } from "../definePlugin";
 
-// declare interface OctopusPlatformPlugins {
-//   openInObserver: (
-//     callback: (isBeIntersection: boolean) => void,
-//     selector: string,
-//     component?: any
-//   ) => () => void;
-// }
+export default definePlugin<"walkIn">({
+  name: "walkIn",
+  install() {
+    const { env, br } = this.globals;
+    const thresholds = [0, 0.5, 1];
 
-// export default definePlugin<"walkIn">({
-//   name: "walkIn",
-//   install() {
-//     const { env, br } = this.globals;
-//     const thresholds = [0, 0.5, 1];
+    if (env === "h5") {
+      return (
+        callback: (isBeIntersection: boolean) => void,
+        selector: string,
+        options: WalkInOptions = {}
+      ) => {
+        let observer: IntersectionObserver | null = new IntersectionObserver(
+          (entries) => callback(entries[0].intersectionRatio > 0),
+          {
+            threshold: thresholds,
+            root: options.root ? document.querySelector(options.root) : null,
+          }
+        );
 
-//     if (env === "h5") {
-//       return (
-//         callback: (isBeIntersection: boolean) => void,
-//         selector: string,
-//         options: any = {}
-//       ) => {
-//         let observer: IntersectionObserver | null = new IntersectionObserver(
-//           (entries) => callback(entries[0].intersectionRatio > 0),
-//           {
-//             threshold: thresholds,
-//             root: options.root ? document.querySelector(options.root) : null,
-//           }
-//         );
+        if (options.observeAll) {
+          document.querySelectorAll(selector)?.forEach((element) => observer!.observe(element));
+        } else {
+          const element = document.querySelector(selector);
 
-//         const elements = document.querySelectorAll(selector);
+          if (element) {
+            observer!.observe(element);
+          }
+        }
 
-//         if (elements.length) {
-//           for (let i = 0; i < elements.length; i++) {
-//             observer.observe(elements[i]);
-//           }
-//         }
+        return () => {
+          observer!.disconnect();
+          observer = null;
+        };
+      };
+    }
 
-//         return () => {
-//           observer!.disconnect();
-//           observer = null;
-//         };
-//       };
-//     }
+    return (
+      callback: (isBeIntersection: boolean) => void,
+      selector: string,
+      options: WalkInOptions = {}
+    ) => {
+      let observer: MiniProgramIntersectionObserver | null = br.createIntersectionObserver(options.component, {
+        thresholds,
+        initialRatio: 0,
+        observeAll: options.observeAll,
+        // nativeMode: true,
+      });
 
-//     return (
-//       callback: (isBeIntersection: boolean) => void,
-//       selector: string,
-//       options: any = {}
-//     ) => {
-//       let observer: any = br.createIntersectionObserver(options.component, {
-//         thresholds,
-//         initialRatio: 0,
-//         nativeMode: true,
-//       });
+      if (options.root) {
+        observer!.relativeTo(options.root);
+      } else {
+        observer!.relativeToViewport();
+      }
 
-//       if (options.root) {
-//         observer.relativeTo(options.root);
-//       } else {
-//         observer.relativeToViewport();
-//       }
+      observer!.observe(selector, (res: any) =>
+        callback(res.intersectionRatio > 0)
+      );
 
-//       observer.observe(selector, (res: any) =>
-//         callback(res.intersectionRatio > 0)
-//       );
-
-//       return () => {
-//         observer.disconnect();
-//         observer = null;
-//       };
-//     };
-//   },
-// });
+      return () => {
+        observer!.disconnect();
+        observer = null;
+      };
+    };
+  },
+});

@@ -3,16 +3,16 @@ import {
   installPlugin,
   type OctopusPlatformPlugins,
   type OctopusPlatformPluginOptions,
-  pluginNow,
+  pluginIntersectionObserver,
 } from "octopus-platform";
 
-export type PlatformProperties = "now";
+export type PlatformProperties = "walkIn";
 
 class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
-  now!: OctopusPlatformPlugins["now"];
+  walkIn!: OctopusPlatformPlugins["walkIn"];
 
   constructor() {
-    super([pluginNow], __VERSION__);
+    super([pluginIntersectionObserver], __VERSION__);
 
     this.init();
   }
