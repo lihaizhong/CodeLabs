@@ -513,7 +513,7 @@ var OctopusPlatform = /*#__PURE__*/function () {
     /**
      * 平台版本
      */
-    _defineProperty(this, "platformVersion", "0.1.0");
+    _defineProperty(this, "platformVersion", "0.1.1");
     /**
      * 应用版本
      */
