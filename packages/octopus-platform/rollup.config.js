@@ -13,7 +13,8 @@ function minifyFileName(fileName) {
 }
 
 const config = {
-  input: "src/index.ts",
+  tsInput: "src/index.ts",
+  dtsInput: "types/index.d.ts",
   plugins: [
     nodeResolve(),
     commonjs(),
@@ -29,7 +30,7 @@ const config = {
 
 export default defineConfig([
   {
-    input: config.input,
+    input: config.tsInput,
     output: [
       {
         file: pkg.module,
@@ -53,7 +54,7 @@ export default defineConfig([
     ],
   },
   {
-    input: config.input,
+    input: config.tsInput,
     output: [
       {
         file: pkg.main,
@@ -85,10 +86,10 @@ export default defineConfig([
   },
   // 归并 .d.ts 文件
   {
-    input: "types/index.d.ts",
+    input: config.dtsInput,
     output: {
       file: pkg.types,
-      format: "es",
+      format: "esm",
     },
     plugins: [
       // 将类型文件全部集中到一个文件中

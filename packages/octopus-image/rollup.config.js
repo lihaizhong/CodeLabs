@@ -116,7 +116,7 @@ export default defineConfig([
     input: config.dtsInput,
     output: {
       file: pkg.types,
-      format: "es",
+      format: "esm",
     },
     plugins: [
       // 将类型文件全部集中到一个文件中
