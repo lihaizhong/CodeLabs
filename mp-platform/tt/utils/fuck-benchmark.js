@@ -351,7 +351,7 @@ var OctopusPlatform = /*#__PURE__*/function () {
     /**
      * 平台版本
      */
-    _defineProperty(this, "platformVersion", "0.1.0");
+    _defineProperty(this, "platformVersion", "0.1.1");
     /**
      * 应用版本
      */
@@ -414,14 +414,12 @@ var OctopusPlatform = /*#__PURE__*/function () {
       if (typeof wx !== "undefined") {
         return "weapp";
       }
-      throw new Error("Unsupported app");
+      throw new Error("Unsupported platform！");
     }
   }, {
     key: "useBridge",
     value: function useBridge() {
       switch (this.globals.env) {
-        case "h5":
-          return globalThis;
         case "alipay":
           return my;
         case "tt":
@@ -429,7 +427,7 @@ var OctopusPlatform = /*#__PURE__*/function () {
         case "weapp":
           return wx;
       }
-      return {};
+      return globalThis;
     }
   }, {
     key: "usePixelRatio",
@@ -564,7 +562,7 @@ var pluginNow = definePlugin({
   function EnhancedPlatform() {
     var _this;
     _classCallCheck(this, EnhancedPlatform);
-    _this = _callSuper(this, EnhancedPlatform, [[pluginNow], "1.0.1"]);
+    _this = _callSuper(this, EnhancedPlatform, [[pluginNow], "1.0.2"]);
     _this.init();
     return _this;
   }

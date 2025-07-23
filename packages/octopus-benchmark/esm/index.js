@@ -3,7 +3,7 @@ import { OctopusPlatform, pluginNow, installPlugin } from 'octopus-platform';
 class EnhancedPlatform extends OctopusPlatform {
     now;
     constructor() {
-        super([pluginNow], "1.0.1");
+        super([pluginNow], "1.0.2");
         this.init();
     }
     installPlugin(plugin) {

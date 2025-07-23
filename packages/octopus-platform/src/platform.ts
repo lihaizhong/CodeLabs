@@ -61,7 +61,7 @@ export abstract class OctopusPlatform<
     this.globals.env = this.autoEnv();
   }
 
-  protected init() {
+  protected init(): void {
     const { globals, plugins } = this;
     const collection: Map<N, OctopusPlatformPluginOptions<N, N>> = new Map();
     const names: N[] = [];
@@ -80,7 +80,7 @@ export abstract class OctopusPlatform<
     installedPlugins.clear();
   }
 
-  private autoEnv() {
+  private autoEnv(): OctopusSupportedPlatform | never {
     // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
     if (typeof window !== "undefined") {
       return "h5";
@@ -98,13 +98,11 @@ export abstract class OctopusPlatform<
       return "weapp";
     }
 
-    throw new Error("Unsupported app");
+    throw new Error("Unsupported platform！");
   }
 
   private useBridge() {
     switch (this.globals.env) {
-      case "h5":
-        return globalThis;
       case "alipay":
         return my;
       case "tt":
@@ -114,10 +112,10 @@ export abstract class OctopusPlatform<
       default:
     }
 
-    return {};
+    return globalThis;
   }
 
-  private usePixelRatio() {
+  private usePixelRatio(): number {
     const { env, br } = this.globals;
 
     if (env === "h5") {

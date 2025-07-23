@@ -190,12 +190,10 @@ class OctopusPlatform {
         if (typeof wx !== "undefined") {
             return "weapp";
         }
-        throw new Error("Unsupported app");
+        throw new Error("Unsupported platform！");
     }
     useBridge() {
         switch (this.globals.env) {
-            case "h5":
-                return globalThis;
             case "alipay":
                 return my;
             case "tt":
@@ -203,7 +201,7 @@ class OctopusPlatform {
             case "weapp":
                 return wx;
         }
-        return {};
+        return globalThis;
     }
     usePixelRatio() {
         const { env, br } = this.globals;

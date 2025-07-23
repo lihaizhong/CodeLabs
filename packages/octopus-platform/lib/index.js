@@ -263,12 +263,10 @@ function utf8(buffer, start, end) {
         if (typeof wx !== "undefined") {
             return "weapp";
         }
-        throw new Error("Unsupported app");
+        throw new Error("Unsupported platform！");
     };
     OctopusPlatform.prototype.useBridge = function () {
         switch (this.globals.env) {
-            case "h5":
-                return globalThis;
             case "alipay":
                 return my;
             case "tt":
@@ -276,7 +274,7 @@ function utf8(buffer, start, end) {
             case "weapp":
                 return wx;
         }
-        return {};
+        return globalThis;
     };
     OctopusPlatform.prototype.usePixelRatio = function () {
         var _a = this.globals, env = _a.env, br = _a.br;
