@@ -5818,16 +5818,24 @@ function generateImageBufferFromCode(options) {
 function generateImageFromCode(options) {
   var buff = generateImageBufferFromCode(options);
   return platform.decode.toDataURL(buff);
-}function getBufferFromImageData(imageData) {
+}function createBufferOfImageData(imageData) {
   var width = imageData.width,
     height = imageData.height,
     data = imageData.data;
   return new PNGEncoder(width, height).write(data).flush();
 }
-function getDataURLFromImageData(imageData) {
-  var buff = getBufferFromImageData(imageData);
+/**
+ * @deprecated 请使用 createBufferOfImageData 代替，此方法可能在后续版本中移除
+ */
+var getBufferFromImageData = createBufferOfImageData;
+function createImageDataUrl(imageData) {
+  var buff = createBufferOfImageData(imageData);
   return platform.decode.toDataURL(buff);
-}/**
+}
+/**
+ * @deprecated 请使用 createImageDataUrl 代替，此方法可能在后续版本中移除
+ */
+var getDataURLFromImageData = createImageDataUrl;/**
  * 检查数据是否为zlib压缩格式
  * @param data 待检查的二进制数据
  * @returns 是否为zlib压缩格式
@@ -7117,4 +7125,4 @@ var Player = /*#__PURE__*/function () {
       this.entity = undefined;
     }
   }]);
-}();exports.Painter=Painter;exports.Parser=Parser;exports.Player=Player;exports.Poster=Poster;exports.ResourceManager=ResourceManager;exports.VideoEditor=VideoEditor;exports.VideoManager=VideoManager;exports.generateImageBufferFromCode=generateImageBufferFromCode;exports.generateImageFromCode=generateImageFromCode;exports.getBufferFromImageData=getBufferFromImageData;exports.getDataURLFromImageData=getDataURLFromImageData;exports.isZlibCompressed=isZlibCompressed;exports.platform=platform;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map
+}();exports.Painter=Painter;exports.Parser=Parser;exports.Player=Player;exports.Poster=Poster;exports.ResourceManager=ResourceManager;exports.VideoEditor=VideoEditor;exports.VideoManager=VideoManager;exports.createBufferOfImageData=createBufferOfImageData;exports.createImageDataUrl=createImageDataUrl;exports.generateImageBufferFromCode=generateImageBufferFromCode;exports.generateImageFromCode=generateImageFromCode;exports.getBufferFromImageData=getBufferFromImageData;exports.getDataURLFromImageData=getDataURLFromImageData;exports.isZlibCompressed=isZlibCompressed;exports.platform=platform;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map

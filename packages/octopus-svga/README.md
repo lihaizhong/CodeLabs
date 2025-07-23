@@ -225,7 +225,7 @@ import {
   Parser,
   Poster,
   VideoEditor,
-  getDataURLFromImageData,
+  createImageDataUrl,
 } from "octopus-svga";
 
 const videoItem = await Parser.load("xx.svga");
@@ -260,7 +260,7 @@ poster.draw();
 
 const imageData = poster.toImageData();
 // 生成base64格式的png图片
-document.querySelector(".poster").src = getDataURLFromImageData(imageData);
+document.querySelector(".poster").src = createImageDataUrl(imageData);
 ```
 
 ### VideoManager 动效管理器

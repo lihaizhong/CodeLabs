@@ -4415,14 +4415,22 @@ function generateImageFromCode(options) {
     return platform.decode.toDataURL(buff);
 }
 
-function getBufferFromImageData(imageData) {
+function createBufferOfImageData(imageData) {
     const { width, height, data } = imageData;
     return new PNGEncoder(width, height).write(data).flush();
 }
-function getDataURLFromImageData(imageData) {
-    const buff = getBufferFromImageData(imageData);
+/**
+ * @deprecated 请使用 createBufferOfImageData 代替，此方法可能在后续版本中移除
+ */
+const getBufferFromImageData = createBufferOfImageData;
+function createImageDataUrl(imageData) {
+    const buff = createBufferOfImageData(imageData);
     return platform.decode.toDataURL(buff);
 }
+/**
+ * @deprecated 请使用 createImageDataUrl 代替，此方法可能在后续版本中移除
+ */
+const getDataURLFromImageData = createImageDataUrl;
 
 /**
  * 检查数据是否为zlib压缩格式
@@ -5351,5 +5359,5 @@ class Poster {
     }
 }
 
-export { Painter, Parser, Player, Poster, ResourceManager, VideoEditor, VideoManager, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
+export { Painter, Parser, Player, Poster, ResourceManager, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
 //# sourceMappingURL=index.js.map

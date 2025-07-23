@@ -408,8 +408,16 @@ interface IQrCodeImgOptions {
 declare function generateImageBufferFromCode(options: IQrCodeImgOptions): any;
 declare function generateImageFromCode(options: IQrCodeImgOptions): string;
 
-declare function getBufferFromImageData(imageData: ImageData): Uint8Array<ArrayBufferLike>;
-declare function getDataURLFromImageData(imageData: ImageData): string;
+declare function createBufferOfImageData(imageData: ImageData): Uint8Array<ArrayBufferLike>;
+/**
+ * @deprecated 请使用 createBufferOfImageData 代替，此方法可能在后续版本中移除
+ */
+declare const getBufferFromImageData: typeof createBufferOfImageData;
+declare function createImageDataUrl(imageData: ImageData): string;
+/**
+ * @deprecated 请使用 createImageDataUrl 代替，此方法可能在后续版本中移除
+ */
+declare const getDataURLFromImageData: typeof createImageDataUrl;
 
 /**
  * 检查数据是否为zlib压缩格式
@@ -849,5 +857,5 @@ declare class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
 }
 declare const platform: EnhancedPlatform;
 
-export { PLAYER_CONTENT_MODE, PLAYER_FILL_MODE, PLAYER_PLAY_MODE, Painter, Parser, PlatformVideo, Player, Poster, ResourceManager, VideoEditor, VideoManager, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
+export { PLAYER_CONTENT_MODE, PLAYER_FILL_MODE, PLAYER_PLAY_MODE, Painter, Parser, PlatformVideo, Player, Poster, ResourceManager, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
 export type { Bucket, CanvasSize, IQrCodeImgOptions, LoadMode, NeedUpdatePoint, PaintMode, PaintModel, PlatformImages, PlatformProperties, PlatformRenderingContext2D, PlayerConfig, PlayerConfigOptions, PlayerEventCallback, PlayerProcessEventCallback, PosterConfig, PosterConfigOptions, PosterEventCallback, RawImages, TransformScale, VideoManagerOptions };

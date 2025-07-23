@@ -1,4 +1,4 @@
-import { Parser, Poster, getDataURLFromImageData } from "../../utils/fuck-svga";
+import { Parser, Poster, createImageDataUrl } from "../../utils/fuck-svga";
 import ReadyGo from "../../utils/ReadyGo";
 
 const readyGo = new ReadyGo();
@@ -83,7 +83,7 @@ Component({
         const imageData = poster.toImageData();
 
         this.setData({
-          source: getDataURLFromImageData(imageData),
+          source: createImageDataUrl(imageData),
         });
         this.setData({ message: "" });
       } catch (ex) {

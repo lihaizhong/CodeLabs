@@ -3,7 +3,7 @@ import {
   Parser,
   Poster,
   VideoEditor,
-  getDataURLFromImageData,
+  createImageDataUrl,
 } from "octopus-svga";
 import { benchmark } from "octopus-benchmark";
 import { EMPTY_PLACEHOLDER, posterSources } from "../../utils/constants";
@@ -49,7 +49,7 @@ async function generatePoster(point) {
   $elem.src = await benchmark.time("generate png data", () => {
     const imageData = poster.toImageData();
 
-    return getDataURLFromImageData(imageData);
+    return createImageDataUrl(imageData);
   });
   benchmark.log("data url", $elem.src);
 }
