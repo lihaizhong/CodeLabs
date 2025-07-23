@@ -67,7 +67,7 @@ export class Poster {
     component?: any
   ): Promise<void> {
     await this.painter.register(selector, "", component);
-    this.renderer = new Renderer2D(this.painter.YC!);
+    this.renderer = new Renderer2D(this.painter.BC!);
     this.resource = new ResourceManager(this.painter);
   }
 
@@ -138,7 +138,7 @@ export class Poster {
 
     const { painter, renderer, resource, entity, config } = this;
 
-    renderer!.resize(config.contentMode, entity!.size, painter.X!);
+    renderer!.resize(config.contentMode, entity!.size, painter.F!);
     renderer!.render(
       entity!,
       resource!.materials,
@@ -153,9 +153,9 @@ export class Poster {
    * 获取海报的 ImageData 数据
    */
   public toImageData(): ImageData {
-    const { XC: context, W: width, H: height } = this.painter;
+    const { FC, W: width, H: height } = this.painter;
 
-    return context!.getImageData(0, 0, width, height);
+    return FC!.getImageData(0, 0, width, height);
   }
 
   /**

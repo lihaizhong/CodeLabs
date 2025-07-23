@@ -59,7 +59,7 @@ const playerAwait = async (scope) => {
 
   benchmark.time("创建 100 个 Image 元素的总时长", () => {
     for (let i = 0; i < 100; i++) {
-      player.painter.X.createImage();
+      player.painter.F.createImage();
     }
   });
 

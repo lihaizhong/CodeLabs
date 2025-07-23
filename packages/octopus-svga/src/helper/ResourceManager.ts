@@ -69,7 +69,7 @@ export class ResourceManager {
     }
 
     if (!img) {
-      img = platform.image.create(this.painter.X!);
+      img = platform.image.create(this.painter.F!);
     }
 
     this.caches.push(img);

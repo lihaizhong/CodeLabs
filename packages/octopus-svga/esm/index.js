@@ -4030,24 +4030,24 @@ class Painter {
     mode;
     /**
      * 主屏的 Canvas 元素
-     * Main Screen
+     * Front Screen
      */
-    X = null;
+    F = null;
     /**
      * 主屏的 Context 对象
-     * Main Context
+     * Front Context
      */
-    XC = null;
+    FC = null;
     /**
      * 副屏的 Canvas 元素
-     * Secondary Screen
+     * Background Screen
      */
-    Y = null;
+    B = null;
     /**
      * 副屏的 Context 对象
-     * Secondary Context
+     * Background Context
      */
-    YC = null;
+    BC = null;
     /**
      * 画布的宽度
      */
@@ -4115,16 +4115,16 @@ class Painter {
             (env !== "h5" || "OffscreenCanvas" in globalThis)) {
             const { W, H } = this;
             const { canvas, context } = getOfsCanvas({ width: W, height: H });
-            this.X = canvas;
-            this.XC = context;
+            this.F = canvas;
+            this.FC = context;
             this.setModel("O");
         }
         else {
             const { canvas, context } = await getCanvas(selector, component);
             const { width, height } = canvas;
             // 添加主屏
-            this.X = canvas;
-            this.XC = context;
+            this.F = canvas;
+            this.FC = context;
             this.setModel("C");
             if (mode === "poster") {
                 canvas.width = this.W;
@@ -4141,21 +4141,21 @@ class Painter {
         // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
         if (model.clear === "CL") {
             this.clearContainer = () => {
-                const { W, H, XC } = this;
-                XC.clearRect(0, 0, W, H);
+                const { W, H, FC } = this;
+                FC.clearRect(0, 0, W, H);
             };
         }
         else {
             this.clearContainer = () => {
-                const { W, H, X } = this;
-                X.width = W;
-                X.height = H;
+                const { W, H, F } = this;
+                F.width = W;
+                F.height = H;
             };
         }
         // #endregion clear main screen implement
         if (mode === "poster") {
-            this.Y = this.X;
-            this.YC = this.XC;
+            this.B = this.F;
+            this.BC = this.FC;
             this.clearSecondary = this.stick = noop;
         }
         else {
@@ -4172,8 +4172,8 @@ class Painter {
                 ofsResult = getOfsCanvas({ width: this.W, height: this.H });
                 this.setModel("O");
             }
-            this.Y = ofsResult.canvas;
-            this.YC = ofsResult.context;
+            this.B = ofsResult.canvas;
+            this.BC = ofsResult.context;
             // #endregion set secondary screen implement
             // #region clear secondary screen implement
             // ------- 生成副屏清理函数 --------
@@ -4183,22 +4183,22 @@ class Painter {
                         const { W, H } = this;
                         // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
                         const { canvas, context } = getOfsCanvas({ width: W, height: H });
-                        this.Y = canvas;
-                        this.YC = context;
+                        this.B = canvas;
+                        this.BC = context;
                     };
                     break;
                 case "CL":
                     this.clearSecondary = () => {
-                        const { W, H, YC } = this;
+                        const { W, H, BC } = this;
                         // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
-                        YC.clearRect(0, 0, W, H);
+                        BC.clearRect(0, 0, W, H);
                     };
                     break;
                 default:
                     this.clearSecondary = () => {
-                        const { W, H, Y } = this;
-                        Y.width = W;
-                        Y.height = H;
+                        const { W, H, B } = this;
+                        B.width = W;
+                        B.height = H;
                     };
             }
             // #endregion clear secondary screen implement
@@ -4207,9 +4207,9 @@ class Painter {
     clearContainer = noop;
     clearSecondary = noop;
     stick() {
-        const { W, H, mode } = this;
+        const { W, H, FC, BC, mode } = this;
         if (mode !== "poster") {
-            this.XC.drawImage(this.YC.canvas, 0, 0, W, H);
+            FC.drawImage(BC.canvas, 0, 0, W, H);
         }
     }
     /**
@@ -4218,7 +4218,7 @@ class Painter {
     destroy() {
         this.clearContainer();
         this.clearSecondary();
-        this.X = this.XC = this.Y = this.YC = null;
+        this.F = this.FC = this.B = this.BC = null;
         this.clearContainer = this.clearSecondary = this.stick = noop;
     }
 }
@@ -4729,7 +4729,7 @@ class VideoEditor {
      * @returns
      */
     getContext() {
-        return this.painter.YC;
+        return this.painter.BC;
     }
     /**
      * 是否是有效的Key
@@ -4854,7 +4854,7 @@ class ResourceManager {
             img = this.caches.shift();
         }
         if (!img) {
-            img = platform.image.create(this.painter.X);
+            img = platform.image.create(this.painter.F);
         }
         this.caches.push(img);
         return img;
@@ -4990,9 +4990,9 @@ class Player {
         // 监听容器是否处于浏览器视窗内
         // this.setIntersectionObserver()
         await this.painter.register(container, secondary, component);
-        this.renderer = new Renderer2D(this.painter.YC);
+        this.renderer = new Renderer2D(this.painter.BC);
         this.resource = new ResourceManager(this.painter);
-        this.animator.onAnimate = platform.rAF.bind(null, this.painter.X);
+        this.animator.onAnimate = platform.rAF.bind(null, this.painter.F);
     }
     /**
      * 更新配置
@@ -5271,7 +5271,7 @@ class Poster {
      */
     async register(selector = "", component) {
         await this.painter.register(selector, "", component);
-        this.renderer = new Renderer2D(this.painter.YC);
+        this.renderer = new Renderer2D(this.painter.BC);
         this.resource = new ResourceManager(this.painter);
     }
     /**
@@ -5329,15 +5329,15 @@ class Poster {
         if (!this.entity)
             return;
         const { painter, renderer, resource, entity, config } = this;
-        renderer.resize(config.contentMode, entity.size, painter.X);
+        renderer.resize(config.contentMode, entity.size, painter.F);
         renderer.render(entity, resource.materials, resource.dynamicMaterials, config.frame, 0, entity.sprites.length);
     }
     /**
      * 获取海报的 ImageData 数据
      */
     toImageData() {
-        const { XC: context, W: width, H: height } = this.painter;
-        return context.getImageData(0, 0, width, height);
+        const { FC, W: width, H: height } = this.painter;
+        return FC.getImageData(0, 0, width, height);
     }
     /**
      * 销毁海报

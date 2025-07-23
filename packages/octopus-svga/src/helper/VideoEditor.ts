@@ -42,7 +42,7 @@ export class VideoEditor {
    * @returns
    */
   getContext() {
-    return this.painter.YC;
+    return this.painter.BC;
   }
 
   /**

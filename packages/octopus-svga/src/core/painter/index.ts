@@ -7,27 +7,27 @@ const { noop } = platform;
 export class Painter {
   /**
    * 主屏的 Canvas 元素
-   * Main Screen
+   * Front Screen
    */
-  public X: PlatformCanvas | PlatformOffscreenCanvas | null = null;
+  public F: PlatformCanvas | PlatformOffscreenCanvas | null = null;
   /**
    * 主屏的 Context 对象
-   * Main Context
+   * Front Context
    */
-  public XC:
+  public FC:
     | CanvasRenderingContext2D
     | OffscreenCanvasRenderingContext2D
     | null = null;
   /**
    * 副屏的 Canvas 元素
-   * Secondary Screen
+   * Background Screen
    */
-  public Y: PlatformCanvas | PlatformOffscreenCanvas | null = null;
+  public B: PlatformCanvas | PlatformOffscreenCanvas | null = null;
   /**
    * 副屏的 Context 对象
-   * Secondary Context
+   * Background Context
    */
-  public YC:
+  public BC:
     | CanvasRenderingContext2D
     | OffscreenCanvasRenderingContext2D
     | null = null;
@@ -114,15 +114,15 @@ export class Painter {
       const { W, H } = this;
       const { canvas, context } = getOfsCanvas({ width: W, height: H });
 
-      this.X = canvas;
-      this.XC = context;
+      this.F = canvas;
+      this.FC = context;
       this.setModel("O");
     } else {
       const { canvas, context } = await getCanvas(selector, component);
       const { width, height } = canvas;
       // 添加主屏
-      this.X = canvas;
-      this.XC = context;
+      this.F = canvas;
+      this.FC = context;
       this.setModel("C");
 
       if (mode === "poster") {
@@ -140,23 +140,23 @@ export class Painter {
     // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
     if (model.clear === "CL") {
       this.clearContainer = () => {
-        const { W, H, XC } = this;
+        const { W, H, FC } = this;
 
-        XC!.clearRect(0, 0, W, H);
+        FC!.clearRect(0, 0, W, H);
       };
     } else {
       this.clearContainer = () => {
-        const { W, H, X } = this;
+        const { W, H, F } = this;
 
-        X!.width = W;
-        X!.height = H;
+        F!.width = W;
+        F!.height = H;
       };
     }
     // #endregion clear main screen implement
 
     if (mode === "poster") {
-      this.Y = this.X;
-      this.YC = this.XC;
+      this.B = this.F;
+      this.BC = this.FC;
       this.clearSecondary = this.stick = noop;
     } else {
       // #region set secondary screen implement
@@ -173,8 +173,8 @@ export class Painter {
         this.setModel("O");
       }
 
-      this.Y = ofsResult.canvas;
-      this.YC = ofsResult.context;
+      this.B = ofsResult.canvas;
+      this.BC = ofsResult.context;
       // #endregion set secondary screen implement
 
       // #region clear secondary screen implement
@@ -186,23 +186,23 @@ export class Painter {
             // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
             const { canvas, context } = getOfsCanvas({ width: W, height: H });
 
-            this.Y = canvas;
-            this.YC = context;
+            this.B = canvas;
+            this.BC = context;
           };
           break;
         case "CL":
           this.clearSecondary = () => {
-            const { W, H, YC } = this;
+            const { W, H, BC } = this;
             // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
-            YC!.clearRect(0, 0, W, H);
+            BC!.clearRect(0, 0, W, H);
           };
           break;
         default:
           this.clearSecondary = () => {
-            const { W, H, Y } = this;
+            const { W, H, B } = this;
           
-            Y!.width = W;
-            Y!.height = H;
+            B!.width = W;
+            B!.height = H;
           };
       }
       // #endregion clear secondary screen implement
@@ -214,10 +214,10 @@ export class Painter {
   public clearSecondary: () => void = noop;
 
   public stick() {
-    const { W, H, mode } = this;
+    const { W, H,FC, BC, mode } = this;
 
     if (mode !== "poster") {
-      this.XC!.drawImage(this.YC!.canvas, 0, 0, W, H);
+      FC!.drawImage(BC!.canvas, 0, 0, W, H);
     }
   }
 
@@ -227,7 +227,7 @@ export class Painter {
   public destroy() {
     this.clearContainer();
     this.clearSecondary();
-    this.X = this.XC = this.Y = this.YC = null;
+    this.F = this.FC = this.B = this.BC = null;
     this.clearContainer = this.clearSecondary = this.stick = noop;
   }
 }

@@ -313,24 +313,24 @@ declare class Painter {
     private readonly mode;
     /**
      * 主屏的 Canvas 元素
-     * Main Screen
+     * Front Screen
      */
-    X: PlatformCanvas | PlatformOffscreenCanvas | null;
+    F: PlatformCanvas | PlatformOffscreenCanvas | null;
     /**
      * 主屏的 Context 对象
-     * Main Context
+     * Front Context
      */
-    XC: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
+    FC: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
     /**
      * 副屏的 Canvas 元素
-     * Secondary Screen
+     * Background Screen
      */
-    Y: PlatformCanvas | PlatformOffscreenCanvas | null;
+    B: PlatformCanvas | PlatformOffscreenCanvas | null;
     /**
      * 副屏的 Context 对象
-     * Secondary Context
+     * Background Context
      */
-    YC: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
+    BC: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
     /**
      * 画布的宽度
      */

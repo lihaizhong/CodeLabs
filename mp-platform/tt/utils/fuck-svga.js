@@ -5394,24 +5394,24 @@ var Painter = /*#__PURE__*/function () {
     this.mode = mode;
     /**
      * 主屏的 Canvas 元素
-     * Main Screen
+     * Front Screen
      */
-    this.X = null;
+    this.F = null;
     /**
      * 主屏的 Context 对象
-     * Main Context
+     * Front Context
      */
-    this.XC = null;
+    this.FC = null;
     /**
      * 副屏的 Canvas 元素
-     * Secondary Screen
+     * Background Screen
      */
-    this.Y = null;
+    this.B = null;
     /**
      * 副屏的 Context 对象
-     * Secondary Context
+     * Background Context
      */
-    this.YC = null;
+    this.BC = null;
     /**
      * 粉刷模式
      */
@@ -5473,8 +5473,8 @@ var Painter = /*#__PURE__*/function () {
                 width: W,
                 height: H
               }), canvas = _getOfsCanvas.canvas, context = _getOfsCanvas.context;
-              this.X = canvas;
-              this.XC = context;
+              this.F = canvas;
+              this.FC = context;
               this.setModel("O");
               _context2.n = 3;
               break;
@@ -5486,8 +5486,8 @@ var Painter = /*#__PURE__*/function () {
               _canvas = _yield$getCanvas.canvas;
               _context = _yield$getCanvas.context;
               width = _canvas.width, height = _canvas.height; // 添加主屏
-              this.X = _canvas;
-              this.XC = _context;
+              this.F = _canvas;
+              this.FC = _context;
               this.setModel("C");
               if (mode === "poster") {
                 _canvas.width = this.W;
@@ -5505,16 +5505,16 @@ var Painter = /*#__PURE__*/function () {
                 this.clearContainer = function () {
                   var W = _this.W,
                     H = _this.H,
-                    XC = _this.XC;
-                  XC.clearRect(0, 0, W, H);
+                    FC = _this.FC;
+                  FC.clearRect(0, 0, W, H);
                 };
               } else {
                 this.clearContainer = function () {
                   var W = _this.W,
                     H = _this.H,
-                    X = _this.X;
-                  X.width = W;
-                  X.height = H;
+                    F = _this.F;
+                  F.width = W;
+                  F.height = H;
                 };
               }
               // #endregion clear main screen implement
@@ -5522,8 +5522,8 @@ var Painter = /*#__PURE__*/function () {
                 _context2.n = 4;
                 break;
               }
-              this.Y = this.X;
-              this.YC = this.XC;
+              this.B = this.F;
+              this.BC = this.FC;
               this.clearSecondary = this.stick = noop;
               _context2.n = 11;
               break;
@@ -5548,8 +5548,8 @@ var Painter = /*#__PURE__*/function () {
               });
               this.setModel("O");
             case 7:
-              this.Y = ofsResult.canvas;
-              this.YC = ofsResult.context;
+              this.B = ofsResult.canvas;
+              this.BC = ofsResult.context;
               // #endregion set secondary screen implement
               // #region clear secondary screen implement
               // ------- 生成副屏清理函数 --------
@@ -5567,26 +5567,26 @@ var Painter = /*#__PURE__*/function () {
                   }),
                   canvas = _getOfsCanvas2.canvas,
                   context = _getOfsCanvas2.context;
-                _this.Y = canvas;
-                _this.YC = context;
+                _this.B = canvas;
+                _this.BC = context;
               };
               return _context2.a(3, 11);
             case 9:
               this.clearSecondary = function () {
                 var W = _this.W,
                   H = _this.H,
-                  YC = _this.YC;
+                  BC = _this.BC;
                 // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
-                YC.clearRect(0, 0, W, H);
+                BC.clearRect(0, 0, W, H);
               };
               return _context2.a(3, 11);
             case 10:
               this.clearSecondary = function () {
                 var W = _this.W,
                   H = _this.H,
-                  Y = _this.Y;
-                Y.width = W;
-                Y.height = H;
+                  B = _this.B;
+                B.width = W;
+                B.height = H;
               };
             case 11:
               return _context2.a(2);
@@ -5599,9 +5599,11 @@ var Painter = /*#__PURE__*/function () {
     value: function stick() {
       var W = this.W,
         H = this.H,
+        FC = this.FC,
+        BC = this.BC,
         mode = this.mode;
       if (mode !== "poster") {
-        this.XC.drawImage(this.YC.canvas, 0, 0, W, H);
+        FC.drawImage(BC.canvas, 0, 0, W, H);
       }
     }
     /**
@@ -5612,7 +5614,7 @@ var Painter = /*#__PURE__*/function () {
     value: function destroy() {
       this.clearContainer();
       this.clearSecondary();
-      this.X = this.XC = this.Y = this.YC = null;
+      this.F = this.FC = this.B = this.BC = null;
       this.clearContainer = this.clearSecondary = this.stick = noop;
     }
   }]);
@@ -6277,7 +6279,7 @@ function isZlibCompressed(data) {
   }, {
     key: "getContext",
     value: function getContext() {
-      return this.painter.YC;
+      return this.painter.BC;
     }
     /**
      * 是否是有效的Key
@@ -6448,7 +6450,7 @@ function isZlibCompressed(data) {
         img = this.caches.shift();
       }
       if (!img) {
-        img = platform.image.create(this.painter.X);
+        img = platform.image.create(this.painter.F);
       }
       this.caches.push(img);
       return img;
@@ -6659,9 +6661,9 @@ var Player = /*#__PURE__*/function () {
               _context.n = 1;
               return this.painter.register(container, secondary, component);
             case 1:
-              this.renderer = new Renderer2D(this.painter.YC);
+              this.renderer = new Renderer2D(this.painter.BC);
               this.resource = new ResourceManager(this.painter);
-              this.animator.onAnimate = platform.rAF.bind(null, this.painter.X);
+              this.animator.onAnimate = platform.rAF.bind(null, this.painter.F);
             case 2:
               return _context.a(2);
           }
@@ -6976,7 +6978,7 @@ var Player = /*#__PURE__*/function () {
                 _context.n = 1;
                 return _this.painter.register(selector, "", component);
               case 1:
-                _this.renderer = new Renderer2D(_this.painter.YC);
+                _this.renderer = new Renderer2D(_this.painter.BC);
                 _this.resource = new ResourceManager(_this.painter);
               case 2:
                 return _context.a(2);
@@ -7086,7 +7088,7 @@ var Player = /*#__PURE__*/function () {
         resource = this.resource,
         entity = this.entity,
         config = this.config;
-      renderer.resize(config.contentMode, entity.size, painter.X);
+      renderer.resize(config.contentMode, entity.size, painter.F);
       renderer.render(entity, resource.materials, resource.dynamicMaterials, config.frame, 0, entity.sprites.length);
     }
     /**
@@ -7096,10 +7098,10 @@ var Player = /*#__PURE__*/function () {
     key: "toImageData",
     value: function toImageData() {
       var _this$painter = this.painter,
-        context = _this$painter.XC,
+        FC = _this$painter.FC,
         width = _this$painter.W,
         height = _this$painter.H;
-      return context.getImageData(0, 0, width, height);
+      return FC.getImageData(0, 0, width, height);
     }
     /**
      * 销毁海报

@@ -74,11 +74,11 @@ export class Player {
     // 监听容器是否处于浏览器视窗内
     // this.setIntersectionObserver()
     await this.painter.register(container, secondary, component);
-    this.renderer = new Renderer2D(this.painter.YC!);
+    this.renderer = new Renderer2D(this.painter.BC!);
     this.resource = new ResourceManager(this.painter);
     this.animator.onAnimate = platform.rAF.bind(
       null,
-      this.painter.X as PlatformCanvas
+      this.painter.F as PlatformCanvas
     );
   }
 
