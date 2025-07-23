@@ -1,5 +1,16 @@
 # octopus-svga
 
+## 1.1.0
+
+### Minor Changes
+
+- fix: 修改 Painter 的 Canvas 句柄名称，使之更具语义化
+
+### Patch Changes
+
+- Updated dependencies []:
+  - octopus-platform@0.1.2
+
 ## 1.0.3
 
 ### Patch Changes

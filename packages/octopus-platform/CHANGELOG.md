@@ -1,5 +1,11 @@
 # octopus-platform
 
+## 0.1.2
+
+### Patch Changes
+
+- fix: 优化平台全局对象判断
+
 ## 0.1.1
 
 ### Patch Changes

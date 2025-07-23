@@ -513,7 +513,7 @@ var OctopusPlatform = /*#__PURE__*/function () {
     /**
      * 平台版本
      */
-    _defineProperty(this, "platformVersion", "0.1.1");
+    _defineProperty(this, "platformVersion", "0.1.2");
     /**
      * 应用版本
      */
@@ -1237,7 +1237,7 @@ var pluginRaf = definePlugin({
   function EnhancedPlatform() {
     var _this;
     _classCallCheck(this, EnhancedPlatform);
-    _this = _callSuper(this, EnhancedPlatform, [[pluginSelector, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "1.0.3"]);
+    _this = _callSuper(this, EnhancedPlatform, [[pluginSelector, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "1.1.0"]);
     _this.init();
     return _this;
   }

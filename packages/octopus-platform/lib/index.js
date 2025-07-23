@@ -213,7 +213,7 @@ function utf8(buffer, start, end) {
         /**
          * 平台版本
          */
-        this.platformVersion = "0.1.1";
+        this.platformVersion = "0.1.2";
         /**
          * 应用版本
          */
