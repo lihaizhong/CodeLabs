@@ -18,7 +18,7 @@
     "esm",
     "lib",
     "index.d.ts",
-    "README.md"
+    "CHANGELOG.md"
   ],
   "scripts": {
     "declare": "tsc",

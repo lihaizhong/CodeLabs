@@ -1,20 +1,26 @@
 {
-  "name": "octopus-image",
+  "name": "uni-image",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "description": "图片生成器",
-  "module": "es/index.js",
+  "module": "esm/index.js",
   "main": "lib/index.js",
   "types": "index.d.ts",
   "exports": {
-    "import": "./es/index.js",
+    "import": "./esm/index.js",
     "default": "./lib/index.js",
     "types": "./index.d.ts"
   },
+  "files": [
+    "esm",
+    "lib",
+    "index.d.ts",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "declare": "tsc",
-    "cleanup": "rimraf -rf es lib types index.d.ts",
+    "cleanup": "rimraf -rf esm lib types index.d.ts",
     "generate": "rollup -c",
     "build": "npm run cleanup && npm run declare && npm run generate",
     "compiler": "pbjs -t static-module -w es6 -o protos/svga.js protos/svga.proto",

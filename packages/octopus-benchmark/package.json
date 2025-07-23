@@ -19,7 +19,8 @@
   "files": [
     "esm",
     "lib",
-    "index.d.ts"
+    "index.d.ts",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "declare": "tsc",
