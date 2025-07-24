@@ -7,11 +7,11 @@ interface RawImages {
 interface PlatformImages {
     [key: string]: PlatformImage | ImageBitmap;
 }
-interface PaintModel {
+interface PainterActionModel {
     type: "C" | "O";
     clear: "CL" | "RE" | "CR";
 }
-type PaintMode = "poster" | "animation";
+type PainterMode = "poster" | "animation";
 interface CanvasSize {
     width: number;
     height: number;
@@ -352,13 +352,13 @@ declare class Painter {
      * @param W 海报模式必须传入
      * @param H 海报模式必须传入
      */
-    constructor(mode?: PaintMode, width?: number, height?: number);
+    constructor(mode?: PainterMode, width?: number, height?: number);
     /**
      * 设置 Canvas 的处理模式
      * - C：代表 Canvas
      * - O：代表 OffscreenCanvas
      */
-    private setModel;
+    private setActionModel;
     /**
      * 注册画笔，根据环境判断生成最优的绘制方式
      * @param selector
@@ -373,156 +373,6 @@ declare class Painter {
      * 销毁画笔
      */
     destroy(): void;
-}
-
-interface IQrCodeImgOptions {
-    /**
-     * 二维码内容
-     */
-    code: string;
-    /**
-     * 二维码的大小
-     */
-    size: number;
-    /**
-     * 二维码的码元 二维码横向有多少个小点（1 - 40）
-     */
-    typeNumber?: number;
-    /**
-     * 二维码的纠错等级
-     * L: 7%（错误字码在 7% 以内可被修正, 容错率较低不建议使用）
-     * M: 15%（错误字码在 15% 以内可被修正, 容错率较低不建议使用）
-     * Q: 25%（错误字码在 25% 以内可被修正）
-     * H: 30%（错误字码在 30% 以内可被修正）
-     */
-    correctLevel?: "L" | "M" | "Q" | "H";
-    /**
-     * 二维码颜色，仅支持 六位的十六进制颜色值，暂不支持透明色 (仅对二维码生效)
-     */
-    codeColor?: string;
-    /**
-     * 二维码背景颜色，仅支持 六位的十六进制 颜色值。暂不支持透明色 (仅对二维码生效)
-     */
-    backgroundColor?: string;
-}
-declare function generateImageBufferFromCode(options: IQrCodeImgOptions): any;
-declare function generateImageFromCode(options: IQrCodeImgOptions): string;
-
-declare function createBufferOfImageData(imageData: ImageData): Uint8Array<ArrayBufferLike>;
-/**
- * @deprecated 请使用 createBufferOfImageData 代替，此方法可能在后续版本中移除
- */
-declare const getBufferFromImageData: typeof createBufferOfImageData;
-declare function createImageDataUrl(imageData: ImageData): string;
-/**
- * @deprecated 请使用 createImageDataUrl 代替，此方法可能在后续版本中移除
- */
-declare const getDataURLFromImageData: typeof createImageDataUrl;
-
-/**
- * 检查数据是否为zlib压缩格式
- * @param data 待检查的二进制数据
- * @returns 是否为zlib压缩格式
- */
-declare function isZlibCompressed(data: Uint8Array): boolean;
-
-interface Bucket {
-    origin: string;
-    local: string;
-    entity: PlatformVideo.Video | null;
-    promise: Promise<ArrayBufferLike> | null;
-}
-interface NeedUpdatePoint {
-    action: "remove" | "add";
-    start: number;
-    end: number;
-}
-type LoadMode = "fast" | "whole";
-interface VideoManagerOptions {
-    preprocess: (bucket: Bucket) => Promise<ArrayBufferLike>;
-    postprocess: (bucket: Bucket, buff: ArrayBufferLike) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
-    cleanup: (buckets: Bucket[]) => Promise<void> | void;
-}
-declare class VideoManager {
-    /**
-     * 视频池的当前指针位置
-     */
-    private point;
-    /**
-     * 视频的最大留存数量，其他视频将放在磁盘上缓存
-     */
-    private maxRemain;
-    /**
-     * 留存视频的开始指针位置
-     */
-    private remainStart;
-    /**
-     * 留存视频的结束指针位置
-     */
-    private remainEnd;
-    /**
-     * 视频加载模式
-     * - 快速加载模式：可保证当前视频加载完成后，尽快播放；其他请求将使用Promise的方式保存在bucket中，以供后续使用
-     * - 完整加载模式：可保证所有视频加载完成，确保播放切换的流畅性
-     */
-    private loadMode;
-    /**
-     * 视频池的所有数据
-     */
-    private buckets;
-    private readonly options;
-    /**
-     * 获取视频池大小
-     */
-    get size(): number;
-    constructor(loadMode: LoadMode, options?: Partial<VideoManagerOptions>);
-    /**
-     * 更新留存指针位置
-     */
-    private updateRemainRange;
-    /**
-     * 指针是否在留存空间内
-     * @param point
-     * @returns
-     */
-    private includeRemainRange;
-    private downloadAndParseVideo;
-    /**
-     * 创建bucket
-     * @param url 远程地址
-     * @param point 指针位置
-     * @param needDownloadAndParse 是否需要下载并解析
-     * @returns
-     */
-    private createBucket;
-    /**
-     * 预加载视频到本地磁盘中
-     * @param urls 视频远程地址
-     * @param point 当前指针位置
-     * @param maxRemain 最大留存数量
-     */
-    prepare(urls: string[], point?: number, maxRemain?: number): Promise<void>;
-    /**
-     * 获取当前帧的bucket
-     * @returns
-     */
-    get(): Promise<Bucket>;
-    /**
-     * 获取当前的指针位置
-     * @returns
-     */
-    getPoint(): number;
-    /**
-     * 获取指定位置的bucket
-     * @param pos
-     * @returns
-     */
-    go(point: number): Promise<Bucket>;
-    /**
-     * 清理所有的bucket
-     * @returns
-     */
-    clear(needRemoveFiles?: boolean): Promise<void>;
 }
 
 declare class ResourceManager {
@@ -588,62 +438,6 @@ declare class ResourceManager {
      * 清理图片资源
      */
     cleanup(): void;
-}
-
-interface VideoEditorOptions {
-    mode?: "R" | "A";
-}
-declare class VideoEditor {
-    private readonly painter;
-    private readonly resource;
-    private readonly entity;
-    constructor(painter: Painter, resource: ResourceManager, entity: PlatformVideo.Video);
-    private set;
-    /**
-     * 获取自定义编辑器
-     * @returns
-     */
-    getContext(): OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D | null;
-    /**
-     * 是否是有效的Key
-     * @param key
-     * @returns
-     */
-    hasValidKey(key: string): boolean;
-    /**
-     * 加载并缓存图片
-     * @param source
-     * @param url
-     * @returns
-     */
-    loadImage(source: Uint8Array | string, url: string): Promise<PlatformImage | ImageBitmap>;
-    /**
-     * 创建画布图片
-     * @param key
-     * @param context
-     * @param options
-     * @returns
-     */
-    setCanvas(key: string, context: PlatformRenderingContext2D, options?: VideoEditorOptions & {
-        width?: number;
-        height?: number;
-    }): Promise<void>;
-    /**
-     * 创建二进制图片
-     * @param key
-     * @param buff
-     * @param options
-     * @returns
-     */
-    setImage(key: string, url: string, options?: VideoEditorOptions): Promise<void>;
-    /**
-     * 创建二维码图片
-     * @param key
-     * @param code
-     * @param options
-     * @returns
-     */
-    setQRCode(key: string, code: string, options: VideoEditorOptions & Omit<IQrCodeImgOptions, "code">): Promise<void>;
 }
 
 /**
@@ -857,5 +651,211 @@ declare class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
 }
 declare const platform: EnhancedPlatform;
 
-export { PLAYER_CONTENT_MODE, PLAYER_FILL_MODE, PLAYER_PLAY_MODE, Painter, Parser, PlatformVideo, Player, Poster, ResourceManager, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
-export type { Bucket, CanvasSize, IQrCodeImgOptions, LoadMode, NeedUpdatePoint, PaintMode, PaintModel, PlatformImages, PlatformProperties, PlatformRenderingContext2D, PlayerConfig, PlayerConfigOptions, PlayerEventCallback, PlayerProcessEventCallback, PosterConfig, PosterConfigOptions, PosterEventCallback, RawImages, TransformScale, VideoManagerOptions };
+interface IQrCodeImgOptions {
+    /**
+     * 二维码内容
+     */
+    code: string;
+    /**
+     * 二维码的大小
+     */
+    size: number;
+    /**
+     * 二维码的码元 二维码横向有多少个小点（1 - 40）
+     */
+    typeNumber?: number;
+    /**
+     * 二维码的纠错等级
+     * L: 7%（错误字码在 7% 以内可被修正, 容错率较低不建议使用）
+     * M: 15%（错误字码在 15% 以内可被修正, 容错率较低不建议使用）
+     * Q: 25%（错误字码在 25% 以内可被修正）
+     * H: 30%（错误字码在 30% 以内可被修正）
+     */
+    correctLevel?: "L" | "M" | "Q" | "H";
+    /**
+     * 二维码颜色，仅支持 六位的十六进制颜色值，暂不支持透明色 (仅对二维码生效)
+     */
+    codeColor?: string;
+    /**
+     * 二维码背景颜色，仅支持 六位的十六进制 颜色值。暂不支持透明色 (仅对二维码生效)
+     */
+    backgroundColor?: string;
+}
+declare function generateImageBufferFromCode(options: IQrCodeImgOptions): any;
+declare function generateImageFromCode(options: IQrCodeImgOptions): string;
+
+declare function createBufferOfImageData(imageData: ImageData): Uint8Array<ArrayBufferLike>;
+/**
+ * @deprecated 请使用 createBufferOfImageData 代替，此方法可能在后续版本中移除
+ */
+declare const getBufferFromImageData: typeof createBufferOfImageData;
+declare function createImageDataUrl(imageData: ImageData): string;
+/**
+ * @deprecated 请使用 createImageDataUrl 代替，此方法可能在后续版本中移除
+ */
+declare const getDataURLFromImageData: typeof createImageDataUrl;
+
+/**
+ * 检查数据是否为zlib压缩格式
+ * @param data 待检查的二进制数据
+ * @returns 是否为zlib压缩格式
+ */
+declare function isZlibCompressed(data: Uint8Array): boolean;
+
+interface Bucket {
+    origin: string;
+    local: string;
+    entity: PlatformVideo.Video | null;
+    promise: Promise<ArrayBufferLike> | null;
+}
+interface NeedUpdatePoint {
+    action: "remove" | "add";
+    start: number;
+    end: number;
+}
+type LoadMode = "fast" | "whole";
+interface VideoManagerOptions {
+    preprocess: (bucket: Bucket) => Promise<ArrayBufferLike>;
+    postprocess: (bucket: Bucket, buff: ArrayBufferLike) => Promise<PlatformVideo.Video> | PlatformVideo.Video;
+    cleanup: (buckets: Bucket[]) => Promise<void> | void;
+}
+declare class VideoManager {
+    /**
+     * 视频池的当前指针位置
+     */
+    private point;
+    /**
+     * 视频的最大留存数量，其他视频将放在磁盘上缓存
+     */
+    private maxRemain;
+    /**
+     * 留存视频的开始指针位置
+     */
+    private remainStart;
+    /**
+     * 留存视频的结束指针位置
+     */
+    private remainEnd;
+    /**
+     * 视频加载模式
+     * - 快速加载模式：可保证当前视频加载完成后，尽快播放；其他请求将使用Promise的方式保存在bucket中，以供后续使用
+     * - 完整加载模式：可保证所有视频加载完成，确保播放切换的流畅性
+     */
+    private loadMode;
+    /**
+     * 视频池的所有数据
+     */
+    private buckets;
+    private readonly options;
+    /**
+     * 获取视频池大小
+     */
+    get size(): number;
+    constructor(loadMode: LoadMode, options?: Partial<VideoManagerOptions>);
+    /**
+     * 更新留存指针位置
+     */
+    private updateRemainRange;
+    /**
+     * 指针是否在留存空间内
+     * @param point
+     * @returns
+     */
+    private includeRemainRange;
+    private downloadAndParseVideo;
+    /**
+     * 创建bucket
+     * @param url 远程地址
+     * @param point 指针位置
+     * @param needDownloadAndParse 是否需要下载并解析
+     * @returns
+     */
+    private createBucket;
+    /**
+     * 预加载视频到本地磁盘中
+     * @param urls 视频远程地址
+     * @param point 当前指针位置
+     * @param maxRemain 最大留存数量
+     */
+    prepare(urls: string[], point?: number, maxRemain?: number): Promise<void>;
+    /**
+     * 获取当前帧的bucket
+     * @returns
+     */
+    get(): Promise<Bucket>;
+    /**
+     * 获取当前的指针位置
+     * @returns
+     */
+    getPoint(): number;
+    /**
+     * 获取指定位置的bucket
+     * @param pos
+     * @returns
+     */
+    go(point: number): Promise<Bucket>;
+    /**
+     * 清理所有的bucket
+     * @returns
+     */
+    clear(needRemoveFiles?: boolean): Promise<void>;
+}
+
+interface VideoEditorOptions {
+    mode?: "R" | "A";
+}
+declare class VideoEditor {
+    private readonly painter;
+    private readonly resource;
+    private readonly entity;
+    constructor(painter: Painter, resource: ResourceManager, entity: PlatformVideo.Video);
+    private set;
+    /**
+     * 获取自定义编辑器
+     * @returns
+     */
+    getContext(): OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D | null;
+    /**
+     * 是否是有效的Key
+     * @param key
+     * @returns
+     */
+    hasValidKey(key: string): boolean;
+    /**
+     * 加载并缓存图片
+     * @param source
+     * @param url
+     * @returns
+     */
+    loadImage(source: Uint8Array | string, url: string): Promise<PlatformImage | ImageBitmap>;
+    /**
+     * 创建画布图片
+     * @param key
+     * @param context
+     * @param options
+     * @returns
+     */
+    setCanvas(key: string, context: PlatformRenderingContext2D, options?: VideoEditorOptions & {
+        width?: number;
+        height?: number;
+    }): Promise<void>;
+    /**
+     * 创建二进制图片
+     * @param key
+     * @param buff
+     * @param options
+     * @returns
+     */
+    setImage(key: string, url: string, options?: VideoEditorOptions): Promise<void>;
+    /**
+     * 创建二维码图片
+     * @param key
+     * @param code
+     * @param options
+     * @returns
+     */
+    setQRCode(key: string, code: string, options: VideoEditorOptions & Omit<IQrCodeImgOptions, "code">): Promise<void>;
+}
+
+export { PLAYER_CONTENT_MODE, PLAYER_FILL_MODE, PLAYER_PLAY_MODE, Painter, Parser, PlatformVideo, Player, Poster, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
+export type { Bucket, CanvasSize, IQrCodeImgOptions, LoadMode, NeedUpdatePoint, PainterActionModel, PainterMode, PlatformImages, PlatformProperties, PlatformRenderingContext2D, PlayerConfig, PlayerConfigOptions, PlayerEventCallback, PlayerProcessEventCallback, PosterConfig, PosterConfigOptions, PosterEventCallback, RawImages, TransformScale, VideoManagerOptions };

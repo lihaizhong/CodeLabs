@@ -2,8 +2,8 @@ import type { RawImage, PlatformImage } from "octopus-platform";
 import { platform } from "../platform";
 import { Parser } from "../core/parser";
 import { generateImageBufferFromCode, IQrCodeImgOptions } from "./qrcode";
-import { getBufferFromImageData } from "./png";
-import type { ResourceManager } from "./ResourceManager";
+import { createBufferOfImageData } from "./png";
+import type { ResourceManager } from "../extensions";
 import type { Painter } from "../core/painter";
 import type { PlatformVideo, PlatformRenderingContext2D } from "../types";
 
@@ -94,7 +94,7 @@ export class VideoEditor {
 
     await this.set(
       key,
-      new Uint8Array(getBufferFromImageData(imageData)),
+      new Uint8Array(createBufferOfImageData(imageData)),
       options?.mode
     );
   }

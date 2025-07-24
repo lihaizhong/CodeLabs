@@ -1,6 +1,6 @@
 import type { PlatformCanvas, PlatformOffscreenCanvas } from "octopus-platform";
 import { platform } from "../../platform";
-import type { PaintModel, PaintMode } from "../../types";
+import type { PainterActionModel, PainterMode } from "../../types";
 
 const { noop } = platform;
 
@@ -42,7 +42,7 @@ export class Painter {
   /**
    * 粉刷模式
    */
-  private model: PaintModel = {} as PaintModel;
+  private model: PainterActionModel = {} as PainterActionModel;
 
   /**
    *
@@ -54,7 +54,7 @@ export class Painter {
    * @param H 海报模式必须传入
    */
   constructor(
-    private readonly mode: PaintMode = "animation",
+    private readonly mode: PainterMode = "animation",
     width = 0,
     height = 0
   ) {
@@ -69,7 +69,7 @@ export class Painter {
    * - C：代表 Canvas
    * - O：代表 OffscreenCanvas
    */
-  private setModel(type: "C" | "O"): void {
+  private setActionModel(type: "C" | "O"): void {
     const { model } = this;
     const { env } = platform.globals;
 
@@ -116,14 +116,14 @@ export class Painter {
 
       this.F = canvas;
       this.FC = context;
-      this.setModel("O");
+      this.setActionModel("O");
     } else {
       const { canvas, context } = await getCanvas(selector, component);
       const { width, height } = canvas;
       // 添加主屏
       this.F = canvas;
       this.FC = context;
-      this.setModel("C");
+      this.setActionModel("C");
 
       if (mode === "poster") {
         canvas.width = this.W;
@@ -167,10 +167,10 @@ export class Painter {
         ofsResult = await getCanvas(ofsSelector, component);
         ofsResult.canvas.width = this.W;
         ofsResult.canvas.height = this.H;
-        this.setModel("C");
+        this.setActionModel("C");
       } else {
         ofsResult = getOfsCanvas({ width: this.W, height: this.H });
-        this.setModel("O");
+        this.setActionModel("O");
       }
 
       this.B = ofsResult.canvas;

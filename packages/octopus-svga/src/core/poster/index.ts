@@ -1,5 +1,4 @@
-import { Renderer2D } from "../../extensions";
-import { ResourceManager } from "../../helper";
+import { Renderer2D, ResourceManager } from "../../extensions";
 import { Painter } from "../painter";
 import {
   type PlatformVideo,

@@ -1249,7 +1249,192 @@ var pluginRaf = definePlugin({
     }
   }]);
 }(OctopusPlatform);
-var platform = new EnhancedPlatform();function readFloatLEImpl() {
+var platform = new EnhancedPlatform();var ResourceManager = /*#__PURE__*/function () {
+  function ResourceManager(painter) {
+    _classCallCheck(this, ResourceManager);
+    this.painter = painter;
+    // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
+    this.caches = [];
+    /**
+     * 动态素材
+     */
+    this.dynamicMaterials = new Map();
+    /**
+     * 素材
+     */
+    this.materials = new Map();
+    /**
+     * 已清理Image对象的坐标
+     */
+    this.point = 0;
+  }
+  /**
+   * 创建图片标签
+   * @returns
+   */
+  return _createClass(ResourceManager, [{
+    key: "createImage",
+    value: function createImage() {
+      var img = null;
+      if (this.point > 0) {
+        this.point--;
+        img = this.caches.shift();
+      }
+      if (!img) {
+        img = platform.image.create(this.painter.F);
+      }
+      this.caches.push(img);
+      return img;
+    }
+    /**
+     * 将 ImageBitmap 插入到 caches
+     * @param img
+     */
+  }, {
+    key: "inertBitmapIntoCaches",
+    value: function inertBitmapIntoCaches(img) {
+      if (ResourceManager.isBitmap(img)) {
+        this.caches.push(img);
+      }
+    }
+    /**
+     * 加载额外的图片资源
+     * @param source 资源内容/地址
+     * @param filename 文件名称
+     * @returns
+     */
+  }, {
+    key: "loadExtImage",
+    value: function loadExtImage(source, filename) {
+      var _this = this;
+      return platform.image.load(function () {
+        return _this.createImage();
+      }, source, platform.path.resolve(filename, "ext")).then(function (img) {
+        _this.inertBitmapIntoCaches(img);
+        return img;
+      });
+    }
+    /**
+     * 加载图片集
+     * @param images 图片数据
+     * @param filename 文件名称
+     * @returns
+     */
+  }, {
+    key: "loadImagesWithRecord",
+    value: function loadImagesWithRecord(images_1, filename_1) {
+      return __awaiter(this, arguments, void 0, function (images, filename) {
+        var _this2 = this;
+        var type = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "normal";
+        return /*#__PURE__*/_regenerator().m(function _callee() {
+          var imageAwaits, imageFilename;
+          return _regenerator().w(function (_context) {
+            while (1) switch (_context.n) {
+              case 0:
+                imageAwaits = [];
+                imageFilename = "".concat(filename.replace(/\.svga$/g, ""), ".png");
+                Object.entries(images).forEach(function (_ref) {
+                  var _ref2 = _slicedToArray(_ref, 2),
+                    name = _ref2[0],
+                    image = _ref2[1];
+                  // 过滤 1px 透明图
+                  if (image instanceof Uint8Array && image.byteLength < 70) {
+                    return;
+                  }
+                  var p = platform.image.load(function () {
+                    return _this2.createImage();
+                  }, image, platform.path.resolve(imageFilename, type === "dynamic" ? "dyn_".concat(name) : name)).then(function (img) {
+                    _this2.inertBitmapIntoCaches(img);
+                    if (type === "dynamic") {
+                      _this2.dynamicMaterials.set(name, img);
+                    } else {
+                      _this2.materials.set(name, img);
+                    }
+                  });
+                  imageAwaits.push(p);
+                });
+                _context.n = 1;
+                return Promise.all(imageAwaits);
+              case 1:
+                return _context.a(2);
+            }
+          }, _callee);
+        })();
+      });
+    }
+    /**
+     * 释放图片资源
+     */
+  }, {
+    key: "release",
+    value: function release() {
+      // FIXME: 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
+      var _iterator = _createForOfIteratorHelper(this.caches),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var img = _step.value;
+          ResourceManager.releaseOne(img);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      this.materials.clear();
+      this.dynamicMaterials.clear();
+      // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
+      platform.globals.env === "alipay" ? this.cleanup() : this.tidyUp();
+    }
+    /**
+     * 整理图片资源，将重复的图片资源移除
+     */
+  }, {
+    key: "tidyUp",
+    value: function tidyUp() {
+      // 通过 Set 的去重特性，保持 caches 元素的唯一性
+      this.caches = Array.from(new Set(this.caches));
+      this.point = this.caches.length;
+    }
+    /**
+     * 清理图片资源
+     */
+  }, {
+    key: "cleanup",
+    value: function cleanup() {
+      this.caches.length = 0;
+      this.point = 0;
+    }
+  }], [{
+    key: "isBitmap",
+    value:
+    /**
+     * 判断是否是 ImageBitmap
+     * @param img
+     * @returns
+     */
+    function isBitmap(img) {
+      return platform.globals.env === "h5" && img instanceof ImageBitmap;
+    }
+    /**
+     * 释放内存资源（图片）
+     * @param img
+     */
+  }, {
+    key: "releaseOne",
+    value: function releaseOne(img) {
+      if (ResourceManager.isBitmap(img)) {
+        img.close();
+      } else if (img.src !== "") {
+        // 【微信】将存在本地的文件删除，防止用户空间被占满
+        if (platform.globals.env === "weapp" && img.src.includes(platform.path.USER_DATA_PATH)) {
+          platform.local.remove(img.src);
+        }
+        platform.image.release(img);
+      }
+    }
+  }]);
+}();function readFloatLEImpl() {
   // 使用静态DataView池
   var DATA_VIEW_POOL_SIZE = 4;
   var dataViewPool = Array(DATA_VIEW_POOL_SIZE).fill(0).map(function () {
@@ -5428,8 +5613,8 @@ var Painter = /*#__PURE__*/function () {
    * - O：代表 OffscreenCanvas
    */
   return _createClass(Painter, [{
-    key: "setModel",
-    value: function setModel(type) {
+    key: "setActionModel",
+    value: function setActionModel(type) {
       var model = this.model;
       var env = platform.globals.env;
       // set type
@@ -5475,7 +5660,7 @@ var Painter = /*#__PURE__*/function () {
               }), canvas = _getOfsCanvas.canvas, context = _getOfsCanvas.context;
               this.F = canvas;
               this.FC = context;
-              this.setModel("O");
+              this.setActionModel("O");
               _context2.n = 3;
               break;
             case 1:
@@ -5488,7 +5673,7 @@ var Painter = /*#__PURE__*/function () {
               width = _canvas.width, height = _canvas.height; // 添加主屏
               this.F = _canvas;
               this.FC = _context;
-              this.setModel("C");
+              this.setActionModel("C");
               if (mode === "poster") {
                 _canvas.width = this.W;
                 _canvas.height = this.H;
@@ -5538,7 +5723,7 @@ var Painter = /*#__PURE__*/function () {
               ofsResult = _context2.v;
               ofsResult.canvas.width = this.W;
               ofsResult.canvas.height = this.H;
-              this.setModel("C");
+              this.setActionModel("C");
               _context2.n = 7;
               break;
             case 6:
@@ -5546,7 +5731,7 @@ var Painter = /*#__PURE__*/function () {
                 width: this.W,
                 height: this.H
               });
-              this.setModel("O");
+              this.setActionModel("O");
             case 7:
               this.B = ofsResult.canvas;
               this.BC = ofsResult.context;
@@ -5743,6 +5928,520 @@ var Painter = /*#__PURE__*/function () {
           fillValue: extFrame * frameDuration
         }
       };
+    }
+  }]);
+}();/**
+ * SVGA 播放器
+ */
+var Player = /*#__PURE__*/function () {
+  function Player() {
+    _classCallCheck(this, Player);
+    /**
+     * 当前配置项
+     */
+    this.config = new Config();
+    /**
+     * 资源管理器
+     */
+    this.resource = null;
+    /**
+     * 刷头实例
+     */
+    this.painter = new Painter();
+    /**
+     * 动画实例
+     */
+    this.animator = new Animator();
+    /**
+     * 渲染器实例
+     */
+    this.renderer = null;
+  }
+  /**
+   * 设置配置项
+   * @param options 可配置项
+   * @property container 主屏，播放动画的 Canvas 元素
+   * @property secondary 副屏，播放动画的 Canvas 元素
+   * @property loop 循环次数，默认值 0（无限循环）
+   * @property fillMode 最后停留的目标模式，类似于 animation-fill-mode，接受值 forwards 和 fallbacks，默认值 forwards。
+   * @property playMode 播放模式，接受值 forwards 和 fallbacks ，默认值 forwards。
+   * @property startFrame 单个循环周期内开始播放的帧数，默认值 0
+   * @property endFrame 单个循环周期内结束播放的帧数，默认值 0
+   * @property loopStartFrame 循环播放的开始帧，仅影响第一个周期的开始帧，默认值 0
+   * @property enableInObserver 是否启用 IntersectionObserver 监听容器是否处于浏览器视窗内，默认值 false
+   */
+  return _createClass(Player, [{
+    key: "setConfig",
+    value: function setConfig(options, component) {
+      return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee() {
+        var config, container, secondary;
+        return _regenerator().w(function (_context) {
+          while (1) switch (_context.n) {
+            case 0:
+              config = typeof options === "string" ? {
+                container: options
+              } : options;
+              container = config.container, secondary = config.secondary;
+              this.config.register(config);
+              // 监听容器是否处于浏览器视窗内
+              // this.setIntersectionObserver()
+              _context.n = 1;
+              return this.painter.register(container, secondary, component);
+            case 1:
+              this.renderer = new Renderer2D(this.painter.BC);
+              this.resource = new ResourceManager(this.painter);
+              this.animator.onAnimate = platform.rAF.bind(null, this.painter.F);
+            case 2:
+              return _context.a(2);
+          }
+        }, _callee, this);
+      }));
+    }
+    /**
+     * 更新配置
+     * @param key
+     * @param value
+     */
+  }, {
+    key: "setItem",
+    value: function setItem(key, value) {
+      this.config.setItem(key, value);
+    }
+    /**
+     * 装载 SVGA 数据元
+     * @param videoEntity SVGA 数据源
+     * @returns Promise<void>
+     */
+  }, {
+    key: "mount",
+    value: function mount(videoEntity) {
+      return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee2() {
+        var images, filename;
+        return _regenerator().w(function (_context2) {
+          while (1) switch (_context2.n) {
+            case 0:
+              if (videoEntity) {
+                _context2.n = 1;
+                break;
+              }
+              throw new Error("videoEntity undefined");
+            case 1:
+              images = videoEntity.images, filename = videoEntity.filename;
+              this.animator.stop();
+              this.painter.clearSecondary();
+              this.resource.release();
+              this.entity = videoEntity;
+              _context2.n = 2;
+              return this.resource.loadImagesWithRecord(images, filename);
+            case 2:
+              return _context2.a(2);
+          }
+        }, _callee2, this);
+      }));
+    }
+    /**
+     * 开始播放
+     */
+  }, {
+    key: "start",
+    value: function start() {
+      var _a;
+      this.startAnimation();
+      (_a = this.onStart) === null || _a === void 0 ? void 0 : _a.call(this);
+    }
+    /**
+     * 重新播放
+     */
+  }, {
+    key: "resume",
+    value: function resume() {
+      var _a;
+      if (this.animator.resume()) {
+        (_a = this.onResume) === null || _a === void 0 ? void 0 : _a.call(this);
+      }
+    }
+    /**
+     * 暂停播放
+     */
+  }, {
+    key: "pause",
+    value: function pause() {
+      var _a;
+      if (this.animator.pause()) {
+        (_a = this.onPause) === null || _a === void 0 ? void 0 : _a.call(this);
+      }
+    }
+    /**
+     * 停止播放
+     */
+  }, {
+    key: "stop",
+    value: function stop() {
+      var _a;
+      this.animator.stop();
+      this.painter.clearContainer();
+      this.painter.clearSecondary();
+      (_a = this.onStop) === null || _a === void 0 ? void 0 : _a.call(this);
+    }
+    /**
+     * 销毁实例
+     */
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      var _a, _b, _c;
+      this.animator.stop();
+      this.painter.destroy();
+      (_a = this.renderer) === null || _a === void 0 ? void 0 : _a.destroy();
+      (_b = this.resource) === null || _b === void 0 ? void 0 : _b.release();
+      (_c = this.resource) === null || _c === void 0 ? void 0 : _c.cleanup();
+      this.entity = undefined;
+    }
+    /**
+     * 跳转到指定帧
+     * @param frame 目标帧
+     * @param andPlay 是否立即播放
+     */
+  }, {
+    key: "stepToFrame",
+    value: function stepToFrame(frame) {
+      var andPlay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (!this.entity || frame < 0 || frame >= this.entity.frames) return;
+      this.pause();
+      this.config.loopStartFrame = frame;
+      if (andPlay) {
+        this.start();
+      }
+    }
+    /**
+     * 跳转到指定百分比
+     * @param percent 目标百分比
+     * @param andPlay 是否立即播放
+     */
+  }, {
+    key: "stepToPercentage",
+    value: function stepToPercentage(percent) {
+      var andPlay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (!this.entity) return;
+      var frames = this.entity.frames;
+      var frame = percent < 0 ? 0 : Math.round(percent * frames);
+      if (frame >= frames) {
+        frame = frames - 1;
+      }
+      debugger;
+      this.stepToFrame(frame, andPlay);
+    }
+    /**
+     * 开始绘制动画
+     */
+  }, {
+    key: "startAnimation",
+    value: function startAnimation() {
+      var _this = this;
+      var entity = this.entity,
+        config = this.config,
+        animator = this.animator,
+        painter = this.painter,
+        renderer = this.renderer,
+        resource = this.resource;
+      var W = painter.W,
+        H = painter.H;
+      var fillMode = config.fillMode,
+        playMode = config.playMode,
+        contentMode = config.contentMode;
+      var _config$getConfig = config.getConfig(entity),
+        currFrame = _config$getConfig.currFrame,
+        startFrame = _config$getConfig.startFrame,
+        endFrame = _config$getConfig.endFrame,
+        totalFrame = _config$getConfig.totalFrame,
+        spriteCount = _config$getConfig.spriteCount,
+        aniConfig = _config$getConfig.aniConfig;
+      var duration = aniConfig.duration,
+        loopStart = aniConfig.loopStart,
+        loop = aniConfig.loop,
+        fillValue = aniConfig.fillValue;
+      var isReverseMode = playMode === "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */;
+      // 当前帧
+      var currentFrame = currFrame;
+      // 片段绘制结束位置
+      var tail = 0;
+      var nextTail;
+      // 上一帧
+      var latestFrame;
+      // 下一帧
+      var nextFrame;
+      // 精确帧
+      var exactFrame;
+      // 当前已完成的百分比
+      var percent;
+      // 是否还有剩余时间
+      var hasRemained;
+      // 更新动画基础信息
+      animator.setConfig(duration, loopStart, loop, fillValue);
+      renderer.resize(contentMode, entity.size, {
+        width: W,
+        height: H
+      });
+      // 分段渲染函数
+      var MAX_DRAW_TIME_PER_FRAME = 8;
+      var MAX_ACCELERATE_DRAW_TIME_PER_FRAME = 3;
+      var MAX_DYNAMIC_CHUNK_SIZE = 34;
+      var MIN_DYNAMIC_CHUNK_SIZE = 1;
+      // 动态调整每次绘制的块大小
+      var dynamicChunkSize = 4; // 初始块大小
+      var startTime;
+      var chunk;
+      var elapsed;
+      // 使用`指数退避算法`平衡渲染速度和流畅度
+      var patchDraw = function patchDraw(before) {
+        startTime = platform.now();
+        before();
+        while (tail < spriteCount) {
+          // 根据当前块大小计算nextTail
+          chunk = Math.min(dynamicChunkSize, spriteCount - tail);
+          nextTail = tail + chunk | 0;
+          renderer.render(entity, resource.materials, resource.dynamicMaterials, currentFrame, tail, nextTail);
+          tail = nextTail;
+          // 动态调整块大小
+          elapsed = platform.now() - startTime;
+          if (elapsed < MAX_ACCELERATE_DRAW_TIME_PER_FRAME) {
+            dynamicChunkSize = Math.min(dynamicChunkSize * 2, MAX_DYNAMIC_CHUNK_SIZE); // 加快绘制
+          } else if (elapsed > MAX_DRAW_TIME_PER_FRAME) {
+            dynamicChunkSize = Math.max(dynamicChunkSize / 2, MIN_DYNAMIC_CHUNK_SIZE); // 减慢绘制
+            break;
+          }
+        }
+      };
+      // 动画绘制过程
+      animator.onUpdate = function (timePercent) {
+        var _a;
+        patchDraw(function () {
+          percent = isReverseMode ? 1 - timePercent : timePercent;
+          exactFrame = percent * totalFrame;
+          if (isReverseMode) {
+            nextFrame = (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
+            // FIXME: 倒序会有一帧的偏差，需要校准当前帧
+            percent = currentFrame / totalFrame;
+          } else {
+            nextFrame = timePercent === 1 ? startFrame : Math.floor(exactFrame);
+          }
+          hasRemained = currentFrame === nextFrame;
+        });
+        if (hasRemained) return;
+        painter.clearContainer();
+        painter.stick();
+        painter.clearSecondary();
+        latestFrame = currentFrame;
+        currentFrame = nextFrame;
+        tail = 0;
+        (_a = _this.onProcess) === null || _a === void 0 ? void 0 : _a.call(_this, ~~(percent * 100) / 100, latestFrame);
+      };
+      animator.onStart = function () {
+        entity.locked = true;
+      };
+      animator.onEnd = function () {
+        var _a;
+        entity.locked = false;
+        // 如果不保留最后一帧渲染，则清空画布
+        if (fillMode === "none" /* PLAYER_FILL_MODE.NONE */) {
+          painter.clearContainer();
+        }
+        (_a = _this.onEnd) === null || _a === void 0 ? void 0 : _a.call(_this);
+      };
+      animator.start();
+    }
+  }]);
+}();var Poster = /*#__PURE__*/function () {
+  function Poster(width, height) {
+    _classCallCheck(this, Poster);
+    /**
+     * 海报配置项
+     */
+    this.config = {
+      /**
+       * 主屏，绘制海报的 Canvas 元素
+       */
+      container: "",
+      /**
+       * 填充模式，类似于 content-mode。
+       */
+      contentMode: "fill" /* PLAYER_CONTENT_MODE.FILL */,
+
+      /**
+       * 绘制成海报的帧，默认是0。
+       */
+      frame: 0
+    };
+    /**
+     * 是否配置完成
+     */
+    this.isConfigured = false;
+    /**
+     * 资源管理器
+     */
+    this.resource = null;
+    /**
+     * 渲染器实例
+     */
+    this.renderer = null;
+    this.painter = new Painter("poster", width, height);
+  }
+  /**
+   * 注册 SVGA 海报
+   * @param selector 容器选择器
+   * @param component 组件
+   */
+  return _createClass(Poster, [{
+    key: "register",
+    value: function register() {
+      return __awaiter(this, arguments, void 0, function () {
+        var _this = this;
+        var selector = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+        var component = arguments.length > 1 ? arguments[1] : undefined;
+        return /*#__PURE__*/_regenerator().m(function _callee() {
+          return _regenerator().w(function (_context) {
+            while (1) switch (_context.n) {
+              case 0:
+                _context.n = 1;
+                return _this.painter.register(selector, "", component);
+              case 1:
+                _this.renderer = new Renderer2D(_this.painter.BC);
+                _this.resource = new ResourceManager(_this.painter);
+              case 2:
+                return _context.a(2);
+            }
+          }, _callee);
+        })();
+      });
+    }
+    /**
+     * 设置配置项
+     * @param options 可配置项
+     */
+  }, {
+    key: "setConfig",
+    value: function setConfig() {
+      return __awaiter(this, arguments, void 0, function () {
+        var _this2 = this;
+        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        var component = arguments.length > 1 ? arguments[1] : undefined;
+        return /*#__PURE__*/_regenerator().m(function _callee2() {
+          return _regenerator().w(function (_context2) {
+            while (1) switch (_context2.n) {
+              case 0:
+                if (typeof options === "string") {
+                  _this2.config.container = options;
+                } else {
+                  Object.assign(_this2.config, options);
+                }
+                _this2.isConfigured = true;
+                _context2.n = 1;
+                return _this2.register(_this2.config.container, component);
+              case 1:
+                return _context2.a(2);
+            }
+          }, _callee2);
+        })();
+      });
+    }
+    /**
+     * 修改内容模式
+     * @param contentMode
+     */
+  }, {
+    key: "setContentMode",
+    value: function setContentMode(contentMode) {
+      this.config.contentMode = contentMode;
+    }
+    /**
+     * 设置当前帧
+     * @param frame
+     */
+  }, {
+    key: "setFrame",
+    value: function setFrame(frame) {
+      this.config.frame = frame;
+    }
+    /**
+     * 装载 SVGA 数据元
+     * @param videoEntity SVGA 数据源
+     * @param currFrame
+     * @returns
+     */
+  }, {
+    key: "mount",
+    value: function mount(videoEntity) {
+      return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee3() {
+        var images, filename;
+        return _regenerator().w(function (_context3) {
+          while (1) switch (_context3.n) {
+            case 0:
+              if (videoEntity) {
+                _context3.n = 1;
+                break;
+              }
+              throw new Error("videoEntity undefined");
+            case 1:
+              if (this.isConfigured) {
+                _context3.n = 3;
+                break;
+              }
+              _context3.n = 2;
+              return this.register();
+            case 2:
+              this.isConfigured = true;
+            case 3:
+              images = videoEntity.images, filename = videoEntity.filename;
+              this.painter.clearContainer();
+              this.resource.release();
+              this.entity = videoEntity;
+              _context3.n = 4;
+              return this.resource.loadImagesWithRecord(images, filename);
+            case 4:
+              return _context3.a(2);
+          }
+        }, _callee3, this);
+      }));
+    }
+    /**
+     * 绘制海报
+     */
+  }, {
+    key: "draw",
+    value: function draw() {
+      if (!this.entity) return;
+      var painter = this.painter,
+        renderer = this.renderer,
+        resource = this.resource,
+        entity = this.entity,
+        config = this.config;
+      renderer.resize(config.contentMode, entity.size, painter.F);
+      renderer.render(entity, resource.materials, resource.dynamicMaterials, config.frame, 0, entity.sprites.length);
+    }
+    /**
+     * 获取海报的 ImageData 数据
+     */
+  }, {
+    key: "toImageData",
+    value: function toImageData() {
+      var _this$painter = this.painter,
+        FC = _this$painter.FC,
+        width = _this$painter.W,
+        height = _this$painter.H;
+      return FC.getImageData(0, 0, width, height);
+    }
+    /**
+     * 销毁海报
+     */
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      var _a, _b, _c;
+      this.painter.destroy();
+      (_a = this.renderer) === null || _a === void 0 ? void 0 : _a.destroy();
+      (_b = this.resource) === null || _b === void 0 ? void 0 : _b.release();
+      (_c = this.resource) === null || _c === void 0 ? void 0 : _c.cleanup();
+      this.entity = undefined;
     }
   }]);
 }();function parseOptions(options) {
@@ -6340,7 +7039,7 @@ function isZlibCompressed(data) {
               height = (_b = options === null || options === void 0 ? void 0 : options.height) !== null && _b !== void 0 ? _b : canvas.height;
               imageData = context.getImageData(0, 0, width, height);
               _context2.n = 2;
-              return this.set(key, new Uint8Array(getBufferFromImageData(imageData)), options === null || options === void 0 ? void 0 : options.mode);
+              return this.set(key, new Uint8Array(createBufferOfImageData(imageData)), options === null || options === void 0 ? void 0 : options.mode);
             case 2:
               return _context2.a(2);
           }
@@ -6426,703 +7125,4 @@ function isZlibCompressed(data) {
       }));
     }
   }]);
-}();var ResourceManager = /*#__PURE__*/function () {
-  function ResourceManager(painter) {
-    _classCallCheck(this, ResourceManager);
-    this.painter = painter;
-    // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
-    this.caches = [];
-    /**
-     * 动态素材
-     */
-    this.dynamicMaterials = new Map();
-    /**
-     * 素材
-     */
-    this.materials = new Map();
-    /**
-     * 已清理Image对象的坐标
-     */
-    this.point = 0;
-  }
-  /**
-   * 创建图片标签
-   * @returns
-   */
-  return _createClass(ResourceManager, [{
-    key: "createImage",
-    value: function createImage() {
-      var img = null;
-      if (this.point > 0) {
-        this.point--;
-        img = this.caches.shift();
-      }
-      if (!img) {
-        img = platform.image.create(this.painter.F);
-      }
-      this.caches.push(img);
-      return img;
-    }
-    /**
-     * 将 ImageBitmap 插入到 caches
-     * @param img
-     */
-  }, {
-    key: "inertBitmapIntoCaches",
-    value: function inertBitmapIntoCaches(img) {
-      if (ResourceManager.isBitmap(img)) {
-        this.caches.push(img);
-      }
-    }
-    /**
-     * 加载额外的图片资源
-     * @param source 资源内容/地址
-     * @param filename 文件名称
-     * @returns
-     */
-  }, {
-    key: "loadExtImage",
-    value: function loadExtImage(source, filename) {
-      var _this = this;
-      return platform.image.load(function () {
-        return _this.createImage();
-      }, source, platform.path.resolve(filename, "ext")).then(function (img) {
-        _this.inertBitmapIntoCaches(img);
-        return img;
-      });
-    }
-    /**
-     * 加载图片集
-     * @param images 图片数据
-     * @param filename 文件名称
-     * @returns
-     */
-  }, {
-    key: "loadImagesWithRecord",
-    value: function loadImagesWithRecord(images_1, filename_1) {
-      return __awaiter(this, arguments, void 0, function (images, filename) {
-        var _this2 = this;
-        var type = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "normal";
-        return /*#__PURE__*/_regenerator().m(function _callee() {
-          var imageAwaits, imageFilename;
-          return _regenerator().w(function (_context) {
-            while (1) switch (_context.n) {
-              case 0:
-                imageAwaits = [];
-                imageFilename = "".concat(filename.replace(/\.svga$/g, ""), ".png");
-                Object.entries(images).forEach(function (_ref) {
-                  var _ref2 = _slicedToArray(_ref, 2),
-                    name = _ref2[0],
-                    image = _ref2[1];
-                  // 过滤 1px 透明图
-                  if (image instanceof Uint8Array && image.byteLength < 70) {
-                    return;
-                  }
-                  var p = platform.image.load(function () {
-                    return _this2.createImage();
-                  }, image, platform.path.resolve(imageFilename, type === "dynamic" ? "dyn_".concat(name) : name)).then(function (img) {
-                    _this2.inertBitmapIntoCaches(img);
-                    if (type === "dynamic") {
-                      _this2.dynamicMaterials.set(name, img);
-                    } else {
-                      _this2.materials.set(name, img);
-                    }
-                  });
-                  imageAwaits.push(p);
-                });
-                _context.n = 1;
-                return Promise.all(imageAwaits);
-              case 1:
-                return _context.a(2);
-            }
-          }, _callee);
-        })();
-      });
-    }
-    /**
-     * 释放图片资源
-     */
-  }, {
-    key: "release",
-    value: function release() {
-      // FIXME: 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
-      var _iterator = _createForOfIteratorHelper(this.caches),
-        _step;
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var img = _step.value;
-          ResourceManager.releaseOne(img);
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-      this.materials.clear();
-      this.dynamicMaterials.clear();
-      // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
-      platform.globals.env === "alipay" ? this.cleanup() : this.tidyUp();
-    }
-    /**
-     * 整理图片资源，将重复的图片资源移除
-     */
-  }, {
-    key: "tidyUp",
-    value: function tidyUp() {
-      // 通过 Set 的去重特性，保持 caches 元素的唯一性
-      this.caches = Array.from(new Set(this.caches));
-      this.point = this.caches.length;
-    }
-    /**
-     * 清理图片资源
-     */
-  }, {
-    key: "cleanup",
-    value: function cleanup() {
-      this.caches.length = 0;
-      this.point = 0;
-    }
-  }], [{
-    key: "isBitmap",
-    value:
-    /**
-     * 判断是否是 ImageBitmap
-     * @param img
-     * @returns
-     */
-    function isBitmap(img) {
-      return platform.globals.env === "h5" && img instanceof ImageBitmap;
-    }
-    /**
-     * 释放内存资源（图片）
-     * @param img
-     */
-  }, {
-    key: "releaseOne",
-    value: function releaseOne(img) {
-      if (ResourceManager.isBitmap(img)) {
-        img.close();
-      } else if (img.src !== "") {
-        // 【微信】将存在本地的文件删除，防止用户空间被占满
-        if (platform.globals.env === "weapp" && img.src.includes(platform.path.USER_DATA_PATH)) {
-          platform.local.remove(img.src);
-        }
-        platform.image.release(img);
-      }
-    }
-  }]);
-}();/**
- * SVGA 播放器
- */
-var Player = /*#__PURE__*/function () {
-  function Player() {
-    _classCallCheck(this, Player);
-    /**
-     * 当前配置项
-     */
-    this.config = new Config();
-    /**
-     * 资源管理器
-     */
-    this.resource = null;
-    /**
-     * 刷头实例
-     */
-    this.painter = new Painter();
-    /**
-     * 动画实例
-     */
-    this.animator = new Animator();
-    /**
-     * 渲染器实例
-     */
-    this.renderer = null;
-  }
-  /**
-   * 设置配置项
-   * @param options 可配置项
-   * @property container 主屏，播放动画的 Canvas 元素
-   * @property secondary 副屏，播放动画的 Canvas 元素
-   * @property loop 循环次数，默认值 0（无限循环）
-   * @property fillMode 最后停留的目标模式，类似于 animation-fill-mode，接受值 forwards 和 fallbacks，默认值 forwards。
-   * @property playMode 播放模式，接受值 forwards 和 fallbacks ，默认值 forwards。
-   * @property startFrame 单个循环周期内开始播放的帧数，默认值 0
-   * @property endFrame 单个循环周期内结束播放的帧数，默认值 0
-   * @property loopStartFrame 循环播放的开始帧，仅影响第一个周期的开始帧，默认值 0
-   * @property enableInObserver 是否启用 IntersectionObserver 监听容器是否处于浏览器视窗内，默认值 false
-   */
-  return _createClass(Player, [{
-    key: "setConfig",
-    value: function setConfig(options, component) {
-      return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee() {
-        var config, container, secondary;
-        return _regenerator().w(function (_context) {
-          while (1) switch (_context.n) {
-            case 0:
-              config = typeof options === "string" ? {
-                container: options
-              } : options;
-              container = config.container, secondary = config.secondary;
-              this.config.register(config);
-              // 监听容器是否处于浏览器视窗内
-              // this.setIntersectionObserver()
-              _context.n = 1;
-              return this.painter.register(container, secondary, component);
-            case 1:
-              this.renderer = new Renderer2D(this.painter.BC);
-              this.resource = new ResourceManager(this.painter);
-              this.animator.onAnimate = platform.rAF.bind(null, this.painter.F);
-            case 2:
-              return _context.a(2);
-          }
-        }, _callee, this);
-      }));
-    }
-    /**
-     * 更新配置
-     * @param key
-     * @param value
-     */
-  }, {
-    key: "setItem",
-    value: function setItem(key, value) {
-      this.config.setItem(key, value);
-    }
-    /**
-     * 装载 SVGA 数据元
-     * @param videoEntity SVGA 数据源
-     * @returns Promise<void>
-     */
-  }, {
-    key: "mount",
-    value: function mount(videoEntity) {
-      return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee2() {
-        var images, filename;
-        return _regenerator().w(function (_context2) {
-          while (1) switch (_context2.n) {
-            case 0:
-              if (videoEntity) {
-                _context2.n = 1;
-                break;
-              }
-              throw new Error("videoEntity undefined");
-            case 1:
-              images = videoEntity.images, filename = videoEntity.filename;
-              this.animator.stop();
-              this.painter.clearSecondary();
-              this.resource.release();
-              this.entity = videoEntity;
-              _context2.n = 2;
-              return this.resource.loadImagesWithRecord(images, filename);
-            case 2:
-              return _context2.a(2);
-          }
-        }, _callee2, this);
-      }));
-    }
-    /**
-     * 开始播放
-     */
-  }, {
-    key: "start",
-    value: function start() {
-      var _a;
-      this.startAnimation();
-      (_a = this.onStart) === null || _a === void 0 ? void 0 : _a.call(this);
-    }
-    /**
-     * 重新播放
-     */
-  }, {
-    key: "resume",
-    value: function resume() {
-      var _a;
-      if (this.animator.resume()) {
-        (_a = this.onResume) === null || _a === void 0 ? void 0 : _a.call(this);
-      }
-    }
-    /**
-     * 暂停播放
-     */
-  }, {
-    key: "pause",
-    value: function pause() {
-      var _a;
-      if (this.animator.pause()) {
-        (_a = this.onPause) === null || _a === void 0 ? void 0 : _a.call(this);
-      }
-    }
-    /**
-     * 停止播放
-     */
-  }, {
-    key: "stop",
-    value: function stop() {
-      var _a;
-      this.animator.stop();
-      this.painter.clearContainer();
-      this.painter.clearSecondary();
-      (_a = this.onStop) === null || _a === void 0 ? void 0 : _a.call(this);
-    }
-    /**
-     * 销毁实例
-     */
-  }, {
-    key: "destroy",
-    value: function destroy() {
-      var _a, _b, _c;
-      this.animator.stop();
-      this.painter.destroy();
-      (_a = this.renderer) === null || _a === void 0 ? void 0 : _a.destroy();
-      (_b = this.resource) === null || _b === void 0 ? void 0 : _b.release();
-      (_c = this.resource) === null || _c === void 0 ? void 0 : _c.cleanup();
-      this.entity = undefined;
-    }
-    /**
-     * 跳转到指定帧
-     * @param frame 目标帧
-     * @param andPlay 是否立即播放
-     */
-  }, {
-    key: "stepToFrame",
-    value: function stepToFrame(frame) {
-      var andPlay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      if (!this.entity || frame < 0 || frame >= this.entity.frames) return;
-      this.pause();
-      this.config.loopStartFrame = frame;
-      if (andPlay) {
-        this.start();
-      }
-    }
-    /**
-     * 跳转到指定百分比
-     * @param percent 目标百分比
-     * @param andPlay 是否立即播放
-     */
-  }, {
-    key: "stepToPercentage",
-    value: function stepToPercentage(percent) {
-      var andPlay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      if (!this.entity) return;
-      var frames = this.entity.frames;
-      var frame = percent < 0 ? 0 : Math.round(percent * frames);
-      if (frame >= frames) {
-        frame = frames - 1;
-      }
-      debugger;
-      this.stepToFrame(frame, andPlay);
-    }
-    /**
-     * 开始绘制动画
-     */
-  }, {
-    key: "startAnimation",
-    value: function startAnimation() {
-      var _this = this;
-      var entity = this.entity,
-        config = this.config,
-        animator = this.animator,
-        painter = this.painter,
-        renderer = this.renderer,
-        resource = this.resource;
-      var W = painter.W,
-        H = painter.H;
-      var fillMode = config.fillMode,
-        playMode = config.playMode,
-        contentMode = config.contentMode;
-      var _config$getConfig = config.getConfig(entity),
-        currFrame = _config$getConfig.currFrame,
-        startFrame = _config$getConfig.startFrame,
-        endFrame = _config$getConfig.endFrame,
-        totalFrame = _config$getConfig.totalFrame,
-        spriteCount = _config$getConfig.spriteCount,
-        aniConfig = _config$getConfig.aniConfig;
-      var duration = aniConfig.duration,
-        loopStart = aniConfig.loopStart,
-        loop = aniConfig.loop,
-        fillValue = aniConfig.fillValue;
-      var isReverseMode = playMode === "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */;
-      // 当前帧
-      var currentFrame = currFrame;
-      // 片段绘制结束位置
-      var tail = 0;
-      var nextTail;
-      // 上一帧
-      var latestFrame;
-      // 下一帧
-      var nextFrame;
-      // 精确帧
-      var exactFrame;
-      // 当前已完成的百分比
-      var percent;
-      // 是否还有剩余时间
-      var hasRemained;
-      // 更新动画基础信息
-      animator.setConfig(duration, loopStart, loop, fillValue);
-      renderer.resize(contentMode, entity.size, {
-        width: W,
-        height: H
-      });
-      // 分段渲染函数
-      var MAX_DRAW_TIME_PER_FRAME = 8;
-      var MAX_ACCELERATE_DRAW_TIME_PER_FRAME = 3;
-      var MAX_DYNAMIC_CHUNK_SIZE = 34;
-      var MIN_DYNAMIC_CHUNK_SIZE = 1;
-      // 动态调整每次绘制的块大小
-      var dynamicChunkSize = 4; // 初始块大小
-      var startTime;
-      var chunk;
-      var elapsed;
-      // 使用`指数退避算法`平衡渲染速度和流畅度
-      var patchDraw = function patchDraw(before) {
-        startTime = platform.now();
-        before();
-        while (tail < spriteCount) {
-          // 根据当前块大小计算nextTail
-          chunk = Math.min(dynamicChunkSize, spriteCount - tail);
-          nextTail = tail + chunk | 0;
-          renderer.render(entity, resource.materials, resource.dynamicMaterials, currentFrame, tail, nextTail);
-          tail = nextTail;
-          // 动态调整块大小
-          elapsed = platform.now() - startTime;
-          if (elapsed < MAX_ACCELERATE_DRAW_TIME_PER_FRAME) {
-            dynamicChunkSize = Math.min(dynamicChunkSize * 2, MAX_DYNAMIC_CHUNK_SIZE); // 加快绘制
-          } else if (elapsed > MAX_DRAW_TIME_PER_FRAME) {
-            dynamicChunkSize = Math.max(dynamicChunkSize / 2, MIN_DYNAMIC_CHUNK_SIZE); // 减慢绘制
-            break;
-          }
-        }
-      };
-      // 动画绘制过程
-      animator.onUpdate = function (timePercent) {
-        var _a;
-        patchDraw(function () {
-          percent = isReverseMode ? 1 - timePercent : timePercent;
-          exactFrame = percent * totalFrame;
-          if (isReverseMode) {
-            nextFrame = (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
-            // FIXME: 倒序会有一帧的偏差，需要校准当前帧
-            percent = currentFrame / totalFrame;
-          } else {
-            nextFrame = timePercent === 1 ? startFrame : Math.floor(exactFrame);
-          }
-          hasRemained = currentFrame === nextFrame;
-        });
-        if (hasRemained) return;
-        painter.clearContainer();
-        painter.stick();
-        painter.clearSecondary();
-        latestFrame = currentFrame;
-        currentFrame = nextFrame;
-        tail = 0;
-        (_a = _this.onProcess) === null || _a === void 0 ? void 0 : _a.call(_this, ~~(percent * 100) / 100, latestFrame);
-      };
-      animator.onStart = function () {
-        entity.locked = true;
-      };
-      animator.onEnd = function () {
-        var _a;
-        entity.locked = false;
-        // 如果不保留最后一帧渲染，则清空画布
-        if (fillMode === "none" /* PLAYER_FILL_MODE.NONE */) {
-          painter.clearContainer();
-        }
-        (_a = _this.onEnd) === null || _a === void 0 ? void 0 : _a.call(_this);
-      };
-      animator.start();
-    }
-  }]);
-}();var Poster = /*#__PURE__*/function () {
-  function Poster(width, height) {
-    _classCallCheck(this, Poster);
-    /**
-     * 海报配置项
-     */
-    this.config = {
-      /**
-       * 主屏，绘制海报的 Canvas 元素
-       */
-      container: "",
-      /**
-       * 填充模式，类似于 content-mode。
-       */
-      contentMode: "fill" /* PLAYER_CONTENT_MODE.FILL */,
-
-      /**
-       * 绘制成海报的帧，默认是0。
-       */
-      frame: 0
-    };
-    /**
-     * 是否配置完成
-     */
-    this.isConfigured = false;
-    /**
-     * 资源管理器
-     */
-    this.resource = null;
-    /**
-     * 渲染器实例
-     */
-    this.renderer = null;
-    this.painter = new Painter("poster", width, height);
-  }
-  /**
-   * 注册 SVGA 海报
-   * @param selector 容器选择器
-   * @param component 组件
-   */
-  return _createClass(Poster, [{
-    key: "register",
-    value: function register() {
-      return __awaiter(this, arguments, void 0, function () {
-        var _this = this;
-        var selector = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
-        var component = arguments.length > 1 ? arguments[1] : undefined;
-        return /*#__PURE__*/_regenerator().m(function _callee() {
-          return _regenerator().w(function (_context) {
-            while (1) switch (_context.n) {
-              case 0:
-                _context.n = 1;
-                return _this.painter.register(selector, "", component);
-              case 1:
-                _this.renderer = new Renderer2D(_this.painter.BC);
-                _this.resource = new ResourceManager(_this.painter);
-              case 2:
-                return _context.a(2);
-            }
-          }, _callee);
-        })();
-      });
-    }
-    /**
-     * 设置配置项
-     * @param options 可配置项
-     */
-  }, {
-    key: "setConfig",
-    value: function setConfig() {
-      return __awaiter(this, arguments, void 0, function () {
-        var _this2 = this;
-        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        var component = arguments.length > 1 ? arguments[1] : undefined;
-        return /*#__PURE__*/_regenerator().m(function _callee2() {
-          return _regenerator().w(function (_context2) {
-            while (1) switch (_context2.n) {
-              case 0:
-                if (typeof options === "string") {
-                  _this2.config.container = options;
-                } else {
-                  Object.assign(_this2.config, options);
-                }
-                _this2.isConfigured = true;
-                _context2.n = 1;
-                return _this2.register(_this2.config.container, component);
-              case 1:
-                return _context2.a(2);
-            }
-          }, _callee2);
-        })();
-      });
-    }
-    /**
-     * 修改内容模式
-     * @param contentMode
-     */
-  }, {
-    key: "setContentMode",
-    value: function setContentMode(contentMode) {
-      this.config.contentMode = contentMode;
-    }
-    /**
-     * 设置当前帧
-     * @param frame
-     */
-  }, {
-    key: "setFrame",
-    value: function setFrame(frame) {
-      this.config.frame = frame;
-    }
-    /**
-     * 装载 SVGA 数据元
-     * @param videoEntity SVGA 数据源
-     * @param currFrame
-     * @returns
-     */
-  }, {
-    key: "mount",
-    value: function mount(videoEntity) {
-      return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee3() {
-        var images, filename;
-        return _regenerator().w(function (_context3) {
-          while (1) switch (_context3.n) {
-            case 0:
-              if (videoEntity) {
-                _context3.n = 1;
-                break;
-              }
-              throw new Error("videoEntity undefined");
-            case 1:
-              if (this.isConfigured) {
-                _context3.n = 3;
-                break;
-              }
-              _context3.n = 2;
-              return this.register();
-            case 2:
-              this.isConfigured = true;
-            case 3:
-              images = videoEntity.images, filename = videoEntity.filename;
-              this.painter.clearContainer();
-              this.resource.release();
-              this.entity = videoEntity;
-              _context3.n = 4;
-              return this.resource.loadImagesWithRecord(images, filename);
-            case 4:
-              return _context3.a(2);
-          }
-        }, _callee3, this);
-      }));
-    }
-    /**
-     * 绘制海报
-     */
-  }, {
-    key: "draw",
-    value: function draw() {
-      if (!this.entity) return;
-      var painter = this.painter,
-        renderer = this.renderer,
-        resource = this.resource,
-        entity = this.entity,
-        config = this.config;
-      renderer.resize(config.contentMode, entity.size, painter.F);
-      renderer.render(entity, resource.materials, resource.dynamicMaterials, config.frame, 0, entity.sprites.length);
-    }
-    /**
-     * 获取海报的 ImageData 数据
-     */
-  }, {
-    key: "toImageData",
-    value: function toImageData() {
-      var _this$painter = this.painter,
-        FC = _this$painter.FC,
-        width = _this$painter.W,
-        height = _this$painter.H;
-      return FC.getImageData(0, 0, width, height);
-    }
-    /**
-     * 销毁海报
-     */
-  }, {
-    key: "destroy",
-    value: function destroy() {
-      var _a, _b, _c;
-      this.painter.destroy();
-      (_a = this.renderer) === null || _a === void 0 ? void 0 : _a.destroy();
-      (_b = this.resource) === null || _b === void 0 ? void 0 : _b.release();
-      (_c = this.resource) === null || _c === void 0 ? void 0 : _c.cleanup();
-      this.entity = undefined;
-    }
-  }]);
-}();exports.Painter=Painter;exports.Parser=Parser;exports.Player=Player;exports.Poster=Poster;exports.ResourceManager=ResourceManager;exports.VideoEditor=VideoEditor;exports.VideoManager=VideoManager;exports.createBufferOfImageData=createBufferOfImageData;exports.createImageDataUrl=createImageDataUrl;exports.generateImageBufferFromCode=generateImageBufferFromCode;exports.generateImageFromCode=generateImageFromCode;exports.getBufferFromImageData=getBufferFromImageData;exports.getDataURLFromImageData=getDataURLFromImageData;exports.isZlibCompressed=isZlibCompressed;exports.platform=platform;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map
+}();exports.Painter=Painter;exports.Parser=Parser;exports.Player=Player;exports.Poster=Poster;exports.VideoEditor=VideoEditor;exports.VideoManager=VideoManager;exports.createBufferOfImageData=createBufferOfImageData;exports.createImageDataUrl=createImageDataUrl;exports.generateImageBufferFromCode=generateImageBufferFromCode;exports.generateImageFromCode=generateImageFromCode;exports.getBufferFromImageData=getBufferFromImageData;exports.getDataURLFromImageData=getDataURLFromImageData;exports.isZlibCompressed=isZlibCompressed;exports.platform=platform;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map

@@ -12,14 +12,14 @@ export interface PlatformImages {
   [key: string]: PlatformImage | ImageBitmap;
 }
 
-export interface PaintModel {
+export interface PainterActionModel {
   // canvas or offscreen
   type: "C" | "O";
   // clear or resize or create
   clear: "CL" | "RE" | "CR";
 }
 
-export type PaintMode = "poster" | "animation";
+export type PainterMode = "poster" | "animation";
 
 export interface CanvasSize {
   width: number;

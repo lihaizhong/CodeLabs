@@ -1,3 +1,4 @@
+export * from "./resource-manager";
 export * from "./svga-decoder";
 export * from "./svga-renderer";
 export * from "./svga-animator";
