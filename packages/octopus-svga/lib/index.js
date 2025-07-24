@@ -5641,7 +5641,7 @@ var Painter = /*#__PURE__*/function () {
     value: function register(selector, ofsSelector, component) {
       return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee() {
         var _this = this;
-        var model, mode, getCanvas, getOfsCanvas, env, W, H, _getOfsCanvas, canvas, context, _yield$getCanvas, _canvas, _context, width, height, ofsResult, _t;
+        var model, mode, getCanvas, getOfsCanvas, env, W, H, _getOfsCanvas, canvas, context, _yield$getCanvas, _canvas, _context, width, height, _W, _H, ofsResult, _t;
         return _regenerator().w(function (_context2) {
           while (1) switch (_context2.n) {
             case 0:
@@ -5713,6 +5713,9 @@ var Painter = /*#__PURE__*/function () {
               _context2.n = 11;
               break;
             case 4:
+              // #region set secondary screen implement
+              // ------- 创建副屏 ---------
+              _W = this.W, _H = this.H;
               if (!(typeof ofsSelector === "string" && ofsSelector !== "")) {
                 _context2.n = 6;
                 break;
@@ -5721,15 +5724,15 @@ var Painter = /*#__PURE__*/function () {
               return getCanvas(ofsSelector, component);
             case 5:
               ofsResult = _context2.v;
-              ofsResult.canvas.width = this.W;
-              ofsResult.canvas.height = this.H;
+              ofsResult.canvas.width = _W;
+              ofsResult.canvas.height = _H;
               this.setActionModel("C");
               _context2.n = 7;
               break;
             case 6:
               ofsResult = getOfsCanvas({
-                width: this.W,
-                height: this.H
+                width: _W,
+                height: _H
               });
               this.setActionModel("O");
             case 7:

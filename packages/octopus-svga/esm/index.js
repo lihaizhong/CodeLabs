@@ -4303,15 +4303,16 @@ class Painter {
         else {
             // #region set secondary screen implement
             // ------- 创建副屏 ---------
+            const { W, H } = this;
             let ofsResult;
             if (typeof ofsSelector === "string" && ofsSelector !== "") {
                 ofsResult = await getCanvas(ofsSelector, component);
-                ofsResult.canvas.width = this.W;
-                ofsResult.canvas.height = this.H;
+                ofsResult.canvas.width = W;
+                ofsResult.canvas.height = H;
                 this.setActionModel("C");
             }
             else {
-                ofsResult = getOfsCanvas({ width: this.W, height: this.H });
+                ofsResult = getOfsCanvas({ width: W, height: H });
                 this.setActionModel("O");
             }
             this.B = ofsResult.canvas;
