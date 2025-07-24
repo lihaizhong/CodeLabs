@@ -17,9 +17,9 @@
 
 ## 暂未实现
 
-- [ ] Web 端支持 **IndexDB**
+- [ ] GPU 加速渲染（WebGL/WebGPU渲染），并支持用户手动切换渲染模式
+- [ ] Web 端支持 **IndexDB**（扩展 plugin-fsm 插件，使其操作方式与文件操作类似）
 - [ ] 支持 **IntersectionObserver**（考虑到体积大小，可能作为外部依赖支持，比如用户实现一个自定义的platform的方式）
-- [ ] GPU 加速渲染（WebGL和WebGPU渲染）
 
 ## 注意事项
 
@@ -340,7 +340,7 @@ const videoManager = new VideoManager("fast", {
 | 浏览器         | RESIZE | RESIZE          |
 | Firefox 浏览器 | RESIZE | CREATE          |
 
-## OTHER
+## 其他
 
 SVGA AE 设计插件
 
