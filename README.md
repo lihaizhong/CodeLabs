@@ -44,6 +44,24 @@ Svga动效播放器，是一个高性能、多端兼容（Web端、微信小程�
 
 ## 工具指令
 
+### 发布准备
+
+```bash
+pnpm changeset # 新增变更集，多次执行可针对不同的包创建变更集
+
+pnpm changeset version # 针对所有的变更集，更新版本号
+
+pnpm --filter <package name> build # 针对不同的包进行构建
+
+git add .
+
+git commit -m "chore: release"
+
+git push
+
+pnpm --filter <package name> publish # 针对不同的包进行发布
+```
+
 ### git submodule
 
 [git submodule 命令](https://www.runoob.com/git/git-submodule.html)
