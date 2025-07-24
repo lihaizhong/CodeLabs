@@ -1,5 +1,11 @@
 # octopus-svga
 
+## 1.2.0
+
+### Minor Changes
+
+- fix: 不对外提供 ResourceManager 类
+
 ## 1.1.0
 
 ### Minor Changes
