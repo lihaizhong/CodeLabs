@@ -18,7 +18,8 @@
 ## 暂未实现
 
 - [ ] Web 端支持 **IndexDB**
-- [ ] 支持 **IntersectionObserver**
+- [ ] 支持 **IntersectionObserver**（考虑到体积大小，可能作为外部依赖支持，比如用户实现一个自定义的platform的方式）
+- [ ] GPU 加速渲染（WebGL和WebGPU渲染）
 
 ## 注意事项
 

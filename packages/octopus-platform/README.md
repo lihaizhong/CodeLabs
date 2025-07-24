@@ -121,7 +121,7 @@ platform.globals.dpr
 platform.globals.system
 ```
 
-### 自定义 platform 插件
+### 自定义插件
 
 ```ts
 import { definePlugin } from "octopus-platform";
