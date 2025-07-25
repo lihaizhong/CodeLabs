@@ -7,6 +7,7 @@
     "preinstall": "npx -y only-allow pnpm",
     "dev": "vite dev",
     "build": "vite build",
+    "preview": "vite preview",
     "minio": "serve -p 3536 -c serve.json",
     "test": "jest",
     "zx:sync": "zx .scripts/sync.mjs",

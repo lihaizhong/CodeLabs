@@ -6149,6 +6149,8 @@ var Player = /*#__PURE__*/function () {
         resource = this.resource;
       var W = painter.W,
         H = painter.H;
+      var materials = resource.materials,
+        dynamicMaterials = resource.dynamicMaterials;
       var fillMode = config.fillMode,
         playMode = config.playMode,
         contentMode = config.contentMode;
@@ -6190,6 +6192,9 @@ var Player = /*#__PURE__*/function () {
       var MAX_ACCELERATE_DRAW_TIME_PER_FRAME = 3;
       var MAX_DYNAMIC_CHUNK_SIZE = 34;
       var MIN_DYNAMIC_CHUNK_SIZE = 1;
+      var render = function render(head, tail) {
+        return renderer.render(entity, materials, dynamicMaterials, currentFrame, head, tail);
+      };
       // 动态调整每次绘制的块大小
       var dynamicChunkSize = 4; // 初始块大小
       var startTime;
@@ -6203,7 +6208,7 @@ var Player = /*#__PURE__*/function () {
           // 根据当前块大小计算nextTail
           chunk = Math.min(dynamicChunkSize, spriteCount - tail);
           nextTail = tail + chunk | 0;
-          renderer.render(entity, resource.materials, resource.dynamicMaterials, currentFrame, tail, nextTail);
+          render(tail, nextTail);
           tail = nextTail;
           // 动态调整块大小
           elapsed = platform.now() - startTime;
@@ -6231,6 +6236,9 @@ var Player = /*#__PURE__*/function () {
           hasRemained = currentFrame === nextFrame;
         });
         if (hasRemained) return;
+        if (tail < spriteCount) {
+          render(tail, spriteCount);
+        }
         painter.clearContainer();
         painter.stick();
         painter.clearSecondary();

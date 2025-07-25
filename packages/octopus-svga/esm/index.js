@@ -4677,6 +4677,7 @@ class Player {
     startAnimation() {
         const { entity, config, animator, painter, renderer, resource } = this;
         const { W, H } = painter;
+        const { materials, dynamicMaterials } = resource;
         const { fillMode, playMode, contentMode } = config;
         const { currFrame, startFrame, endFrame, totalFrame, spriteCount, aniConfig, } = config.getConfig(entity);
         const { duration, loopStart, loop, fillValue } = aniConfig;
@@ -4704,6 +4705,7 @@ class Player {
         const MAX_ACCELERATE_DRAW_TIME_PER_FRAME = 3;
         const MAX_DYNAMIC_CHUNK_SIZE = 34;
         const MIN_DYNAMIC_CHUNK_SIZE = 1;
+        const render = (head, tail) => renderer.render(entity, materials, dynamicMaterials, currentFrame, head, tail);
         // 动态调整每次绘制的块大小
         let dynamicChunkSize = 4; // 初始块大小
         let startTime;
@@ -4717,7 +4719,7 @@ class Player {
                 // 根据当前块大小计算nextTail
                 chunk = Math.min(dynamicChunkSize, spriteCount - tail);
                 nextTail = (tail + chunk) | 0;
-                renderer.render(entity, resource.materials, resource.dynamicMaterials, currentFrame, tail, nextTail);
+                render(tail, nextTail);
                 tail = nextTail;
                 // 动态调整块大小
                 elapsed = platform.now() - startTime;
@@ -4748,6 +4750,9 @@ class Player {
             });
             if (hasRemained)
                 return;
+            if (tail < spriteCount) {
+                render(tail, spriteCount);
+            }
             painter.clearContainer();
             painter.stick();
             painter.clearSecondary();
