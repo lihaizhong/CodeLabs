@@ -5365,5 +5365,5 @@ class VideoEditor {
     }
 }
 
-export { Painter, Parser, Player, Poster, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
+export { EnhancedPlatform, Painter, Parser, Player, Poster, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
 //# sourceMappingURL=index.js.map
