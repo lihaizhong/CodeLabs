@@ -1,5 +1,12 @@
 # octopus-svga
 
+## 1.2.1
+
+### Patch Changes
+
+- fix: 修复帧率高时，无法渲染完整信息问题
+- chore: 更新文档
+
 ## 1.2.0
 
 ### Minor Changes
