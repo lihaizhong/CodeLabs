@@ -2,7 +2,12 @@
   "name": "octopus-platform",
   "version": "0.1.2",
   "type": "module",
-  "keywords": [],
+  "keywords": [
+    "platform",
+    "front-end",
+    "mobile",
+    "compatibility"
+  ],
   "description": "平台兼容性磨平",
   "module": "esm/index.js",
   "main": "lib/index.js",

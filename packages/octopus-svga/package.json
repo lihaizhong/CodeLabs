@@ -3,7 +3,11 @@
   "version": "1.2.1",
   "keywords": [
     "svgaplayer",
-    "svga"
+    "svga",
+    "front-end",
+    "mobile",
+    "animate",
+    "compatibility"
   ],
   "description": "高性能SVGA动效播放器，支持Web/微信小程序/支付宝小程序/抖音小程序，设计目标是 解析速度更快、体积更小、性能更高、兼容性更高、功能更丰富。",
   "type": "module",
