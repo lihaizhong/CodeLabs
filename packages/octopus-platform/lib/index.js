@@ -353,20 +353,15 @@ var definePlugin = function (plugin) { return plugin; };function installPlugin(p
     install: function () {
         var _a = this.globals, env = _a.env, br = _a.br;
         if (env === "h5") {
-            return function (selector) {
-                return document.querySelector(selector);
-            };
+            return function (selector) { return document.querySelector(selector); };
         }
         return function (selector, component) {
-            var query = br.createSelectorQuery();
-            if (component) {
-                query = query.in(component);
-            }
-            return query
+            return (component || br)
+                .createSelectorQuery()
                 .select(selector)
                 .fields({ node: true, size: true });
         };
-    }
+    },
 });/**
  * 通过选择器匹配获取canvas实例
  * @returns

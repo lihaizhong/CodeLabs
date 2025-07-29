@@ -708,11 +708,7 @@ var pluginSelector = definePlugin({
       };
     }
     return function (selector, component) {
-      var query = br.createSelectorQuery();
-      if (component) {
-        query = query.in(component);
-      }
-      return query.select(selector).fields({
+      return (component || br).createSelectorQuery().select(selector).fields({
         node: true,
         size: true
       });
