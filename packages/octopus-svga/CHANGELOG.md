@@ -1,5 +1,14 @@
 # octopus-svga
 
+## 1.2.2
+
+### Patch Changes
+
+- chore: 更新依赖包
+
+- Updated dependencies []:
+  - octopus-platform@0.1.3
+
 ## 1.2.1
 
 ### Patch Changes
