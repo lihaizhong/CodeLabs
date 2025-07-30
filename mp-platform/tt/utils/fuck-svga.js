@@ -708,11 +708,7 @@ var pluginSelector = definePlugin({
       };
     }
     return function (selector, component) {
-      var query = br.createSelectorQuery();
-      if (component) {
-        query = query.in(component);
-      }
-      return query.select(selector).fields({
+      return (component || br).createSelectorQuery().select(selector).fields({
         node: true,
         size: true
       });
@@ -7136,4 +7132,4 @@ function isZlibCompressed(data) {
       }));
     }
   }]);
-}();exports.Painter=Painter;exports.Parser=Parser;exports.Player=Player;exports.Poster=Poster;exports.VideoEditor=VideoEditor;exports.VideoManager=VideoManager;exports.createBufferOfImageData=createBufferOfImageData;exports.createImageDataUrl=createImageDataUrl;exports.generateImageBufferFromCode=generateImageBufferFromCode;exports.generateImageFromCode=generateImageFromCode;exports.getBufferFromImageData=getBufferFromImageData;exports.getDataURLFromImageData=getDataURLFromImageData;exports.isZlibCompressed=isZlibCompressed;exports.platform=platform;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map
+}();exports.EnhancedPlatform=EnhancedPlatform;exports.Painter=Painter;exports.Parser=Parser;exports.Player=Player;exports.Poster=Poster;exports.VideoEditor=VideoEditor;exports.VideoManager=VideoManager;exports.createBufferOfImageData=createBufferOfImageData;exports.createImageDataUrl=createImageDataUrl;exports.generateImageBufferFromCode=generateImageBufferFromCode;exports.generateImageFromCode=generateImageFromCode;exports.getBufferFromImageData=getBufferFromImageData;exports.getDataURLFromImageData=getDataURLFromImageData;exports.isZlibCompressed=isZlibCompressed;exports.platform=platform;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map

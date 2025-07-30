@@ -6,20 +6,13 @@ export default definePlugin<"getSelector">({
     const { env, br } = this.globals;
 
     if (env === "h5") {
-      return (selector: string) =>
-        document.querySelector(selector);
+      return (selector: string) => document.querySelector(selector);
     }
 
-    return (selector: string, component?: any) => {
-      let query = br.createSelectorQuery();
-
-      if (component) {
-        query = query.in(component);
-      }
-
-      return query
+    return (selector: string, component?: any) =>
+      (component || br)
+        .createSelectorQuery()
         .select(selector)
-        .fields({ node: true, size: true })
-    }
-  }
+        .fields({ node: true, size: true });
+  },
 });

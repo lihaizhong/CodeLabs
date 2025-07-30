@@ -140,7 +140,7 @@ class OctopusPlatform {
     /**
      * 平台版本
      */
-    platformVersion = "0.1.2";
+    platformVersion = "0.1.3";
     /**
      * 应用版本
      */
@@ -284,16 +284,11 @@ var pluginSelector = definePlugin({
         if (env === "h5") {
             return (selector) => document.querySelector(selector);
         }
-        return (selector, component) => {
-            let query = br.createSelectorQuery();
-            if (component) {
-                query = query.in(component);
-            }
-            return query
-                .select(selector)
-                .fields({ node: true, size: true });
-        };
-    }
+        return (selector, component) => (component || br)
+            .createSelectorQuery()
+            .select(selector)
+            .fields({ node: true, size: true });
+    },
 });
 
 /**

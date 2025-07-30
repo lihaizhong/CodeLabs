@@ -27,7 +27,7 @@ export type PlatformProperties =
   | "getCanvas"
   | "getOfsCanvas";
 
-class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
+export class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
   now!: OctopusPlatformPlugins["now"];
 
   path!: OctopusPlatformPlugins["path"];

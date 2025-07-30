@@ -23,7 +23,7 @@ class EnhancedPlatform extends OctopusPlatform {
             pluginNow,
             pluginPath,
             pluginRAF,
-        ], "1.2.1");
+        ], "1.2.2");
         this.init();
     }
     installPlugin(plugin) {
@@ -5365,5 +5365,5 @@ class VideoEditor {
     }
 }
 
-export { Painter, Parser, Player, Poster, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
+export { EnhancedPlatform, Painter, Parser, Player, Poster, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
 //# sourceMappingURL=index.js.map

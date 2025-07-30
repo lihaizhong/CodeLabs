@@ -1,5 +1,11 @@
 # octopus-platform
 
+## 0.1.3
+
+### Patch Changes
+
+- fix: 提升 createSelectorQuery()性能
+
 ## 0.1.2
 
 ### Patch Changes
