@@ -1233,7 +1233,7 @@ var pluginRaf = definePlugin({
   function EnhancedPlatform() {
     var _this;
     _classCallCheck(this, EnhancedPlatform);
-    _this = _callSuper(this, EnhancedPlatform, [[pluginSelector, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "1.2.2"]);
+    _this = _callSuper(this, EnhancedPlatform, [[pluginSelector, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "1.3.0"]);
     _this.init();
     return _this;
   }
