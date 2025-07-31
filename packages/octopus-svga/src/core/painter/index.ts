@@ -1,6 +1,16 @@
-import type { PlatformCanvas, PlatformOffscreenCanvas } from "octopus-platform";
+import type {
+  Bitmap,
+  PlatformCanvas,
+  PlatformOffscreenCanvas,
+} from "octopus-platform";
 import { platform } from "../../platform";
-import type { PainterActionModel, PainterMode } from "../../types";
+import type {
+  PainterActionModel,
+  PainterMode,
+  PlatformVideo,
+  PLAYER_CONTENT_MODE,
+} from "../../types";
+import { Renderer2D, Renderer2DExtension } from "src/extensions";
 
 const { noop } = platform;
 
@@ -10,6 +20,7 @@ export class Painter {
    * Front Screen
    */
   public F: PlatformCanvas | PlatformOffscreenCanvas | null = null;
+
   /**
    * 主屏的 Context 对象
    * Front Context
@@ -18,11 +29,13 @@ export class Painter {
     | CanvasRenderingContext2D
     | OffscreenCanvasRenderingContext2D
     | null = null;
+
   /**
    * 副屏的 Canvas 元素
    * Background Screen
    */
   public B: PlatformCanvas | PlatformOffscreenCanvas | null = null;
+
   /**
    * 副屏的 Context 对象
    * Background Context
@@ -31,18 +44,26 @@ export class Painter {
     | CanvasRenderingContext2D
     | OffscreenCanvasRenderingContext2D
     | null = null;
+
   /**
    * 画布的宽度
    */
   public W: number;
+
   /**
    * 画布的高度
    */
   public H: number;
+
   /**
    * 粉刷模式
    */
   private model: PainterActionModel = {} as PainterActionModel;
+
+  /**
+   * 渲染器实例
+   */
+  private renderer: Renderer2D | null = null;
 
   /**
    *
@@ -77,14 +98,7 @@ export class Painter {
     model.type = type;
 
     // set clear
-    if (
-      type === "O" &&
-      // OffscreenCanvas 在 Firefox 浏览器无法被清理历史内容
-      env === "h5" &&
-      navigator.userAgent.includes("Firefox")
-    ) {
-      model.clear = "CR";
-    } else if ((type === "O" && env === "tt") || env === "alipay") {
+    if ((type === "O" && env === "tt") || env === "alipay") {
       model.clear = "CL";
     } else {
       model.clear = "RE";
@@ -138,26 +152,20 @@ export class Painter {
     // #region clear main screen implement
     // ------- 生成主屏清理函数 -------
     // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
-    if (model.clear === "CL") {
-      this.clearContainer = () => {
-        const { W, H, FC } = this;
-
-        FC!.clearRect(0, 0, W, H);
-      };
-    } else {
-      this.clearContainer = () => {
-        const { W, H, F } = this;
-
-        F!.width = W;
-        F!.height = H;
-      };
-    }
+    this.clearContainer = Renderer2DExtension.clear(
+      model.clear,
+      this.FC!,
+      this.F!,
+      this.W,
+      this.H
+    );
     // #endregion clear main screen implement
 
     if (mode === "poster") {
       this.B = this.F;
       this.BC = this.FC;
-      this.clearSecondary = this.stick = noop;
+      this.clearSecondary = this.clearContainer;
+      this.stick = noop;
     } else {
       // #region set secondary screen implement
       // ------- 创建副屏 ---------
@@ -180,47 +188,60 @@ export class Painter {
 
       // #region clear secondary screen implement
       // ------- 生成副屏清理函数 --------
-      switch (model.clear) {
-        case "CR":
-          this.clearSecondary = () => {
-            const { W, H } = this;
-            // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
-            const { canvas, context } = getOfsCanvas({ width: W, height: H });
-
-            this.B = canvas;
-            this.BC = context;
-          };
-          break;
-        case "CL":
-          this.clearSecondary = () => {
-            const { W, H, BC } = this;
-            // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
-            BC!.clearRect(0, 0, W, H);
-          };
-          break;
-        default:
-          this.clearSecondary = () => {
-            const { W, H, B } = this;
-          
-            B!.width = W;
-            B!.height = H;
-          };
-      }
+      this.clearSecondary = Renderer2DExtension.clear(
+        model.clear,
+        this.BC!,
+        this.B!,
+        this.W,
+        this.H
+      );
+      this.stick = Renderer2DExtension.stick(this.FC!, this.B!);
       // #endregion clear secondary screen implement
     }
+
+    const { B, BC } = this;
+    const renderer = this.renderer = new Renderer2D(BC);
+    this.resize = (
+      contentMode: PLAYER_CONTENT_MODE,
+      videoSize: PlatformVideo.VideoSize
+    ) => renderer!.resize(contentMode, videoSize, B!);
+    this.draw = (
+      videoEntity: PlatformVideo.Video,
+      materials: Map<string, Bitmap>,
+      dynamicMaterials: Map<string, Bitmap>,
+      currentFrame: number,
+      head: number,
+      tail: number
+    ) =>
+      renderer!.render(
+        videoEntity,
+        materials,
+        dynamicMaterials,
+        currentFrame,
+        head,
+        tail
+      );
   }
 
   public clearContainer: () => void = noop;
 
   public clearSecondary: () => void = noop;
 
-  public stick() {
-    const { W, H,FC, BC, mode } = this;
+  public resize: (
+    contentMode: PLAYER_CONTENT_MODE,
+    videoSize: PlatformVideo.VideoSize
+  ) => void = noop;
 
-    if (mode !== "poster") {
-      FC!.drawImage(BC!.canvas, 0, 0, W, H);
-    }
-  }
+  public draw: (
+    videoEntity: PlatformVideo.Video,
+    materials: Map<string, Bitmap>,
+    dynamicMaterials: Map<string, Bitmap>,
+    currentFrame: number,
+    head: number,
+    tail: number
+  ) => void = noop;
+
+  public stick: () => void = noop;
 
   /**
    * 销毁画笔
@@ -230,5 +251,6 @@ export class Painter {
     this.clearSecondary();
     this.F = this.FC = this.B = this.BC = null;
     this.clearContainer = this.clearSecondary = this.stick = noop;
+    this.renderer?.destroy();
   }
 }

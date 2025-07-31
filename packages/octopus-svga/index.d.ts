@@ -9,7 +9,7 @@ interface PlatformImages {
 }
 interface PainterActionModel {
     type: "C" | "O";
-    clear: "CL" | "RE" | "CR";
+    clear: "CL" | "RE";
 }
 type PainterMode = "poster" | "animation";
 interface CanvasSize {
@@ -344,6 +344,10 @@ declare class Painter {
      */
     private model;
     /**
+     * 渲染器实例
+     */
+    private renderer;
+    /**
      *
      * @param mode
      *  - poster: 海报模式
@@ -368,7 +372,9 @@ declare class Painter {
     register(selector: string, ofsSelector?: string, component?: any): Promise<void>;
     clearContainer: () => void;
     clearSecondary: () => void;
-    stick(): void;
+    resize: (contentMode: PLAYER_CONTENT_MODE, videoSize: PlatformVideo.VideoSize) => void;
+    draw: (videoEntity: PlatformVideo.Video, materials: Map<string, Bitmap>, dynamicMaterials: Map<string, Bitmap>, currentFrame: number, head: number, tail: number) => void;
+    stick: () => void;
     /**
      * 销毁画笔
      */
@@ -465,10 +471,6 @@ declare class Player {
      * 动画实例
      */
     private readonly animator;
-    /**
-     * 渲染器实例
-     */
-    private renderer;
     /**
      * 设置配置项
      * @param options 可配置项
@@ -587,10 +589,6 @@ declare class Poster {
      * 资源管理器
      */
     resource: ResourceManager | null;
-    /**
-     * 渲染器实例
-     */
-    private renderer;
     constructor(width: number, height: number);
     /**
      * 注册 SVGA 海报

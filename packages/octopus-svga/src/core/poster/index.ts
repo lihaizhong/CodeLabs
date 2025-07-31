@@ -47,11 +47,6 @@ export class Poster {
    */
   public resource: ResourceManager | null = null;
 
-  /**
-   * 渲染器实例
-   */
-  private renderer: Renderer2D | null = null;
-
   constructor(width: number, height: number) {
     this.painter = new Painter("poster", width, height);
   }
@@ -66,7 +61,6 @@ export class Poster {
     component?: any
   ): Promise<void> {
     await this.painter.register(selector, "", component);
-    this.renderer = new Renderer2D(this.painter.BC!);
     this.resource = new ResourceManager(this.painter);
   }
 
@@ -135,10 +129,10 @@ export class Poster {
   public draw(): void {
     if (!this.entity) return;
 
-    const { painter, renderer, resource, entity, config } = this;
+    const { painter, resource, entity, config } = this;
 
-    renderer!.resize(config.contentMode, entity!.size, painter.F!);
-    renderer!.render(
+    painter.resize(config.contentMode, entity!.size);
+    painter.draw(
       entity!,
       resource!.materials,
       resource!.dynamicMaterials,
@@ -162,7 +156,6 @@ export class Poster {
    */
   public destroy(): void {
     this.painter.destroy();
-    this.renderer?.destroy();
     this.resource?.release();
     this.resource?.cleanup();
     this.entity = undefined;

@@ -2110,6 +2110,22 @@ class Renderer2D {
     }
 }
 
+const Renderer2DExtension = {
+    stick: (context, bitmap) => () => context.drawImage(bitmap, 0, 0),
+    clear: (type, context, canvas, width, height) => {
+        if (type === "CL") {
+            return () => {
+                // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
+                context.clearRect(0, 0, width, height);
+            };
+        }
+        return () => {
+            canvas.width = width;
+            canvas.height = height;
+        };
+    },
+};
+
 /**
  * 动画控制器
  */
@@ -4203,6 +4219,10 @@ class Painter {
      */
     model = {};
     /**
+     * 渲染器实例
+     */
+    renderer = null;
+    /**
      *
      * @param mode
      *  - poster: 海报模式
@@ -4228,13 +4248,7 @@ class Painter {
         // set type
         model.type = type;
         // set clear
-        if (type === "O" &&
-            // OffscreenCanvas 在 Firefox 浏览器无法被清理历史内容
-            env === "h5" &&
-            navigator.userAgent.includes("Firefox")) {
-            model.clear = "CR";
-        }
-        else if ((type === "O" && env === "tt") || env === "alipay") {
+        if ((type === "O" && env === "tt") || env === "alipay") {
             model.clear = "CL";
         }
         else {
@@ -4281,24 +4295,13 @@ class Painter {
         // #region clear main screen implement
         // ------- 生成主屏清理函数 -------
         // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
-        if (model.clear === "CL") {
-            this.clearContainer = () => {
-                const { W, H, FC } = this;
-                FC.clearRect(0, 0, W, H);
-            };
-        }
-        else {
-            this.clearContainer = () => {
-                const { W, H, F } = this;
-                F.width = W;
-                F.height = H;
-            };
-        }
+        this.clearContainer = Renderer2DExtension.clear(model.clear, this.FC, this.F, this.W, this.H);
         // #endregion clear main screen implement
         if (mode === "poster") {
             this.B = this.F;
             this.BC = this.FC;
-            this.clearSecondary = this.stick = noop;
+            this.clearSecondary = this.clearContainer;
+            this.stick = noop;
         }
         else {
             // #region set secondary screen implement
@@ -4320,41 +4323,20 @@ class Painter {
             // #endregion set secondary screen implement
             // #region clear secondary screen implement
             // ------- 生成副屏清理函数 --------
-            switch (model.clear) {
-                case "CR":
-                    this.clearSecondary = () => {
-                        const { W, H } = this;
-                        // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
-                        const { canvas, context } = getOfsCanvas({ width: W, height: H });
-                        this.B = canvas;
-                        this.BC = context;
-                    };
-                    break;
-                case "CL":
-                    this.clearSecondary = () => {
-                        const { W, H, BC } = this;
-                        // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
-                        BC.clearRect(0, 0, W, H);
-                    };
-                    break;
-                default:
-                    this.clearSecondary = () => {
-                        const { W, H, B } = this;
-                        B.width = W;
-                        B.height = H;
-                    };
-            }
+            this.clearSecondary = Renderer2DExtension.clear(model.clear, this.BC, this.B, this.W, this.H);
+            this.stick = Renderer2DExtension.stick(this.FC, this.B);
             // #endregion clear secondary screen implement
         }
+        const { B, BC } = this;
+        const renderer = this.renderer = new Renderer2D(BC);
+        this.resize = (contentMode, videoSize) => renderer.resize(contentMode, videoSize, B);
+        this.draw = (videoEntity, materials, dynamicMaterials, currentFrame, head, tail) => renderer.render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail);
     }
     clearContainer = noop;
     clearSecondary = noop;
-    stick() {
-        const { W, H, FC, BC, mode } = this;
-        if (mode !== "poster") {
-            FC.drawImage(BC.canvas, 0, 0, W, H);
-        }
-    }
+    resize = noop;
+    draw = noop;
+    stick = noop;
     /**
      * 销毁画笔
      */
@@ -4363,6 +4345,7 @@ class Painter {
         this.clearSecondary();
         this.F = this.FC = this.B = this.BC = null;
         this.clearContainer = this.clearSecondary = this.stick = noop;
+        this.renderer?.destroy();
     }
 }
 
@@ -4516,10 +4499,6 @@ class Player {
      */
     animator = new Animator();
     /**
-     * 渲染器实例
-     */
-    renderer = null;
-    /**
      * 设置配置项
      * @param options 可配置项
      * @property container 主屏，播放动画的 Canvas 元素
@@ -4539,7 +4518,6 @@ class Player {
         // 监听容器是否处于浏览器视窗内
         // this.setIntersectionObserver()
         await this.painter.register(container, secondary, component);
-        this.renderer = new Renderer2D(this.painter.BC);
         this.resource = new ResourceManager(this.painter);
         this.animator.onAnimate = platform.rAF.bind(null, this.painter.F);
     }
@@ -4636,7 +4614,6 @@ class Player {
     destroy() {
         this.animator.stop();
         this.painter.destroy();
-        this.renderer?.destroy();
         this.resource?.release();
         this.resource?.cleanup();
         this.entity = undefined;
@@ -4675,7 +4652,7 @@ class Player {
      * 开始绘制动画
      */
     startAnimation() {
-        const { entity, config, animator, painter, renderer, resource } = this;
+        const { entity, config, animator, painter, resource } = this;
         const { W, H } = painter;
         const { materials, dynamicMaterials } = resource;
         const { fillMode, playMode, contentMode } = config;
@@ -4699,13 +4676,13 @@ class Player {
         let hasRemained;
         // 更新动画基础信息
         animator.setConfig(duration, loopStart, loop, fillValue);
-        renderer.resize(contentMode, entity.size, { width: W, height: H });
+        painter.resize(contentMode, entity.size);
         // 分段渲染函数
         const MAX_DRAW_TIME_PER_FRAME = 8;
         const MAX_ACCELERATE_DRAW_TIME_PER_FRAME = 3;
         const MAX_DYNAMIC_CHUNK_SIZE = 34;
         const MIN_DYNAMIC_CHUNK_SIZE = 1;
-        const render = (head, tail) => renderer.render(entity, materials, dynamicMaterials, currentFrame, head, tail);
+        const render = (head, tail) => painter.draw(entity, materials, dynamicMaterials, currentFrame, head, tail);
         // 动态调整每次绘制的块大小
         let dynamicChunkSize = 4; // 初始块大小
         let startTime;
@@ -4811,10 +4788,6 @@ class Poster {
      * 资源管理器
      */
     resource = null;
-    /**
-     * 渲染器实例
-     */
-    renderer = null;
     constructor(width, height) {
         this.painter = new Painter("poster", width, height);
     }
@@ -4825,7 +4798,6 @@ class Poster {
      */
     async register(selector = "", component) {
         await this.painter.register(selector, "", component);
-        this.renderer = new Renderer2D(this.painter.BC);
         this.resource = new ResourceManager(this.painter);
     }
     /**
@@ -4882,9 +4854,9 @@ class Poster {
     draw() {
         if (!this.entity)
             return;
-        const { painter, renderer, resource, entity, config } = this;
-        renderer.resize(config.contentMode, entity.size, painter.F);
-        renderer.render(entity, resource.materials, resource.dynamicMaterials, config.frame, 0, entity.sprites.length);
+        const { painter, resource, entity, config } = this;
+        painter.resize(config.contentMode, entity.size);
+        painter.draw(entity, resource.materials, resource.dynamicMaterials, config.frame, 0, entity.sprites.length);
     }
     /**
      * 获取海报的 ImageData 数据
@@ -4898,7 +4870,6 @@ class Poster {
      */
     destroy() {
         this.painter.destroy();
-        this.renderer?.destroy();
         this.resource?.release();
         this.resource?.cleanup();
         this.entity = undefined;

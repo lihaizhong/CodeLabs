@@ -15,8 +15,8 @@ export interface PlatformImages {
 export interface PainterActionModel {
   // canvas or offscreen
   type: "C" | "O";
-  // clear or resize or create
-  clear: "CL" | "RE" | "CR";
+  // clear or resize
+  clear: "CL" | "RE";
 }
 
 export type PainterMode = "poster" | "animation";

@@ -330,7 +330,6 @@ const videoManager = new VideoManager("fast", {
 
 - RESIZE: 利用 Canvas 宽高变化会自动清除画布特性。
 - CLEAR: 利用 Canvas 上下文的 `clearRect` 方法。
-- CREATE: 重新创建 OffscreenCanvas 实例。
 
 |                | Canvas | OffscreenCanvas |
 | -------------- | ------ | --------------- |
@@ -338,7 +337,6 @@ const videoManager = new VideoManager("fast", {
 | 支付宝小程序   | CLEAR  | RESIZE          |
 | 抖音小程序     | RESIZE | CLEAR           |
 | 浏览器         | RESIZE | RESIZE          |
-| Firefox 浏览器 | RESIZE | CREATE          |
 
 ## 其他
 

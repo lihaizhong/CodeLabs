@@ -1,1 +1,1 @@
-export { Renderer2D } from './2d'
+export * from './2d'

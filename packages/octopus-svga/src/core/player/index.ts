@@ -2,7 +2,7 @@ import type { PlatformCanvas } from "octopus-platform";
 import { platform } from "../../platform";
 import { Painter } from "../painter";
 import { Config } from "./config";
-import { Animator, Renderer2D, ResourceManager } from "../../extensions";
+import { Animator, ResourceManager } from "../../extensions";
 import {
   type PlatformVideo,
   type PlayerConfigOptions,
@@ -44,11 +44,6 @@ export class Player {
   private readonly animator: Animator = new Animator();
 
   /**
-   * 渲染器实例
-   */
-  private renderer: Renderer2D | null = null;
-
-  /**
    * 设置配置项
    * @param options 可配置项
    * @property container 主屏，播放动画的 Canvas 元素
@@ -73,7 +68,6 @@ export class Player {
     // 监听容器是否处于浏览器视窗内
     // this.setIntersectionObserver()
     await this.painter.register(container, secondary, component);
-    this.renderer = new Renderer2D(this.painter.BC!);
     this.resource = new ResourceManager(this.painter);
     this.animator.onAnimate = platform.rAF.bind(
       null,
@@ -186,7 +180,6 @@ export class Player {
   public destroy(): void {
     this.animator.stop();
     this.painter.destroy();
-    this.renderer?.destroy();
     this.resource?.release();
     this.resource?.cleanup();
     this.entity = undefined;
@@ -230,7 +223,7 @@ export class Player {
    * 开始绘制动画
    */
   private startAnimation(): void {
-    const { entity, config, animator, painter, renderer, resource } = this;
+    const { entity, config, animator, painter, resource } = this;
     const { W, H } = painter;
     const { materials, dynamicMaterials } = resource!;
     const { fillMode, playMode, contentMode } = config;
@@ -263,7 +256,7 @@ export class Player {
 
     // 更新动画基础信息
     animator.setConfig(duration, loopStart, loop, fillValue);
-    renderer!.resize(contentMode, entity!.size, { width: W, height: H });
+    painter.resize(contentMode, entity!.size);
 
     // 分段渲染函数
     const MAX_DRAW_TIME_PER_FRAME = 8;
@@ -271,7 +264,7 @@ export class Player {
     const MAX_DYNAMIC_CHUNK_SIZE = 34;
     const MIN_DYNAMIC_CHUNK_SIZE = 1;
     const render = (head: number, tail: number) =>
-      renderer!.render(
+      painter.draw(
         entity!,
         materials,
         dynamicMaterials,
