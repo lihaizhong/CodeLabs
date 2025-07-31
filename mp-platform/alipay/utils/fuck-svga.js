@@ -513,7 +513,7 @@ var OctopusPlatform = /*#__PURE__*/function () {
     /**
      * 平台版本
      */
-    _defineProperty(this, "platformVersion", "0.1.2");
+    _defineProperty(this, "platformVersion", "0.1.3");
     /**
      * 应用版本
      */
@@ -1233,7 +1233,7 @@ var pluginRaf = definePlugin({
   function EnhancedPlatform() {
     var _this;
     _classCallCheck(this, EnhancedPlatform);
-    _this = _callSuper(this, EnhancedPlatform, [[pluginSelector, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "1.2.1"]);
+    _this = _callSuper(this, EnhancedPlatform, [[pluginSelector, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "1.3.0"]);
     _this.init();
     return _this;
   }
@@ -3582,7 +3582,25 @@ var PointPool = /*#__PURE__*/function () {
  * - A: arcTo，从起始点绘制一条弧线到指定点。
  */
 Renderer2D.SVG_PATH = new Set(["M", "L", "H", "V", "Z", "C", "S", "Q", "m", "l", "h", "v", "z", "c", "s", "q"]);
-Renderer2D.SVG_LETTER_REGEXP = /[a-zA-Z]/;/**
+Renderer2D.SVG_LETTER_REGEXP = /[a-zA-Z]/;var Renderer2DExtension = {
+  stick: function stick(context, bitmap) {
+    return function () {
+      return context.drawImage(bitmap, 0, 0);
+    };
+  },
+  clear: function clear(type, context, canvas, width, height) {
+    if (type === "CL") {
+      return function () {
+        // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
+        context.clearRect(0, 0, width, height);
+      };
+    }
+    return function () {
+      canvas.width = width;
+      canvas.height = height;
+    };
+  }
+};/**
  * 动画控制器
  */
 var Animator = /*#__PURE__*/function () {
@@ -5561,14 +5579,11 @@ var Painter = /*#__PURE__*/function () {
   /**
    *
    * @param mode
-   *  - poster: 海报模式
-   *  - animation: 动画模式
-   *  - 默认为 animation
    * @param W 海报模式必须传入
    * @param H 海报模式必须传入
    */
   function Painter() {
-    var mode = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "animation";
+    var mode = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "dual";
     var width = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
     var height = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
     _classCallCheck(this, Painter);
@@ -5597,8 +5612,15 @@ var Painter = /*#__PURE__*/function () {
      * 粉刷模式
      */
     this.model = {};
+    /**
+     * 渲染器实例
+     */
+    this.renderer = null;
     this.clearContainer = noop;
     this.clearSecondary = noop;
+    this.resize = noop;
+    this.draw = noop;
+    this.stick = noop;
     var dpr = platform.globals.dpr;
     this.W = width * dpr;
     this.H = height * dpr;
@@ -5616,11 +5638,7 @@ var Painter = /*#__PURE__*/function () {
       // set type
       model.type = type;
       // set clear
-      if (type === "O" &&
-      // OffscreenCanvas 在 Firefox 浏览器无法被清理历史内容
-      env === "h5" && navigator.userAgent.includes("Firefox")) {
-        model.clear = "CR";
-      } else if (type === "O" && env === "tt" || env === "alipay") {
+      if (type === "O" && env === "tt" || env === "alipay") {
         model.clear = "CL";
       } else {
         model.clear = "RE";
@@ -5636,8 +5654,7 @@ var Painter = /*#__PURE__*/function () {
     key: "register",
     value: function register(selector, ofsSelector, component) {
       return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee() {
-        var _this = this;
-        var model, mode, getCanvas, getOfsCanvas, env, W, H, _getOfsCanvas, canvas, context, _yield$getCanvas, _canvas, _context, width, height, _W, _H, ofsResult, _t;
+        var model, mode, getCanvas, getOfsCanvas, env, _W, _H, _getOfsCanvas, canvas, context, _yield$getCanvas, _canvas, _context, FC, F, W, H, clearType, ofsResult, _BC, _B, B, BC, renderer;
         return _regenerator().w(function (_context2) {
           while (1) switch (_context2.n) {
             case 0:
@@ -5645,15 +5662,15 @@ var Painter = /*#__PURE__*/function () {
               getCanvas = platform.getCanvas, getOfsCanvas = platform.getOfsCanvas;
               env = platform.globals.env; // #region set main screen implement
               // -------- 创建主屏 ---------
-              if (!(mode === "poster" && (env !== "h5" || "OffscreenCanvas" in globalThis))) {
+              if (!(mode === "single" && (env !== "h5" || "OffscreenCanvas" in globalThis))) {
                 _context2.n = 1;
                 break;
               }
-              W = this.W, H = this.H;
+              _W = this.W, _H = this.H;
               _getOfsCanvas = getOfsCanvas({
-                width: W,
-                height: H
-              }), canvas = _getOfsCanvas.canvas, context = _getOfsCanvas.context;
+                width: _W,
+                height: _H
+              }), canvas = _getOfsCanvas.canvas, context = _getOfsCanvas.context; // 添加主屏
               this.F = canvas;
               this.FC = context;
               this.setActionModel("O");
@@ -5666,52 +5683,33 @@ var Painter = /*#__PURE__*/function () {
               _yield$getCanvas = _context2.v;
               _canvas = _yield$getCanvas.canvas;
               _context = _yield$getCanvas.context;
-              width = _canvas.width, height = _canvas.height; // 添加主屏
+              // 添加主屏
               this.F = _canvas;
               this.FC = _context;
               this.setActionModel("C");
-              if (mode === "poster") {
+              if (mode === "single") {
                 _canvas.width = this.W;
                 _canvas.height = this.H;
               } else {
-                this.W = width;
-                this.H = height;
+                this.W = _canvas.width;
+                this.H = _canvas.height;
               }
             case 3:
               // #endregion set main screen implement
-              // #region clear main screen implement
-              // ------- 生成主屏清理函数 -------
-              // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
-              if (model.clear === "CL") {
-                this.clearContainer = function () {
-                  var W = _this.W,
-                    H = _this.H,
-                    FC = _this.FC;
-                  FC.clearRect(0, 0, W, H);
-                };
-              } else {
-                this.clearContainer = function () {
-                  var W = _this.W,
-                    H = _this.H,
-                    F = _this.F;
-                  F.width = W;
-                  F.height = H;
-                };
-              }
-              // #endregion clear main screen implement
-              if (!(mode === "poster")) {
+              FC = this.FC, F = this.F, W = this.W, H = this.H;
+              clearType = model.clear;
+              this.clearContainer = Renderer2DExtension.clear(clearType, FC, F, W, H);
+              if (!(mode === "single")) {
                 _context2.n = 4;
                 break;
               }
-              this.B = this.F;
-              this.BC = this.FC;
-              this.clearSecondary = this.stick = noop;
-              _context2.n = 11;
+              this.B = F;
+              this.BC = FC;
+              this.clearSecondary = this.clearContainer;
+              this.stick = noop;
+              _context2.n = 8;
               break;
             case 4:
-              // #region set secondary screen implement
-              // ------- 创建副屏 ---------
-              _W = this.W, _H = this.H;
               if (!(typeof ofsSelector === "string" && ofsSelector !== "")) {
                 _context2.n = 6;
                 break;
@@ -5720,75 +5718,41 @@ var Painter = /*#__PURE__*/function () {
               return getCanvas(ofsSelector, component);
             case 5:
               ofsResult = _context2.v;
-              ofsResult.canvas.width = _W;
-              ofsResult.canvas.height = _H;
+              ofsResult.canvas.width = W;
+              ofsResult.canvas.height = H;
               this.setActionModel("C");
               _context2.n = 7;
               break;
             case 6:
               ofsResult = getOfsCanvas({
-                width: _W,
-                height: _H
+                width: W,
+                height: H
               });
               this.setActionModel("O");
             case 7:
               this.B = ofsResult.canvas;
               this.BC = ofsResult.context;
               // #endregion set secondary screen implement
-              // #region clear secondary screen implement
-              // ------- 生成副屏清理函数 --------
-              _t = model.clear;
-              _context2.n = _t === "CR" ? 8 : _t === "CL" ? 9 : 10;
-              break;
+              _BC = this.BC, _B = this.B;
+              this.clearSecondary = Renderer2DExtension.clear(clearType, _BC, _B, W, H);
+              this.stick = Renderer2DExtension.stick(FC, _B);
             case 8:
-              this.clearSecondary = function () {
-                var W = _this.W,
-                  H = _this.H;
-                // FIXME:【支付宝小程序】频繁创建新的 OffscreenCanvas 会出现崩溃现象
-                var _getOfsCanvas2 = getOfsCanvas({
-                    width: W,
-                    height: H
-                  }),
-                  canvas = _getOfsCanvas2.canvas,
-                  context = _getOfsCanvas2.context;
-                _this.B = canvas;
-                _this.BC = context;
+              // #region other methods implement
+              // ------- 生成其他方法 --------
+              B = this.B, BC = this.BC;
+              renderer = this.renderer = new Renderer2D(BC);
+              this.resize = function (contentMode, videoSize) {
+                return renderer.resize(contentMode, videoSize, B);
               };
-              return _context2.a(3, 11);
+              this.draw = function (videoEntity, materials, dynamicMaterials, currentFrame, head, tail) {
+                return renderer.render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail);
+              };
+              // #endregion other methods implement
             case 9:
-              this.clearSecondary = function () {
-                var W = _this.W,
-                  H = _this.H,
-                  BC = _this.BC;
-                // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
-                BC.clearRect(0, 0, W, H);
-              };
-              return _context2.a(3, 11);
-            case 10:
-              this.clearSecondary = function () {
-                var W = _this.W,
-                  H = _this.H,
-                  B = _this.B;
-                B.width = W;
-                B.height = H;
-              };
-            case 11:
               return _context2.a(2);
           }
         }, _callee, this);
       }));
-    }
-  }, {
-    key: "stick",
-    value: function stick() {
-      var W = this.W,
-        H = this.H,
-        FC = this.FC,
-        BC = this.BC,
-        mode = this.mode;
-      if (mode !== "poster") {
-        FC.drawImage(BC.canvas, 0, 0, W, H);
-      }
     }
     /**
      * 销毁画笔
@@ -5796,10 +5760,12 @@ var Painter = /*#__PURE__*/function () {
   }, {
     key: "destroy",
     value: function destroy() {
+      var _a;
       this.clearContainer();
       this.clearSecondary();
       this.F = this.FC = this.B = this.BC = null;
       this.clearContainer = this.clearSecondary = this.stick = noop;
+      (_a = this.renderer) === null || _a === void 0 ? void 0 : _a.destroy();
     }
   }]);
 }();var Config = /*#__PURE__*/function () {
@@ -5951,10 +5917,6 @@ var Player = /*#__PURE__*/function () {
      * 动画实例
      */
     this.animator = new Animator();
-    /**
-     * 渲染器实例
-     */
-    this.renderer = null;
   }
   /**
    * 设置配置项
@@ -5987,7 +5949,6 @@ var Player = /*#__PURE__*/function () {
               _context.n = 1;
               return this.painter.register(container, secondary, component);
             case 1:
-              this.renderer = new Renderer2D(this.painter.BC);
               this.resource = new ResourceManager(this.painter);
               this.animator.onAnimate = platform.rAF.bind(null, this.painter.F);
             case 2:
@@ -6088,12 +6049,11 @@ var Player = /*#__PURE__*/function () {
   }, {
     key: "destroy",
     value: function destroy() {
-      var _a, _b, _c;
+      var _a, _b;
       this.animator.stop();
       this.painter.destroy();
-      (_a = this.renderer) === null || _a === void 0 ? void 0 : _a.destroy();
-      (_b = this.resource) === null || _b === void 0 ? void 0 : _b.release();
-      (_c = this.resource) === null || _c === void 0 ? void 0 : _c.cleanup();
+      (_a = this.resource) === null || _a === void 0 ? void 0 : _a.release();
+      (_b = this.resource) === null || _b === void 0 ? void 0 : _b.cleanup();
       this.entity = undefined;
     }
     /**
@@ -6141,10 +6101,9 @@ var Player = /*#__PURE__*/function () {
         config = this.config,
         animator = this.animator,
         painter = this.painter,
-        renderer = this.renderer,
         resource = this.resource;
-      var W = painter.W,
-        H = painter.H;
+      painter.W;
+        painter.H;
       var materials = resource.materials,
         dynamicMaterials = resource.dynamicMaterials;
       var fillMode = config.fillMode,
@@ -6179,17 +6138,14 @@ var Player = /*#__PURE__*/function () {
       var hasRemained;
       // 更新动画基础信息
       animator.setConfig(duration, loopStart, loop, fillValue);
-      renderer.resize(contentMode, entity.size, {
-        width: W,
-        height: H
-      });
+      painter.resize(contentMode, entity.size);
       // 分段渲染函数
       var MAX_DRAW_TIME_PER_FRAME = 8;
       var MAX_ACCELERATE_DRAW_TIME_PER_FRAME = 3;
       var MAX_DYNAMIC_CHUNK_SIZE = 34;
       var MIN_DYNAMIC_CHUNK_SIZE = 1;
       var render = function render(head, tail) {
-        return renderer.render(entity, materials, dynamicMaterials, currentFrame, head, tail);
+        return painter.draw(entity, materials, dynamicMaterials, currentFrame, head, tail);
       };
       // 动态调整每次绘制的块大小
       var dynamicChunkSize = 4; // 初始块大小
@@ -6287,11 +6243,7 @@ var Player = /*#__PURE__*/function () {
      * 资源管理器
      */
     this.resource = null;
-    /**
-     * 渲染器实例
-     */
-    this.renderer = null;
-    this.painter = new Painter("poster", width, height);
+    this.painter = new Painter("single", width, height);
   }
   /**
    * 注册 SVGA 海报
@@ -6312,7 +6264,6 @@ var Player = /*#__PURE__*/function () {
                 _context.n = 1;
                 return _this.painter.register(selector, "", component);
               case 1:
-                _this.renderer = new Renderer2D(_this.painter.BC);
                 _this.resource = new ResourceManager(_this.painter);
               case 2:
                 return _context.a(2);
@@ -6418,12 +6369,11 @@ var Player = /*#__PURE__*/function () {
     value: function draw() {
       if (!this.entity) return;
       var painter = this.painter,
-        renderer = this.renderer,
         resource = this.resource,
         entity = this.entity,
         config = this.config;
-      renderer.resize(config.contentMode, entity.size, painter.F);
-      renderer.render(entity, resource.materials, resource.dynamicMaterials, config.frame, 0, entity.sprites.length);
+      painter.resize(config.contentMode, entity.size);
+      painter.draw(entity, resource.materials, resource.dynamicMaterials, config.frame, 0, entity.sprites.length);
     }
     /**
      * 获取海报的 ImageData 数据
@@ -6443,11 +6393,10 @@ var Player = /*#__PURE__*/function () {
   }, {
     key: "destroy",
     value: function destroy() {
-      var _a, _b, _c;
+      var _a, _b;
       this.painter.destroy();
-      (_a = this.renderer) === null || _a === void 0 ? void 0 : _a.destroy();
-      (_b = this.resource) === null || _b === void 0 ? void 0 : _b.release();
-      (_c = this.resource) === null || _c === void 0 ? void 0 : _c.cleanup();
+      (_a = this.resource) === null || _a === void 0 ? void 0 : _a.release();
+      (_b = this.resource) === null || _b === void 0 ? void 0 : _b.cleanup();
       this.entity = undefined;
     }
   }]);
@@ -7045,6 +6994,7 @@ function isZlibCompressed(data) {
               width = (_a = options === null || options === void 0 ? void 0 : options.width) !== null && _a !== void 0 ? _a : canvas.width;
               height = (_b = options === null || options === void 0 ? void 0 : options.height) !== null && _b !== void 0 ? _b : canvas.height;
               imageData = context.getImageData(0, 0, width, height);
+              this.painter.clearSecondary();
               _context2.n = 2;
               return this.set(key, new Uint8Array(createBufferOfImageData(imageData)), options === null || options === void 0 ? void 0 : options.mode);
             case 2:

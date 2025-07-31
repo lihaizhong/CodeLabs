@@ -11,7 +11,7 @@ interface PainterActionModel {
     type: "C" | "O";
     clear: "CL" | "RE";
 }
-type PainterMode = "poster" | "animation";
+type PainterMode = "dual" | "single";
 interface CanvasSize {
     width: number;
     height: number;
@@ -350,9 +350,6 @@ declare class Painter {
     /**
      *
      * @param mode
-     *  - poster: 海报模式
-     *  - animation: 动画模式
-     *  - 默认为 animation
      * @param W 海报模式必须传入
      * @param H 海报模式必须传入
      */

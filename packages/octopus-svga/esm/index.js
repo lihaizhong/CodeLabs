@@ -4225,13 +4225,10 @@ class Painter {
     /**
      *
      * @param mode
-     *  - poster: 海报模式
-     *  - animation: 动画模式
-     *  - 默认为 animation
      * @param W 海报模式必须传入
      * @param H 海报模式必须传入
      */
-    constructor(mode = "animation", width = 0, height = 0) {
+    constructor(mode = "dual", width = 0, height = 0) {
         this.mode = mode;
         const { dpr } = platform.globals;
         this.W = width * dpr;
@@ -4267,46 +4264,43 @@ class Painter {
         const { env } = platform.globals;
         // #region set main screen implement
         // -------- 创建主屏 ---------
-        if (mode === "poster" &&
+        if (mode === "single" &&
             (env !== "h5" || "OffscreenCanvas" in globalThis)) {
             const { W, H } = this;
             const { canvas, context } = getOfsCanvas({ width: W, height: H });
+            // 添加主屏
             this.F = canvas;
             this.FC = context;
             this.setActionModel("O");
         }
         else {
             const { canvas, context } = await getCanvas(selector, component);
-            const { width, height } = canvas;
             // 添加主屏
             this.F = canvas;
             this.FC = context;
             this.setActionModel("C");
-            if (mode === "poster") {
+            if (mode === "single") {
                 canvas.width = this.W;
                 canvas.height = this.H;
             }
             else {
-                this.W = width;
-                this.H = height;
+                this.W = canvas.width;
+                this.H = canvas.height;
             }
         }
         // #endregion set main screen implement
-        // #region clear main screen implement
-        // ------- 生成主屏清理函数 -------
-        // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
-        this.clearContainer = Renderer2DExtension.clear(model.clear, this.FC, this.F, this.W, this.H);
-        // #endregion clear main screen implement
-        if (mode === "poster") {
-            this.B = this.F;
-            this.BC = this.FC;
+        const { FC, F, W, H } = this;
+        const clearType = model.clear;
+        this.clearContainer = Renderer2DExtension.clear(clearType, FC, F, W, H);
+        if (mode === "single") {
+            this.B = F;
+            this.BC = FC;
             this.clearSecondary = this.clearContainer;
             this.stick = noop;
         }
         else {
             // #region set secondary screen implement
             // ------- 创建副屏 ---------
-            const { W, H } = this;
             let ofsResult;
             if (typeof ofsSelector === "string" && ofsSelector !== "") {
                 ofsResult = await getCanvas(ofsSelector, component);
@@ -4321,16 +4315,17 @@ class Painter {
             this.B = ofsResult.canvas;
             this.BC = ofsResult.context;
             // #endregion set secondary screen implement
-            // #region clear secondary screen implement
-            // ------- 生成副屏清理函数 --------
-            this.clearSecondary = Renderer2DExtension.clear(model.clear, this.BC, this.B, this.W, this.H);
-            this.stick = Renderer2DExtension.stick(this.FC, this.B);
-            // #endregion clear secondary screen implement
+            const { BC, B } = this;
+            this.clearSecondary = Renderer2DExtension.clear(clearType, BC, B, W, H);
+            this.stick = Renderer2DExtension.stick(FC, B);
         }
+        // #region other methods implement
+        // ------- 生成其他方法 --------
         const { B, BC } = this;
-        const renderer = this.renderer = new Renderer2D(BC);
+        const renderer = (this.renderer = new Renderer2D(BC));
         this.resize = (contentMode, videoSize) => renderer.resize(contentMode, videoSize, B);
         this.draw = (videoEntity, materials, dynamicMaterials, currentFrame, head, tail) => renderer.render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail);
+        // #endregion other methods implement
     }
     clearContainer = noop;
     clearSecondary = noop;
@@ -4789,7 +4784,7 @@ class Poster {
      */
     resource = null;
     constructor(width, height) {
-        this.painter = new Painter("poster", width, height);
+        this.painter = new Painter("single", width, height);
     }
     /**
      * 注册 SVGA 海报

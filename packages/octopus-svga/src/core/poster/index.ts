@@ -48,7 +48,7 @@ export class Poster {
   public resource: ResourceManager | null = null;
 
   constructor(width: number, height: number) {
-    this.painter = new Painter("poster", width, height);
+    this.painter = new Painter("single", width, height);
   }
 
   /**

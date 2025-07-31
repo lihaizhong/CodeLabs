@@ -5579,14 +5579,11 @@ var Painter = /*#__PURE__*/function () {
   /**
    *
    * @param mode
-   *  - poster: 海报模式
-   *  - animation: 动画模式
-   *  - 默认为 animation
    * @param W 海报模式必须传入
    * @param H 海报模式必须传入
    */
   function Painter() {
-    var mode = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "animation";
+    var mode = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "dual";
     var width = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
     var height = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
     _classCallCheck(this, Painter);
@@ -5657,7 +5654,7 @@ var Painter = /*#__PURE__*/function () {
     key: "register",
     value: function register(selector, ofsSelector, component) {
       return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee() {
-        var model, mode, getCanvas, getOfsCanvas, env, W, H, _getOfsCanvas, canvas, context, _yield$getCanvas, _canvas, _context, width, height, _W, _H, ofsResult, B, BC, renderer;
+        var model, mode, getCanvas, getOfsCanvas, env, _W, _H, _getOfsCanvas, canvas, context, _yield$getCanvas, _canvas, _context, FC, F, W, H, clearType, ofsResult, _BC, _B, B, BC, renderer;
         return _regenerator().w(function (_context2) {
           while (1) switch (_context2.n) {
             case 0:
@@ -5665,15 +5662,15 @@ var Painter = /*#__PURE__*/function () {
               getCanvas = platform.getCanvas, getOfsCanvas = platform.getOfsCanvas;
               env = platform.globals.env; // #region set main screen implement
               // -------- 创建主屏 ---------
-              if (!(mode === "poster" && (env !== "h5" || "OffscreenCanvas" in globalThis))) {
+              if (!(mode === "single" && (env !== "h5" || "OffscreenCanvas" in globalThis))) {
                 _context2.n = 1;
                 break;
               }
-              W = this.W, H = this.H;
+              _W = this.W, _H = this.H;
               _getOfsCanvas = getOfsCanvas({
-                width: W,
-                height: H
-              }), canvas = _getOfsCanvas.canvas, context = _getOfsCanvas.context;
+                width: _W,
+                height: _H
+              }), canvas = _getOfsCanvas.canvas, context = _getOfsCanvas.context; // 添加主屏
               this.F = canvas;
               this.FC = context;
               this.setActionModel("O");
@@ -5686,38 +5683,33 @@ var Painter = /*#__PURE__*/function () {
               _yield$getCanvas = _context2.v;
               _canvas = _yield$getCanvas.canvas;
               _context = _yield$getCanvas.context;
-              width = _canvas.width, height = _canvas.height; // 添加主屏
+              // 添加主屏
               this.F = _canvas;
               this.FC = _context;
               this.setActionModel("C");
-              if (mode === "poster") {
+              if (mode === "single") {
                 _canvas.width = this.W;
                 _canvas.height = this.H;
               } else {
-                this.W = width;
-                this.H = height;
+                this.W = _canvas.width;
+                this.H = _canvas.height;
               }
             case 3:
               // #endregion set main screen implement
-              // #region clear main screen implement
-              // ------- 生成主屏清理函数 -------
-              // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布
-              this.clearContainer = Renderer2DExtension.clear(model.clear, this.FC, this.F, this.W, this.H);
-              // #endregion clear main screen implement
-              if (!(mode === "poster")) {
+              FC = this.FC, F = this.F, W = this.W, H = this.H;
+              clearType = model.clear;
+              this.clearContainer = Renderer2DExtension.clear(clearType, FC, F, W, H);
+              if (!(mode === "single")) {
                 _context2.n = 4;
                 break;
               }
-              this.B = this.F;
-              this.BC = this.FC;
+              this.B = F;
+              this.BC = FC;
               this.clearSecondary = this.clearContainer;
               this.stick = noop;
               _context2.n = 8;
               break;
             case 4:
-              // #region set secondary screen implement
-              // ------- 创建副屏 ---------
-              _W = this.W, _H = this.H;
               if (!(typeof ofsSelector === "string" && ofsSelector !== "")) {
                 _context2.n = 6;
                 break;
@@ -5726,27 +5718,27 @@ var Painter = /*#__PURE__*/function () {
               return getCanvas(ofsSelector, component);
             case 5:
               ofsResult = _context2.v;
-              ofsResult.canvas.width = _W;
-              ofsResult.canvas.height = _H;
+              ofsResult.canvas.width = W;
+              ofsResult.canvas.height = H;
               this.setActionModel("C");
               _context2.n = 7;
               break;
             case 6:
               ofsResult = getOfsCanvas({
-                width: _W,
-                height: _H
+                width: W,
+                height: H
               });
               this.setActionModel("O");
             case 7:
               this.B = ofsResult.canvas;
               this.BC = ofsResult.context;
               // #endregion set secondary screen implement
-              // #region clear secondary screen implement
-              // ------- 生成副屏清理函数 --------
-              this.clearSecondary = Renderer2DExtension.clear(model.clear, this.BC, this.B, this.W, this.H);
-              this.stick = Renderer2DExtension.stick(this.FC, this.B);
-              // #endregion clear secondary screen implement
+              _BC = this.BC, _B = this.B;
+              this.clearSecondary = Renderer2DExtension.clear(clearType, _BC, _B, W, H);
+              this.stick = Renderer2DExtension.stick(FC, _B);
             case 8:
+              // #region other methods implement
+              // ------- 生成其他方法 --------
               B = this.B, BC = this.BC;
               renderer = this.renderer = new Renderer2D(BC);
               this.resize = function (contentMode, videoSize) {
@@ -5755,6 +5747,7 @@ var Painter = /*#__PURE__*/function () {
               this.draw = function (videoEntity, materials, dynamicMaterials, currentFrame, head, tail) {
                 return renderer.render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail);
               };
+              // #endregion other methods implement
             case 9:
               return _context2.a(2);
           }
@@ -6250,7 +6243,7 @@ var Player = /*#__PURE__*/function () {
      * 资源管理器
      */
     this.resource = null;
-    this.painter = new Painter("poster", width, height);
+    this.painter = new Painter("single", width, height);
   }
   /**
    * 注册 SVGA 海报

@@ -19,7 +19,7 @@ export interface PainterActionModel {
   clear: "CL" | "RE";
 }
 
-export type PainterMode = "poster" | "animation";
+export type PainterMode = "dual" | "single";
 
 export interface CanvasSize {
   width: number;
