@@ -7001,6 +7001,7 @@ function isZlibCompressed(data) {
               width = (_a = options === null || options === void 0 ? void 0 : options.width) !== null && _a !== void 0 ? _a : canvas.width;
               height = (_b = options === null || options === void 0 ? void 0 : options.height) !== null && _b !== void 0 ? _b : canvas.height;
               imageData = context.getImageData(0, 0, width, height);
+              this.painter.clearSecondary();
               _context2.n = 2;
               return this.set(key, new Uint8Array(createBufferOfImageData(imageData)), options === null || options === void 0 ? void 0 : options.mode);
             case 2:

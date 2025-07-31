@@ -1,5 +1,12 @@
 # octopus-svga
 
+## 1.3.0
+
+### Minor Changes
+
+- - 解耦 renderer 与 painter 之间的逻辑
+  - 修复 VideoEditor setCanvas 之后不清空画布问题
+
 ## 1.2.2
 
 ### Patch Changes

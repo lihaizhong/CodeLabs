@@ -5303,6 +5303,7 @@ class VideoEditor {
         const width = options?.width ?? canvas.width;
         const height = options?.height ?? canvas.height;
         const imageData = context.getImageData(0, 0, width, height);
+        this.painter.clearSecondary();
         await this.set(key, new Uint8Array(createBufferOfImageData(imageData)), options?.mode);
     }
     /**
