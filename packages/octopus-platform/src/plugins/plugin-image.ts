@@ -19,6 +19,7 @@ export default definePlugin<"image", "local" | "decode">({
   install() {
     const { local, decode } = this;
     const { env } = this.globals;
+    const printError = (msg: string) => console.error(`image error: ${msg}`);
     let genImageSource: (
       data: Uint8Array | string,
       filepath: string
@@ -37,6 +38,7 @@ export default definePlugin<"image", "local" | "decode">({
       return new Promise<PlatformImage>((resolve, reject) => {
         img.onload = () => resolve(img);
         img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${url}`));
+        img.crossOrigin = "anonymous";
         img.src = url;
       });
     }
@@ -50,23 +52,27 @@ export default definePlugin<"image", "local" | "decode">({
     if (env === "h5") {
       return {
         create: (_: PlatformCanvas | PlatformOffscreenCanvas) => new Image(),
-        load: (
+        load: async (
           createImage: () => HTMLImageElement,
           data: ImageBitmap | Uint8Array | string,
           filepath: string
         ) => {
           // 由于ImageBitmap在图片渲染上有优势，故优先使用
           if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
-            return createImageBitmap(new Blob([decode.toBuffer(data)]));
+            try {
+              data = await createImageBitmap(new Blob([decode.toBuffer(data)]));
+            } catch (ex: any) {
+              printError(ex.message);
+            }
           }
 
           if (data instanceof ImageBitmap) {
-            return Promise.resolve(data);
+            return data;
           }
 
           return loadImage(
             createImage(),
-            genImageSource(data as Uint8Array | string, filepath) as string
+            genImageSource(data, filepath) as string
           );
         },
         release: releaseImage,
@@ -84,9 +90,7 @@ export default definePlugin<"image", "local" | "decode">({
         return local!
           .write(decode.toBuffer(data), filepath)
           .catch((ex: any) => {
-            console.warn(
-              `image write fail: ${ex.errorMessage || ex.errMsg || ex.message}`
-            );
+            printError(ex.errorMessage || ex.errMsg || ex.message);
             return decode.toDataURL(data);
           });
       };

@@ -6,7 +6,7 @@
 
 - [x] 兼容 Android 4.4+ / iOS 9+
 - [x] 整体大小 **~80Kb**，核心部分大小 **~50Kb**（解析器 + 播放器），*小于 [SVGAPlayer-Web-Lite](https://github.com/svga/SVGAPlayer-Web-Lite)*
-- [x] 实现多端兼容，目前支持 H5、微信小程序、支付宝小程序、抖音小程序
+- [x] 实现多端兼容，目前支持 **H5**、**微信小程序**、**支付宝小程序**、**抖音小程序**
 - [x] 优化 **protobuf** 解析器体积，增强二进制解析速度
 - [x] 支持 **双缓冲渲染机制** + **指数退避算法** 提升渲染性能
 - [x] 支持基于 SVGA 格式的 **模版海报** 绘制 _（需配合 png 图片生成器使用）_
@@ -14,6 +14,8 @@
 - [x] 支持动效文件 **编辑器** _（支持图片和二维码生成和替换，也可以自定义绘图）_
 - [x] 内置 **二维码生成器**
 - [x] 内置 **png 图片生成器**
+
+- PS：目前兼容的场景仅 **H5**、**微信小程序**、**支付宝小程序**、**抖音小程序**，理论上仅需放开限制即可兼容更多小程序场景以及鸿蒙元服务。
 
 ## 暂未实现
 
@@ -215,7 +217,7 @@ Parser.decompress(buff);
 Parser.parseVideo(buff, url, needDecompress);
 ```
 
-### VideoEditor 动效编辑器
+### VideoEditor 动效编辑器配合 Poster 海报
 
 可通过修改解析后的数据元，从而实现修改元素、插入动态元素功能
 
@@ -266,7 +268,7 @@ const imageData = poster.toImageData();
 document.querySelector(".poster").src = createImageDataUrl(imageData);
 ```
 
-### VideoManager 动效管理器
+### VideoManager 动效管理器配合 Player 播放器
 
 ```ts
 import { VideoManager, Player } from "octopus-svga";

@@ -21,13 +21,8 @@ export class ResourceManager {
     if (ResourceManager.isBitmap(img)) {
       (img as ImageBitmap).close();
     } else if ((img as PlatformImage).src !== "") {
-      // 【微信】将存在本地的文件删除，防止用户空间被占满
-      if (
-        platform.globals.env === "weapp" &&
-        (img as PlatformImage).src.includes(
-          platform.path.USER_DATA_PATH
-        )
-      ) {
+      // 将存在本地的文件删除，防止用户空间被占满
+      if (platform.path.is((img as PlatformImage).src)) {
         platform.local!.remove((img as PlatformImage).src);
       }
 

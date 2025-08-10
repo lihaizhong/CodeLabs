@@ -8,5 +8,8 @@
   "license": "ISC",
   "devDependencies": {
     "@mini-types/alipay": "^3.0.14"
+  },
+  "dependencies": {
+    "tiny-emitter": "^2.1.0"
   }
 }

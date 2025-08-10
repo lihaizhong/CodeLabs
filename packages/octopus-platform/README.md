@@ -9,7 +9,7 @@
 
 ## 暂未实现
 
-- [ ] 兼容鸿蒙元应用/淘宝小程序
+- [ ] 兼容淘宝小程序
 - [ ] 支持 `IndexDB`
 - [ ] 支持 `IntersectionObserver`
 
@@ -117,8 +117,6 @@ platform.globals.env
 platform.globals.br
 // 当前设备的设备像素比
 platform.globals.dpr
-// 当前设备的系统名称（仅小程序支持）
-platform.globals.system
 ```
 
 ### 自定义插件

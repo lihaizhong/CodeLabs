@@ -76,12 +76,20 @@ importers:
         version: 1.22.1
 
   mp-platform/alipay:
+    dependencies:
+      tiny-emitter:
+        specifier: ^2.1.0
+        version: 2.1.0
     devDependencies:
       '@mini-types/alipay':
         specifier: ^3.0.14
         version: 3.0.14
 
   mp-platform/tt:
+    dependencies:
+      tiny-emitter:
+        specifier: ^2.1.0
+        version: 2.1.0
     devDependencies:
       '@douyin-microapp/typings':
         specifier: ^1.3.1
@@ -92,6 +100,9 @@ importers:
       '@ungap/url-search-params':
         specifier: ^0.2.2
         version: 0.2.2
+      tiny-emitter:
+        specifier: ^2.1.0
+        version: 2.1.0
     devDependencies:
       '@types/wechat-miniprogram':
         specifier: ^3.4.8
@@ -120,6 +131,9 @@ importers:
       octopus-svga:
         specifier: workspace:^
         version: link:../../packages/octopus-svga
+      tiny-emitter:
+        specifier: ^2.1.0
+        version: 2.1.0
       weui:
         specifier: ^2.6.22
         version: 2.6.22
@@ -3812,6 +3826,9 @@ packages:
   test-exclude@6.0.0:
     resolution: {integrity: sha512-cAGWPIyOHU6zlmg88jwm7VRyXnMN7iV68OGAbYDk/Mh/xC/pzVPlQtY6ngoIH/5/tciuhGfvESU8GrHrcxD56w==}
     engines: {node: '>=8'}
+
+  tiny-emitter@2.1.0:
+    resolution: {integrity: sha512-NB6Dk1A9xgQPMoGqC5CVXn123gWyte215ONT5Pp5a0yt4nlEoO1ZWeCwpncaekPHXO60i47ihFnZPiRPjRMq4Q==}
 
   tinyglobby@0.2.14:
     resolution: {integrity: sha512-tX5e7OM1HnYr2+a2C/4V0htOcSQcoSTH9KgJnVvNm5zm/cyEWKJ7j7YutsH9CxMdtOkkLFy2AHrMci9IM8IPZQ==}
@@ -7834,6 +7851,8 @@ snapshots:
       '@istanbuljs/schema': 0.1.3
       glob: 7.2.3
       minimatch: 3.1.2
+
+  tiny-emitter@2.1.0: {}
 
   tinyglobby@0.2.14:
     dependencies:

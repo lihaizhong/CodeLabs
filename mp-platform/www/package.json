@@ -15,6 +15,7 @@
     "octopus-benchmark": "workspace:^",
     "octopus-platform": "workspace:^",
     "octopus-svga": "workspace:^",
+    "tiny-emitter": "^2.1.0",
     "weui": "^2.6.22"
   }
 }

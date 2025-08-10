@@ -7,13 +7,13 @@ export type OctopusSupportedPlatform =
   | "alipay"
   | "tt"
   | "h5"
+  | "harmony"
   | "unknown";
 
 export interface OctopusPlatformGlobals {
   env: OctopusSupportedPlatform;
   br: any;
   dpr: number;
-  system: string;
 }
 
 export type OctopusPlatformWithDependencies<
@@ -48,7 +48,6 @@ export abstract class OctopusPlatform<
     env: "unknown",
     br: null,
     dpr: 1,
-    system: "unknown",
   };
 
   public noop = noop;
@@ -69,7 +68,6 @@ export abstract class OctopusPlatform<
 
     globals.br = this.useBridge();
     globals.dpr = this.usePixelRatio();
-    globals.system = this.useSystem();
 
     for (const plugin of plugins) {
       names.push(plugin.name);
@@ -81,11 +79,11 @@ export abstract class OctopusPlatform<
   }
 
   private autoEnv(): OctopusSupportedPlatform | never {
-    // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
     if (typeof window !== "undefined") {
       return "h5";
     }
 
+    // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
     if (typeof tt !== "undefined") {
       return "tt";
     }
@@ -96,6 +94,10 @@ export abstract class OctopusPlatform<
 
     if (typeof wx !== "undefined") {
       return "weapp";
+    }
+
+    if (typeof has !== "undefined") {
+      return "harmony";
     }
 
     throw new Error("Unsupported platform！");
@@ -146,6 +148,9 @@ export abstract class OctopusPlatform<
         break;
       case "tt":
         system = tt.getDeviceInfoSync().platform as string;
+        break;
+      case "harmony":
+        system = has.getSystemInfoSync().platform as string;
         break;
       default:
         system = "unknown";
