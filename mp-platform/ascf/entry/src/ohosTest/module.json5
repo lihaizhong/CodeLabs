@@ -4,10 +4,9 @@
     "type": "feature",
     "deviceTypes": [
       "phone",
-      "tablet",
-      "2in1"
+      "tablet"
     ],
     "deliveryWithInstall": true,
-    "installationFree": false
+    "installationFree": true
   }
 }

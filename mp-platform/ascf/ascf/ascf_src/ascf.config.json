@@ -1,0 +1,7 @@
+{
+  "ascfRoot": "./",
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  }
+}

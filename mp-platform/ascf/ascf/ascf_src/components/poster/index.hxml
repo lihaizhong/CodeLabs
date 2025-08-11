@@ -1,0 +1,2 @@
+<image class="svga-palette" src="{{ source }}"/>
+<view has:if="{{ message }}" class="svga-error-popup">{{ message }}</view>

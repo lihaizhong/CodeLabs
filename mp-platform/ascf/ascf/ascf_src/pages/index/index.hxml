@@ -1,0 +1,7 @@
+<page-meta>
+  <!-- <navigation-bar></navigation-bar> -->
+</page-meta>
+
+<mp-cells>
+  <mp-cell has:for="{{ btnList }}" has:key="path" title="{{ item.text }}" data-url="{{ item.path }}" bindtap="handleNavigateTo" link/>
+</mp-cells>

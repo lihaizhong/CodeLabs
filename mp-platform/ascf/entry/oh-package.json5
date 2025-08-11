@@ -5,6 +5,7 @@
   "main": "",
   "author": "",
   "license": "",
-  "dependencies": {}
+  "dependencies": {
+    "@atomicservice/ascfapi": "^1.0.6"
+  }
 }
-

@@ -1,10 +1,11 @@
 {
   "app": {
-    "bundleName": "com.example.ascf",
+    "bundleName": "com.atomicservice.6917581080251929669",
+    "bundleType": "atomicService",
     "vendor": "example",
     "versionCode": 1000000,
     "versionName": "1.0.0",
-    "icon": "$media:layered_image",
+    "icon": "$media:app_icon",
     "label": "$string:app_name"
   }
 }
