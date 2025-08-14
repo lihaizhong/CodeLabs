@@ -8,6 +8,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
+    "build:ascf": "ascf compile mp-platform/ascf -c",
     "minio": "serve -p 3536 -c serve.json",
     "test": "jest",
     "zx:sync": "zx .scripts/sync.mjs",
@@ -40,5 +41,8 @@
   "engines": {
     "node": ">=20.x",
     "parcel": "2.x"
+  },
+  "dependencies": {
+    "@atomicservice/ascf-toolkit": "^1.0.8"
   }
 }
