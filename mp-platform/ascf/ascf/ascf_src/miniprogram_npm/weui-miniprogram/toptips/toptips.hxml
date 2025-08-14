@@ -1,0 +1,16 @@
+<template name="body">
+    <view aria-role="alert" class="weui-toptips weui-toptips_warn {{className}} {{extClass}} {{innerShow ? 'weui-animate-fade-in' :  'weui-animate-fade-out'}}">
+        <block has:if="{{msg}}">{{msg}}</block>
+        <block has:else>
+            <slot/>
+        </block>
+    </view>
+</template>
+
+<root-portal enable="{{true}}" has:if="{{rootPortal && wrapperShow}}">
+    <template is="body" data="{{className, extClass, innerShow, msg}}"/>
+</root-portal>
+<block has:elif="{{!rootPortal && wrapperShow}}">
+    <template is="body" data="{{className, extClass, innerShow, msg}}"/>
+</block>
+

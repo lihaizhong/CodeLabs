@@ -1,0 +1,6 @@
+<checkbox-group has:if="{{multi}}" class="{{extClass}}" bindchange="checkedChange">
+    <slot/>
+</checkbox-group>
+<radio-group has:else class="{{extClass}}" bindchange="checkedChange">
+    <slot/>
+</radio-group>

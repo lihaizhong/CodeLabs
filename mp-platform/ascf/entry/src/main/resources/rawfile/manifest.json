@@ -1,0 +1,84 @@
+{
+    "style": "v2",
+    "rendererOptions": {
+        "skyline": {
+            "defaultDisplayBlock": true,
+            "disableABTest": true,
+            "sdkVersionBegin": "3.0.0",
+            "sdkVersionEnd": "15.255.255"
+        }
+    },
+    "componentFramework": "glass-easel",
+    "sitemapLocation": "sitemap.json",
+    "workers": {
+        "path": "workers",
+        "isSubpackage": true
+    },
+    "subPackages": [],
+    "type": "webapp",
+    "independentList": [],
+    "subpackages": [],
+    "versionType": "debug",
+    "debug": true,
+    "debugable": true,
+    "global": {
+        "window": {
+            "navigationStyle": "default"
+        }
+    },
+    "router": {
+        "entry": "pages/index/index",
+        "pages": {
+            "pages/index/index": {
+                "component": "",
+                "info": {
+                    "navigationBarTitleText": "首页",
+                    "usingComponents": {
+                        "mp-cells": "miniprogram_npm/weui-miniprogram/cells/cells",
+                        "mp-cell": "miniprogram_npm/weui-miniprogram/cell/cell"
+                    }
+                }
+            },
+            "pages/svga/index": {
+                "component": "",
+                "info": {
+                    "navigationBarTitleText": "SVGA动画库 自研版",
+                    "usingComponents": {
+                        "fuck-animation": "components/animation/index"
+                    }
+                }
+            },
+            "pages/svga2/index": {
+                "component": "",
+                "info": {
+                    "navigationBarTitleText": "SVGA动画库 官方版",
+                    "usingComponents": {
+                        "fuck-animation": "components/animation2/index"
+                    }
+                }
+            },
+            "pages/poster/index": {
+                "component": "",
+                "info": {
+                    "navigationBarTitleText": "海报",
+                    "usingComponents": {
+                        "fuck-poster": "components/poster/index"
+                    }
+                }
+            },
+            "pages/webview/index": {
+                "component": "",
+                "info": {
+                    "usingComponents": {}
+                }
+            },
+            "pages/apng/index": {
+                "component": "",
+                "info": {
+                    "navigationBarTitleText": "APNG动画",
+                    "usingComponents": {}
+                }
+            }
+        }
+    }
+}
