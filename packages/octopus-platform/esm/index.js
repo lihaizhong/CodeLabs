@@ -152,7 +152,7 @@ class OctopusPlatform {
         env: "unknown",
         br: null,
         dpr: 1,
-        system: "unknown",
+        system: "",
     };
     noop = noop;
     retry = retry;
@@ -177,10 +177,10 @@ class OctopusPlatform {
         installedPlugins.clear();
     }
     autoEnv() {
-        // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
         if (typeof window !== "undefined") {
             return "h5";
         }
+        // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
         if (typeof tt !== "undefined") {
             return "tt";
         }
@@ -189,6 +189,9 @@ class OctopusPlatform {
         }
         if (typeof wx !== "undefined") {
             return "weapp";
+        }
+        if (typeof has !== "undefined") {
+            return "harmony";
         }
         throw new Error("Unsupported platform！");
     }
@@ -228,6 +231,30 @@ class OctopusPlatform {
                 break;
             case "tt":
                 system = tt.getDeviceInfoSync().platform;
+                break;
+            case "harmony":
+                system = has.getSystemInfoSync().platform;
+                break;
+            case "h5":
+                if ("userAgentData" in navigator) {
+                    // @ts-ignore
+                    system = navigator.userAgentData.platform;
+                }
+                else {
+                    const UA = navigator.userAgent;
+                    if (/(Android|Adr)/i.test(UA)) {
+                        system = "android";
+                    }
+                    else if (/\(i[^;]+;( U;)? CPU.+Mac OS X/i.test(UA)) {
+                        system = "ios";
+                    }
+                    else if (/HarmonyOS/i.test(UA)) {
+                        system = "harmony";
+                    }
+                    else {
+                        system = "unknown";
+                    }
+                }
                 break;
             default:
                 system = "unknown";
@@ -503,6 +530,7 @@ var pluginImage = definePlugin({
     install() {
         const { local, decode } = this;
         const { env } = this.globals;
+        const printError = (msg) => console.error(`image error: ${msg}`);
         let genImageSource = (data, _filepath) => (typeof data === "string" ? data : decode.toDataURL(data));
         /**
          * 加载图片
@@ -514,6 +542,7 @@ var pluginImage = definePlugin({
             return new Promise((resolve, reject) => {
                 img.onload = () => resolve(img);
                 img.onerror = () => reject(new Error(`SVGA LOADING FAILURE: ${url}`));
+                img.crossOrigin = "anonymous";
                 img.src = url;
             });
         }
@@ -525,13 +554,18 @@ var pluginImage = definePlugin({
         if (env === "h5") {
             return {
                 create: (_) => new Image(),
-                load: (createImage, data, filepath) => {
+                load: async (createImage, data, filepath) => {
                     // 由于ImageBitmap在图片渲染上有优势，故优先使用
                     if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
-                        return createImageBitmap(new Blob([decode.toBuffer(data)]));
+                        try {
+                            data = await createImageBitmap(new Blob([decode.toBuffer(data)]));
+                        }
+                        catch (ex) {
+                            printError(ex.message);
+                        }
                     }
                     if (data instanceof ImageBitmap) {
-                        return Promise.resolve(data);
+                        return data;
                     }
                     return loadImage(createImage(), genImageSource(data, filepath));
                 },
@@ -548,7 +582,7 @@ var pluginImage = definePlugin({
                 return local
                     .write(decode.toBuffer(data), filepath)
                     .catch((ex) => {
-                    console.warn(`image write fail: ${ex.errorMessage || ex.errMsg || ex.message}`);
+                    printError(ex.errorMessage || ex.errMsg || ex.message);
                     return decode.toDataURL(data);
                 });
             };

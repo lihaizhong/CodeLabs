@@ -93,7 +93,7 @@ interface OctopusPlatformPluginOptions<N extends keyof OctopusPlatformPlugins, D
  */
 declare const definePlugin: <N extends keyof OctopusPlatformPlugins, D extends keyof OctopusPlatformPlugins = never>(plugin: OctopusPlatformPluginOptions<N, D>) => OctopusPlatformPluginOptions<N, D>;
 
-type OctopusSupportedPlatform = "weapp" | "alipay" | "tt" | "h5" | "unknown";
+type OctopusSupportedPlatform = "weapp" | "alipay" | "tt" | "h5" | "harmony" | "unknown";
 interface OctopusPlatformGlobals {
     env: OctopusSupportedPlatform;
     br: any;

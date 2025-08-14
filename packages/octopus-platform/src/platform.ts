@@ -14,6 +14,7 @@ export interface OctopusPlatformGlobals {
   env: OctopusSupportedPlatform;
   br: any;
   dpr: number;
+  system: string;
 }
 
 export type OctopusPlatformWithDependencies<
@@ -48,6 +49,7 @@ export abstract class OctopusPlatform<
     env: "unknown",
     br: null,
     dpr: 1,
+    system: "",
   };
 
   public noop = noop;
@@ -68,6 +70,7 @@ export abstract class OctopusPlatform<
 
     globals.br = this.useBridge();
     globals.dpr = this.usePixelRatio();
+    globals.system = this.useSystem();
 
     for (const plugin of plugins) {
       names.push(plugin.name);
@@ -151,6 +154,24 @@ export abstract class OctopusPlatform<
         break;
       case "harmony":
         system = has.getSystemInfoSync().platform as string;
+        break;
+      case "h5":
+        if ("userAgentData" in navigator) {
+          // @ts-ignore
+          system = navigator.userAgentData.platform;
+        } else {
+          const UA = navigator.userAgent;
+
+          if (/(Android|Adr)/i.test(UA)) {
+            system = "android";
+          } else if (/\(i[^;]+;( U;)? CPU.+Mac OS X/i.test(UA)) {
+            system = "ios";
+          } else if (/HarmonyOS/i.test(UA)) {
+            system = "harmony";
+          } else {
+            system = "unknown";
+          }
+        }
         break;
       default:
         system = "unknown";

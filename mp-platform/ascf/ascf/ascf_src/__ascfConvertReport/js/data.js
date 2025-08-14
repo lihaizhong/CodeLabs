@@ -258,7 +258,7 @@ let pageData = {
     "文件总数": 42,
     "源项目路径": "/Users/lihaizhong/Documents/Project/CodeLabs/mp-platform/weapp",
     "目标输出路径": "/Users/lihaizhong/Documents/Project/CodeLabs/mp-platform/ascf/ascf/ascf_src",
-    "转换耗时": "0.666s"
+    "转换耗时": "0.639s"
   },
   "opening": {},
   "concept": {

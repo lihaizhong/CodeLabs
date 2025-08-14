@@ -225,7 +225,7 @@ function utf8(buffer, start, end) {
             env: "unknown",
             br: null,
             dpr: 1,
-            system: "unknown",
+            system: "",
         };
         this.noop = noop;
         this.retry = retry;
@@ -250,10 +250,10 @@ function utf8(buffer, start, end) {
         installedPlugins.clear();
     };
     OctopusPlatform.prototype.autoEnv = function () {
-        // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
         if (typeof window !== "undefined") {
             return "h5";
         }
+        // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
         if (typeof tt !== "undefined") {
             return "tt";
         }
@@ -262,6 +262,9 @@ function utf8(buffer, start, end) {
         }
         if (typeof wx !== "undefined") {
             return "weapp";
+        }
+        if (typeof has !== "undefined") {
+            return "harmony";
         }
         throw new Error("Unsupported platform！");
     };
@@ -301,6 +304,30 @@ function utf8(buffer, start, end) {
                 break;
             case "tt":
                 system = tt.getDeviceInfoSync().platform;
+                break;
+            case "harmony":
+                system = has.getSystemInfoSync().platform;
+                break;
+            case "h5":
+                if ("userAgentData" in navigator) {
+                    // @ts-ignore
+                    system = navigator.userAgentData.platform;
+                }
+                else {
+                    var UA = navigator.userAgent;
+                    if (/(Android|Adr)/i.test(UA)) {
+                        system = "android";
+                    }
+                    else if (/\(i[^;]+;( U;)? CPU.+Mac OS X/i.test(UA)) {
+                        system = "ios";
+                    }
+                    else if (/HarmonyOS/i.test(UA)) {
+                        system = "harmony";
+                    }
+                    else {
+                        system = "unknown";
+                    }
+                }
                 break;
             default:
                 system = "unknown";
@@ -584,6 +611,7 @@ var pluginImage = definePlugin({
         var _this = this;
         var _a = this, local = _a.local, decode = _a.decode;
         var env = this.globals.env;
+        var printError = function (msg) { return console.error("image error: ".concat(msg)); };
         var genImageSource = function (data, _filepath) { return (typeof data === "string" ? data : decode.toDataURL(data)); };
         /**
          * 加载图片
@@ -595,6 +623,7 @@ var pluginImage = definePlugin({
             return new Promise(function (resolve, reject) {
                 img.onload = function () { return resolve(img); };
                 img.onerror = function () { return reject(new Error("SVGA LOADING FAILURE: ".concat(url))); };
+                img.crossOrigin = "anonymous";
                 img.src = url;
             });
         }
@@ -606,16 +635,31 @@ var pluginImage = definePlugin({
         if (env === "h5") {
             return {
                 create: function (_) { return new Image(); },
-                load: function (createImage, data, filepath) {
-                    // 由于ImageBitmap在图片渲染上有优势，故优先使用
-                    if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
-                        return createImageBitmap(new Blob([decode.toBuffer(data)]));
-                    }
-                    if (data instanceof ImageBitmap) {
-                        return Promise.resolve(data);
-                    }
-                    return loadImage(createImage(), genImageSource(data, filepath));
-                },
+                load: function (createImage, data, filepath) { return __awaiter(_this, void 0, void 0, function () {
+                    var ex_1;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                if (!(data instanceof Uint8Array && "createImageBitmap" in globalThis)) return [3 /*break*/, 4];
+                                _a.label = 1;
+                            case 1:
+                                _a.trys.push([1, 3, , 4]);
+                                return [4 /*yield*/, createImageBitmap(new Blob([decode.toBuffer(data)]))];
+                            case 2:
+                                data = _a.sent();
+                                return [3 /*break*/, 4];
+                            case 3:
+                                ex_1 = _a.sent();
+                                printError(ex_1.message);
+                                return [3 /*break*/, 4];
+                            case 4:
+                                if (data instanceof ImageBitmap) {
+                                    return [2 /*return*/, data];
+                                }
+                                return [2 /*return*/, loadImage(createImage(), genImageSource(data, filepath))];
+                        }
+                    });
+                }); },
                 release: releaseImage,
             };
         }
@@ -630,7 +674,7 @@ var pluginImage = definePlugin({
                     return [2 /*return*/, local
                             .write(decode.toBuffer(data), filepath)
                             .catch(function (ex) {
-                            console.warn("image write fail: ".concat(ex.errorMessage || ex.errMsg || ex.message));
+                            printError(ex.errorMessage || ex.errMsg || ex.message);
                             return decode.toDataURL(data);
                         })];
                 });

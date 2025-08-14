@@ -51,9 +51,8 @@ class ResourceManager {
             img.close();
         }
         else if (img.src !== "") {
-            // 【微信】将存在本地的文件删除，防止用户空间被占满
-            if (platform.globals.env === "weapp" &&
-                img.src.includes(platform.path.USER_DATA_PATH)) {
+            // 将存在本地的文件删除，防止用户空间被占满
+            if (platform.path.is(img.src)) {
                 platform.local.remove(img.src);
             }
             platform.image.release(img);
@@ -4939,6 +4938,11 @@ function generateImageFromCode(options) {
     return platform.decode.toDataURL(buff);
 }
 
+/**
+ * 将 ImageData 转换为 PNG 格式的 Buffer
+ * @param imageData
+ * @returns PNG 格式的 Buffer
+ */
 function createBufferOfImageData(imageData) {
     const { width, height, data } = imageData;
     return new PNGEncoder(width, height).write(data).flush();
@@ -4947,9 +4951,13 @@ function createBufferOfImageData(imageData) {
  * @deprecated 请使用 createBufferOfImageData 代替，此方法可能在后续版本中移除
  */
 const getBufferFromImageData = createBufferOfImageData;
+/**
+ * 将 ImageData 转换为 PNG 格式的 Base64 字符串
+ * @param imageData
+ * @returns PNG 格式的 Base64 字符串
+ */
 function createImageDataUrl(imageData) {
-    const buff = createBufferOfImageData(imageData);
-    return platform.decode.toDataURL(buff);
+    return platform.decode.toDataURL(createBufferOfImageData(imageData));
 }
 /**
  * @deprecated 请使用 createImageDataUrl 代替，此方法可能在后续版本中移除
@@ -4970,18 +4978,16 @@ function isZlibCompressed(data) {
     const cmf = data[0];
     const flg = data[1];
     // 检查CMF的压缩方法（低4位为8表示DEFLATE）
-    // eslint-disable-next-line no-bitwise
-    if ((cmf & 0x0F) !== 8) {
+    if ((cmf & 0x0f) !== 8) {
         return false;
     }
     // 检查窗口大小（高4位通常为7，但不是严格要求）
-    // 这里不强制检查，因为理论上可以是其他值
+    // - 这里不强制检查，因为理论上可以是其他值
     // 验证头部校验（CMF * 256 + FLG必须是31的倍数）
-    if (((cmf * 256 + flg) % 31) !== 0) {
+    if ((cmf * 256 + flg) % 31 !== 0) {
         return false;
     }
     // 检查字典标志位（如果设置了字典，需要额外验证，但这种情况很少见）
-    // eslint-disable-next-line no-bitwise
     const fdict = (flg & 0x20) !== 0;
     if (fdict) {
         // 标准zlib压缩通常不使用预定义字典
@@ -4994,8 +5000,10 @@ function isZlibCompressed(data) {
     if (adler32Bytes.length !== 4) {
         return false;
     }
-    // eslint-disable-next-line no-bitwise
-    const adler32 = (adler32Bytes[0] << 24) | (adler32Bytes[1] << 16) | (adler32Bytes[2] << 8) | adler32Bytes[3];
+    const adler32 = (adler32Bytes[0] << 24) |
+        (adler32Bytes[1] << 16) |
+        (adler32Bytes[2] << 8) |
+        adler32Bytes[3];
     // 有效的ADLER-32值应大于0（除非是空数据）
     if (data.length > 2 && adler32 === 0) {
         return false;
