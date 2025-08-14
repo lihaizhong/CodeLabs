@@ -1,0 +1,92 @@
+{
+  "name": "@codelabs/sourcemap-locator",
+  "version": "1.0.0",
+  "description": "A powerful sourcemap locator tool that supports multi-layer recursive parsing to find the original source code location",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "unpkg": "lib/index.min.js",
+  "types": "index.d.ts",
+  "exports": {
+    "import": "./esm/index.js",
+    "default": "./lib/index.js",
+    "unpkg": "./lib/index.min.js",
+    "types": "./index.d.ts"
+  },
+  "bin": {
+    "sourcemap-locator": "bin/index.js",
+    "sml": "bin/index.js"
+  },
+  "files": [
+    "lib",
+    "esm",
+    "bin",
+    "index.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "declare": "tsc",
+    "cleanup": "rimraf -rf esm lib types index.d.ts",
+    "generate": "rollup -c",
+    "build": "npm run cleanup && npm run declare && npm run generate",
+    "dev": "rollup -c --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "sourcemap",
+    "source-map",
+    "locator",
+    "debug",
+    "typescript",
+    "javascript",
+    "cli",
+    "recursive",
+    "mapping"
+  ],
+  "author": "CodeLabs Team",
+  "license": "MIT",
+  "dependencies": {
+    "source-map": "^0.7.4",
+    "commander": "^11.0.0",
+    "chalk": "^4.1.2",
+    "fs-extra": "^11.1.1",
+    "glob": "^10.3.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.4",
+    "@rollup/plugin-node-resolve": "^15.2.1",
+    "@rollup/plugin-replace": "^5.0.2",
+    "@rollup/plugin-typescript": "^11.1.3",
+    "@types/node": "^20.6.3",
+    "@types/fs-extra": "^11.0.1",
+    "@types/jest": "^29.5.5",
+    "@typescript-eslint/eslint-plugin": "^6.7.2",
+    "@typescript-eslint/parser": "^6.7.2",
+    "eslint": "^8.49.0",
+    "jest": "^29.7.0",
+    "rimraf": "^5.0.1",
+    "rollup": "^3.29.2",
+    "rollup-plugin-dts": "^6.0.2",
+    "rollup-plugin-terser": "^7.0.2",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codelabs/sourcemap-locator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/codelabs/sourcemap-locator/issues"
+  },
+  "homepage": "https://github.com/codelabs/sourcemap-locator#readme"
+}

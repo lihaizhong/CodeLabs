@@ -101,6 +101,40 @@ export default async (): Promise<Config> => {
           "<rootDir>/**/src/**/?(*.)+(spec|test).[tj]s?(x)"
         ],
       },
+      {
+        displayName: "SourcemapLocator",
+
+        // The directory where Jest should output its coverage files
+        coverageDirectory: "<rootDir>/coverage",
+
+        // The test environment that will be used for testing
+        testEnvironment: "node",
+
+        // The root directory that Jest should scan for tests and modules within
+        rootDir: "./packages/sourcemap-locator",
+
+        // A list of paths to directories that Jest should use to search for files in
+        roots: [
+          "<rootDir>/__tests__",
+          "<rootDir>/src"
+        ],
+
+        // A map from regular expressions to paths to transformers
+        transform: {
+          "^.+\.ts$": [
+            "ts-jest",
+            {
+              tsconfig: "<rootDir>/tsconfig.test.json",
+            }
+          ],
+        },
+
+        // The glob patterns Jest uses to detect test files
+        testMatch: [
+          "<rootDir>/**/__tests__/**/?(*.)+(spec|test).[tj]s?(x)",
+          "<rootDir>/**/src/**/?(*.)+(spec|test).[tj]s?(x)"
+        ],
+      },
     ]
   };
 };
