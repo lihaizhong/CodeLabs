@@ -20,6 +20,13 @@
   ],
   "author": "lihzsky",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lihaizhong/CodeLabs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lihaizhong/CodeLabs/issues"
+  },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.5",

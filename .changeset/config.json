@@ -3,7 +3,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "lihaizhong/CodeSnippet"
+      "repo": "lihaizhong/CodeLabs"
     }
   ],
   "commit": false,
