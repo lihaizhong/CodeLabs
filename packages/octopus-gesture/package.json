@@ -1,11 +1,8 @@
 {
-  "name": "octopus-virtual-scroll",
+  "name": "octopus-gesture",
   "version": "1.0.0",
   "type": "module",
-  "keywords": [
-    "virtual-scroll",
-    "scroll"
-  ],
+  "keywords": ["gesture"],
   "description": "基准测试工具",
   "module": "esm/index.js",
   "main": "lib/index.js",

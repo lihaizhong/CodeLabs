@@ -1,5 +1,5 @@
 {
-  "name": "@codelabs/sourcemap-locator",
+  "name": "sourcemap-locator",
   "version": "1.0.0",
   "description": "A powerful sourcemap locator tool that supports multi-layer recursive parsing to find the original source code location",
   "main": "lib/index.js",

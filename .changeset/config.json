@@ -7,10 +7,21 @@
     }
   ],
   "commit": false,
+  "privatePackages": false,
   "fixed": [],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [
+    "miniprogram-alipay",
+    "miniprogram-h5",
+    "miniprogram-tt",
+    "miniprogram-weapp",
+    "hello-chat",
+    "hello-international",
+    "hello-like-redis",
+    "hello-sse",
+    "hello-stone"
+  ]
 }
