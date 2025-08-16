@@ -1,0 +1,9 @@
+{
+  "version": 3,
+  "file": "compiled.js",
+  "sourceRoot": "",
+  "sources": ["original.js"],
+  "names": ["calculateSum", "x", "y", "processData", "data"],
+  "mappings": "AAAA,SAASA,EAAaC,EAAGC,GACvB,OAAOD,EAAIC,CACb,CAEA,SAASC,EAAYC,GACnB,OAAOA,EAAKC,IAAIC,GAASA,EAAO,EACjC,CAEAC,OAAOC,QAAU,CACfN,cAAAA,EACAE,aAAAA,CACF",
+  "sourcesContent": ["function calculateSum(x, y) {\n  return x + y;\n}\n\nfunction processData(data) {\n  return data.map(item => item * 2);\n}\n\nmodule.exports = {\n  calculateSum,\n  processData\n};"]
+}

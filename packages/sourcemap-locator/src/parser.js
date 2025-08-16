@@ -1,20 +1,16 @@
-"use strict";
 /**
  * Sourcemap解析引擎
  * 负责解析sourcemap文件并提供位置映射功能
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SourcemapParser = void 0;
-exports.createParser = createParser;
-const fs_1 = require("fs");
-const path_1 = require("path");
-const source_map_1 = require("source-map");
-const types_1 = require("./types");
+import { readFileSync, existsSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { SourceMapConsumer } from 'source-map';
+import { ErrorType, SourcemapLocatorError, EventType } from './types';
 /**
  * Sourcemap解析器类
  * 提供sourcemap文件解析和位置定位功能
  */
-class SourcemapParser {
+export class SourcemapParser {
     /**
      * 构造函数
      * @param config 解析器配置
@@ -75,35 +71,35 @@ class SourcemapParser {
      * @returns SourceMapConsumer实例
      */
     async parseSourcemap(sourcemapPath) {
-        this.emitEvent(types_1.EventType.PARSE_START, { sourcemapPath });
+        this.emitEvent(EventType.PARSE_START, { sourcemapPath });
         // 检查缓存
         if (this.cache.has(sourcemapPath)) {
-            this.emitEvent(types_1.EventType.CACHE_HIT, { sourcemapPath });
+            this.emitEvent(EventType.CACHE_HIT, { sourcemapPath });
             return this.cache.get(sourcemapPath);
         }
-        this.emitEvent(types_1.EventType.CACHE_MISS, { sourcemapPath });
+        this.emitEvent(EventType.CACHE_MISS, { sourcemapPath });
         // 检查文件是否存在
-        if (!(0, fs_1.existsSync)(sourcemapPath)) {
-            throw new types_1.SourcemapLocatorError(types_1.ErrorType.FILE_NOT_FOUND, `Sourcemap file not found: ${sourcemapPath}`);
+        if (!existsSync(sourcemapPath)) {
+            throw new SourcemapLocatorError(ErrorType.FILE_NOT_FOUND, `Sourcemap file not found: ${sourcemapPath}`);
         }
         try {
             // 读取并解析sourcemap文件
-            const sourcemapContent = (0, fs_1.readFileSync)(sourcemapPath, 'utf-8');
+            const sourcemapContent = readFileSync(sourcemapPath, 'utf-8');
             const sourcemapData = JSON.parse(sourcemapContent);
             // 验证sourcemap格式
             this.validateSourcemap(sourcemapData);
             // 创建SourceMapConsumer
-            const consumer = await new source_map_1.SourceMapConsumer(sourcemapData);
+            const consumer = await new SourceMapConsumer(sourcemapData);
             // 缓存结果
             this.cache.set(sourcemapPath, consumer);
-            this.emitEvent(types_1.EventType.PARSE_COMPLETE, { sourcemapPath });
+            this.emitEvent(EventType.PARSE_COMPLETE, { sourcemapPath });
             return consumer;
         }
         catch (error) {
-            if (error instanceof types_1.SourcemapLocatorError) {
+            if (error instanceof SourcemapLocatorError) {
                 throw error;
             }
-            throw new types_1.SourcemapLocatorError(types_1.ErrorType.PARSE_ERROR, `Failed to parse sourcemap: ${error instanceof Error ? error.message : String(error)}`, { sourcemapPath, originalError: error });
+            throw new SourcemapLocatorError(ErrorType.PARSE_ERROR, `Failed to parse sourcemap: ${error instanceof Error ? error.message : String(error)}`, { sourcemapPath, originalError: error });
         }
     }
     /**
@@ -112,16 +108,16 @@ class SourcemapParser {
      */
     validateSourcemap(sourcemapData) {
         if (!sourcemapData || typeof sourcemapData !== 'object') {
-            throw new types_1.SourcemapLocatorError(types_1.ErrorType.INVALID_SOURCEMAP, 'Invalid sourcemap format: not an object');
+            throw new SourcemapLocatorError(ErrorType.INVALID_SOURCEMAP, 'Invalid sourcemap format: not an object');
         }
         const requiredFields = ['version', 'sources', 'mappings'];
         for (const field of requiredFields) {
             if (!(field in sourcemapData)) {
-                throw new types_1.SourcemapLocatorError(types_1.ErrorType.INVALID_SOURCEMAP, `Invalid sourcemap format: missing required field '${field}'`);
+                throw new SourcemapLocatorError(ErrorType.INVALID_SOURCEMAP, `Invalid sourcemap format: missing required field '${field}'`);
             }
         }
         if (sourcemapData.version !== 3) {
-            throw new types_1.SourcemapLocatorError(types_1.ErrorType.INVALID_SOURCEMAP, `Unsupported sourcemap version: ${sourcemapData.version}. Only version 3 is supported.`);
+            throw new SourcemapLocatorError(ErrorType.INVALID_SOURCEMAP, `Unsupported sourcemap version: ${sourcemapData.version}. Only version 3 is supported.`);
         }
     }
     /**
@@ -145,7 +141,7 @@ class SourcemapParser {
                     error: `No mapping found for position (${request.line}, ${request.column})`
                 };
             }
-            this.emitEvent(types_1.EventType.MAPPING_FOUND, {
+            this.emitEvent(EventType.MAPPING_FOUND, {
                 from: { line: request.line, column: request.column },
                 to: { source: originalPosition.source, line: originalPosition.line, column: originalPosition.column }
             });
@@ -166,7 +162,7 @@ class SourcemapParser {
             };
         }
         catch (error) {
-            if (error instanceof types_1.SourcemapLocatorError) {
+            if (error instanceof SourcemapLocatorError) {
                 return {
                     success: false,
                     error: error.message
@@ -185,10 +181,10 @@ class SourcemapParser {
      */
     validatePosition(line, column) {
         if (!Number.isInteger(line) || line < 1) {
-            throw new types_1.SourcemapLocatorError(types_1.ErrorType.POSITION_OUT_OF_RANGE, `Invalid line number: ${line}. Line numbers must be positive integers starting from 1.`);
+            throw new SourcemapLocatorError(ErrorType.POSITION_OUT_OF_RANGE, `Invalid line number: ${line}. Line numbers must be positive integers starting from 1.`);
         }
         if (!Number.isInteger(column) || column < 0) {
-            throw new types_1.SourcemapLocatorError(types_1.ErrorType.POSITION_OUT_OF_RANGE, `Invalid column number: ${column}. Column numbers must be non-negative integers starting from 0.`);
+            throw new SourcemapLocatorError(ErrorType.POSITION_OUT_OF_RANGE, `Invalid column number: ${column}. Column numbers must be non-negative integers starting from 0.`);
         }
     }
     /**
@@ -198,13 +194,13 @@ class SourcemapParser {
      * @returns 解析后的绝对路径
      */
     resolveSourcePath(source, sourcemapPath) {
-        const sourcemapDir = (0, path_1.dirname)(sourcemapPath);
+        const sourcemapDir = dirname(sourcemapPath);
         // 如果配置了sourceRoot，优先使用
         if (this.config.sourceRoot) {
-            return (0, path_1.resolve)(this.config.sourceRoot, source);
+            return resolve(this.config.sourceRoot, source);
         }
         // 否则相对于sourcemap文件目录解析
-        return (0, path_1.resolve)(sourcemapDir, source);
+        return resolve(sourcemapDir, source);
     }
     /**
      * 获取源码内容
@@ -221,8 +217,8 @@ class SourcemapParser {
         }
         // 如果sourcemap中没有内容，尝试从文件系统读取
         try {
-            if ((0, fs_1.existsSync)(sourceFile)) {
-                return (0, fs_1.readFileSync)(sourceFile, 'utf-8');
+            if (existsSync(sourceFile)) {
+                return readFileSync(sourceFile, 'utf-8');
             }
         }
         catch (error) {
@@ -248,13 +244,12 @@ class SourcemapParser {
         this.listeners.clear();
     }
 }
-exports.SourcemapParser = SourcemapParser;
 /**
  * 创建默认的sourcemap解析器实例
  * @param config 解析器配置
  * @returns 解析器实例
  */
-function createParser(config) {
+export function createParser(config) {
     return new SourcemapParser(config);
 }
 //# sourceMappingURL=parser.js.map

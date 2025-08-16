@@ -6,7 +6,7 @@
  */
 
 // 导入编译后的主模块
-const { SourcemapLocatorAPI } = require('../lib/index.js');
+const { SourcemapLocatorAPI } = require('../esm/index.js');
 const { Command } = require('commander');
 const chalk = require('chalk');
 const { existsSync, readFileSync } = require('fs');

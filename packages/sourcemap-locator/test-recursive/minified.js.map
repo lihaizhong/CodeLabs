@@ -1,0 +1,9 @@
+{
+  "version": 3,
+  "file": "minified.js",
+  "sourceRoot": "",
+  "sources": ["compiled.js"],
+  "names": ["calc", "x", "y", "proc", "data", "module", "exports", "calculateSum", "processData"],
+  "mappings": "AAAA,SAASA,EAAKC,EAAEC,GAAG,OAAOD,EAAEC,CAAC,CAAC,SAASC,EAAKC,GAAG,OAAOA,EAAKC,IAAIC,GAAKA,EAAE,EAAE,CAAC,CAACC,OAAOC,QAAQ,CAACC,cAAcP,EAAMQ,YAAaN",
+  "sourcesContent": ["function calc(x, y) {\n  return x + y;\n}\n\nfunction proc(data) {\n  return data.map(item => item * 2);\n}\n\nmodule.exports = {\n  calculateSum: calc,\n  processData: proc\n};\n//# sourceMappingURL=compiled.js.map"]
+}

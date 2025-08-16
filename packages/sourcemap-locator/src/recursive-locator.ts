@@ -3,8 +3,8 @@
  * 支持多层sourcemap的循环解析，直到找到最终的原始源码位置
  */
 
-import { resolve, dirname, join } from 'path';
-import { existsSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { readFileSync, existsSync } from 'fs';
 import { SourcemapParser } from './parser';
 import {
   SourceLocation,
@@ -190,7 +190,7 @@ export class RecursiveLocator {
     });
 
     // 检查是否还有更深层的sourcemap
-    const nextSourcemapPath = this.findNextSourcemap(currentResult.sourceFile);
+    const nextSourcemapPath = await this.findNextSourcemap(currentResult.sourceFile);
     
     if (nextSourcemapPath && existsSync(nextSourcemapPath)) {
       // 继续递归解析
@@ -223,39 +223,78 @@ export class RecursiveLocator {
    * @param sourceFile 源文件路径
    * @returns sourcemap文件路径，如果不存在则返回null
    */
-  private findNextSourcemap(sourceFile: string): string | null {
-    const possibleExtensions = ['.map', '.js.map', '.ts.map', '.jsx.map', '.tsx.map'];
-    const sourceDir = dirname(sourceFile);
-    const sourceBasename = sourceFile;
-
-    // 尝试不同的sourcemap文件命名模式
-    const patterns = [
-      // 直接在源文件后加.map
-      `${sourceFile}.map`,
-      // 替换扩展名为.map
-      sourceFile.replace(/\.[^.]+$/, '.map'),
-      // 在同目录下查找同名的.map文件
-      join(sourceDir, `${sourceBasename}.map`)
-    ];
-
-    for (const pattern of patterns) {
-      if (existsSync(pattern)) {
-        return pattern;
-      }
+  private async findNextSourcemap(sourceFile: string): Promise<string | null> {
+    // 首先尝试从文件内容中提取 sourcemap 引用
+    const extractedPath = await this.extractSourcemapFromFile(sourceFile);
+    
+    if (extractedPath) {
+      const resolvedPath = resolve(dirname(sourceFile), extractedPath);
+      return resolvedPath;
     }
 
-    // 尝试常见的构建工具生成的sourcemap文件
-    const filename = sourceFile.split('/').pop() || '';
-    const nameWithoutExt = filename.replace(/\.[^.]+$/, '');
+    // 如果没有找到引用，尝试常见的命名模式
+    const baseName = sourceFile.split('/').pop()?.replace(/\.[^.]+$/, '') || '';
+    const dir = dirname(sourceFile);
     
-    for (const ext of possibleExtensions) {
-      const mapFile = join(sourceDir, `${nameWithoutExt}${ext}`);
-      if (existsSync(mapFile)) {
-        return mapFile;
+    const patterns = [
+      `${baseName}.js.map`,
+      `${baseName}.map`,
+      `${baseName}.ts.map`,
+      `${baseName}.jsx.map`,
+      `${baseName}.tsx.map`
+    ];
+    
+    for (const pattern of patterns) {
+      const fullPath = resolve(dir, pattern);
+      if (existsSync(fullPath)) {
+        return fullPath;
       }
     }
 
     return null;
+  }
+
+  /**
+   * 从JavaScript文件中提取sourcemap引用
+   * @param sourceFile JavaScript文件路径
+   * @returns sourcemap文件路径，如果不存在则返回null
+   */
+  private extractSourcemapFromFile(sourceFile: string): string | null {
+    try {
+      // 只处理JavaScript相关文件
+      if (!/\.(js|jsx|ts|tsx)$/.test(sourceFile)) {
+        return null;
+      }
+
+      if (!existsSync(sourceFile)) {
+        return null;
+      }
+
+      const content = readFileSync(sourceFile, 'utf-8');
+      
+      // 查找sourcemap引用注释
+      const sourcemapRegex = /\/\/#\s*sourceMappingURL=(.+)$/m;
+      const match = content.match(sourcemapRegex);
+      
+      if (match && match[1]) {
+        const sourcemapUrl = match[1].trim();
+        
+        // 如果是相对路径，解析为绝对路径
+        if (!sourcemapUrl.startsWith('http')) {
+          const sourceDir = dirname(sourceFile);
+          const sourcemapPath = resolve(sourceDir, sourcemapUrl);
+          
+          if (existsSync(sourcemapPath)) {
+            return sourcemapPath;
+          }
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      // 读取文件失败，返回null
+      return null;
+    }
   }
 
   /**

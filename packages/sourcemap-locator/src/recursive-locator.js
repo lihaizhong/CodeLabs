@@ -1,27 +1,24 @@
-"use strict";
 /**
  * 递归定位器
  * 支持多层sourcemap的循环解析，直到找到最终的原始源码位置
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.RecursiveLocator = void 0;
-exports.createRecursiveLocator = createRecursiveLocator;
-const path_1 = require("path");
-const fs_1 = require("fs");
-const parser_1 = require("./parser");
-const types_1 = require("./types");
+import { resolve, dirname } from 'path';
+import { readFileSync, existsSync } from 'fs';
+import { SourcemapParser } from './parser';
+import { ErrorType, SourcemapLocatorError, EventType } from './types';
 /**
  * 递归定位器类
  * 提供多层sourcemap的递归解析功能
  */
-class RecursiveLocator {
+export class RecursiveLocator {
     /**
      * 构造函数
      * @param config 解析器配置
      */
     constructor(config = {}) {
         this.visitedFiles = new Set();
-        this.parser = new parser_1.SourcemapParser(config);
+        this.listeners = new Map();
+        this.parser = new SourcemapParser(config);
         this.maxDepth = config.maxRecursionDepth || 10;
     }
     /**
@@ -32,9 +29,21 @@ class RecursiveLocator {
     async locateRecursively(request) {
         this.visitedFiles.clear();
         const mappingSteps = [];
+        // 触发定位开始事件
+        this.emitEvent(EventType.LOCATE_START, {
+            sourcemapPath: request.sourcemapPath,
+            line: request.line,
+            column: request.column
+        });
         try {
             const result = await this.locateWithDepth(request.sourcemapPath, request.line, request.column, 0, mappingSteps);
             if (result) {
+                // 触发定位完成事件
+                this.emitEvent(EventType.LOCATE_COMPLETE, {
+                    success: true,
+                    result,
+                    mappingSteps
+                });
                 return {
                     success: true,
                     result: {
@@ -44,6 +53,11 @@ class RecursiveLocator {
                 };
             }
             else {
+                // 触发定位完成事件（失败）
+                this.emitEvent(EventType.LOCATE_COMPLETE, {
+                    success: false,
+                    error: `No mapping found for position (${request.line}, ${request.column})`
+                });
                 return {
                     success: false,
                     error: `No mapping found for position (${request.line}, ${request.column})`
@@ -51,7 +65,14 @@ class RecursiveLocator {
             }
         }
         catch (error) {
-            if (error instanceof types_1.SourcemapLocatorError) {
+            const errorMessage = error instanceof SourcemapLocatorError ? error.message :
+                `Unexpected error: ${error instanceof Error ? error.message : String(error)}`;
+            // 触发定位完成事件（错误）
+            this.emitEvent(EventType.LOCATE_COMPLETE, {
+                success: false,
+                error: errorMessage
+            });
+            if (error instanceof SourcemapLocatorError) {
                 return {
                     success: false,
                     error: error.message
@@ -59,7 +80,7 @@ class RecursiveLocator {
             }
             return {
                 success: false,
-                error: `Unexpected error: ${error instanceof Error ? error.message : String(error)}`
+                error: errorMessage
             };
         }
     }
@@ -75,12 +96,12 @@ class RecursiveLocator {
     async locateWithDepth(sourcemapPath, line, column, depth, mappingSteps) {
         // 检查递归深度限制
         if (depth >= this.maxDepth) {
-            throw new types_1.SourcemapLocatorError(types_1.ErrorType.MAX_DEPTH_EXCEEDED, `Maximum recursion depth (${this.maxDepth}) exceeded`);
+            throw new SourcemapLocatorError(ErrorType.MAX_DEPTH_EXCEEDED, `Maximum recursion depth (${this.maxDepth}) exceeded`);
         }
         // 检查循环引用
-        const normalizedPath = (0, path_1.resolve)(sourcemapPath);
+        const normalizedPath = resolve(sourcemapPath);
         if (this.visitedFiles.has(normalizedPath)) {
-            throw new types_1.SourcemapLocatorError(types_1.ErrorType.CIRCULAR_REFERENCE, `Circular reference detected: ${normalizedPath}`);
+            throw new SourcemapLocatorError(ErrorType.CIRCULAR_REFERENCE, `Circular reference detected: ${normalizedPath}`);
         }
         this.visitedFiles.add(normalizedPath);
         // 解析当前层级的sourcemap
@@ -112,9 +133,15 @@ class RecursiveLocator {
             sourceFile: currentResult.sourceFile
         };
         mappingSteps.push(mappingStep);
+        // 触发步骤完成事件
+        this.emitEvent(EventType.STEP_COMPLETE, {
+            step: mappingStep,
+            depth,
+            totalSteps: mappingSteps.length
+        });
         // 检查是否还有更深层的sourcemap
-        const nextSourcemapPath = this.findNextSourcemap(currentResult.sourceFile);
-        if (nextSourcemapPath && (0, fs_1.existsSync)(nextSourcemapPath)) {
+        const nextSourcemapPath = await this.findNextSourcemap(currentResult.sourceFile);
+        if (nextSourcemapPath && existsSync(nextSourcemapPath)) {
             // 继续递归解析
             const deeperResult = await this.locateWithDepth(nextSourcemapPath, currentResult.sourceLine, currentResult.sourceColumn, depth + 1, mappingSteps);
             if (deeperResult) {
@@ -136,34 +163,66 @@ class RecursiveLocator {
      * @param sourceFile 源文件路径
      * @returns sourcemap文件路径，如果不存在则返回null
      */
-    findNextSourcemap(sourceFile) {
-        const possibleExtensions = ['.map', '.js.map', '.ts.map', '.jsx.map', '.tsx.map'];
-        const sourceDir = (0, path_1.dirname)(sourceFile);
-        const sourceBasename = sourceFile;
-        // 尝试不同的sourcemap文件命名模式
+    async findNextSourcemap(sourceFile) {
+        // 首先尝试从文件内容中提取 sourcemap 引用
+        const extractedPath = await this.extractSourcemapFromFile(sourceFile);
+        if (extractedPath) {
+            const resolvedPath = resolve(dirname(sourceFile), extractedPath);
+            return resolvedPath;
+        }
+        // 如果没有找到引用，尝试常见的命名模式
+        const baseName = sourceFile.split('/').pop()?.replace(/\.[^.]+$/, '') || '';
+        const dir = dirname(sourceFile);
         const patterns = [
-            // 直接在源文件后加.map
-            `${sourceFile}.map`,
-            // 替换扩展名为.map
-            sourceFile.replace(/\.[^.]+$/, '.map'),
-            // 在同目录下查找同名的.map文件
-            (0, path_1.join)(sourceDir, `${sourceBasename}.map`)
+            `${baseName}.js.map`,
+            `${baseName}.map`,
+            `${baseName}.ts.map`,
+            `${baseName}.jsx.map`,
+            `${baseName}.tsx.map`
         ];
         for (const pattern of patterns) {
-            if ((0, fs_1.existsSync)(pattern)) {
-                return pattern;
-            }
-        }
-        // 尝试常见的构建工具生成的sourcemap文件
-        const filename = sourceFile.split('/').pop() || '';
-        const nameWithoutExt = filename.replace(/\.[^.]+$/, '');
-        for (const ext of possibleExtensions) {
-            const mapFile = (0, path_1.join)(sourceDir, `${nameWithoutExt}${ext}`);
-            if ((0, fs_1.existsSync)(mapFile)) {
-                return mapFile;
+            const fullPath = resolve(dir, pattern);
+            if (existsSync(fullPath)) {
+                return fullPath;
             }
         }
         return null;
+    }
+    /**
+     * 从JavaScript文件中提取sourcemap引用
+     * @param sourceFile JavaScript文件路径
+     * @returns sourcemap文件路径，如果不存在则返回null
+     */
+    extractSourcemapFromFile(sourceFile) {
+        try {
+            // 只处理JavaScript相关文件
+            if (!/\.(js|jsx|ts|tsx)$/.test(sourceFile)) {
+                return null;
+            }
+            if (!existsSync(sourceFile)) {
+                return null;
+            }
+            const content = readFileSync(sourceFile, 'utf-8');
+            // 查找sourcemap引用注释
+            const sourcemapRegex = /\/\/#\s*sourceMappingURL=(.+)$/m;
+            const match = content.match(sourcemapRegex);
+            if (match && match[1]) {
+                const sourcemapUrl = match[1].trim();
+                // 如果是相对路径，解析为绝对路径
+                if (!sourcemapUrl.startsWith('http')) {
+                    const sourceDir = dirname(sourceFile);
+                    const sourcemapPath = resolve(sourceDir, sourcemapUrl);
+                    if (existsSync(sourcemapPath)) {
+                        return sourcemapPath;
+                    }
+                }
+            }
+            return null;
+        }
+        catch (error) {
+            // 读取文件失败，返回null
+            return null;
+        }
     }
     /**
      * 批量递归定位
@@ -222,11 +281,32 @@ class RecursiveLocator {
         return `Mapping chain (${mappingSteps.length} steps):\n${chain}`;
     }
     /**
+     * 触发事件
+     * @param eventType 事件类型
+     * @param data 事件数据
+     */
+    emitEvent(eventType, data) {
+        const listeners = this.listeners.get(eventType);
+        if (listeners) {
+            const event = {
+                type: eventType,
+                timestamp: Date.now(),
+                data
+            };
+            listeners.forEach(listener => listener(event));
+        }
+    }
+    /**
      * 添加事件监听器
      * @param eventType 事件类型
      * @param listener 监听器函数
      */
     addEventListener(eventType, listener) {
+        if (!this.listeners.has(eventType)) {
+            this.listeners.set(eventType, []);
+        }
+        this.listeners.get(eventType).push(listener);
+        // 同时添加到parser的监听器中
         this.parser.addEventListener(eventType, listener);
     }
     /**
@@ -235,6 +315,14 @@ class RecursiveLocator {
      * @param listener 监听器函数
      */
     removeEventListener(eventType, listener) {
+        const listeners = this.listeners.get(eventType);
+        if (listeners) {
+            const index = listeners.indexOf(listener);
+            if (index > -1) {
+                listeners.splice(index, 1);
+            }
+        }
+        // 同时从parser中移除
         this.parser.removeEventListener(eventType, listener);
     }
     /**
@@ -252,13 +340,12 @@ class RecursiveLocator {
         this.visitedFiles.clear();
     }
 }
-exports.RecursiveLocator = RecursiveLocator;
 /**
  * 创建递归定位器实例
  * @param config 解析器配置
  * @returns 递归定位器实例
  */
-function createRecursiveLocator(config) {
+export function createRecursiveLocator(config) {
     return new RecursiveLocator(config);
 }
 //# sourceMappingURL=recursive-locator.js.map

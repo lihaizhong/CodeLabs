@@ -1,15 +1,12 @@
-"use strict";
 /**
  * Sourcemap定位器核心类型定义
  * 定义了所有用于sourcemap解析和位置定位的数据结构
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.EventType = exports.SourcemapLocatorError = exports.ErrorType = void 0;
 /**
  * 错误类型枚举
  * 定义可能出现的错误类型
  */
-var ErrorType;
+export var ErrorType;
 (function (ErrorType) {
     /** 文件不存在 */
     ErrorType["FILE_NOT_FOUND"] = "FILE_NOT_FOUND";
@@ -25,12 +22,12 @@ var ErrorType;
     ErrorType["CIRCULAR_REFERENCE"] = "CIRCULAR_REFERENCE";
     /** 解析错误 */
     ErrorType["PARSE_ERROR"] = "PARSE_ERROR";
-})(ErrorType || (exports.ErrorType = ErrorType = {}));
+})(ErrorType || (ErrorType = {}));
 /**
  * 自定义错误类
  * 用于表示sourcemap定位过程中的错误
  */
-class SourcemapLocatorError extends Error {
+export class SourcemapLocatorError extends Error {
     constructor(type, message, details) {
         super(message);
         this.name = 'SourcemapLocatorError';
@@ -38,12 +35,11 @@ class SourcemapLocatorError extends Error {
         this.details = details;
     }
 }
-exports.SourcemapLocatorError = SourcemapLocatorError;
 /**
  * 事件类型枚举
  * 定义解析过程中可能触发的事件
  */
-var EventType;
+export var EventType;
 (function (EventType) {
     /** 开始解析 */
     EventType["PARSE_START"] = "PARSE_START";
@@ -63,5 +59,5 @@ var EventType;
     EventType["STEP_COMPLETE"] = "step_complete";
     /** 定位完成 */
     EventType["LOCATE_COMPLETE"] = "locate_complete";
-})(EventType || (exports.EventType = EventType = {}));
+})(EventType || (EventType = {}));
 //# sourceMappingURL=types.js.map

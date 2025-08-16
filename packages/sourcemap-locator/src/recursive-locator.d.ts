@@ -11,6 +11,7 @@ export declare class RecursiveLocator {
     private parser;
     private maxDepth;
     private visitedFiles;
+    private listeners;
     /**
      * 构造函数
      * @param config 解析器配置
@@ -39,6 +40,12 @@ export declare class RecursiveLocator {
      */
     private findNextSourcemap;
     /**
+     * 从JavaScript文件中提取sourcemap引用
+     * @param sourceFile JavaScript文件路径
+     * @returns sourcemap文件路径，如果不存在则返回null
+     */
+    private extractSourcemapFromFile;
+    /**
      * 批量递归定位
      * @param request 批量定位请求
      * @returns 批量定位结果
@@ -50,6 +57,12 @@ export declare class RecursiveLocator {
      * @returns 映射链摘要
      */
     getMappingChainSummary(mappingSteps: MappingStep[]): string;
+    /**
+     * 触发事件
+     * @param eventType 事件类型
+     * @param data 事件数据
+     */
+    private emitEvent;
     /**
      * 添加事件监听器
      * @param eventType 事件类型
