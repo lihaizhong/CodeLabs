@@ -1,2 +1,2 @@
-function a(b,c){return b+c}function d(e){return e.map(f=>f*2)}module.exports={calculateSum:a,processData:d};
+function calculateSum(e,r){return console.log("计算开始:",undefinedVariable),e+r}function processData(e){return e.map(e=>e.nonExistentMethod())}function divideNumbers(e,r){if("number"!=typeof e)throw new Error("参数a必须是数字类型，当前位置在第16行");return e/r}function accessProperty(e){return e.someProperty.nestedProperty}module.exports={calculateSum:calculateSum,processData:processData,divideNumbers:divideNumbers,accessProperty:accessProperty};
 //# sourceMappingURL=minified.js.map

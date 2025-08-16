@@ -1,9 +1,1 @@
-{
-  "version": 3,
-  "file": "compiled.js",
-  "sourceRoot": "",
-  "sources": ["original.js"],
-  "names": ["calculateSum", "x", "y", "processData", "data"],
-  "mappings": "AAAA,SAASA,EAAaC,EAAGC,GACvB,OAAOD,EAAIC,CACb,CAEA,SAASC,EAAYC,GACnB,OAAOA,EAAKC,IAAIC,GAASA,EAAO,EACjC,CAEAC,OAAOC,QAAU,CACfN,cAAAA,EACAE,aAAAA,CACF",
-  "sourcesContent": ["function calculateSum(x, y) {\n  return x + y;\n}\n\nfunction processData(data) {\n  return data.map(item => item * 2);\n}\n\nmodule.exports = {\n  calculateSum,\n  processData\n};"]
-}
+{"version":3,"file":"compiled.js","sources":["original.js"],"names":["calculateSum","x","y","console","log","undefinedVariable","processData","data","map","item","nonExistentMethod","divideNumbers","a","b","Error","accessProperty","obj","someProperty","nestedProperty","module","exports"],"mappings":"AAAA,SAASA,aAAaC,EAAGC,GAGvB,OADAC,QAAQC,IAAI,QAASC,iBAAiB,EAC/BJ,EAAIC,CACb,CAEA,SAASI,YAAYC,GAEnB,OAAOA,EAAKC,IAAIC,GACPA,EAAKC,kBAAkB,CAC/B,CACH,CAEA,SAASC,cAAcC,EAAGC,GAExB,GAAiB,UAAb,OAAOD,EACT,MAAM,IAAIE,MAAM,sBAAsB,EAExC,OAAOF,EAAIC,CACb,CAEA,SAASE,eAAeC,GAEtB,OAAOA,EAAIC,aAAaC,cAC1B,CAEAC,OAAOC,QAAU,CACfpB,aAAAA,aACAM,YAAAA,YACAK,cAAAA,cACAI,eAAAA,cACF"}

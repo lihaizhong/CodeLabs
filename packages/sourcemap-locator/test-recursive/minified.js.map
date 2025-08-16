@@ -1,9 +1,1 @@
-{
-  "version": 3,
-  "file": "minified.js",
-  "sourceRoot": "",
-  "sources": ["compiled.js"],
-  "names": ["calc", "x", "y", "proc", "data", "module", "exports", "calculateSum", "processData"],
-  "mappings": "AAAA,SAASA,EAAKC,EAAEC,GAAG,OAAOD,EAAEC,CAAC,CAAC,SAASC,EAAKC,GAAG,OAAOA,EAAKC,IAAIC,GAAKA,EAAE,EAAE,CAAC,CAACC,OAAOC,QAAQ,CAACC,cAAcP,EAAMQ,YAAaN",
-  "sourcesContent": ["function calc(x, y) {\n  return x + y;\n}\n\nfunction proc(data) {\n  return data.map(item => item * 2);\n}\n\nmodule.exports = {\n  calculateSum: calc,\n  processData: proc\n};\n//# sourceMappingURL=compiled.js.map"]
-}
+{"version":3,"file":"minified.js","sources":["compiled.js"],"names":["calculateSum","e","r","console","log","undefinedVariable","processData","map","nonExistentMethod","divideNumbers","Error","accessProperty","someProperty","nestedProperty","module","exports"],"mappings":"AAAA,SAASA,aAAaC,EAAEC,GAAG,OAAOC,QAAQC,IAAI,QAAQC,iBAAiB,EAAEJ,EAAEC,CAAC,CAAC,SAASI,YAAYL,GAAG,OAAOA,EAAEM,IAAIN,GAAGA,EAAEO,kBAAkB,CAAC,CAAC,CAAC,SAASC,cAAcR,EAAEC,GAAG,GAAG,UAAU,OAAOD,EAAE,MAAM,IAAIS,MAAM,sBAAsB,EAAE,OAAOT,EAAEC,CAAC,CAAC,SAASS,eAAeV,GAAG,OAAOA,EAAEW,aAAaC,cAAc,CAACC,OAAOC,QAAQ,CAACf,aAAaA,aAAaM,YAAYA,YAAYG,cAAcA,cAAcE,eAAeA,cAAc"}
