@@ -5059,7 +5059,7 @@ class VideoManager {
          * @returns
          */
         cleanup: (buckets) => {
-            const { globals, local, path } = platform;
+            const { local, path } = platform;
             buckets.forEach((bucket) => {
                 if (path.is(bucket.local)) {
                     local.remove(bucket.local);

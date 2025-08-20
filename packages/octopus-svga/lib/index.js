@@ -6649,8 +6649,7 @@ function isZlibCompressed(data) {
        * @returns
        */
       cleanup: function cleanup(buckets) {
-        platform.globals;
-          var local = platform.local,
+        var local = platform.local,
           path = platform.path;
         buckets.forEach(function (bucket) {
           if (path.is(bucket.local)) {

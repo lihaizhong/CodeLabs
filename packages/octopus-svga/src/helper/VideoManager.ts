@@ -79,7 +79,7 @@ export class VideoManager {
      * @returns
      */
     cleanup: (buckets: Bucket[]) => {
-      const { globals, local, path } = platform;
+      const { local, path } = platform;
 
       buckets.forEach((bucket: Bucket) => {
         if (path.is(bucket.local)) {
