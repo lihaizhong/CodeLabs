@@ -4,8 +4,6 @@
  */
 
 export * from './types';
-export * from './parser';
-export * from './recursive-locator';
 
 import { promises as fs } from 'fs';
 import { RecursiveLocator } from './recursive-locator';

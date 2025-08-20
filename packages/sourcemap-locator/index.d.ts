@@ -456,6 +456,56 @@ declare class RecursiveLocator {
 declare function createRecursiveLocator(config?: ParserConfig): RecursiveLocator;
 
 /**
+ * Sourcemap Locator CLI 工具入口文件
+ * 这是编译后的JavaScript版本，用于npm包的bin字段
+ */
+
+/**
+ * CLI应用程序类
+ */
+declare class SourcemapLocatorCLI {
+    private program;
+    constructor();
+    /**
+     * 设置命令行命令
+     */
+    private setupCommands;
+    /**
+     * 处理locate命令
+     */
+    handleLocateCommand(sourcemap: string, line: number, column: number, options: {
+        recursive: boolean;
+        maxDepth: number;
+        verbose: boolean;
+        format: string;
+    }): Promise<void>;
+    /**
+     * 处理validate命令
+     */
+    handleValidateCommand(sourcemap: string): Promise<void>;
+    /**
+     * 输出单个定位结果
+     */
+    outputLocateResult(result: LocateResult, format: string): void;
+    /**
+     * 解析整数参数
+     */
+    parseInteger(value: string): number;
+    /**
+     * 获取版本号
+     */
+    getVersion(): any;
+    /**
+     * 输出错误信息并退出
+     */
+    error(message: string): void;
+    /**
+     * 运行CLI应用程序
+     */
+    run(): void;
+}
+
+/**
  * Sourcemap定位器主入口文件
  * 提供统一的API接口供外部程序调用
  */
@@ -580,5 +630,5 @@ declare function getSourcemapInfo(sourcemapPath: string, config?: ParserConfig):
     sourceRoot?: string;
 }>;
 
-export { ErrorType, EventType, RecursiveLocator, SourcemapLocatorAPI, SourcemapLocatorError, SourcemapParser, batchLocate, createLocator, createParser, createRecursiveLocator, SourcemapLocatorAPI as default, getSourcemapInfo, locate, validateSourcemap };
+export { ErrorType, EventType, RecursiveLocator, SourcemapLocatorAPI, SourcemapLocatorCLI, SourcemapLocatorError, SourcemapParser, batchLocate, createLocator, createParser, createRecursiveLocator, SourcemapLocatorAPI as default, getSourcemapInfo, locate, validateSourcemap };
 export type { BatchLocateResult, BatchLocationRequest, CLIOptions, CacheConfig, EventData, EventListener$1 as EventListener, LocateResult, LocationRequest, MappingStep, ParseContext, ParserConfig, SourceLocation, SourceMapData };
