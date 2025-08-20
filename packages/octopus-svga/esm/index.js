@@ -5171,11 +5171,12 @@ class VideoManager {
     async prepare(urls, point = 0, maxRemain = 3) {
         this.updateRemainRange(point, maxRemain, urls.length);
         const { loadMode, point: currentPoint } = this;
+        const needDownloadAndParse = loadMode === "whole";
         // 优先加载当前动效
-        const preloadBucket = await this.createBucket(urls[currentPoint], currentPoint, loadMode === "whole");
+        const preloadBucket = await this.createBucket(urls[currentPoint], currentPoint, needDownloadAndParse);
         await Promise.all(urls.map((url, index) => index === currentPoint
             ? preloadBucket
-            : this.createBucket(url, index, loadMode === "whole")));
+            : this.createBucket(url, index, needDownloadAndParse)));
     }
     /**
      * 获取当前帧的bucket

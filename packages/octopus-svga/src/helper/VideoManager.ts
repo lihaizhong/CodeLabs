@@ -227,18 +227,19 @@ export class VideoManager {
     this.updateRemainRange(point, maxRemain, urls.length);
 
     const { loadMode, point: currentPoint } = this;
+    const needDownloadAndParse = loadMode === "whole";
     // 优先加载当前动效
     const preloadBucket: Bucket = await this.createBucket(
       urls[currentPoint],
       currentPoint,
-      loadMode === "whole"
+      needDownloadAndParse
     );
 
     await Promise.all(
       urls.map((url: string, index: number) =>
         index === currentPoint
           ? preloadBucket
-          : this.createBucket(url, index, loadMode === "whole")
+          : this.createBucket(url, index, needDownloadAndParse)
       )
     );
   }

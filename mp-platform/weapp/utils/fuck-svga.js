@@ -6808,19 +6808,20 @@ function isZlibCompressed(data) {
         var point = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
         var maxRemain = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 3;
         return /*#__PURE__*/_regenerator().m(function _callee3() {
-          var loadMode, currentPoint, preloadBucket;
+          var loadMode, currentPoint, needDownloadAndParse, preloadBucket;
           return _regenerator().w(function (_context3) {
             while (1) switch (_context3.n) {
               case 0:
                 _this2.updateRemainRange(point, maxRemain, urls.length);
-                loadMode = _this2.loadMode, currentPoint = _this2.point; // 优先加载当前动效
+                loadMode = _this2.loadMode, currentPoint = _this2.point;
+                needDownloadAndParse = loadMode === "whole"; // 优先加载当前动效
                 _context3.n = 1;
-                return _this2.createBucket(urls[currentPoint], currentPoint, loadMode === "whole");
+                return _this2.createBucket(urls[currentPoint], currentPoint, needDownloadAndParse);
               case 1:
                 preloadBucket = _context3.v;
                 _context3.n = 2;
                 return Promise.all(urls.map(function (url, index) {
-                  return index === currentPoint ? preloadBucket : _this2.createBucket(url, index, loadMode === "whole");
+                  return index === currentPoint ? preloadBucket : _this2.createBucket(url, index, needDownloadAndParse);
                 }));
               case 2:
                 return _context3.a(2);
