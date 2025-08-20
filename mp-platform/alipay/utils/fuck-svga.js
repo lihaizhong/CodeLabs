@@ -369,32 +369,32 @@ function retry(_x) {
   return _retry.apply(this, arguments);
 } // 使用静态缓冲区，避免重复创建
 function _retry() {
-  _retry = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(fn) {
+  _retry = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(fn) {
     var intervals,
       times,
-      _args3 = arguments,
-      _t4;
-    return _regenerator().w(function (_context3) {
-      while (1) switch (_context3.p = _context3.n) {
+      _args4 = arguments,
+      _t5;
+    return _regenerator().w(function (_context4) {
+      while (1) switch (_context4.p = _context4.n) {
         case 0:
-          intervals = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : [];
-          times = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : 0;
-          _context3.p = 1;
-          return _context3.a(2, fn());
+          intervals = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : [];
+          times = _args4.length > 2 && _args4[2] !== undefined ? _args4[2] : 0;
+          _context4.p = 1;
+          return _context4.a(2, fn());
         case 2:
-          _context3.p = 2;
-          _t4 = _context3.v;
+          _context4.p = 2;
+          _t5 = _context4.v;
           if (!(times >= intervals.length)) {
-            _context3.n = 3;
+            _context4.n = 3;
             break;
           }
-          throw _t4;
+          throw _t5;
         case 3:
-          return _context3.a(2, delay(function () {
+          return _context4.a(2, delay(function () {
             return retry(fn, intervals, ++times);
           }, intervals[times]));
       }
-    }, _callee3, null, [[1, 2]]);
+    }, _callee4, null, [[1, 2]]);
   }));
   return _retry.apply(this, arguments);
 }
@@ -525,7 +525,7 @@ var OctopusPlatform = /*#__PURE__*/function () {
       env: "unknown",
       br: null,
       dpr: 1,
-      system: "unknown"
+      system: ""
     });
     _defineProperty(this, "noop", noop$1);
     _defineProperty(this, "retry", retry);
@@ -563,10 +563,10 @@ var OctopusPlatform = /*#__PURE__*/function () {
   }, {
     key: "autoEnv",
     value: function autoEnv() {
-      // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
       if (typeof window !== "undefined") {
         return "h5";
       }
+      // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
       if (typeof tt !== "undefined") {
         return "tt";
       }
@@ -575,6 +575,9 @@ var OctopusPlatform = /*#__PURE__*/function () {
       }
       if (typeof wx !== "undefined") {
         return "weapp";
+      }
+      if (typeof has !== "undefined") {
+        return "harmony";
       }
       throw new Error("Unsupported platform！");
     }
@@ -622,6 +625,26 @@ var OctopusPlatform = /*#__PURE__*/function () {
           break;
         case "tt":
           system = tt.getDeviceInfoSync().platform;
+          break;
+        case "harmony":
+          system = has.getSystemInfoSync().platform;
+          break;
+        case "h5":
+          if ("userAgentData" in navigator) {
+            // @ts-ignore
+            system = navigator.userAgentData.platform;
+          } else {
+            var UA = navigator.userAgent;
+            if (/(Android|Adr)/i.test(UA)) {
+              system = "android";
+            } else if (/\(i[^;]+;( U;)? CPU.+Mac OS X/i.test(UA)) {
+              system = "ios";
+            } else if (/HarmonyOS/i.test(UA)) {
+              system = "harmony";
+            } else {
+              system = "unknown";
+            }
+          }
           break;
         default:
           system = "unknown";
@@ -994,6 +1017,9 @@ var pluginImage = definePlugin({
     var local = this.local,
       decode = this.decode;
     var env = this.globals.env;
+    var printError = function printError(msg) {
+      return console.error("image error: ".concat(msg));
+    };
     var genImageSource = function genImageSource(data, _filepath) {
       return typeof data === "string" ? data : decode.toDataURL(data);
     };
@@ -1011,6 +1037,7 @@ var pluginImage = definePlugin({
         img.onerror = function () {
           return reject(new Error("SVGA LOADING FAILURE: ".concat(url)));
         };
+        img.crossOrigin = "anonymous";
         img.src = url;
       });
     }
@@ -1024,40 +1051,67 @@ var pluginImage = definePlugin({
         create: function create(_) {
           return new Image();
         },
-        load: function load(createImage, data, filepath) {
-          // 由于ImageBitmap在图片渲染上有优势，故优先使用
-          if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
-            return createImageBitmap(new Blob([decode.toBuffer(data)]));
+        load: function () {
+          var _load = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(createImage, data, filepath) {
+            var _t;
+            return _regenerator().w(function (_context) {
+              while (1) switch (_context.p = _context.n) {
+                case 0:
+                  if (!(data instanceof Uint8Array && "createImageBitmap" in globalThis)) {
+                    _context.n = 4;
+                    break;
+                  }
+                  _context.p = 1;
+                  _context.n = 2;
+                  return createImageBitmap(new Blob([decode.toBuffer(data)]));
+                case 2:
+                  data = _context.v;
+                  _context.n = 4;
+                  break;
+                case 3:
+                  _context.p = 3;
+                  _t = _context.v;
+                  printError(_t.message);
+                case 4:
+                  if (!(data instanceof ImageBitmap)) {
+                    _context.n = 5;
+                    break;
+                  }
+                  return _context.a(2, data);
+                case 5:
+                  return _context.a(2, loadImage(createImage(), genImageSource(data, filepath)));
+              }
+            }, _callee, null, [[1, 3]]);
+          }));
+          function load(_x3, _x4, _x5) {
+            return _load.apply(this, arguments);
           }
-          if (data instanceof ImageBitmap) {
-            return Promise.resolve(data);
-          }
-          return loadImage(createImage(), genImageSource(data, filepath));
-        },
+          return load;
+        }(),
         release: releaseImage
       };
     }
     // FIXME: 支付宝小程序IDE保存临时文件会失败;抖音最大用户文件大小为10M
     if (env === "weapp") {
       genImageSource = /*#__PURE__*/function () {
-        var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(data, filepath) {
-          return _regenerator().w(function (_context) {
-            while (1) switch (_context.n) {
+        var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(data, filepath) {
+          return _regenerator().w(function (_context2) {
+            while (1) switch (_context2.n) {
               case 0:
                 if (!(typeof data === "string")) {
-                  _context.n = 1;
+                  _context2.n = 1;
                   break;
                 }
-                return _context.a(2, data);
+                return _context2.a(2, data);
               case 1:
-                return _context.a(2, local.write(decode.toBuffer(data), filepath).catch(function (ex) {
-                  console.warn("image write fail: ".concat(ex.errorMessage || ex.errMsg || ex.message));
+                return _context2.a(2, local.write(decode.toBuffer(data), filepath).catch(function (ex) {
+                  printError(ex.errorMessage || ex.errMsg || ex.message);
                   return decode.toDataURL(data);
                 }));
             }
-          }, _callee);
+          }, _callee2);
         }));
-        return function genImageSource(_x3, _x4) {
+        return function genImageSource(_x6, _x7) {
           return _ref2.apply(this, arguments);
         };
       }();
@@ -1067,23 +1121,23 @@ var pluginImage = definePlugin({
         return canvas.createImage();
       },
       load: function () {
-        var _load = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(createImage, data, filepath) {
-          var _t, _t2, _t3;
-          return _regenerator().w(function (_context2) {
-            while (1) switch (_context2.n) {
+        var _load2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(createImage, data, filepath) {
+          var _t2, _t3, _t4;
+          return _regenerator().w(function (_context3) {
+            while (1) switch (_context3.n) {
               case 0:
-                _t = loadImage;
-                _t2 = createImage();
-                _context2.n = 1;
+                _t2 = loadImage;
+                _t3 = createImage();
+                _context3.n = 1;
                 return genImageSource(data, filepath);
               case 1:
-                _t3 = _context2.v;
-                return _context2.a(2, _t(_t2, _t3));
+                _t4 = _context3.v;
+                return _context3.a(2, _t2(_t3, _t4));
             }
-          }, _callee2);
+          }, _callee3);
         }));
-        function load(_x5, _x6, _x7) {
-          return _load.apply(this, arguments);
+        function load(_x8, _x9, _x0) {
+          return _load2.apply(this, arguments);
         }
         return load;
       }(),
@@ -1422,8 +1476,8 @@ var platform = new EnhancedPlatform();var ResourceManager = /*#__PURE__*/functio
       if (ResourceManager.isBitmap(img)) {
         img.close();
       } else if (img.src !== "") {
-        // 【微信】将存在本地的文件删除，防止用户空间被占满
-        if (platform.globals.env === "weapp" && img.src.includes(platform.path.USER_DATA_PATH)) {
+        // 将存在本地的文件删除，防止用户空间被占满
+        if (platform.path.is(img.src)) {
           platform.local.remove(img.src);
         }
         platform.image.release(img);
@@ -6473,7 +6527,12 @@ function generateImageBufferFromCode(options) {
 function generateImageFromCode(options) {
   var buff = generateImageBufferFromCode(options);
   return platform.decode.toDataURL(buff);
-}function createBufferOfImageData(imageData) {
+}/**
+ * 将 ImageData 转换为 PNG 格式的 Buffer
+ * @param imageData
+ * @returns PNG 格式的 Buffer
+ */
+function createBufferOfImageData(imageData) {
   var width = imageData.width,
     height = imageData.height,
     data = imageData.data;
@@ -6483,9 +6542,13 @@ function generateImageFromCode(options) {
  * @deprecated 请使用 createBufferOfImageData 代替，此方法可能在后续版本中移除
  */
 var getBufferFromImageData = createBufferOfImageData;
+/**
+ * 将 ImageData 转换为 PNG 格式的 Base64 字符串
+ * @param imageData
+ * @returns PNG 格式的 Base64 字符串
+ */
 function createImageDataUrl(imageData) {
-  var buff = createBufferOfImageData(imageData);
-  return platform.decode.toDataURL(buff);
+  return platform.decode.toDataURL(createBufferOfImageData(imageData));
 }
 /**
  * @deprecated 请使用 createImageDataUrl 代替，此方法可能在后续版本中移除
@@ -6504,18 +6567,16 @@ function isZlibCompressed(data) {
   var cmf = data[0];
   var flg = data[1];
   // 检查CMF的压缩方法（低4位为8表示DEFLATE）
-  // eslint-disable-next-line no-bitwise
-  if ((cmf & 0x0F) !== 8) {
+  if ((cmf & 0x0f) !== 8) {
     return false;
   }
   // 检查窗口大小（高4位通常为7，但不是严格要求）
-  // 这里不强制检查，因为理论上可以是其他值
+  // - 这里不强制检查，因为理论上可以是其他值
   // 验证头部校验（CMF * 256 + FLG必须是31的倍数）
   if ((cmf * 256 + flg) % 31 !== 0) {
     return false;
   }
   // 检查字典标志位（如果设置了字典，需要额外验证，但这种情况很少见）
-  // eslint-disable-next-line no-bitwise
   var fdict = (flg & 0x20) !== 0;
   if (fdict) {
     // 标准zlib压缩通常不使用预定义字典
@@ -6528,7 +6589,6 @@ function isZlibCompressed(data) {
   if (adler32Bytes.length !== 4) {
     return false;
   }
-  // eslint-disable-next-line no-bitwise
   var adler32 = adler32Bytes[0] << 24 | adler32Bytes[1] << 16 | adler32Bytes[2] << 8 | adler32Bytes[3];
   // 有效的ADLER-32值应大于0（除非是空数据）
   if (data.length > 2 && adler32 === 0) {
@@ -6755,16 +6815,12 @@ function isZlibCompressed(data) {
                 _this2.updateRemainRange(point, maxRemain, urls.length);
                 loadMode = _this2.loadMode, currentPoint = _this2.point; // 优先加载当前动效
                 _context3.n = 1;
-                return _this2.createBucket(urls[currentPoint], currentPoint, true);
+                return _this2.createBucket(urls[currentPoint], currentPoint, loadMode === "whole");
               case 1:
                 preloadBucket = _context3.v;
                 _context3.n = 2;
                 return Promise.all(urls.map(function (url, index) {
-                  // 当前帧的视频已经预加载到内存中
-                  if (index === currentPoint) {
-                    return preloadBucket;
-                  }
-                  return _this2.createBucket(url, index, loadMode === "whole");
+                  return index === currentPoint ? preloadBucket : _this2.createBucket(url, index, loadMode === "whole");
                 }));
               case 2:
                 return _context3.a(2);
@@ -6787,9 +6843,12 @@ function isZlibCompressed(data) {
           while (1) switch (_context4.n) {
             case 0:
               bucket = this.buckets[this.point];
-              if (!bucket.promise) {
+              if (bucket.entity) {
                 _context4.n = 2;
                 break;
+              }
+              if (!bucket.promise) {
+                bucket.promise = this.downloadAndParseVideo(bucket);
               }
               _context4.n = 1;
               return bucket.promise.then(function (data) {
@@ -6798,18 +6857,7 @@ function isZlibCompressed(data) {
             case 1:
               bucket.entity = _context4.v;
               bucket.promise = null;
-              _context4.n = 4;
-              break;
             case 2:
-              if (bucket.entity) {
-                _context4.n = 4;
-                break;
-              }
-              _context4.n = 3;
-              return this.downloadAndParseVideo(bucket, true);
-            case 3:
-              bucket.entity = _context4.v;
-            case 4:
               return _context4.a(2, bucket);
           }
         }, _callee4, this);

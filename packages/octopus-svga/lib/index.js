@@ -6815,16 +6815,12 @@ function isZlibCompressed(data) {
                 _this2.updateRemainRange(point, maxRemain, urls.length);
                 loadMode = _this2.loadMode, currentPoint = _this2.point; // 优先加载当前动效
                 _context3.n = 1;
-                return _this2.createBucket(urls[currentPoint], currentPoint, true);
+                return _this2.createBucket(urls[currentPoint], currentPoint, loadMode === "whole");
               case 1:
                 preloadBucket = _context3.v;
                 _context3.n = 2;
                 return Promise.all(urls.map(function (url, index) {
-                  // 当前帧的视频已经预加载到内存中
-                  if (index === currentPoint) {
-                    return preloadBucket;
-                  }
-                  return _this2.createBucket(url, index, loadMode === "whole");
+                  return index === currentPoint ? preloadBucket : _this2.createBucket(url, index, loadMode === "whole");
                 }));
               case 2:
                 return _context3.a(2);
@@ -6847,9 +6843,12 @@ function isZlibCompressed(data) {
           while (1) switch (_context4.n) {
             case 0:
               bucket = this.buckets[this.point];
-              if (!bucket.promise) {
+              if (bucket.entity) {
                 _context4.n = 2;
                 break;
+              }
+              if (!bucket.promise) {
+                bucket.promise = this.downloadAndParseVideo(bucket);
               }
               _context4.n = 1;
               return bucket.promise.then(function (data) {
@@ -6858,18 +6857,7 @@ function isZlibCompressed(data) {
             case 1:
               bucket.entity = _context4.v;
               bucket.promise = null;
-              _context4.n = 4;
-              break;
             case 2:
-              if (bucket.entity) {
-                _context4.n = 4;
-                break;
-              }
-              _context4.n = 3;
-              return this.downloadAndParseVideo(bucket, true);
-            case 3:
-              bucket.entity = _context4.v;
-            case 4:
               return _context4.a(2, bucket);
           }
         }, _callee4, this);

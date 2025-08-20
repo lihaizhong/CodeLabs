@@ -231,18 +231,15 @@ export class VideoManager {
     const preloadBucket: Bucket = await this.createBucket(
       urls[currentPoint],
       currentPoint,
-      true
+      loadMode === "whole"
     );
 
     await Promise.all(
-      urls.map((url: string, index: number) => {
-        // 当前帧的视频已经预加载到内存中
-        if (index === currentPoint) {
-          return preloadBucket;
-        }
-
-        return this.createBucket(url, index, loadMode === "whole");
-      })
+      urls.map((url: string, index: number) =>
+        index === currentPoint
+          ? preloadBucket
+          : this.createBucket(url, index, loadMode === "whole")
+      )
     );
   }
 
@@ -253,13 +250,15 @@ export class VideoManager {
   async get(): Promise<Bucket> {
     const bucket = this.buckets[this.point];
 
-    if (bucket.promise) {
+    if (!bucket.entity) {
+      if (!bucket.promise) {
+        bucket.promise = this.downloadAndParseVideo(bucket);
+      }
+
       bucket.entity = await bucket.promise.then((data: ArrayBufferLike) =>
         this.options.postprocess(bucket, data)
       );
       bucket.promise = null;
-    } else if (!bucket.entity) {
-      bucket.entity = await this.downloadAndParseVideo(bucket, true);
     }
 
     return bucket;
