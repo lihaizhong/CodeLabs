@@ -1142,8 +1142,8 @@ let pageData = {
   "tableInfo": {
     "文件总数": 195,
     "源项目路径": "/Users/lihaizhong/Documents/Project/CodeLabs/mp-platform/weapp",
-    "目标输出路径": "/Users/lihaizhong/Documents/Project/CodeLabs/mp-platform/ascf/ascf/ascf_src",
-    "转换耗时": "0.932s"
+    "目标输出路径": "/Users/lihaizhong/Documents/Project/CodeLabs/mp-harmony/ascf/ascf_src",
+    "转换耗时": "1.093s"
   },
   "opening": {},
   "concept": {

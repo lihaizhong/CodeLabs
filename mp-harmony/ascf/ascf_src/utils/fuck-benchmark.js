@@ -312,32 +312,32 @@ function retry(_x) {
   return _retry.apply(this, arguments);
 } // 使用静态缓冲区，避免重复创建
 function _retry() {
-  _retry = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(fn) {
+  _retry = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(fn) {
     var intervals,
       times,
-      _args3 = arguments,
-      _t4;
-    return _regenerator().w(function (_context3) {
-      while (1) switch (_context3.p = _context3.n) {
+      _args4 = arguments,
+      _t5;
+    return _regenerator().w(function (_context4) {
+      while (1) switch (_context4.p = _context4.n) {
         case 0:
-          intervals = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : [];
-          times = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : 0;
-          _context3.p = 1;
-          return _context3.a(2, fn());
+          intervals = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : [];
+          times = _args4.length > 2 && _args4[2] !== undefined ? _args4[2] : 0;
+          _context4.p = 1;
+          return _context4.a(2, fn());
         case 2:
-          _context3.p = 2;
-          _t4 = _context3.v;
+          _context4.p = 2;
+          _t5 = _context4.v;
           if (!(times >= intervals.length)) {
-            _context3.n = 3;
+            _context4.n = 3;
             break;
           }
-          throw _t4;
+          throw _t5;
         case 3:
-          return _context3.a(2, delay(function () {
+          return _context4.a(2, delay(function () {
             return retry(fn, intervals, ++times);
           }, intervals[times]));
       }
-    }, _callee3, null, [[1, 2]]);
+    }, _callee4, null, [[1, 2]]);
   }));
   return _retry.apply(this, arguments);
 }
@@ -363,7 +363,7 @@ var OctopusPlatform = /*#__PURE__*/function () {
       env: "unknown",
       br: null,
       dpr: 1,
-      system: "unknown"
+      system: ""
     });
     _defineProperty(this, "noop", noop);
     _defineProperty(this, "retry", retry);
@@ -401,10 +401,10 @@ var OctopusPlatform = /*#__PURE__*/function () {
   }, {
     key: "autoEnv",
     value: function autoEnv() {
-      // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
       if (typeof window !== "undefined") {
         return "h5";
       }
+      // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
       if (typeof tt !== "undefined") {
         return "tt";
       }
@@ -413,6 +413,9 @@ var OctopusPlatform = /*#__PURE__*/function () {
       }
       if (typeof wx !== "undefined") {
         return "weapp";
+      }
+      if (typeof has !== "undefined") {
+        return "harmony";
       }
       throw new Error("Unsupported platform！");
     }
@@ -453,14 +456,33 @@ var OctopusPlatform = /*#__PURE__*/function () {
       var system;
       switch (env) {
         case "weapp":
-// 暂不支持api has.getDeviceInfo TODO
-          system = has.getDeviceInfo().platform;
+          system = wx.getDeviceInfo().platform;
           break;
         case "alipay":
           system = my.getDeviceBaseInfo().platform;
           break;
         case "tt":
           system = has.getDeviceInfoSync().platform;
+          break;
+        case "harmony":
+          system = has.getSystemInfoSync().platform;
+          break;
+        case "h5":
+          if ("userAgentData" in navigator) {
+            // @ts-ignore
+            system = navigator.userAgentData.platform;
+          } else {
+            var UA = navigator.userAgent;
+            if (/(Android|Adr)/i.test(UA)) {
+              system = "android";
+            } else if (/\(i[^;]+;( U;)? CPU.+Mac OS X/i.test(UA)) {
+              system = "ios";
+            } else if (/HarmonyOS/i.test(UA)) {
+              system = "harmony";
+            } else {
+              system = "unknown";
+            }
+          }
           break;
         default:
           system = "unknown";

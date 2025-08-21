@@ -30,8 +30,7 @@ Component({
 
   lifetimes: {
     async ready() {
-// 暂不支持api has.getWindowInfo TODO
-      const { windowWidth: width, windowHeight: height } = has.getWindowInfo();
+      const { windowWidth: width, windowHeight: height } = has.getSystemInfoSync();
 
       poster = new Poster(width, height);
       await poster.setConfig("#palette", this);
