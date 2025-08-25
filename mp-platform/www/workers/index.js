@@ -10,7 +10,7 @@ onmessage = (event) => {
   const { method, data, ref } = event.data || {};
 
   if (typeof method === "string" && method !== "") {
-    fetch(data || method).then(async (response) => {
+    fetch(data || method, { priority: "low" }).then(async (response) => {
       if (response.ok) {
         const buff = await response.arrayBuffer();
         const { buffer } = unzlibSync(new Uint8Array(buff));

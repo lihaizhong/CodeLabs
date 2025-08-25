@@ -511,7 +511,7 @@ var pluginDownload = definePlugin({
             return {
                 is: isRemote,
                 fetch: function (url) {
-                    return fetch(url).then(function (response) {
+                    return fetch(url, { priority: "low" }).then(function (response) {
                         if (response.ok) {
                             return response.arrayBuffer();
                         }

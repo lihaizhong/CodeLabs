@@ -898,7 +898,9 @@ var pluginDownload = definePlugin({
           };
           return fetch;
         }(function (url) {
-          return fetch(url).then(function (response) {
+          return fetch(url, {
+            priority: "low"
+          }).then(function (response) {
             if (response.ok) {
               return response.arrayBuffer();
             }
@@ -6649,8 +6651,7 @@ function isZlibCompressed(data) {
        * @returns
        */
       cleanup: function cleanup(buckets) {
-        platform.globals;
-          var local = platform.local,
+        var local = platform.local,
           path = platform.path;
         buckets.forEach(function (bucket) {
           if (path.is(bucket.local)) {

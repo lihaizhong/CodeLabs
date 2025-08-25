@@ -436,7 +436,7 @@ var pluginDownload = definePlugin({
         if (env === "h5") {
             return {
                 is: isRemote,
-                fetch: (url) => fetch(url).then((response) => {
+                fetch: (url) => fetch(url, { priority: "low" }).then((response) => {
                     if (response.ok) {
                         return response.arrayBuffer();
                     }

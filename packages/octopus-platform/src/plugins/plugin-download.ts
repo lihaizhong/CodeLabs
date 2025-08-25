@@ -14,7 +14,7 @@ export default definePlugin<"remote">({
       return {
         is: isRemote,
         fetch: (url: string) =>
-          fetch(url).then((response) => {
+          fetch(url, { priority: "low" }).then((response) => {
             if (response.ok) {
               return response.arrayBuffer();
             }
