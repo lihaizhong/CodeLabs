@@ -32,7 +32,8 @@
     "unzlib",
     "Varint",
     "weapp",
-    "wechat"
+    "wechat",
+    "yxxx"
   ],
   "debug.javascript.terminalOptions": {
     "resolveSourceMapLocations": [
