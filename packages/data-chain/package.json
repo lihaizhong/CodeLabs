@@ -1,5 +1,5 @@
 {
-  "name": "you-want-data",
+  "name": "data-chain",
   "version": "1.0.0",
   "description": "基于JSON-SCHEMA的数据校验与格式化工具",
   "private": true,
@@ -8,16 +8,13 @@
     "build": "",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "format",
-    "validator"
-  ],
+  "keywords": ["format"],
   "author": "lihzsky",
   "license": "MIT",
   "dependencies": {
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.19"
   },
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   }
 }
