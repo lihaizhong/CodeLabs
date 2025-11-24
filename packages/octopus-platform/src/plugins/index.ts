@@ -1,6 +1,6 @@
 export { default as pluginSelector } from "./plugin-selector";
 export { default as pluginCanvas } from "./plugin-canvas";
-export { default as pluginDecode } from "./plugin-decode";
+export { default as pluginCodec } from "./plugin-codec";
 export { default as pluginDownload } from "./plugin-download";
 export { default as pluginFsm } from "./plugin-fsm";
 export { default as pluginImage } from "./plugin-image";

@@ -51,7 +51,7 @@ interface OctopusPlatformPlugins {
     now: () => number;
     rAF: (canvas: PlatformCanvas, callback: () => void) => number;
     walkIn: (callback: (isBeIntersection: boolean) => void, selector: string, options: WalkInOptions) => () => void;
-    decode: {
+    codec: {
         toDataURL: (data: Uint8Array) => string;
         toBuffer: (data: Uint8Array) => ArrayBuffer;
         bytesToString: (data: Uint8Array) => string;
@@ -147,7 +147,7 @@ declare const _default$9: OctopusPlatformPluginOptions<"getCanvas", "getSelector
  * 用于处理数据解码
  * @returns
  */
-declare const _default$8: OctopusPlatformPluginOptions<"decode", never>;
+declare const _default$8: OctopusPlatformPluginOptions<"codec", never>;
 
 /**
  * 用于处理远程文件读取
@@ -165,9 +165,9 @@ declare const _default$6: OctopusPlatformPluginOptions<"local", never>;
  * 图片加载插件
  * @package plugin-fsm 本地文件存储能力
  * @package plugin-path 路径处理能力
- * @package plugin-decode 解码能力
+ * @package plugin-codec 解码能力
  */
-declare const _default$5: OctopusPlatformPluginOptions<"image", "decode" | "local">;
+declare const _default$5: OctopusPlatformPluginOptions<"image", "codec" | "local">;
 
 declare const _default$4: OctopusPlatformPluginOptions<"now", never>;
 
@@ -191,5 +191,5 @@ declare const _default$1: OctopusPlatformPluginOptions<"rAF", never>;
 
 declare const _default: OctopusPlatformPluginOptions<"walkIn", never>;
 
-export { OctopusPlatform, definePlugin, installPlugin, _default$9 as pluginCanvas, _default$8 as pluginDecode, _default$7 as pluginDownload, _default$6 as pluginFsm, _default$5 as pluginImage, _default as pluginIntersectionObserver, _default$4 as pluginNow, _default$3 as pluginOfsCanvas, _default$2 as pluginPath, _default$1 as pluginRAF, _default$a as pluginSelector };
+export { OctopusPlatform, definePlugin, installPlugin, _default$9 as pluginCanvas, _default$8 as pluginCodec, _default$7 as pluginDownload, _default$6 as pluginFsm, _default$5 as pluginImage, _default as pluginIntersectionObserver, _default$4 as pluginNow, _default$3 as pluginOfsCanvas, _default$2 as pluginPath, _default$1 as pluginRAF, _default$a as pluginSelector };
 export type { Bitmap, GetCanvasResult, GetOffscreenCanvasResult, MiniProgramCanvas, MiniProgramImage, MiniProgramIntersectionObserver, MiniProgramOffscreenCanvas, OctopusPlatformGlobals, OctopusPlatformPluginOptions, OctopusPlatformPlugins, OctopusPlatformWithDependencies, OctopusSupportedPlatform, OffscreenCanvasOptions, PlatformCanvas, PlatformImage, PlatformOffscreenCanvas, RawImage, WalkInOptions };

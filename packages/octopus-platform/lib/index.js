@@ -457,15 +457,15 @@ var pluginCanvas = definePlugin({
  * 用于处理数据解码
  * @returns
  */
-var pluginDecode = definePlugin({
-    name: "decode",
+var pluginCodec = definePlugin({
+    name: "codec",
     install: function () {
         var _a = this.globals, env = _a.env, br = _a.br;
         var b64Wrap = function (b64, type) {
             if (type === void 0) { type = "image/png"; }
             return "data:".concat(type, ";base64,").concat(b64);
         };
-        var decode = {
+        var codec = {
             toBuffer: function (data) {
                 var buffer = data.buffer, byteOffset = data.byteOffset, byteLength = data.byteLength;
                 if (buffer instanceof ArrayBuffer) {
@@ -488,14 +488,14 @@ var pluginDecode = definePlugin({
         };
         if (env === "h5") {
             var textDecoder_1 = new TextDecoder("utf-8", { fatal: true });
-            return __assign(__assign({}, decode), { toDataURL: function (data) {
-                    return b64Wrap(btoa(decode.bytesToString(data)));
+            return __assign(__assign({}, codec), { toDataURL: function (data) {
+                    return b64Wrap(btoa(codec.bytesToString(data)));
                 }, utf8: function (data, start, end) {
                     return textDecoder_1.decode(data.subarray(start, end));
                 } });
         }
-        return __assign(__assign({}, decode), { toDataURL: function (data) {
-                return b64Wrap(br.arrayBufferToBase64(decode.toBuffer(data)));
+        return __assign(__assign({}, codec), { toDataURL: function (data) {
+                return b64Wrap(br.arrayBufferToBase64(codec.toBuffer(data)));
             }, utf8: utf8 });
     },
 });/**
@@ -602,17 +602,17 @@ var pluginFsm = definePlugin({
  * 图片加载插件
  * @package plugin-fsm 本地文件存储能力
  * @package plugin-path 路径处理能力
- * @package plugin-decode 解码能力
+ * @package plugin-codec 解码能力
  */
 var pluginImage = definePlugin({
     name: "image",
-    dependencies: ["local", "decode"],
+    dependencies: ["local", "codec"],
     install: function () {
         var _this = this;
-        var _a = this, local = _a.local, decode = _a.decode;
+        var _a = this, local = _a.local, codec = _a.codec;
         var env = this.globals.env;
         var printError = function (msg) { return console.error("image error: ".concat(msg)); };
-        var genImageSource = function (data, _filepath) { return (typeof data === "string" ? data : decode.toDataURL(data)); };
+        var genImageSource = function (data, _filepath) { return (typeof data === "string" ? data : codec.toDataURL(data)); };
         /**
          * 加载图片
          * @param img
@@ -644,7 +644,7 @@ var pluginImage = definePlugin({
                                 _a.label = 1;
                             case 1:
                                 _a.trys.push([1, 3, , 4]);
-                                return [4 /*yield*/, createImageBitmap(new Blob([decode.toBuffer(data)]))];
+                                return [4 /*yield*/, createImageBitmap(new Blob([codec.toBuffer(data)]))];
                             case 2:
                                 data = _a.sent();
                                 return [3 /*break*/, 4];
@@ -672,10 +672,10 @@ var pluginImage = definePlugin({
                     }
                     // FIXME: IOS设备 微信小程序 Uint8Array转base64 时间较长，使用图片缓存形式速度会更快
                     return [2 /*return*/, local
-                            .write(decode.toBuffer(data), filepath)
+                            .write(codec.toBuffer(data), filepath)
                             .catch(function (ex) {
                             printError(ex.errorMessage || ex.errMsg || ex.message);
-                            return decode.toDataURL(data);
+                            return codec.toDataURL(data);
                         })];
                 });
             }); };
@@ -862,4 +862,4 @@ var pluginRaf = definePlugin({
             };
         };
     },
-});exports.OctopusPlatform=OctopusPlatform;exports.definePlugin=definePlugin;exports.installPlugin=installPlugin;exports.pluginCanvas=pluginCanvas;exports.pluginDecode=pluginDecode;exports.pluginDownload=pluginDownload;exports.pluginFsm=pluginFsm;exports.pluginImage=pluginImage;exports.pluginIntersectionObserver=pluginIntersectionObserver;exports.pluginNow=pluginNow;exports.pluginOfsCanvas=pluginOfsCanvas;exports.pluginPath=pluginPath;exports.pluginRAF=pluginRaf;exports.pluginSelector=pluginSelector;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map
+});exports.OctopusPlatform=OctopusPlatform;exports.definePlugin=definePlugin;exports.installPlugin=installPlugin;exports.pluginCanvas=pluginCanvas;exports.pluginCodec=pluginCodec;exports.pluginDownload=pluginDownload;exports.pluginFsm=pluginFsm;exports.pluginImage=pluginImage;exports.pluginIntersectionObserver=pluginIntersectionObserver;exports.pluginNow=pluginNow;exports.pluginOfsCanvas=pluginOfsCanvas;exports.pluginPath=pluginPath;exports.pluginRAF=pluginRaf;exports.pluginSelector=pluginSelector;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map

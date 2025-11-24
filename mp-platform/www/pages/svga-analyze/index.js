@@ -33,7 +33,7 @@ async function render(current) {
   $switch.innerHTML = "";
   entries.forEach(([key, value], index) => {
     const $item = document.createElement("div");
-    const b64Image = platform.decode.toDataURL(value);
+    const b64Image = platform.codec.toDataURL(value);
     const image = new Image();
 
     image.src = b64Image;

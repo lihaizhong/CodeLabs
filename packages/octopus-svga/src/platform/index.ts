@@ -6,7 +6,7 @@ import {
   pluginSelector,
   pluginCanvas,
   pluginOfsCanvas,
-  pluginDecode,
+  pluginCodec,
   pluginDownload,
   pluginFsm,
   pluginImage,
@@ -20,7 +20,7 @@ export type PlatformProperties =
   | "path"
   | "remote"
   | "local"
-  | "decode"
+  | "codec"
   | "image"
   | "rAF"
   | "getSelector"
@@ -36,7 +36,7 @@ export class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
 
   local!: OctopusPlatformPlugins["local"];
 
-  decode!: OctopusPlatformPlugins["decode"];
+  codec!: OctopusPlatformPlugins["codec"];
 
   image!: OctopusPlatformPlugins["image"];
 
@@ -54,7 +54,7 @@ export class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
         pluginSelector,
         pluginCanvas,
         pluginOfsCanvas,
-        pluginDecode,
+        pluginCodec,
         pluginDownload,
         pluginFsm,
         pluginImage,

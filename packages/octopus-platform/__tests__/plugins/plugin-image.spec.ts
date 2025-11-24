@@ -1,12 +1,12 @@
 import { initialPlatformGlobal } from "../../__mocks__";
-import pluginDecode from "../../src/plugins/plugin-decode";
+import pluginCodec from "../../src/plugins/plugin-codec";
 import pluginFsm from "../../src/plugins/plugin-fsm";
 import pluginPath from "../../src/plugins/plugin-path";
 import pluginImage from "../../src/plugins/plugin-image";
-import { OctopusPlatform } from "src/platform";
+import { OctopusPlatform } from "../../src/platform";
 
-jest.mock("../../src/plugins/plugin-decode", () => ({
-  name: "decode",
+jest.mock("../../src/plugins/plugin-codec", () => ({
+  name: "codec",
   install: () => ({
     toDataURL: () => "to data url success",
     toBuffer: () => "to buffer success",
@@ -47,11 +47,11 @@ describe("pluginImage 插件", () => {
     const platform = {
       globals: initialPlatformGlobal("h5"),
       noop: () => {},
-      decode: {} as OctopusPlatform<"decode">,
+      codec: {} as OctopusPlatform<"codec">,
       local: {} as OctopusPlatform<"local">,
-    } as OctopusPlatform<"decode" | "local" | "image">;
+    } as OctopusPlatform<"codec" | "local" | "image">;
 
-    platform.decode = pluginDecode.install.call(platform);
+    platform.codec = pluginCodec.install.call(platform);
     platform.local = null;
     platform.path = pluginPath.install.call(platform);
 
@@ -109,7 +109,7 @@ describe("pluginImage 插件", () => {
     const platform = {
       globals: initialPlatformGlobal("weapp"),
       noop: () => {},
-      decode: {} as OctopusPlatform.PlatformPlugin["decode"],
+      codec: {} as OctopusPlatform.PlatformPlugin["codec"],
       local: {} as OctopusPlatform.PlatformPlugin["local"],
       path: {} as OctopusPlatform.PlatformPlugin["path"],
       getGlobalCanvas() {
@@ -119,7 +119,7 @@ describe("pluginImage 插件", () => {
       },
     } as EnhancedPlatform;
 
-    platform.decode = pluginDecode.install.call(platform);
+    platform.codec = pluginCodec.install.call(platform);
     platform.local = pluginFsm.install.call(platform);
     platform.path = pluginPath.install.call(platform);
 
@@ -171,7 +171,7 @@ describe("pluginImage 插件", () => {
     const platform = {
       globals: initialPlatformGlobal("alipay"),
       noop: () => {},
-      decode: {} as OctopusPlatform.PlatformPlugin["decode"],
+      codec: {} as OctopusPlatform.PlatformPlugin["codec"],
       local: {} as OctopusPlatform.PlatformPlugin["local"],
       path: {} as OctopusPlatform.PlatformPlugin["path"],
       getGlobalCanvas() {
@@ -181,7 +181,7 @@ describe("pluginImage 插件", () => {
       },
     } as EnhancedPlatform;
 
-    platform.decode = pluginDecode.install.call(platform);
+    platform.codec = pluginCodec.install.call(platform);
     platform.local = pluginFsm.install.call(platform);
     platform.path = pluginPath.install.call(platform);
 

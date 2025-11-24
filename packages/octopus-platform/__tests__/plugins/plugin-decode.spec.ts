@@ -1,51 +1,51 @@
 import { OctopusPlatform } from "../../src/platform";
 import { initialPlatformGlobal } from "../../__mocks__";
-import pluginDecode from "../../src/plugins/plugin-decode";
+import pluginCodec from "../../src/plugins/plugin-codec";
 
 jest.mock("../../src/extensions/utf8", () => ({
   utf8: jest.fn(() => "mocked utf8 data")
 }));
 
-describe("pluginDecode 定义", () => {
-  it("decode 是否被定义", () => {
-    expect(pluginDecode).toBeDefined();
+describe("pluginCodec 定义", () => {
+  it("codec 是否被定义", () => {
+    expect(pluginCodec).toBeDefined();
   });
 
-  it("decode 定义是否正确", () => {
-    expect(typeof pluginDecode).toBe("object");
-    expect(typeof pluginDecode.name).toBe("string");
-    expect(typeof pluginDecode.install).toBe("function");
-    expect(pluginDecode.name).toBe("decode");
+  it("codec 定义是否正确", () => {
+    expect(typeof pluginCodec).toBe("object");
+    expect(typeof pluginCodec.name).toBe("string");
+    expect(typeof pluginCodec.install).toBe("function");
+    expect(pluginCodec.name).toBe("codec");
   });
 });
 
-describe("pluginDecode 插件", () => {
+describe("pluginCodec 插件", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe("H5 环境", () => {
-    const platform = { globals: initialPlatformGlobal("h5") } as OctopusPlatform<"decode">;
+    const platform = { globals: initialPlatformGlobal("h5") } as OctopusPlatform<"codec">;
 
     it("检查插件是否正常安装", () => {
-      const decode = pluginDecode.install.call(platform);
+      const codec = pluginCodec.install.call(platform);
 
-      expect(typeof decode).toBe("object");
-      expect(typeof decode.toBuffer).toBe("function");
-      expect(typeof decode.toDataURL).toBe("function");
-      expect(typeof decode.utf8).toBe("function");
+      expect(typeof codec).toBe("object");
+      expect(typeof codec.toBuffer).toBe("function");
+      expect(typeof codec.toDataURL).toBe("function");
+      expect(typeof codec.utf8).toBe("function");
     });
 
     it("toBuffer 调用成功", () => {
-      const decode = pluginDecode.install.call(platform);
+      const codec = pluginCodec.install.call(platform);
       const u8a = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
       const { buffer, byteOffset, byteLength } = u8a;
 
-      expect(decode.toBuffer(u8a)).toStrictEqual(buffer.slice(byteOffset, byteOffset + byteLength));
+      expect(codec.toBuffer(u8a)).toStrictEqual(buffer.slice(byteOffset, byteOffset + byteLength));
     });
 
     it("toDataURL 调用成功", () => {
-      const decode = pluginDecode.install.call(platform);
+      const codec = pluginCodec.install.call(platform);
       const u8a = new Uint8Array([
         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
         0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02, 0x08, 0x06, 0x00, 0x00, 0x00, 0x72, 0xb6, 0x0d,
@@ -54,49 +54,49 @@ describe("pluginDecode 插件", () => {
         0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
       ]);
 
-      expect(decode.toDataURL(u8a)).toBe("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mP4z8DwH4QZYAwAR8oH+Rq28akAAAAASUVORK5CYII=");
+      expect(codec.toDataURL(u8a)).toBe("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR42mP4z8DwH4QZYAwAR8oH+Rq28akAAAAASUVORK5CYII=");
     });
 
     it("utf8 调用成功", () => {
-      const decode = pluginDecode.install.call(platform);
+      const codec = pluginCodec.install.call(platform);
       const u8a = new Uint8Array([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100]);
 
-      expect(decode.utf8(u8a, 0, 11)).toBe("hello world");
+      expect(codec.utf8(u8a, 0, 11)).toBe("hello world");
     });
   });
 
   describe("小程序(weapp, alipay, tt) 环境", () => {
-    const platform = { globals: initialPlatformGlobal("weapp") } as OctopusPlatform<"decode">;
+    const platform = { globals: initialPlatformGlobal("weapp") } as OctopusPlatform<"codec">;
 
     it("检查插件是否正常安装", () => {
-      const decode = pluginDecode.install.call(platform);
+      const codec = pluginCodec.install.call(platform);
 
-      expect(typeof decode).toBe("object");
-      expect(typeof decode.toBuffer).toBe("function");
-      expect(typeof decode.toDataURL).toBe("function");
-      expect(typeof decode.utf8).toBe("function");
+      expect(typeof codec).toBe("object");
+      expect(typeof codec.toBuffer).toBe("function");
+      expect(typeof codec.toDataURL).toBe("function");
+      expect(typeof codec.utf8).toBe("function");
     });
 
     it("toBuffer 调用成功", () => {
-      const decode = pluginDecode.install.call(platform);
+      const codec = pluginCodec.install.call(platform);
       const u8a = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
       const { buffer, byteOffset, byteLength } = u8a;
 
-      expect(decode.toBuffer(u8a)).toStrictEqual(buffer.slice(byteOffset, byteOffset + byteLength));
+      expect(codec.toBuffer(u8a)).toStrictEqual(buffer.slice(byteOffset, byteOffset + byteLength));
     });
 
     it("toDataURL 调用成功", () => {
-      const decode = pluginDecode.install.call(platform);
+      const codec = pluginCodec.install.call(platform);
       const u8a = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d]);
 
-      expect(decode.toDataURL(u8a)).toBe("data:image/png;base64,mocked base64 data");
+      expect(codec.toDataURL(u8a)).toBe("data:image/png;base64,mocked base64 data");
     });
 
     it("utf8 调用成功", () => {
-      const decode = pluginDecode.install.call(platform);
+      const codec = pluginCodec.install.call(platform);
       const u8a = new Uint8Array([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100]);
 
-      expect(decode.utf8(u8a, 0, 11)).toBe("mocked utf8 data");
+      expect(codec.utf8(u8a, 0, 11)).toBe("mocked utf8 data");
     });
   });
 });

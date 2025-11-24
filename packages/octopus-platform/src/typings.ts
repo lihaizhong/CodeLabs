@@ -80,7 +80,7 @@ export interface OctopusPlatformPlugins {
     options: WalkInOptions
   ) => () => void;
 
-  decode: {
+  codec: {
     toDataURL: (data: Uint8Array) => string;
     toBuffer: (data: Uint8Array) => ArrayBuffer;
     bytesToString: (data: Uint8Array) => string;

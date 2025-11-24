@@ -163,7 +163,7 @@ export default class Reader {
   string() {
     const [start, end] = this.getBytesRange();
     // 直接在原始buffer上解码，避免创建中间bytes对象
-    const result = platform.decode.utf8(this.buf, start, end);
+    const result = platform.codec.utf8(this.buf, start, end);
     this.pos = end;
 
     return result;

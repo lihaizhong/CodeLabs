@@ -818,8 +818,8 @@ var pluginCanvas = definePlugin({
  * 用于处理数据解码
  * @returns
  */
-var pluginDecode = definePlugin({
-  name: "decode",
+var pluginCodec = definePlugin({
+  name: "codec",
   install: function install() {
     var _this$globals4 = this.globals,
       env = _this$globals4.env,
@@ -828,7 +828,7 @@ var pluginDecode = definePlugin({
       var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "image/png";
       return "data:".concat(type, ";base64,").concat(b64);
     };
-    var decode = {
+    var codec = {
       toBuffer: function toBuffer(data) {
         var buffer = data.buffer,
           byteOffset = data.byteOffset,
@@ -855,18 +855,18 @@ var pluginDecode = definePlugin({
       var textDecoder = new TextDecoder("utf-8", {
         fatal: true
       });
-      return _objectSpread2(_objectSpread2({}, decode), {}, {
+      return _objectSpread2(_objectSpread2({}, codec), {}, {
         toDataURL: function toDataURL(data) {
-          return b64Wrap(btoa(decode.bytesToString(data)));
+          return b64Wrap(btoa(codec.bytesToString(data)));
         },
         utf8: function utf8(data, start, end) {
           return textDecoder.decode(data.subarray(start, end));
         }
       });
     }
-    return _objectSpread2(_objectSpread2({}, decode), {}, {
+    return _objectSpread2(_objectSpread2({}, codec), {}, {
       toDataURL: function toDataURL(data) {
-        return b64Wrap(br.arrayBufferToBase64(decode.toBuffer(data)));
+        return b64Wrap(br.arrayBufferToBase64(codec.toBuffer(data)));
       },
       utf8: utf8
     });
@@ -1010,20 +1010,20 @@ var pluginFsm = definePlugin({
  * 图片加载插件
  * @package plugin-fsm 本地文件存储能力
  * @package plugin-path 路径处理能力
- * @package plugin-decode 解码能力
+ * @package plugin-codec 解码能力
  */
 var pluginImage = definePlugin({
   name: "image",
-  dependencies: ["local", "decode"],
+  dependencies: ["local", "codec"],
   install: function install() {
     var local = this.local,
-      decode = this.decode;
+      codec = this.codec;
     var env = this.globals.env;
     var printError = function printError(msg) {
       return console.error("image error: ".concat(msg));
     };
     var genImageSource = function genImageSource(data, _filepath) {
-      return typeof data === "string" ? data : decode.toDataURL(data);
+      return typeof data === "string" ? data : codec.toDataURL(data);
     };
     /**
      * 加载图片
@@ -1065,7 +1065,7 @@ var pluginImage = definePlugin({
                   }
                   _context.p = 1;
                   _context.n = 2;
-                  return createImageBitmap(new Blob([decode.toBuffer(data)]));
+                  return createImageBitmap(new Blob([codec.toBuffer(data)]));
                 case 2:
                   data = _context.v;
                   _context.n = 4;
@@ -1106,9 +1106,9 @@ var pluginImage = definePlugin({
                 }
                 return _context2.a(2, data);
               case 1:
-                return _context2.a(2, local.write(decode.toBuffer(data), filepath).catch(function (ex) {
+                return _context2.a(2, local.write(codec.toBuffer(data), filepath).catch(function (ex) {
                   printError(ex.errorMessage || ex.errMsg || ex.message);
-                  return decode.toDataURL(data);
+                  return codec.toDataURL(data);
                 }));
             }
           }, _callee2);
@@ -1289,7 +1289,7 @@ var pluginRaf = definePlugin({
   function EnhancedPlatform() {
     var _this;
     _classCallCheck(this, EnhancedPlatform);
-    _this = _callSuper(this, EnhancedPlatform, [[pluginSelector, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "1.3.0"]);
+    _this = _callSuper(this, EnhancedPlatform, [[pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "1.3.0"]);
     _this.init();
     return _this;
   }
@@ -1747,7 +1747,7 @@ function calculateHash(buff, start, end, step) {
         start = _this$getBytesRange4[0],
         end = _this$getBytesRange4[1];
       // 直接在原始buffer上解码，避免创建中间bytes对象
-      var result = platform.decode.utf8(this.buf, start, end);
+      var result = platform.codec.utf8(this.buf, start, end);
       this.pos = end;
       return result;
     }
@@ -4596,7 +4596,7 @@ function unzlibSync(data) {
         throw new TypeError('Input must be a Uint8Array');
       }
       var caches = this.caches;
-      var key = platform.decode.bytesToString(buff);
+      var key = platform.codec.bytesToString(buff);
       if (caches.has(key)) {
         return caches.get(key);
       }
@@ -6528,7 +6528,7 @@ function generateImageBufferFromCode(options) {
 }
 function generateImageFromCode(options) {
   var buff = generateImageBufferFromCode(options);
-  return platform.decode.toDataURL(buff);
+  return platform.codec.toDataURL(buff);
 }/**
  * 将 ImageData 转换为 PNG 格式的 Buffer
  * @param imageData
@@ -6550,7 +6550,7 @@ var getBufferFromImageData = createBufferOfImageData;
  * @returns PNG 格式的 Base64 字符串
  */
 function createImageDataUrl(imageData) {
-  return platform.decode.toDataURL(createBufferOfImageData(imageData));
+  return platform.codec.toDataURL(createBufferOfImageData(imageData));
 }
 /**
  * @deprecated 请使用 createImageDataUrl 代替，此方法可能在后续版本中移除

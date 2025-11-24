@@ -1,5 +1,11 @@
 # octopus-platform
 
+## 0.2.0
+
+### Minor Changes
+
+- 修改插件(plugin-decode -> plugin-codec)
+
 ## 0.1.3
 
 ### Patch Changes

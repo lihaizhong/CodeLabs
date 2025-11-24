@@ -10,7 +10,7 @@ import type {
   PlatformVideo,
   PLAYER_CONTENT_MODE,
 } from "../../types";
-import { Renderer2D, Renderer2DExtension } from "src/extensions";
+import { Renderer2D, Renderer2DExtension } from "../../extensions";
 
 const { noop } = platform;
 

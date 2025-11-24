@@ -1,11 +1,11 @@
-import { OctopusPlatform, pluginSelector, pluginCanvas, pluginOfsCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF, installPlugin } from 'octopus-platform';
+import { OctopusPlatform, pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF, installPlugin } from 'octopus-platform';
 
 class EnhancedPlatform extends OctopusPlatform {
     now;
     path;
     remote;
     local;
-    decode;
+    codec;
     image;
     rAF;
     getSelector;
@@ -16,7 +16,7 @@ class EnhancedPlatform extends OctopusPlatform {
             pluginSelector,
             pluginCanvas,
             pluginOfsCanvas,
-            pluginDecode,
+            pluginCodec,
             pluginDownload,
             pluginFsm,
             pluginImage,
@@ -418,7 +418,7 @@ class Reader {
     string() {
         const [start, end] = this.getBytesRange();
         // 直接在原始buffer上解码，避免创建中间bytes对象
-        const result = platform.decode.utf8(this.buf, start, end);
+        const result = platform.codec.utf8(this.buf, start, end);
         this.pos = end;
         return result;
     }
@@ -3037,7 +3037,7 @@ class CRC32 {
             throw new TypeError('Input must be a Uint8Array');
         }
         const { caches } = this;
-        const key = platform.decode.bytesToString(buff);
+        const key = platform.codec.bytesToString(buff);
         if (caches.has(key)) {
             return caches.get(key);
         }
@@ -4935,7 +4935,7 @@ function generateImageBufferFromCode(options) {
 }
 function generateImageFromCode(options) {
     const buff = generateImageBufferFromCode(options);
-    return platform.decode.toDataURL(buff);
+    return platform.codec.toDataURL(buff);
 }
 
 /**
@@ -4957,7 +4957,7 @@ const getBufferFromImageData = createBufferOfImageData;
  * @returns PNG 格式的 Base64 字符串
  */
 function createImageDataUrl(imageData) {
-    return platform.decode.toDataURL(createBufferOfImageData(imageData));
+    return platform.codec.toDataURL(createBufferOfImageData(imageData));
 }
 /**
  * @deprecated 请使用 createImageDataUrl 代替，此方法可能在后续版本中移除

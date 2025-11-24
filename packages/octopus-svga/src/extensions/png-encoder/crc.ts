@@ -22,7 +22,7 @@ export class CRC32 {
     }
 
     const { caches } = this;
-    const key = platform.decode.bytesToString(buff);
+    const key = platform.codec.bytesToString(buff);
   
     if (caches.has(key)) {
       return caches.get(key)!;

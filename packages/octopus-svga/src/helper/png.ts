@@ -23,7 +23,7 @@ export const getBufferFromImageData = createBufferOfImageData;
  * @returns PNG 格式的 Base64 字符串
  */
 export function createImageDataUrl(imageData: ImageData) {
-  return platform.decode.toDataURL(createBufferOfImageData(imageData));
+  return platform.codec.toDataURL(createBufferOfImageData(imageData));
 }
 
 /**

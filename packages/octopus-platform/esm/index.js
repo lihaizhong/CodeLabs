@@ -382,12 +382,12 @@ var pluginCanvas = definePlugin({
  * 用于处理数据解码
  * @returns
  */
-var pluginDecode = definePlugin({
-    name: "decode",
+var pluginCodec = definePlugin({
+    name: "codec",
     install() {
         const { env, br } = this.globals;
         const b64Wrap = (b64, type = "image/png") => `data:${type};base64,${b64}`;
-        const decode = {
+        const codec = {
             toBuffer(data) {
                 const { buffer, byteOffset, byteLength } = data;
                 if (buffer instanceof ArrayBuffer) {
@@ -411,14 +411,14 @@ var pluginDecode = definePlugin({
         if (env === "h5") {
             const textDecoder = new TextDecoder("utf-8", { fatal: true });
             return {
-                ...decode,
-                toDataURL: (data) => b64Wrap(btoa(decode.bytesToString(data))),
+                ...codec,
+                toDataURL: (data) => b64Wrap(btoa(codec.bytesToString(data))),
                 utf8: (data, start, end) => textDecoder.decode(data.subarray(start, end)),
             };
         }
         return {
-            ...decode,
-            toDataURL: (data) => b64Wrap(br.arrayBufferToBase64(decode.toBuffer(data))),
+            ...codec,
+            toDataURL: (data) => b64Wrap(br.arrayBufferToBase64(codec.toBuffer(data))),
             utf8,
         };
     },
@@ -522,16 +522,16 @@ var pluginFsm = definePlugin({
  * 图片加载插件
  * @package plugin-fsm 本地文件存储能力
  * @package plugin-path 路径处理能力
- * @package plugin-decode 解码能力
+ * @package plugin-codec 解码能力
  */
 var pluginImage = definePlugin({
     name: "image",
-    dependencies: ["local", "decode"],
+    dependencies: ["local", "codec"],
     install() {
-        const { local, decode } = this;
+        const { local, codec } = this;
         const { env } = this.globals;
         const printError = (msg) => console.error(`image error: ${msg}`);
-        let genImageSource = (data, _filepath) => (typeof data === "string" ? data : decode.toDataURL(data));
+        let genImageSource = (data, _filepath) => (typeof data === "string" ? data : codec.toDataURL(data));
         /**
          * 加载图片
          * @param img
@@ -558,7 +558,7 @@ var pluginImage = definePlugin({
                     // 由于ImageBitmap在图片渲染上有优势，故优先使用
                     if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
                         try {
-                            data = await createImageBitmap(new Blob([decode.toBuffer(data)]));
+                            data = await createImageBitmap(new Blob([codec.toBuffer(data)]));
                         }
                         catch (ex) {
                             printError(ex.message);
@@ -580,10 +580,10 @@ var pluginImage = definePlugin({
                 }
                 // FIXME: IOS设备 微信小程序 Uint8Array转base64 时间较长，使用图片缓存形式速度会更快
                 return local
-                    .write(decode.toBuffer(data), filepath)
+                    .write(codec.toBuffer(data), filepath)
                     .catch((ex) => {
                     printError(ex.errorMessage || ex.errMsg || ex.message);
-                    return decode.toDataURL(data);
+                    return codec.toDataURL(data);
                 });
             };
         }
@@ -759,5 +759,5 @@ var pluginIntersectionObserver = definePlugin({
     },
 });
 
-export { OctopusPlatform, definePlugin, installPlugin, pluginCanvas, pluginDecode, pluginDownload, pluginFsm, pluginImage, pluginIntersectionObserver, pluginNow, pluginOfsCanvas, pluginPath, pluginRaf as pluginRAF, pluginSelector };
+export { OctopusPlatform, definePlugin, installPlugin, pluginCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginIntersectionObserver, pluginNow, pluginOfsCanvas, pluginPath, pluginRaf as pluginRAF, pluginSelector };
 //# sourceMappingURL=index.js.map

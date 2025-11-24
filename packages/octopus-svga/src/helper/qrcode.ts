@@ -108,5 +108,5 @@ export function generateImageBufferFromCode(options: IQrCodeImgOptions) {
 export function generateImageFromCode(options: IQrCodeImgOptions) {
   const buff = generateImageBufferFromCode(options);
 
-  return platform.decode.toDataURL(buff);
+  return platform.codec.toDataURL(buff);
 }

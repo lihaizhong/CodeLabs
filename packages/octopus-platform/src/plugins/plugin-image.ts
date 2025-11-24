@@ -11,13 +11,13 @@ import { definePlugin } from "../definePlugin";
  * 图片加载插件
  * @package plugin-fsm 本地文件存储能力
  * @package plugin-path 路径处理能力
- * @package plugin-decode 解码能力
+ * @package plugin-codec 解码能力
  */
-export default definePlugin<"image", "local" | "decode">({  
+export default definePlugin<"image", "local" | "codec">({  
   name: "image",
-  dependencies: ["local", "decode"],
+  dependencies: ["local", "codec"],
   install() {
-    const { local, decode } = this;
+    const { local, codec } = this;
     const { env } = this.globals;
     const printError = (msg: string) => console.error(`image error: ${msg}`);
     let genImageSource: (
@@ -26,7 +26,7 @@ export default definePlugin<"image", "local" | "decode">({
     ) => Promise<string> | string = (
       data: Uint8Array | string,
       _filepath: string
-    ) => (typeof data === "string" ? data : decode.toDataURL(data));
+    ) => (typeof data === "string" ? data : codec.toDataURL(data));
 
     /**
      * 加载图片
@@ -60,7 +60,7 @@ export default definePlugin<"image", "local" | "decode">({
           // 由于ImageBitmap在图片渲染上有优势，故优先使用
           if (data instanceof Uint8Array && "createImageBitmap" in globalThis) {
             try {
-              data = await createImageBitmap(new Blob([decode.toBuffer(data)]));
+              data = await createImageBitmap(new Blob([codec.toBuffer(data)]));
             } catch (ex: any) {
               printError(ex.message);
             }
@@ -88,10 +88,10 @@ export default definePlugin<"image", "local" | "decode">({
 
         // FIXME: IOS设备 微信小程序 Uint8Array转base64 时间较长，使用图片缓存形式速度会更快
         return local!
-          .write(decode.toBuffer(data), filepath)
+          .write(codec.toBuffer(data), filepath)
           .catch((ex: any) => {
             printError(ex.errorMessage || ex.errMsg || ex.message);
-            return decode.toDataURL(data);
+            return codec.toDataURL(data);
           });
       };
     }

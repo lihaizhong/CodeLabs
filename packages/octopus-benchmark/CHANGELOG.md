@@ -1,5 +1,16 @@
 # octopus-benchmark
 
+## 2.0.0
+
+### Minor Changes
+
+- 修改插件(plugin-decode -> plugin-codec)
+
+### Patch Changes
+
+- Updated dependencies []:
+  - octopus-platform@0.2.0
+
 ## 1.1.1
 
 ### Patch Changes

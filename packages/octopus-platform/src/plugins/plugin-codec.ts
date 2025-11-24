@@ -5,13 +5,13 @@ import { utf8 } from "../extensions/utf8";
  * 用于处理数据解码
  * @returns
  */
-export default definePlugin<"decode">({
-  name: "decode",
+export default definePlugin<"codec">({
+  name: "codec",
   install() {
     const { env, br } = this.globals;
     const b64Wrap = (b64: string, type: string = "image/png") =>
       `data:${type};base64,${b64}`;
-    const decode = {
+    const codec = {
       toBuffer(data: Uint8Array): ArrayBuffer {
         const { buffer, byteOffset, byteLength } = data;
 
@@ -44,18 +44,18 @@ export default definePlugin<"decode">({
       const textDecoder = new TextDecoder("utf-8", { fatal: true });
 
       return {
-        ...decode,
+        ...codec,
         toDataURL: (data: Uint8Array) =>
-          b64Wrap(btoa(decode.bytesToString(data))),
+          b64Wrap(btoa(codec.bytesToString(data))),
         utf8: (data: Uint8Array, start: number, end: number) =>
           textDecoder.decode(data.subarray(start, end)),
       };
     }
 
     return {
-      ...decode,
+      ...codec,
       toDataURL: (data: Uint8Array) =>
-        b64Wrap((br as any).arrayBufferToBase64(decode.toBuffer(data))),
+        b64Wrap((br as any).arrayBufferToBase64(codec.toBuffer(data))),
       utf8,
     };
   },
