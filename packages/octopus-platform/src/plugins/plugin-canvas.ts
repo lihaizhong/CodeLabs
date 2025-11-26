@@ -10,7 +10,7 @@ export default definePlugin<"getCanvas", "getSelector">({
   dependencies: ["getSelector"],
   install() {
     const { retry, getSelector } = this;
-    const { env, br, dpr } = this.globals;
+    const { env, dpr } = this.globals;
     const intervals = [50, 100, 100];
 
     function initCanvas(
