@@ -215,7 +215,6 @@ export class Player {
       frame = frames - 1;
     }
 
-    debugger;
     this.stepToFrame(frame, andPlay);
   }
 
@@ -315,7 +314,7 @@ export class Player {
         if (isReverseMode) {
           nextFrame =
             (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
-          // FIXME: 倒序会有一帧的偏差，需要校准当前帧
+          // 倒序会有一帧的偏差，需要校准当前帧
           percent = currentFrame / totalFrame;
         } else {
           nextFrame = timePercent === 1 ? startFrame : Math.floor(exactFrame);
