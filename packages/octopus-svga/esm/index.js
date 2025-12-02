@@ -23,7 +23,7 @@ class EnhancedPlatform extends OctopusPlatform {
             pluginNow,
             pluginPath,
             pluginRAF,
-        ], "1.3.0");
+        ], "2.0.0");
         this.init();
     }
     installPlugin(plugin) {
@@ -58,7 +58,7 @@ class ResourceManager {
             platform.image.release(img);
         }
     }
-    // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
+    // 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
     caches = [];
     /**
      * 动态素材
@@ -147,13 +147,13 @@ class ResourceManager {
      * 释放图片资源
      */
     release() {
-        // FIXME: 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
+        // 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
         for (const img of this.caches) {
             ResourceManager.releaseOne(img);
         }
         this.materials.clear();
         this.dynamicMaterials.clear();
-        // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
+        // 支付宝小程序 image 修改 src 无法触发 onload 事件
         platform.globals.env === "alipay" ? this.cleanup() : this.tidyUp();
     }
     /**
@@ -4639,7 +4639,6 @@ class Player {
         if (frame >= frames) {
             frame = frames - 1;
         }
-        debugger;
         this.stepToFrame(frame, andPlay);
     }
     /**
@@ -4647,7 +4646,6 @@ class Player {
      */
     startAnimation() {
         const { entity, config, animator, painter, resource } = this;
-        const { W, H } = painter;
         const { materials, dynamicMaterials } = resource;
         const { fillMode, playMode, contentMode } = config;
         const { currFrame, startFrame, endFrame, totalFrame, spriteCount, aniConfig, } = config.getConfig(entity);
@@ -4711,7 +4709,7 @@ class Player {
                 if (isReverseMode) {
                     nextFrame =
                         (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
-                    // FIXME: 倒序会有一帧的偏差，需要校准当前帧
+                    // 倒序会有一帧的偏差，需要校准当前帧
                     percent = currentFrame / totalFrame;
                 }
                 else {

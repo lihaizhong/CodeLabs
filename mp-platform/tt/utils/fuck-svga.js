@@ -1289,7 +1289,7 @@ var pluginRaf = definePlugin({
   function EnhancedPlatform() {
     var _this;
     _classCallCheck(this, EnhancedPlatform);
-    _this = _callSuper(this, EnhancedPlatform, [[pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "1.3.0"]);
+    _this = _callSuper(this, EnhancedPlatform, [[pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "2.0.0"]);
     _this.init();
     return _this;
   }
@@ -1305,7 +1305,7 @@ var platform = new EnhancedPlatform();var ResourceManager = /*#__PURE__*/functio
   function ResourceManager(painter) {
     _classCallCheck(this, ResourceManager);
     this.painter = painter;
-    // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
+    // 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
     this.caches = [];
     /**
      * 动态素材
@@ -1420,7 +1420,7 @@ var platform = new EnhancedPlatform();var ResourceManager = /*#__PURE__*/functio
   }, {
     key: "release",
     value: function release() {
-      // FIXME: 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
+      // 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
       var _iterator = _createForOfIteratorHelper(this.caches),
         _step;
       try {
@@ -1435,7 +1435,7 @@ var platform = new EnhancedPlatform();var ResourceManager = /*#__PURE__*/functio
       }
       this.materials.clear();
       this.dynamicMaterials.clear();
-      // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
+      // 支付宝小程序 image 修改 src 无法触发 onload 事件
       platform.globals.env === "alipay" ? this.cleanup() : this.tidyUp();
     }
     /**
@@ -6143,7 +6143,6 @@ var Player = /*#__PURE__*/function () {
       if (frame >= frames) {
         frame = frames - 1;
       }
-      debugger;
       this.stepToFrame(frame, andPlay);
     }
     /**
@@ -6158,8 +6157,6 @@ var Player = /*#__PURE__*/function () {
         animator = this.animator,
         painter = this.painter,
         resource = this.resource;
-      painter.W;
-        painter.H;
       var materials = resource.materials,
         dynamicMaterials = resource.dynamicMaterials;
       var fillMode = config.fillMode,
@@ -6236,7 +6233,7 @@ var Player = /*#__PURE__*/function () {
           exactFrame = percent * totalFrame;
           if (isReverseMode) {
             nextFrame = (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
-            // FIXME: 倒序会有一帧的偏差，需要校准当前帧
+            // 倒序会有一帧的偏差，需要校准当前帧
             percent = currentFrame / totalFrame;
           } else {
             nextFrame = timePercent === 1 ? startFrame : Math.floor(exactFrame);

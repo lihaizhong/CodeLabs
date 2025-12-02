@@ -223,7 +223,6 @@ export class Player {
    */
   private startAnimation(): void {
     const { entity, config, animator, painter, resource } = this;
-    const { W, H } = painter;
     const { materials, dynamicMaterials } = resource!;
     const { fillMode, playMode, contentMode } = config;
     const {
