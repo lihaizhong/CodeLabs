@@ -2109,6 +2109,9 @@ class Renderer2D {
     }
 }
 
+const create2DRenderer = ({ context }) => {
+    return new Renderer2D(context);
+};
 const Renderer2DExtension = {
     stick: (context, bitmap) => () => context.drawImage(bitmap, 0, 0),
     clear: (type, context, canvas, width, height) => {
@@ -4266,14 +4269,14 @@ class Painter {
         if (mode === "single" &&
             (env !== "h5" || "OffscreenCanvas" in globalThis)) {
             const { W, H } = this;
-            const { canvas, context } = getOfsCanvas({ width: W, height: H });
+            const { canvas, context } = getOfsCanvas({ type: '2d', width: W, height: H });
             // 添加主屏
             this.F = canvas;
             this.FC = context;
             this.setActionModel("O");
         }
         else {
-            const { canvas, context } = await getCanvas(selector, component);
+            const { canvas, context } = await getCanvas(selector, { type: '2d', component });
             // 添加主屏
             this.F = canvas;
             this.FC = context;
@@ -4302,13 +4305,13 @@ class Painter {
             // ------- 创建副屏 ---------
             let ofsResult;
             if (typeof ofsSelector === "string" && ofsSelector !== "") {
-                ofsResult = await getCanvas(ofsSelector, component);
+                ofsResult = await getCanvas(ofsSelector, { type: '2d', component });
                 ofsResult.canvas.width = W;
                 ofsResult.canvas.height = H;
                 this.setActionModel("C");
             }
             else {
-                ofsResult = getOfsCanvas({ width: W, height: H });
+                ofsResult = getOfsCanvas({ type: '2d', width: W, height: H });
                 this.setActionModel("O");
             }
             this.B = ofsResult.canvas;
@@ -4321,7 +4324,7 @@ class Painter {
         // #region other methods implement
         // ------- 生成其他方法 --------
         const { B, BC } = this;
-        const renderer = (this.renderer = new Renderer2D(BC));
+        const renderer = (this.renderer = create2DRenderer({ context: BC }));
         this.resize = (contentMode, videoSize) => renderer.resize(contentMode, videoSize, B);
         this.draw = (videoEntity, materials, dynamicMaterials, currentFrame, head, tail) => renderer.render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail);
         // #endregion other methods implement

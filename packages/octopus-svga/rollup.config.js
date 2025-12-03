@@ -8,6 +8,7 @@ import replace from "@rollup/plugin-replace";
 import terser from "@rollup/plugin-terser";
 import babel from "@rollup/plugin-babel";
 import pkg from "./package.json" with { type: "json" };
+import { path } from "zx";
 
 function minifyFileName(fileName) {
   return fileName.replace(/\.js$/, ".min.js");

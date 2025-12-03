@@ -513,7 +513,7 @@ var OctopusPlatform = /*#__PURE__*/function () {
     /**
      * 平台版本
      */
-    _defineProperty(this, "platformVersion", "0.1.3");
+    _defineProperty(this, "platformVersion", "0.2.0");
     /**
      * 应用版本
      */
@@ -750,16 +750,15 @@ var pluginCanvas = definePlugin({
     var retry = this.retry,
       getSelector = this.getSelector;
     var _this$globals3 = this.globals,
-      env = _this$globals3.env;
-      _this$globals3.br;
-      var dpr = _this$globals3.dpr;
+      env = _this$globals3.env,
+      dpr = _this$globals3.dpr;
     var intervals = [50, 100, 100];
-    function initCanvas(canvas, width, height) {
+    function initCanvas(canvas, width, height, type) {
       if (!canvas) {
         throw new Error("canvas not found.");
       }
       // const MAX_SIZE = 1365;
-      var context = canvas.getContext("2d");
+      var context = canvas.getContext(type);
       // let virtualWidth = width * dpr;
       // let virtualHeight = height * dpr;
       // // 微信小程序限制canvas最大尺寸为 1365 * 1365
@@ -785,15 +784,30 @@ var pluginCanvas = definePlugin({
       };
     }
     if (env === "h5") {
-      return function (selector) {
+      return function (selector, options) {
+        var type = (options === null || options === void 0 ? void 0 : options.type) || "2d";
         return retry(function () {
           // FIXME: Taro 对 canvas 做了特殊处理，canvas 元素的 id 会被加上 canvas-id 的前缀
           var canvas = getSelector("canvas[canvas-id=".concat(selector.slice(1), "]")) || getSelector(selector);
-          return initCanvas(canvas, canvas === null || canvas === void 0 ? void 0 : canvas.clientWidth, canvas === null || canvas === void 0 ? void 0 : canvas.clientHeight);
+          return initCanvas(canvas, canvas === null || canvas === void 0 ? void 0 : canvas.clientWidth, canvas === null || canvas === void 0 ? void 0 : canvas.clientHeight, type);
         }, intervals);
       };
     }
-    return function (selector, component) {
+    return function (selector, options) {
+      var type;
+      var component;
+      if (options) {
+        if (typeof options.setData === "function") {
+          type = "2d";
+          component = options;
+        } else {
+          type = options.type || "2d";
+          component = null;
+        }
+      } else {
+        type = "2d";
+        component = null;
+      }
       return retry(function () {
         return new Promise(function (resolve, reject) {
           var query = getSelector(selector, component);
@@ -803,7 +817,7 @@ var pluginCanvas = definePlugin({
               width = _ref.width,
               height = _ref.height;
             try {
-              resolve(initCanvas(node, width, height));
+              resolve(initCanvas(node, width, height, type));
             } catch (e) {
               reject(e);
             }
@@ -3638,7 +3652,11 @@ var PointPool = /*#__PURE__*/function () {
  * - A: arcTo，从起始点绘制一条弧线到指定点。
  */
 Renderer2D.SVG_PATH = new Set(["M", "L", "H", "V", "Z", "C", "S", "Q", "m", "l", "h", "v", "z", "c", "s", "q"]);
-Renderer2D.SVG_LETTER_REGEXP = /[a-zA-Z]/;var Renderer2DExtension = {
+Renderer2D.SVG_LETTER_REGEXP = /[a-zA-Z]/;var create2DRenderer = function create2DRenderer(_ref) {
+  var context = _ref.context;
+  return new Renderer2D(context);
+};
+var Renderer2DExtension = {
   stick: function stick(context, bitmap) {
     return function () {
       return context.drawImage(bitmap, 0, 0);
@@ -5724,6 +5742,7 @@ var Painter = /*#__PURE__*/function () {
               }
               _W = this.W, _H = this.H;
               _getOfsCanvas = getOfsCanvas({
+                type: '2d',
                 width: _W,
                 height: _H
               }), canvas = _getOfsCanvas.canvas, context = _getOfsCanvas.context; // 添加主屏
@@ -5734,7 +5753,10 @@ var Painter = /*#__PURE__*/function () {
               break;
             case 1:
               _context2.n = 2;
-              return getCanvas(selector, component);
+              return getCanvas(selector, {
+                type: '2d',
+                component: component
+              });
             case 2:
               _yield$getCanvas = _context2.v;
               _canvas = _yield$getCanvas.canvas;
@@ -5771,7 +5793,10 @@ var Painter = /*#__PURE__*/function () {
                 break;
               }
               _context2.n = 5;
-              return getCanvas(ofsSelector, component);
+              return getCanvas(ofsSelector, {
+                type: '2d',
+                component: component
+              });
             case 5:
               ofsResult = _context2.v;
               ofsResult.canvas.width = W;
@@ -5781,6 +5806,7 @@ var Painter = /*#__PURE__*/function () {
               break;
             case 6:
               ofsResult = getOfsCanvas({
+                type: '2d',
                 width: W,
                 height: H
               });
@@ -5796,7 +5822,9 @@ var Painter = /*#__PURE__*/function () {
               // #region other methods implement
               // ------- 生成其他方法 --------
               B = this.B, BC = this.BC;
-              renderer = this.renderer = new Renderer2D(BC);
+              renderer = this.renderer = create2DRenderer({
+                context: BC
+              });
               this.resize = function (contentMode, videoSize) {
                 return renderer.resize(contentMode, videoSize, B);
               };

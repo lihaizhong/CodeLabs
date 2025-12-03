@@ -140,7 +140,7 @@ class OctopusPlatform {
     /**
      * 平台版本
      */
-    platformVersion = "0.1.3";
+    platformVersion = "0.2.0";
     /**
      * 应用版本
      */
@@ -327,14 +327,14 @@ var pluginCanvas = definePlugin({
     dependencies: ["getSelector"],
     install() {
         const { retry, getSelector } = this;
-        const { env, br, dpr } = this.globals;
+        const { env, dpr } = this.globals;
         const intervals = [50, 100, 100];
-        function initCanvas(canvas, width, height) {
+        function initCanvas(canvas, width, height, type) {
             if (!canvas) {
                 throw new Error("canvas not found.");
             }
             // const MAX_SIZE = 1365;
-            const context = canvas.getContext("2d");
+            const context = canvas.getContext(type);
             // let virtualWidth = width * dpr;
             // let virtualHeight = height * dpr;
             // // 微信小程序限制canvas最大尺寸为 1365 * 1365
@@ -357,24 +357,45 @@ var pluginCanvas = definePlugin({
             return { canvas, context };
         }
         if (env === "h5") {
-            return (selector) => retry(() => {
-                // FIXME: Taro 对 canvas 做了特殊处理，canvas 元素的 id 会被加上 canvas-id 的前缀
-                const canvas = (getSelector(`canvas[canvas-id=${selector.slice(1)}]`) || getSelector(selector));
-                return initCanvas(canvas, canvas?.clientWidth, canvas?.clientHeight);
-            }, intervals);
+            return (selector, options) => {
+                const type = options?.type || "2d";
+                return retry(() => {
+                    // FIXME: Taro 对 canvas 做了特殊处理，canvas 元素的 id 会被加上 canvas-id 的前缀
+                    const canvas = (getSelector(`canvas[canvas-id=${selector.slice(1)}]`) || getSelector(selector));
+                    return initCanvas(canvas, canvas?.clientWidth, canvas?.clientHeight, type);
+                }, intervals);
+            };
         }
-        return (selector, component) => retry(() => new Promise((resolve, reject) => {
-            let query = getSelector(selector, component);
-            query.exec((res) => {
-                const { node, width, height } = res[0] || {};
-                try {
-                    resolve(initCanvas(node, width, height));
+        return (selector, options) => {
+            let type;
+            let component;
+            if (options) {
+                if (typeof options.setData === "function") {
+                    type = "2d";
+                    component = options;
                 }
-                catch (e) {
-                    reject(e);
+                else {
+                    type = options.type || "2d";
+                    component = null;
                 }
-            });
-        }), intervals);
+            }
+            else {
+                type = "2d";
+                component = null;
+            }
+            return retry(() => new Promise((resolve, reject) => {
+                let query = getSelector(selector, component);
+                query.exec((res) => {
+                    const { node, width, height } = res[0] || {};
+                    try {
+                        resolve(initCanvas(node, width, height, type));
+                    }
+                    catch (e) {
+                        reject(e);
+                    }
+                });
+            }), intervals);
+        };
     },
 });
 

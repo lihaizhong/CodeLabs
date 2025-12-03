@@ -213,7 +213,7 @@ function utf8(buffer, start, end) {
         /**
          * 平台版本
          */
-        this.platformVersion = "0.1.3";
+        this.platformVersion = "0.2.0";
         /**
          * 应用版本
          */
@@ -398,14 +398,14 @@ var pluginCanvas = definePlugin({
     dependencies: ["getSelector"],
     install: function () {
         var _a = this, retry = _a.retry, getSelector = _a.getSelector;
-        var _b = this.globals, env = _b.env; _b.br; var dpr = _b.dpr;
+        var _b = this.globals, env = _b.env, dpr = _b.dpr;
         var intervals = [50, 100, 100];
-        function initCanvas(canvas, width, height) {
+        function initCanvas(canvas, width, height, type) {
             if (!canvas) {
                 throw new Error("canvas not found.");
             }
             // const MAX_SIZE = 1365;
-            var context = canvas.getContext("2d");
+            var context = canvas.getContext(type);
             // let virtualWidth = width * dpr;
             // let virtualHeight = height * dpr;
             // // 微信小程序限制canvas最大尺寸为 1365 * 1365
@@ -428,22 +428,39 @@ var pluginCanvas = definePlugin({
             return { canvas: canvas, context: context };
         }
         if (env === "h5") {
-            return function (selector) {
+            return function (selector, options) {
+                var type = (options === null || options === void 0 ? void 0 : options.type) || "2d";
                 return retry(function () {
                     // FIXME: Taro 对 canvas 做了特殊处理，canvas 元素的 id 会被加上 canvas-id 的前缀
                     var canvas = (getSelector("canvas[canvas-id=".concat(selector.slice(1), "]")) || getSelector(selector));
-                    return initCanvas(canvas, canvas === null || canvas === void 0 ? void 0 : canvas.clientWidth, canvas === null || canvas === void 0 ? void 0 : canvas.clientHeight);
+                    return initCanvas(canvas, canvas === null || canvas === void 0 ? void 0 : canvas.clientWidth, canvas === null || canvas === void 0 ? void 0 : canvas.clientHeight, type);
                 }, intervals);
             };
         }
-        return function (selector, component) {
+        return function (selector, options) {
+            var type;
+            var component;
+            if (options) {
+                if (typeof options.setData === "function") {
+                    type = "2d";
+                    component = options;
+                }
+                else {
+                    type = options.type || "2d";
+                    component = null;
+                }
+            }
+            else {
+                type = "2d";
+                component = null;
+            }
             return retry(function () {
                 return new Promise(function (resolve, reject) {
                     var query = getSelector(selector, component);
                     query.exec(function (res) {
                         var _a = res[0] || {}, node = _a.node, width = _a.width, height = _a.height;
                         try {
-                            resolve(initCanvas(node, width, height));
+                            resolve(initCanvas(node, width, height, type));
                         }
                         catch (e) {
                             reject(e);

@@ -443,6 +443,15 @@ declare class ResourceManager {
     cleanup(): void;
 }
 
+declare global {
+    interface Navigator {
+        gpu?: {
+            requestAdapter(): Promise<any>;
+            getPreferredCanvasFormat(): string;
+        };
+    }
+}
+
 /**
  * SVGA 播放器
  */

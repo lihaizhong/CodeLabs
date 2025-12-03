@@ -3,7 +3,22 @@ import {
   PlatformCanvas,
   PlatformOffscreenCanvas,
 } from "octopus-platform";
-export * from "./Renderer2D";
+import { PlatformRenderingContext2D } from "../../../types";
+import { Renderer2D } from "./Renderer2D";
+
+export interface Renderer2DOptions {
+  context: PlatformRenderingContext2D;
+}
+
+export const create2DRenderer = ({ context }: Renderer2DOptions): Renderer2D => {
+  return new Renderer2D(context);
+};
+
+export const detect2DSupport = (): boolean => {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  return !!context;
+};
 
 export const Renderer2DExtension = {
   stick:
@@ -33,3 +48,5 @@ export const Renderer2DExtension = {
     };
   },
 };
+
+export { Renderer2D };
