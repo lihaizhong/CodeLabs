@@ -1,5 +1,5 @@
+import { PlatformVideo } from "@/types";
 import Reader from "../io/Reader";
-import { PlatformVideo } from "../../../types/video";
 
 /**
  * Properties of a ShapeArgs.

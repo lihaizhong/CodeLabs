@@ -1,5 +1,5 @@
 {
-  "name": "octopus-svga",
+  "name": "octopus-svga-engine",
   "version": "2.0.0",
   "keywords": [
     "svgaplayer",
@@ -29,7 +29,7 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "declare": "tsc",
+    "declare": "tsc -p tsconfig.dts.json",
     "cleanup": "rimraf -rf esm lib types index.d.ts",
     "generate": "rollup -c",
     "build": "npm run cleanup && npm run declare && npm run generate",
@@ -65,6 +65,7 @@
     "rollup": "^4.45.1",
     "rollup-plugin-delete": "^3.0.1",
     "rollup-plugin-dts": "^6.2.1",
+    "tsc-alias": "^1.8.16",
     "tslib": "^2.8.1",
     "typescript": "^5.8.3"
   },

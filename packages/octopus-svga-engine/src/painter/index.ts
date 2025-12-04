@@ -3,14 +3,14 @@ import type {
   PlatformCanvas,
   PlatformOffscreenCanvas,
 } from "octopus-platform";
-import { platform } from "../../platform";
+import { platform } from "@/platform";
+import { create2DRenderer, Renderer2D, Renderer2DExtension } from "@/extensions";
 import type {
   PainterActionModel,
   PainterMode,
   PlatformVideo,
   PLAYER_CONTENT_MODE,
-} from "../../types";
-import { create2DRenderer, Renderer2D, Renderer2DExtension } from "../../extensions";
+} from "@/types";
 
 const { noop } = platform;
 

@@ -3,7 +3,7 @@ import {
   PlatformCanvas,
   PlatformOffscreenCanvas,
 } from "octopus-platform";
-import { PlatformRenderingContext2D } from "../../../types";
+import { PlatformRenderingContext2D } from "@/types";
 import { Renderer2D } from "./Renderer2D";
 
 export interface Renderer2DOptions {

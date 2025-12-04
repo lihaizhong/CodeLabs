@@ -8,7 +8,6 @@ import replace from "@rollup/plugin-replace";
 import terser from "@rollup/plugin-terser";
 import babel from "@rollup/plugin-babel";
 import pkg from "./package.json" with { type: "json" };
-import { path } from "zx";
 
 function minifyFileName(fileName) {
   return fileName.replace(/\.js$/, ".min.js");
@@ -45,11 +44,7 @@ export default defineConfig([
           __VERSION__: JSON.stringify(pkg.version),
         },
       }),
-      typescript({
-        declaration: false,
-        emitDeclarationOnly: false,
-        declarationDir: undefined,
-      }),
+      typescript(),
       commonjs(),
     ],
   },
@@ -59,7 +54,7 @@ export default defineConfig([
       {
         file: pkg.main,
         format: "umd",
-        name: "OctopusSvga",
+        name: "OctopusSvgaEngine",
         exports: "named",
         compact: true,
         esModule: true,
@@ -68,7 +63,7 @@ export default defineConfig([
       {
         file: minifyFileName(pkg.main),
         format: "umd",
-        name: "OctopusSvga",
+        name: "OctopusSvgaEngine",
         exports: "named",
         esModule: true,
         compact: true,
@@ -77,14 +72,9 @@ export default defineConfig([
       },
     ],
     plugins: [
-      nodeResolve(),
+      nodeResolve({ browser: true }),
       commonjs(),
-      typescript({
-        target: "ES6",
-        declaration: false,
-        emitDeclarationOnly: false,
-        declarationDir: undefined,
-      }),
+      typescript({ target: "ES6" }),
       babel({
         babelHelpers: "bundled",
         include: [
@@ -119,9 +109,17 @@ export default defineConfig([
       file: pkg.types,
       format: "esm",
     },
+    external: ["octopus-platform"],
     plugins: [
       // 将类型文件全部集中到一个文件中
-      dts(),
+      dts({
+        // 使用专门的 tsconfig.dts.json 中的路径映射
+        tsconfig: "./tsconfig.dts.json",
+        // 确保解析路径别名
+        respectExternal: true,
+        // 包含外部模块的类型定义
+        includeExternal: ["octopus-platform"]
+      }),
       // 在构建完成后，删除 types 文件夹
       del({
         targets: "types",

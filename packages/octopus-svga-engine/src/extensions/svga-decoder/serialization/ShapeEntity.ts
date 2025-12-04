@@ -1,10 +1,10 @@
+import { PlatformVideo } from "@/types";
 import Reader from "../io/Reader";
 import Transform from "./Transform";
 import ShapeArgs from "./ShapeArgs";
 import RectArgs from "./RectArgs";
 import EllipseArgs from "./EllipseArgs";
 import ShapeStyle from "./ShapeStyle";
-import { PlatformVideo } from "../../../types/video";
 
 export default class ShapeEntity {
   /**

@@ -1,12 +1,12 @@
 import { type Bitmap } from "octopus-platform";
-import { PointPool, CurrentPoint } from "../../../shared/PointPool";
+import { PointPool, CurrentPoint } from "@/shared/PointPool";
 import {
   PlatformVideo,
   type TransformScale,
   type PlatformRenderingContext2D,
   type CanvasSize,
   PLAYER_CONTENT_MODE
-} from "../../../types";
+} from "@/types";
 
 export interface ICommand {
   command: string;

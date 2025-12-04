@@ -1,8 +1,8 @@
 import { PlatformCanvas } from 'octopus-platform';
+import { PlatformRenderingContext2D } from '@/types';
 import { createGPURenderer,RendererGPU } from './gpu';
 import { createGLRenderer,RendererGL } from './gl';
 import { create2DRenderer,Renderer2D } from './2d';
-import { PlatformRenderingContext2D } from '../../types';
 
 export * from './2d'
 export * from './gl'

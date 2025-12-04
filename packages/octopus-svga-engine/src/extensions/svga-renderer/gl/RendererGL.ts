@@ -3,7 +3,7 @@ import {
   PlatformVideo,
   type TransformScale,
   PLAYER_CONTENT_MODE
-} from "../../../types";
+} from "@/types";
 
 export class RendererGL {
   private gl: WebGLRenderingContext | null = null;

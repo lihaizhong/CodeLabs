@@ -1,5 +1,5 @@
-import { platform } from "../platform";
-import { PNGEncoder } from "../extensions";
+import { platform } from "@/platform";
+import { PNGEncoder } from "@/extensions";
 
 /**
  * 将 ImageData 转换为 PNG 格式的 Buffer
