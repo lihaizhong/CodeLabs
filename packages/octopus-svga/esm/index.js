@@ -1,36 +1,17 @@
-import { OctopusPlatform, pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF, installPlugin } from 'octopus-platform';
+import { createPlatform, pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF } from 'octopus-platform';
 
-class EnhancedPlatform extends OctopusPlatform {
-    now;
-    path;
-    remote;
-    local;
-    codec;
-    image;
-    rAF;
-    getSelector;
-    getCanvas;
-    getOfsCanvas;
-    constructor() {
-        super([
-            pluginSelector,
-            pluginCanvas,
-            pluginOfsCanvas,
-            pluginCodec,
-            pluginDownload,
-            pluginFsm,
-            pluginImage,
-            pluginNow,
-            pluginPath,
-            pluginRAF,
-        ], "2.0.0");
-        this.init();
-    }
-    installPlugin(plugin) {
-        installPlugin(this, plugin);
-    }
-}
-const platform = new EnhancedPlatform();
+const platform = createPlatform([
+    pluginSelector,
+    pluginCanvas,
+    pluginOfsCanvas,
+    pluginCodec,
+    pluginDownload,
+    pluginFsm,
+    pluginImage,
+    pluginNow,
+    pluginPath,
+    pluginRAF,
+], "2.0.0");
 
 class ResourceManager {
     painter;
@@ -2108,11 +2089,7 @@ class Renderer2D {
         this.context = null;
     }
 }
-
-const create2DRenderer = ({ context }) => {
-    return new Renderer2D(context);
-};
-const Renderer2DExtension = {
+const RendererExtension = {
     stick: (context, bitmap) => () => context.drawImage(bitmap, 0, 0),
     clear: (type, context, canvas, width, height) => {
         if (type === "CL") {
@@ -4293,7 +4270,7 @@ class Painter {
         // #endregion set main screen implement
         const { FC, F, W, H } = this;
         const clearType = model.clear;
-        this.clearContainer = Renderer2DExtension.clear(clearType, FC, F, W, H);
+        this.clearContainer = RendererExtension.clear(clearType, FC, F, W, H);
         if (mode === "single") {
             this.B = F;
             this.BC = FC;
@@ -4318,13 +4295,13 @@ class Painter {
             this.BC = ofsResult.context;
             // #endregion set secondary screen implement
             const { BC, B } = this;
-            this.clearSecondary = Renderer2DExtension.clear(clearType, BC, B, W, H);
-            this.stick = Renderer2DExtension.stick(FC, B);
+            this.clearSecondary = RendererExtension.clear(clearType, BC, B, W, H);
+            this.stick = RendererExtension.stick(FC, B);
         }
         // #region other methods implement
         // ------- 生成其他方法 --------
         const { B, BC } = this;
-        const renderer = (this.renderer = create2DRenderer({ context: BC }));
+        const renderer = (this.renderer = new Renderer2D(BC));
         this.resize = (contentMode, videoSize) => renderer.resize(contentMode, videoSize, B);
         this.draw = (videoEntity, materials, dynamicMaterials, currentFrame, head, tail) => renderer.render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail);
         // #endregion other methods implement
@@ -4892,7 +4869,7 @@ const calcCellSizeAndPadding = (moduleCount, size) => {
         cellSize: cellSize || 2,
     };
 };
-function generateImageBufferFromCode(options) {
+function generateImageBufferFromCodeInternal(options) {
     const { code, typeNumber, correctLevel, size, codeColor, backgroundColor } = parseOptions(options);
     let qr;
     try {
@@ -4904,7 +4881,7 @@ function generateImageBufferFromCode(options) {
         if (typeNumber >= 40) {
             throw new Error("Text too long to encode");
         }
-        return arguments.callee({
+        return generateImageBufferFromCodeInternal({
             code,
             size,
             correctLevel,
@@ -4934,6 +4911,9 @@ function generateImageBufferFromCode(options) {
     }
     return png.flush();
 }
+function generateImageBufferFromCode(options) {
+    return generateImageBufferFromCodeInternal(options);
+}
 function generateImageFromCode(options) {
     const buff = generateImageBufferFromCode(options);
     return platform.codec.toDataURL(buff);
@@ -4949,10 +4929,6 @@ function createBufferOfImageData(imageData) {
     return new PNGEncoder(width, height).write(data).flush();
 }
 /**
- * @deprecated 请使用 createBufferOfImageData 代替，此方法可能在后续版本中移除
- */
-const getBufferFromImageData = createBufferOfImageData;
-/**
  * 将 ImageData 转换为 PNG 格式的 Base64 字符串
  * @param imageData
  * @returns PNG 格式的 Base64 字符串
@@ -4960,10 +4936,6 @@ const getBufferFromImageData = createBufferOfImageData;
 function createImageDataUrl(imageData) {
     return platform.codec.toDataURL(createBufferOfImageData(imageData));
 }
-/**
- * @deprecated 请使用 createImageDataUrl 代替，此方法可能在后续版本中移除
- */
-const getDataURLFromImageData = createImageDataUrl;
 
 /**
  * 检查数据是否为zlib压缩格式
@@ -5338,5 +5310,5 @@ class VideoEditor {
     }
 }
 
-export { EnhancedPlatform, Painter, Parser, Player, Poster, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
+export { Painter, Parser, Player, Poster, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, isZlibCompressed, platform };
 //# sourceMappingURL=index.js.map

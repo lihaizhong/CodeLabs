@@ -301,13 +301,6 @@ typeof SuppressedError === "function" ? SuppressedError : function (error, suppr
     var e = new Error(message);
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
 };var noop = function noop() {};
-function delay(callback, interval) {
-  return new Promise(function (resolve) {
-    return setTimeout(function () {
-      return resolve(callback());
-    }, interval);
-  });
-}
 function retry(_x) {
   return _retry.apply(this, arguments);
 } // 使用静态缓冲区，避免重复创建
@@ -321,23 +314,34 @@ function _retry() {
       while (1) switch (_context4.p = _context4.n) {
         case 0:
           intervals = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : [];
-          times = _args4.length > 2 && _args4[2] !== undefined ? _args4[2] : 0;
-          _context4.p = 1;
-          return _context4.a(2, fn());
-        case 2:
+          times = 0;
+        case 1:
           _context4.p = 2;
+          _context4.n = 3;
+          return fn();
+        case 3:
+          return _context4.a(2, _context4.v);
+        case 4:
+          _context4.p = 4;
           _t5 = _context4.v;
           if (!(times >= intervals.length)) {
-            _context4.n = 3;
+            _context4.n = 5;
             break;
           }
           throw _t5;
-        case 3:
-          return _context4.a(2, delay(function () {
-            return retry(fn, intervals, ++times);
-          }, intervals[times]));
+        case 5:
+          _context4.n = 6;
+          return new Promise(function (resolve) {
+            return setTimeout(resolve, intervals[times]);
+          });
+        case 6:
+          times++;
+          _context4.n = 1;
+          break;
+        case 7:
+          return _context4.a(2);
       }
-    }, _callee4, null, [[1, 2]]);
+    }, _callee4, null, [[2, 4]]);
   }));
   return _retry.apply(this, arguments);
 }
@@ -351,7 +355,7 @@ var OctopusPlatform = /*#__PURE__*/function () {
     /**
      * 平台版本
      */
-    _defineProperty(this, "platformVersion", "0.1.3");
+    _defineProperty(this, "platformVersion", "0.2.0");
     /**
      * 应用版本
      */
@@ -401,23 +405,39 @@ var OctopusPlatform = /*#__PURE__*/function () {
   }, {
     key: "autoEnv",
     value: function autoEnv() {
-      if (typeof window !== "undefined") {
-        return "h5";
+      var envs = [{
+        name: 'h5',
+        check: function check() {
+          return typeof window !== 'undefined';
+        }
+      }, {
+        name: 'tt',
+        check: function check() {
+          return typeof tt !== 'undefined';
+        }
+      }, {
+        name: 'alipay',
+        check: function check() {
+          return typeof my !== 'undefined';
+        }
+      }, {
+        name: 'weapp',
+        check: function check() {
+          return typeof wx !== 'undefined';
+        }
+      }, {
+        name: 'harmony',
+        check: function check() {
+          return typeof has !== 'undefined';
+        }
+      }];
+      for (var _i = 0, _envs = envs; _i < _envs.length; _i++) {
+        var env = _envs[_i];
+        if (env.check()) return env.name;
       }
-      // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
-      if (typeof tt !== "undefined") {
-        return "tt";
-      }
-      if (typeof my !== "undefined") {
-        return "alipay";
-      }
-      if (typeof wx !== "undefined") {
-        return "weapp";
-      }
-      if (typeof has !== "undefined") {
-        return "harmony";
-      }
-      throw new Error("Unsupported platform！");
+      throw new Error("Unsupported platform! Available: ".concat(envs.map(function (e) {
+        return e.name;
+      }).join(', ')));
     }
   }, {
     key: "useBridge",
@@ -547,15 +567,47 @@ var OctopusPlatform = /*#__PURE__*/function () {
 var definePlugin = function definePlugin(plugin) {
   return plugin;
 };
-function installPlugin(platform, plugin) {
-  var value = plugin.install.call(platform);
-  Object.defineProperty(platform, plugin.name, {
+function _installPlugin(self, plugin) {
+  var value = plugin.install.call(self);
+  Object.defineProperty(self, plugin.name, {
     get: function get() {
       return value;
     },
     enumerable: true,
     configurable: true
   });
+}
+
+/**
+ * 创建平台实例的工厂函数
+ *
+ * 通过工厂函数创建平台实例，无需继承。
+ * TypeScript 会根据插件列表自动推断实例的属性类型。
+ *
+ * @param plugins - 插件列表
+ * @param version - 应用版本
+ * @returns 平台实例，自动推断插件属性类型
+ */
+function createPlatform(plugins, version) {
+  // 内部类：继承 OctopusPlatform 并实现 installPlugin
+  var InternalPlatform = /*#__PURE__*/function (_OctopusPlatform2) {
+    function InternalPlatform() {
+      var _this;
+      _classCallCheck(this, InternalPlatform);
+      _this = _callSuper(this, InternalPlatform, [plugins, version]);
+      _this.init(); // 在基类中调用 init
+      return _this;
+    }
+    _inherits(InternalPlatform, _OctopusPlatform2);
+    return _createClass(InternalPlatform, [{
+      key: "installPlugin",
+      value: function installPlugin(plugin) {
+        // 使用 installPlugin.ts 中的实现（包含类型断言）
+        _installPlugin(this, plugin);
+      }
+    }]);
+  }(OctopusPlatform);
+  return new InternalPlatform();
 }
 var pluginNow = definePlugin({
   name: "now",
@@ -581,105 +633,119 @@ var pluginNow = definePlugin({
       return Date.now();
     };
   }
-});var EnhancedPlatform = /*#__PURE__*/function (_OctopusPlatform) {
-  function EnhancedPlatform() {
-    var _this;
-    _classCallCheck(this, EnhancedPlatform);
-    _this = _callSuper(this, EnhancedPlatform, [[pluginNow], "1.1.1"]);
-    _this.init();
-    return _this;
-  }
-  _inherits(EnhancedPlatform, _OctopusPlatform);
-  return _createClass(EnhancedPlatform, [{
-    key: "installPlugin",
-    value: function installPlugin$1(plugin) {
-      installPlugin(this, plugin);
-    }
-  }]);
-}(OctopusPlatform);
-var platform = new EnhancedPlatform();var logBadge = ["%cBENCHMARK", "padding: 2px 4px; background: #68B984; color: #FFFFFF; border-radius: 4px;"];
-var infoBadge = ["%cBENCHMARK", "padding: 2px 4px; background: #89CFF0; color: #FFFFFF; border-radius: 4px;"];
-var Stopwatch = /*#__PURE__*/function () {
-  function Stopwatch() {
-    _classCallCheck(this, Stopwatch);
-    this.timeLabels = new Map();
-    this.markLabels = new Map();
-  }
-  return _createClass(Stopwatch, [{
-    key: "start",
-    value: function start(label) {
-      this.timeLabels.set(label, platform.now());
-    }
-  }, {
-    key: "stop",
-    value: function stop(label) {
+});var platform = createPlatform([pluginNow], "2.0.0");var BADGE_PREFIX = "%cBENCHMARK";
+var BASE_STYLE = "padding: 2px 4px; color: #FFFFFF; border-radius: 4px;";
+var logBadge = [BADGE_PREFIX, "".concat(BASE_STYLE, " background: #68B984;")];
+var infoBadge = [BADGE_PREFIX, "".concat(BASE_STYLE, " background: #89CFF0;")];
+/**
+ * 创建性能测试实例
+ * @returns Benchmark 实例
+ */
+function createBenchmark() {
+  var timeLabels = new Map();
+  var markLabels = new Map();
+  return {
+    /**
+     * 获取当前时间戳
+     */
+    now: function now() {
+      return platform.now();
+    },
+    /**
+     * 开始计时
+     */
+    start: function start(label) {
+      timeLabels.set(label, platform.now());
+    },
+    /**
+     * 停止计时并输出结果
+     */
+    stop: function stop(label) {
       var nowTime = platform.now();
-      var timeLabels = this.timeLabels;
       if (timeLabels.has(label)) {
-        console.log("".concat(label, ": ").concat(nowTime - timeLabels.get(label), " ms"));
+        var startTime = timeLabels.get(label);
+        console.log("".concat(label, ": ").concat(nowTime - startTime, " ms"));
         timeLabels.delete(label);
       }
-    }
-  }, {
-    key: "mark",
-    value: function mark(label) {
+    },
+    /**
+     * 标记时间点并输出间隔
+     */
+    mark: function mark(label) {
       var nowTime = platform.now();
-      var markLabels = this.markLabels;
       if (markLabels.has(label)) {
-        console.log("".concat(label, ": ").concat(nowTime - markLabels.get(label), " ms"));
+        var prevTime = markLabels.get(label);
+        console.log("".concat(label, ": ").concat(nowTime - prevTime, " ms"));
       }
       markLabels.set(label, nowTime);
-    }
-  }, {
-    key: "reset",
-    value: function reset(label) {
-      this.markLabels.delete(label);
-    }
-  }, {
-    key: "clear",
-    value: function clear() {
-      this.timeLabels.clear();
-      this.markLabels.clear();
-    }
-  }]);
-}();
-var stopwatch = new Stopwatch();
-var benchmark = Object.create(stopwatch);
-benchmark.now = function () {
-  return platform.now();
-};
-benchmark.time = function (label, callback) {
-  return __awaiter(void 0, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee() {
-    var result;
-    return _regenerator().w(function (_context) {
-      while (1) switch (_context.n) {
-        case 0:
-          stopwatch.start(label);
-          _context.n = 1;
-          return callback();
-        case 1:
-          result = _context.v;
-          stopwatch.stop(label);
-          return _context.a(2, result);
+    },
+    /**
+     * 重置标记
+     */
+    reset: function reset(label) {
+      markLabels.delete(label);
+    },
+    /**
+     * 清除所有标签
+     */
+    clear: function clear() {
+      timeLabels.clear();
+      markLabels.clear();
+    },
+    /**
+     * 测量异步操作的执行时间
+     */
+    time: function time(label, callback) {
+      return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee() {
+        return _regenerator().w(function (_context) {
+          while (1) switch (_context.p = _context.n) {
+            case 0:
+              this.start(label);
+              _context.p = 1;
+              _context.n = 2;
+              return callback();
+            case 2:
+              return _context.a(2, _context.v);
+            case 3:
+              _context.p = 3;
+              this.stop(label);
+              return _context.f(3);
+            case 4:
+              return _context.a(2);
+          }
+        }, _callee, this, [[1,, 3, 4]]);
+      }));
+    },
+    /**
+     * 输出分隔线
+     */
+    line: function line() {
+      var size = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 40;
+      console.log("-".repeat(size));
+    },
+    /**
+     * 输出带徽标的日志
+     */
+    log: function log() {
+      var _console;
+      for (var _len = arguments.length, message = new Array(_len), _key = 0; _key < _len; _key++) {
+        message[_key] = arguments[_key];
       }
-    }, _callee);
-  }));
-};
-benchmark.line = function () {
-  var size = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 40;
-  console.log("-".repeat(size));
-};
-benchmark.log = function () {
-  var _console;
-  for (var _len = arguments.length, message = new Array(_len), _key = 0; _key < _len; _key++) {
-    message[_key] = arguments[_key];
-  }
-  (_console = console).log.apply(_console, logBadge.concat(message));
-};
-benchmark.info = function () {
-  var _console2;
-  for (var _len2 = arguments.length, message = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    message[_key2] = arguments[_key2];
-  }
-  (_console2 = console).info.apply(_console2, infoBadge.concat(message));
-};exports.benchmark=benchmark;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map
+      (_console = console).log.apply(_console, logBadge.concat(message));
+    },
+    /**
+     * 输出带徽标的信息
+     */
+    info: function info() {
+      var _console2;
+      for (var _len2 = arguments.length, message = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        message[_key2] = arguments[_key2];
+      }
+      (_console2 = console).info.apply(_console2, infoBadge.concat(message));
+    }
+  };
+}
+/**
+ * 默认性能测试实例
+ */
+var benchmark = createBenchmark();exports.benchmark=benchmark;exports.createBenchmark=createBenchmark;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map

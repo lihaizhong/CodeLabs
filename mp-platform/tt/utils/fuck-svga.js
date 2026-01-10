@@ -358,13 +358,6 @@ typeof SuppressedError === "function" ? SuppressedError : function (error, suppr
     var e = new Error(message);
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
 };var noop$1 = function noop() {};
-function delay(callback, interval) {
-  return new Promise(function (resolve) {
-    return setTimeout(function () {
-      return resolve(callback());
-    }, interval);
-  });
-}
 function retry(_x) {
   return _retry.apply(this, arguments);
 } // 使用静态缓冲区，避免重复创建
@@ -378,28 +371,220 @@ function _retry() {
       while (1) switch (_context4.p = _context4.n) {
         case 0:
           intervals = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : [];
-          times = _args4.length > 2 && _args4[2] !== undefined ? _args4[2] : 0;
-          _context4.p = 1;
-          return _context4.a(2, fn());
-        case 2:
+          times = 0;
+        case 1:
           _context4.p = 2;
+          _context4.n = 3;
+          return fn();
+        case 3:
+          return _context4.a(2, _context4.v);
+        case 4:
+          _context4.p = 4;
           _t5 = _context4.v;
           if (!(times >= intervals.length)) {
-            _context4.n = 3;
+            _context4.n = 5;
             break;
           }
           throw _t5;
-        case 3:
-          return _context4.a(2, delay(function () {
-            return retry(fn, intervals, ++times);
-          }, intervals[times]));
+        case 5:
+          _context4.n = 6;
+          return new Promise(function (resolve) {
+            return setTimeout(resolve, intervals[times]);
+          });
+        case 6:
+          times++;
+          _context4.n = 1;
+          break;
+        case 7:
+          return _context4.a(2);
       }
-    }, _callee4, null, [[1, 2]]);
+    }, _callee4, null, [[2, 4]]);
   }));
   return _retry.apply(this, arguments);
 }
 var BUFFER_SIZE = 4096; // 更大的缓冲区，减少字符串拼接次数
 var STATIC_BUFFER = new Uint16Array(BUFFER_SIZE); // 预分配ASCII缓冲区
+/**
+ * 验证 UTF-8 解码的输入范围
+ * @param buffer - 输入的字节数组
+ * @param start - 起始位置
+ * @param end - 结束位置
+ * @throws RangeError 如果范围无效
+ */
+function validateRange(buffer, start, end) {
+  if (start < 0 || end > buffer.length) {
+    throw new RangeError("Index out of range");
+  }
+}
+/**
+ * 检测指定范围是否全为 ASCII 字符
+ * @param buffer - 输入的字节数组
+ * @param start - 起始位置
+ * @param end - 结束位置
+ * @returns true 如果所有字节 <= 0x7F
+ */
+function isAllAscii(buffer, start, end) {
+  for (var i = start; i < end; i++) {
+    if (buffer[i] > 0x7F) {
+      return false;
+    }
+  }
+  return true;
+}
+/**
+ * 快速解码纯 ASCII 内容
+ * @param buffer - 输入的字节数组
+ * @param start - 起始位置
+ * @param end - 结束位置
+ * @returns 解码后的字符串
+ */
+function decodeAsciiFastPath(buffer, start, end) {
+  var resultParts = [];
+  // 批量处理，每次处理 BUFFER_SIZE 个字节
+  for (var i = start; i < end; i += BUFFER_SIZE) {
+    var chunkEnd = Math.min(i + BUFFER_SIZE, end);
+    var len = chunkEnd - i;
+    // 直接复制到 Uint16Array
+    for (var j = 0; j < len; j++) {
+      STATIC_BUFFER[j] = buffer[i + j];
+    }
+    // 将缓冲区转换为字符串
+    var str = '';
+    for (var k = 0; k < len; k++) {
+      str += String.fromCharCode(STATIC_BUFFER[k]);
+    }
+    resultParts.push(str);
+  }
+  return resultParts.join('');
+}
+/**
+ * 解码单个 UTF-8 多字节序列
+ * @param buffer - 输入的字节数组
+ * @param pos - 当前位置（指向第一个字节）
+ * @param end - 结束位置
+ * @returns { codePoint, nextPos } 解码结果和下一位置
+ */
+function decodeUTF8Sequence(buffer, pos, end) {
+  var byte = buffer[pos];
+  var codePoint;
+  var nextPos = pos + 1;
+  // 2 字节序列: 110xxxxx 10xxxxxx
+  if ((byte & 0xE0) === 0xC0 && nextPos < end) {
+    codePoint = (byte & 0x1F) << 6 | buffer[nextPos++] & 0x3F;
+  }
+  // 3 字节序列: 1110xxxx 10xxxxxx 10xxxxxx
+  else if ((byte & 0xF0) === 0xE0 && nextPos + 1 < end) {
+    codePoint = (byte & 0x0F) << 12 | (buffer[nextPos++] & 0x3F) << 6 | buffer[nextPos++] & 0x3F;
+  }
+  // 4 字节序列: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+  else if ((byte & 0xF8) === 0xF0 && nextPos + 2 < end) {
+    codePoint = (byte & 0x07) << 18 | (buffer[nextPos++] & 0x3F) << 12 | (buffer[nextPos++] & 0x3F) << 6 | buffer[nextPos++] & 0x3F;
+  }
+  // 无效的 UTF-8 序列
+  else {
+    codePoint = 0xFFFD; // Unicode 替换字符
+    // 跳过可能的后续字节
+    while (nextPos < end && (buffer[nextPos] & 0xC0) === 0x80) {
+      nextPos++;
+    }
+  }
+  return {
+    codePoint: codePoint,
+    nextPos: nextPos
+  };
+}
+/**
+ * 将码点追加到缓冲区，必要时提交
+ * @param staticBuffer - 静态缓冲区
+ * @param bufferPos - 当前缓冲区位置
+ * @param codePoint - 要追加的码点
+ * @param resultParts - 结果字符串数组
+ * @param forceCommit - 是否强制提交
+ * @returns 新的缓冲区位置
+ */
+function appendToBuffer(staticBuffer, bufferPos, codePoint, resultParts, forceCommit) {
+  staticBuffer[bufferPos++] = codePoint;
+  // 检查是否需要提交缓冲区
+  if (bufferPos >= BUFFER_SIZE - 3) {
+    var str = '';
+    for (var i = 0; i < bufferPos; i++) {
+      str += String.fromCharCode(staticBuffer[i]);
+    }
+    resultParts.push(str);
+    bufferPos = 0;
+  }
+  return bufferPos;
+}
+/**
+ * 解码混合内容（ASCII + 多字节 UTF-8）
+ * @param buffer - 输入的字节数组
+ * @param start - 起始位置
+ * @param end - 结束位置
+ * @returns 解码后的字符串
+ */
+function decodeMixedContent(buffer, start, end) {
+  var resultParts = [];
+  var bufferPos = 0;
+  var i = start;
+  while (i < end) {
+    var byte = buffer[i++];
+    // ASCII 字符处理
+    if (byte < 0x80) {
+      STATIC_BUFFER[bufferPos++] = byte;
+      // 如果缓冲区满了，提交并清空
+      if (bufferPos === BUFFER_SIZE) {
+        var str = '';
+        for (var j = 0; j < bufferPos; j++) {
+          str += String.fromCharCode(STATIC_BUFFER[j]);
+        }
+        resultParts.push(str);
+        bufferPos = 0;
+      }
+      continue;
+    }
+    // 提交之前的 ASCII 字符
+    if (bufferPos > 0) {
+      var _str = '';
+      for (var _j = 0; _j < bufferPos; _j++) {
+        _str += String.fromCharCode(STATIC_BUFFER[_j]);
+      }
+      resultParts.push(_str);
+      bufferPos = 0;
+    }
+    // 解码 UTF-8 多字节序列
+    var _decodeUTF8Sequence = decodeUTF8Sequence(buffer, i - 1, end),
+      codePoint = _decodeUTF8Sequence.codePoint,
+      nextPos = _decodeUTF8Sequence.nextPos;
+    i = nextPos;
+    // 处理 Unicode 代理对（超过 0xFFFF 的码点）
+    if (codePoint > 0xFFFF) {
+      var surrogateCodePoint = codePoint - 0x10000;
+      STATIC_BUFFER[bufferPos++] = 0xD800 + (surrogateCodePoint >> 10);
+      STATIC_BUFFER[bufferPos++] = 0xDC00 + (surrogateCodePoint & 0x3FF);
+      // 检查缓冲区是否需要提交（预留空间给下一个可能的代理对）
+      if (bufferPos >= BUFFER_SIZE - 2) {
+        var _str2 = '';
+        for (var _j2 = 0; _j2 < bufferPos; _j2++) {
+          _str2 += String.fromCharCode(STATIC_BUFFER[_j2]);
+        }
+        resultParts.push(_str2);
+        bufferPos = 0;
+      }
+    } else {
+      // 普通码点
+      bufferPos = appendToBuffer(STATIC_BUFFER, bufferPos, codePoint, resultParts);
+    }
+  }
+  // 提交剩余字符
+  if (bufferPos > 0) {
+    var _str3 = '';
+    for (var _j3 = 0; _j3 < bufferPos; _j3++) {
+      _str3 += String.fromCharCode(STATIC_BUFFER[_j3]);
+    }
+    resultParts.push(_str3);
+  }
+  return resultParts.join('');
+}
 /**
  * 优化的 UTF-8 解码函数
  * 主要优化点：
@@ -407,101 +592,25 @@ var STATIC_BUFFER = new Uint16Array(BUFFER_SIZE); // 预分配ASCII缓冲区
  * 2. 批量处理 ASCII 字符
  * 3. 优化循环结构和条件判断
  * 4. 使用 Uint16Array 代替普通数组提高性能
+ *
+ * @param buffer - 输入的 UTF-8 编码字节数组
+ * @param start - 起始位置
+ * @param end - 结束位置
+ * @returns 解码后的字符串
  */
 function utf8(buffer, start, end) {
-  // 边界检查
-  if (start < 0 || end > buffer.length) throw new RangeError("Index out of range");
-  if (end - start < 1) return "";
-  var resultParts = [];
-  var bufferPos = 0;
-  var appendBuffer = function appendBuffer(parts) {
-    resultParts.push(String.fromCharCode.apply(null, Array.from(parts)));
-  };
-  // 快速路径：检查是否全是 ASCII
-  var allAscii = true;
-  for (var i = start; i < end; i++) {
-    if (buffer[i] > 0x7F) {
-      allAscii = false;
-      break;
-    }
+  // 1. 边界验证
+  validateRange(buffer, start, end);
+  // 2. 处理空输入
+  if (end - start < 1) {
+    return "";
   }
-  // 全 ASCII 优化路径
-  if (allAscii) {
-    for (var _i = start; _i < end; _i += BUFFER_SIZE) {
-      var chunkEnd = Math.min(_i + BUFFER_SIZE, end);
-      var len = chunkEnd - _i;
-      // 直接复制到 Uint16Array
-      for (var j = 0; j < len; j++) {
-        STATIC_BUFFER[j] = buffer[_i + j];
-      }
-      appendBuffer(STATIC_BUFFER.subarray(0, len));
-    }
-    return resultParts.join('');
+  // 3. 快速路径：全 ASCII
+  if (isAllAscii(buffer, start, end)) {
+    return decodeAsciiFastPath(buffer, start, end);
   }
-  // 混合内容处理
-  for (var _i2 = start; _i2 < end;) {
-    var byte = buffer[_i2++];
-    // ASCII 字符处理
-    if (byte < 0x80) {
-      STATIC_BUFFER[bufferPos++] = byte;
-      // 如果缓冲区满了，提交并清空
-      if (bufferPos === BUFFER_SIZE) {
-        appendBuffer(STATIC_BUFFER);
-        bufferPos = 0;
-      }
-      continue;
-    }
-    // 提交之前的 ASCII 字符
-    if (bufferPos > 0) {
-      appendBuffer(STATIC_BUFFER.subarray(0, bufferPos));
-      bufferPos = 0;
-    }
-    // 变长编码处理 - 使用查表法代替多个条件判断
-    var codePoint = void 0;
-    // 2 字节序列: 110xxxxx 10xxxxxx
-    if ((byte & 0xE0) === 0xC0 && _i2 < end) {
-      codePoint = (byte & 0x1F) << 6 | buffer[_i2++] & 0x3F;
-    }
-    // 3 字节序列: 1110xxxx 10xxxxxx 10xxxxxx
-    else if ((byte & 0xF0) === 0xE0 && _i2 + 1 < end) {
-      codePoint = (byte & 0x0F) << 12 | (buffer[_i2++] & 0x3F) << 6 | buffer[_i2++] & 0x3F;
-    }
-    // 4 字节序列: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-    else if ((byte & 0xF8) === 0xF0 && _i2 + 2 < end) {
-      codePoint = (byte & 0x07) << 18 | (buffer[_i2++] & 0x3F) << 12 | (buffer[_i2++] & 0x3F) << 6 | buffer[_i2++] & 0x3F;
-      // 处理 Unicode 代理对
-      if (codePoint > 0xFFFF) {
-        codePoint -= 0x10000;
-        STATIC_BUFFER[bufferPos++] = 0xD800 + (codePoint >> 10);
-        STATIC_BUFFER[bufferPos++] = 0xDC00 + (codePoint & 0x3FF);
-        // 检查缓冲区是否需要提交
-        if (bufferPos >= BUFFER_SIZE - 2) {
-          // 预留空间给下一个可能的代理对
-          appendBuffer(STATIC_BUFFER.subarray(0, bufferPos));
-          bufferPos = 0;
-        }
-        continue;
-      }
-    }
-    // 无效的 UTF-8 序列
-    else {
-      codePoint = 0xFFFD; // Unicode 替换字符
-      // 跳过可能的后续字节
-      while (_i2 < end && (buffer[_i2] & 0xC0) === 0x80) _i2++;
-    }
-    STATIC_BUFFER[bufferPos++] = codePoint;
-    // 检查缓冲区是否需要提交
-    if (bufferPos >= BUFFER_SIZE - 3) {
-      // 预留空间给下一个可能的多字节字符
-      appendBuffer(STATIC_BUFFER.subarray(0, bufferPos));
-      bufferPos = 0;
-    }
-  }
-  // 提交剩余字符
-  if (bufferPos > 0) {
-    appendBuffer(STATIC_BUFFER.subarray(0, bufferPos));
-  }
-  return resultParts.join('');
+  // 4. 混合内容处理
+  return decodeMixedContent(buffer, start, end);
 }
 var OctopusPlatform = /*#__PURE__*/function () {
   function OctopusPlatform(plugins, version) {
@@ -563,23 +672,39 @@ var OctopusPlatform = /*#__PURE__*/function () {
   }, {
     key: "autoEnv",
     value: function autoEnv() {
-      if (typeof window !== "undefined") {
-        return "h5";
+      var envs = [{
+        name: 'h5',
+        check: function check() {
+          return typeof window !== 'undefined';
+        }
+      }, {
+        name: 'tt',
+        check: function check() {
+          return typeof tt !== 'undefined';
+        }
+      }, {
+        name: 'alipay',
+        check: function check() {
+          return typeof my !== 'undefined';
+        }
+      }, {
+        name: 'weapp',
+        check: function check() {
+          return typeof wx !== 'undefined';
+        }
+      }, {
+        name: 'harmony',
+        check: function check() {
+          return typeof has !== 'undefined';
+        }
+      }];
+      for (var _i = 0, _envs = envs; _i < _envs.length; _i++) {
+        var env = _envs[_i];
+        if (env.check()) return env.name;
       }
-      // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
-      if (typeof tt !== "undefined") {
-        return "tt";
-      }
-      if (typeof my !== "undefined") {
-        return "alipay";
-      }
-      if (typeof wx !== "undefined") {
-        return "weapp";
-      }
-      if (typeof has !== "undefined") {
-        return "harmony";
-      }
-      throw new Error("Unsupported platform！");
+      throw new Error("Unsupported platform! Available: ".concat(envs.map(function (e) {
+        return e.name;
+      }).join(', ')));
     }
   }, {
     key: "useBridge",
@@ -709,15 +834,47 @@ var OctopusPlatform = /*#__PURE__*/function () {
 var definePlugin = function definePlugin(plugin) {
   return plugin;
 };
-function installPlugin(platform, plugin) {
-  var value = plugin.install.call(platform);
-  Object.defineProperty(platform, plugin.name, {
+function _installPlugin(self, plugin) {
+  var value = plugin.install.call(self);
+  Object.defineProperty(self, plugin.name, {
     get: function get() {
       return value;
     },
     enumerable: true,
     configurable: true
   });
+}
+
+/**
+ * 创建平台实例的工厂函数
+ *
+ * 通过工厂函数创建平台实例，无需继承。
+ * TypeScript 会根据插件列表自动推断实例的属性类型。
+ *
+ * @param plugins - 插件列表
+ * @param version - 应用版本
+ * @returns 平台实例，自动推断插件属性类型
+ */
+function createPlatform(plugins, version) {
+  // 内部类：继承 OctopusPlatform 并实现 installPlugin
+  var InternalPlatform = /*#__PURE__*/function (_OctopusPlatform2) {
+    function InternalPlatform() {
+      var _this;
+      _classCallCheck(this, InternalPlatform);
+      _this = _callSuper(this, InternalPlatform, [plugins, version]);
+      _this.init(); // 在基类中调用 init
+      return _this;
+    }
+    _inherits(InternalPlatform, _OctopusPlatform2);
+    return _createClass(InternalPlatform, [{
+      key: "installPlugin",
+      value: function installPlugin(plugin) {
+        // 使用 installPlugin.ts 中的实现（包含类型断言）
+        _installPlugin(this, plugin);
+      }
+    }]);
+  }(OctopusPlatform);
+  return new InternalPlatform();
 }
 var pluginSelector = definePlugin({
   name: "getSelector",
@@ -797,12 +954,13 @@ var pluginCanvas = definePlugin({
       var type;
       var component;
       if (options) {
+        // 如果是小程序组件对象
         if (typeof options.setData === "function") {
           type = "2d";
           component = options;
         } else {
           type = options.type || "2d";
-          component = null;
+          component = options.component || null;
         }
       } else {
         type = "2d";
@@ -1299,23 +1457,7 @@ var pluginRaf = definePlugin({
       }
     };
   }
-});var EnhancedPlatform = /*#__PURE__*/function (_OctopusPlatform) {
-  function EnhancedPlatform() {
-    var _this;
-    _classCallCheck(this, EnhancedPlatform);
-    _this = _callSuper(this, EnhancedPlatform, [[pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "2.0.0"]);
-    _this.init();
-    return _this;
-  }
-  _inherits(EnhancedPlatform, _OctopusPlatform);
-  return _createClass(EnhancedPlatform, [{
-    key: "installPlugin",
-    value: function installPlugin$1(plugin) {
-      installPlugin(this, plugin);
-    }
-  }]);
-}(OctopusPlatform);
-var platform = new EnhancedPlatform();var ResourceManager = /*#__PURE__*/function () {
+});var platform = createPlatform([pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "2.0.0");var ResourceManager = /*#__PURE__*/function () {
   function ResourceManager(painter) {
     _classCallCheck(this, ResourceManager);
     this.painter = painter;
@@ -3652,11 +3794,8 @@ var PointPool = /*#__PURE__*/function () {
  * - A: arcTo，从起始点绘制一条弧线到指定点。
  */
 Renderer2D.SVG_PATH = new Set(["M", "L", "H", "V", "Z", "C", "S", "Q", "m", "l", "h", "v", "z", "c", "s", "q"]);
-Renderer2D.SVG_LETTER_REGEXP = /[a-zA-Z]/;var create2DRenderer = function create2DRenderer(_ref) {
-  var context = _ref.context;
-  return new Renderer2D(context);
-};
-var Renderer2DExtension = {
+Renderer2D.SVG_LETTER_REGEXP = /[a-zA-Z]/;
+var RendererExtension = {
   stick: function stick(context, bitmap) {
     return function () {
       return context.drawImage(bitmap, 0, 0);
@@ -5776,7 +5915,7 @@ var Painter = /*#__PURE__*/function () {
               // #endregion set main screen implement
               FC = this.FC, F = this.F, W = this.W, H = this.H;
               clearType = model.clear;
-              this.clearContainer = Renderer2DExtension.clear(clearType, FC, F, W, H);
+              this.clearContainer = RendererExtension.clear(clearType, FC, F, W, H);
               if (!(mode === "single")) {
                 _context2.n = 4;
                 break;
@@ -5816,15 +5955,13 @@ var Painter = /*#__PURE__*/function () {
               this.BC = ofsResult.context;
               // #endregion set secondary screen implement
               _BC = this.BC, _B = this.B;
-              this.clearSecondary = Renderer2DExtension.clear(clearType, _BC, _B, W, H);
-              this.stick = Renderer2DExtension.stick(FC, _B);
+              this.clearSecondary = RendererExtension.clear(clearType, _BC, _B, W, H);
+              this.stick = RendererExtension.stick(FC, _B);
             case 8:
               // #region other methods implement
               // ------- 生成其他方法 --------
               B = this.B, BC = this.BC;
-              renderer = this.renderer = create2DRenderer({
-                context: BC
-              });
+              renderer = this.renderer = new Renderer2D(BC);
               this.resize = function (contentMode, videoSize) {
                 return renderer.resize(contentMode, videoSize, B);
               };
@@ -6503,7 +6640,7 @@ var calcCellSizeAndPadding = function calcCellSizeAndPadding(moduleCount, size) 
     cellSize: cellSize || 2
   };
 };
-function generateImageBufferFromCode(options) {
+function generateImageBufferFromCodeInternal(options) {
   var _parseOptions = parseOptions(options),
     code = _parseOptions.code,
     typeNumber = _parseOptions.typeNumber,
@@ -6520,7 +6657,7 @@ function generateImageBufferFromCode(options) {
     if (typeNumber >= 40) {
       throw new Error("Text too long to encode");
     }
-    return arguments.callee({
+    return generateImageBufferFromCodeInternal({
       code: code,
       size: size,
       correctLevel: correctLevel,
@@ -6551,6 +6688,9 @@ function generateImageBufferFromCode(options) {
   }
   return png.flush();
 }
+function generateImageBufferFromCode(options) {
+  return generateImageBufferFromCodeInternal(options);
+}
 function generateImageFromCode(options) {
   var buff = generateImageBufferFromCode(options);
   return platform.codec.toDataURL(buff);
@@ -6566,21 +6706,13 @@ function createBufferOfImageData(imageData) {
   return new PNGEncoder(width, height).write(data).flush();
 }
 /**
- * @deprecated 请使用 createBufferOfImageData 代替，此方法可能在后续版本中移除
- */
-var getBufferFromImageData = createBufferOfImageData;
-/**
  * 将 ImageData 转换为 PNG 格式的 Base64 字符串
  * @param imageData
  * @returns PNG 格式的 Base64 字符串
  */
 function createImageDataUrl(imageData) {
   return platform.codec.toDataURL(createBufferOfImageData(imageData));
-}
-/**
- * @deprecated 请使用 createImageDataUrl 代替，此方法可能在后续版本中移除
- */
-var getDataURLFromImageData = createImageDataUrl;/**
+}/**
  * 检查数据是否为zlib压缩格式
  * @param data 待检查的二进制数据
  * @returns 是否为zlib压缩格式
@@ -7157,4 +7289,4 @@ function isZlibCompressed(data) {
       }));
     }
   }]);
-}();exports.EnhancedPlatform=EnhancedPlatform;exports.Painter=Painter;exports.Parser=Parser;exports.Player=Player;exports.Poster=Poster;exports.VideoEditor=VideoEditor;exports.VideoManager=VideoManager;exports.createBufferOfImageData=createBufferOfImageData;exports.createImageDataUrl=createImageDataUrl;exports.generateImageBufferFromCode=generateImageBufferFromCode;exports.generateImageFromCode=generateImageFromCode;exports.getBufferFromImageData=getBufferFromImageData;exports.getDataURLFromImageData=getDataURLFromImageData;exports.isZlibCompressed=isZlibCompressed;exports.platform=platform;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map
+}();exports.Painter=Painter;exports.Parser=Parser;exports.Player=Player;exports.Poster=Poster;exports.VideoEditor=VideoEditor;exports.VideoManager=VideoManager;exports.createBufferOfImageData=createBufferOfImageData;exports.createImageDataUrl=createImageDataUrl;exports.generateImageBufferFromCode=generateImageBufferFromCode;exports.generateImageFromCode=generateImageFromCode;exports.isZlibCompressed=isZlibCompressed;exports.platform=platform;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map

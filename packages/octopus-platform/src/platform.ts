@@ -82,28 +82,21 @@ export abstract class OctopusPlatform<
   }
 
   private autoEnv(): OctopusSupportedPlatform | never {
-    if (typeof window !== "undefined") {
-      return "h5";
+    const envs = [
+      { name: 'h5', check: () => typeof window !== 'undefined' },
+      { name: 'tt', check: () => typeof tt !== 'undefined' },
+      { name: 'alipay', check: () => typeof my !== 'undefined' },
+      { name: 'weapp', check: () => typeof wx !== 'undefined' },
+      { name: 'harmony', check: () => typeof has !== 'undefined' },
+    ];
+ 
+    for (const env of envs) {
+      if (env.check()) return env.name as OctopusSupportedPlatform;
     }
 
-    // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
-    if (typeof tt !== "undefined") {
-      return "tt";
-    }
-
-    if (typeof my !== "undefined") {
-      return "alipay";
-    }
-
-    if (typeof wx !== "undefined") {
-      return "weapp";
-    }
-
-    if (typeof has !== "undefined") {
-      return "harmony";
-    }
-
-    throw new Error("Unsupported platform！");
+    throw new Error(
+      `Unsupported platform! Available: ${envs.map(e => e.name).join(', ')}`
+    );
   }
 
   private useBridge() {
@@ -215,7 +208,7 @@ export abstract class OctopusPlatform<
     }
   }
 
-  abstract installPlugin(plugin: OctopusPlatformPluginOptions<N, N>): void;
+  protected abstract installPlugin(plugin: OctopusPlatformPluginOptions<N, N>): void;
 
   public switch(env: OctopusSupportedPlatform): void {
     this.globals.env = env;

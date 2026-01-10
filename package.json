@@ -10,7 +10,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "build:ascf": "ascf compile mp-platform/ascf -c",
-    "minio": "serve -p 3536 -c serve.json",
+    "serve": "serve -p 3536 -c serve.json",
     "test": "jest",
     "zx:sync": "zx .scripts/sync.mjs",
     "zx:clear": "zx .scripts/clear.mjs"

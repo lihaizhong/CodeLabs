@@ -1,24 +1,6 @@
 import Reader from "../io/Reader";
 import { PlatformVideo } from "../../../types/video";
 
-/**
- * Properties of a RectArgs.
- * @memberof com.opensource.svga.ShapeEntity
- * @interface IRectArgs
- * @property {number|null} [x] RectArgs x
- * @property {number|null} [y] RectArgs y
- * @property {number|null} [width] RectArgs width
- * @property {number|null} [height] RectArgs height
- * @property {number|null} [cornerRadius] RectArgs cornerRadius
- */
-export interface RectArgsProps {
-  x: number | null;
-  y: number | null;
-  width: number | null;
-  height: number | null;
-  cornerRadius: number | null;
-}
-
 export default class RectArgs {
   /**
    * Decodes a RectArgs message from the specified reader.

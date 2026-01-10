@@ -1,88 +1,190 @@
 import { platform } from "./platform";
 
-const logBadge = [
-  "%cBENCHMARK",
-  "padding: 2px 4px; background: #68B984; color: #FFFFFF; border-radius: 4px;",
-];
-const infoBadge = [
-  "%cBENCHMARK",
-  "padding: 2px 4px; background: #89CFF0; color: #FFFFFF; border-radius: 4px;",
-]
+const BADGE_PREFIX = "%cBENCHMARK";
+const BASE_STYLE = "padding: 2px 4px; color: #FFFFFF; border-radius: 4px;";
 
-class Stopwatch {
-  private readonly timeLabels: Map<string, number> = new Map();
+const logBadge = [BADGE_PREFIX, `${BASE_STYLE} background: #68B984;`];
+const infoBadge = [BADGE_PREFIX, `${BASE_STYLE} background: #89CFF0;`];
 
-  private readonly markLabels: Map<string, number> = new Map();
+type MessageHandler = (...message: unknown[]) => void;
+type AsyncHandler<T> = (label: string, callback: () => Promise<T> | T) => Promise<T>;
+type LabelHandler = (label: string) => void;
 
-  start(label: string) {
-    this.timeLabels.set(label, platform.now());
-  }
-
-  stop(label: string) {
-    const nowTime = platform.now();
-    const { timeLabels } = this;
-
-    if (timeLabels.has(label)) {
-      console.log(`${label}: ${nowTime - timeLabels.get(label)!} ms`);
-      timeLabels.delete(label);
-    }
-  }
-
-  mark(label: string) {
-    const nowTime = platform.now();
-    const { markLabels } = this;
-
-    if (markLabels.has(label)) {
-      console.log(`${label}: ${nowTime - markLabels.get(label)!} ms`);
-    }
-
-    markLabels.set(label, nowTime);
-  }
-
-  reset(label: string) {
-    this.markLabels.delete(label);
-  }
-
-  clear() {
-    this.timeLabels.clear();
-    this.markLabels.clear();
-  }
-}
-
-export interface Benchmark extends Stopwatch {
+/**
+ * 性能测试工具
+ * 提供精确的时间测量、性能监控和格式化输出功能
+ */
+export interface Benchmark {
+  /**
+   * 获取当前时间戳（毫秒）
+   * @returns 当前时间戳
+   */
   now: () => number;
-  time: <T extends any = any>(
-    label: string,
-    callback: () => Promise<T> | T
-  ) => Promise<T>;
-  line: (size: number) => void;
-  log: (...message: unknown[]) => void;
-  info: (...message: unknown[]) => void;
+
+  /**
+   * 开始计时
+   * @param label - 计时标签
+   */
+  start: LabelHandler;
+
+  /**
+   * 停止计时并输出结果
+   * @param label - 计时标签
+   */
+  stop: LabelHandler;
+
+  /**
+   * 标记时间点并输出间隔
+   * @param label - 标记标签
+   */
+  mark: LabelHandler;
+
+  /**
+   * 重置标记
+   * @param label - 标记标签
+   */
+  reset: LabelHandler;
+
+  /**
+   * 清除所有标签
+   */
+  clear: () => void;
+
+  /**
+   * 测量异步操作的执行时间
+   * @param label - 测试标签
+   * @param callback - 要测试的异步函数
+   * @returns callback 的返回值
+   * @example
+   * ```typescript
+   * const result = await benchmark.time('fetch-data', async () => {
+   *   return await fetchData();
+   * });
+   * ```
+   */
+  time: AsyncHandler<any>;
+
+  /**
+   * 输出分隔线
+   * @param size - 分隔线长度，默认 40
+   */
+  line: (size?: number) => void;
+
+  /**
+   * 输出带徽标的日志
+   * @param message - 日志内容
+   */
+  log: MessageHandler;
+
+  /**
+   * 输出带徽标的信息
+   * @param message - 信息内容
+   */
+  info: MessageHandler;
 }
 
-const stopwatch = new Stopwatch();
-const benchmark: Benchmark = Object.create(stopwatch);
+/**
+ * 创建性能测试实例
+ * @returns Benchmark 实例
+ */
+export function createBenchmark(): Benchmark {
+  const timeLabels = new Map<string, number>();
+  const markLabels = new Map<string, number>();
 
-benchmark.now = () => platform.now();
+  return {
+    /**
+     * 获取当前时间戳
+     */
+    now: () => platform.now(),
 
-benchmark.time = async (label, callback) => {
-  stopwatch.start(label);
-  const result = await callback();
-  stopwatch.stop(label);
+    /**
+     * 开始计时
+     */
+    start(label: string) {
+      timeLabels.set(label, platform.now());
+    },
 
-  return result;
-};
+    /**
+     * 停止计时并输出结果
+     */
+    stop(label: string) {
+      const nowTime = platform.now();
 
-benchmark.line = (size = 40) => {
-  console.log("-".repeat(size));
-};
+      if (timeLabels.has(label)) {
+        const startTime = timeLabels.get(label)!;
+        console.log(`${label}: ${nowTime - startTime} ms`);
+        timeLabels.delete(label);
+      }
+    },
 
-benchmark.log = (...message) => {
-  console.log(...logBadge, ...message);
-};
+    /**
+     * 标记时间点并输出间隔
+     */
+    mark(label: string) {
+      const nowTime = platform.now();
 
-benchmark.info = (...message) => {
-  console.info(...infoBadge, ...message);
-};
+      if (markLabels.has(label)) {
+        const prevTime = markLabels.get(label)!;
+        console.log(`${label}: ${nowTime - prevTime} ms`);
+      }
 
-export { benchmark };
+      markLabels.set(label, nowTime);
+    },
+
+    /**
+     * 重置标记
+     */
+    reset(label: string) {
+      markLabels.delete(label);
+    },
+
+    /**
+     * 清除所有标签
+     */
+    clear() {
+      timeLabels.clear();
+      markLabels.clear();
+    },
+
+    /**
+     * 测量异步操作的执行时间
+     */
+    async time<T>(
+      label: string,
+      callback: () => Promise<T> | T
+    ): Promise<T> {
+      this.start(label);
+      try {
+        return await callback();
+      } finally {
+        this.stop(label);
+      }
+    },
+
+    /**
+     * 输出分隔线
+     */
+    line(size = 40) {
+      console.log("-".repeat(size));
+    },
+
+    /**
+     * 输出带徽标的日志
+     */
+    log(...message: unknown[]) {
+      console.log(...logBadge, ...message);
+    },
+
+    /**
+     * 输出带徽标的信息
+     */
+    info(...message: unknown[]) {
+      console.info(...infoBadge, ...message);
+    },
+  };
+}
+
+/**
+ * 默认性能测试实例
+ */
+export const benchmark = createBenchmark();

@@ -57,7 +57,7 @@ const calcCellSizeAndPadding = (moduleCount: number, size: number) => {
   };
 };
 
-export function generateImageBufferFromCode(options: IQrCodeImgOptions) {
+function generateImageBufferFromCodeInternal(options: IQrCodeImgOptions) {
   const { code, typeNumber, correctLevel, size, codeColor, backgroundColor } =
     parseOptions(options);
   let qr: QRCode;
@@ -71,7 +71,7 @@ export function generateImageBufferFromCode(options: IQrCodeImgOptions) {
       throw new Error("Text too long to encode");
     }
 
-    return arguments.callee({
+    return generateImageBufferFromCodeInternal({
       code,
       size,
       correctLevel,
@@ -103,6 +103,10 @@ export function generateImageBufferFromCode(options: IQrCodeImgOptions) {
   }
 
   return png.flush();
+}
+
+export function generateImageBufferFromCode(options: IQrCodeImgOptions) {
+  return generateImageBufferFromCodeInternal(options);
 }
 
 export function generateImageFromCode(options: IQrCodeImgOptions) {

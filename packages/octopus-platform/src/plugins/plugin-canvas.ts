@@ -82,7 +82,7 @@ export default definePlugin<"getCanvas", "getSelector">({
           component = options;
         } else {
           type = options.type || "2d";
-          component = null;
+          component = options.component || null;
         }
       } else {
         type = "2d";

@@ -10,7 +10,7 @@ import type {
   PlatformVideo,
   PLAYER_CONTENT_MODE,
 } from "../../types";
-import { create2DRenderer, Renderer2D, Renderer2DExtension } from "../../extensions";
+import { Renderer2D, RendererExtension } from "../../extensions";
 
 const { noop } = platform;
 
@@ -148,7 +148,7 @@ export class Painter {
     const { FC, F, W, H } = this;
     const clearType = model.clear;
 
-    this.clearContainer = Renderer2DExtension.clear(clearType, FC!, F!, W, H);
+    this.clearContainer = RendererExtension.clear(clearType, FC!, F!, W, H);
 
     if (mode === "single") {
       this.B = F;
@@ -175,14 +175,14 @@ export class Painter {
 
       const { BC, B } = this;
 
-      this.clearSecondary = Renderer2DExtension.clear(clearType, BC!, B!, W, H);
-      this.stick = Renderer2DExtension.stick(FC!, B!);
+      this.clearSecondary = RendererExtension.clear(clearType, BC!, B!, W, H);
+      this.stick = RendererExtension.stick(FC!, B!);
     }
 
     // #region other methods implement
     // ------- 生成其他方法 --------
     const { B, BC } = this;
-    const renderer = (this.renderer = create2DRenderer({ context: BC }));
+    const renderer = (this.renderer = new Renderer2D(BC));
 
     this.resize = (
       contentMode: PLAYER_CONTENT_MODE,
