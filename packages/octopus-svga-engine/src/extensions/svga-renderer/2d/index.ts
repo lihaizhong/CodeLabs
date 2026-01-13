@@ -14,14 +14,14 @@ export interface Renderer2DExtensions {
   stick: (
     context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
     bitmap: Bitmap
-  ) => void;
+  ) => () => void;
   clear: (
     type: "CL" | "RE",
     context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
     canvas: PlatformCanvas | PlatformOffscreenCanvas,
     width: number,
     height: number
-  ) => void;
+  ) => () => void;
 }
 
 export interface Renderer2DReturn {

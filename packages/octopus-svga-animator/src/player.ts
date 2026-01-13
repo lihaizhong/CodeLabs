@@ -1,17 +1,28 @@
-import type { PlatformCanvas } from "octopus-platform";
-import { platform } from "../../platform";
-import { Painter } from "../painter";
-import { Config } from "./config";
-import { Animator, ResourceManager } from "../../extensions";
+import type { PlatformCanvas } from "octopus-svga-engine";
 import {
-  type PlatformVideo,
-  type PlayerConfigOptions,
-  type PlayerConfig,
-  type PlayerEventCallback,
-  type PlayerProcessEventCallback,
+  Painter,
+  ResourceManager,
+  Animator,
+  platform,
+} from "octopus-svga-engine";
+import type {
+  PlatformVideo,
+  PlayerConfigOptions,
+  PlayerConfig,
+  PlayerEventCallback,
+  PlayerProcessEventCallback,
+} from "octopus-svga-engine";
+import {
   PLAYER_PLAY_MODE,
   PLAYER_FILL_MODE,
-} from "../../types";
+  PLAYER_CONTENT_MODE,
+} from "octopus-svga-engine";
+import {
+  DynamicElementManager,
+  TextOptions,
+  QRCodeOptions,
+  CanvasOptions,
+} from "./dynamic-element";
 
 /**
  * SVGA 播放器
@@ -19,14 +30,21 @@ import {
 export class Player {
   /**
    * SVGA 元数据
-   * Video Entity
    */
   private entity: PlatformVideo.Video | undefined;
 
   /**
    * 当前配置项
    */
-  private readonly config = new Config();
+  private config: PlayerConfig = {
+    loop: 0,
+    fillMode: PLAYER_FILL_MODE.FORWARDS,
+    playMode: PLAYER_PLAY_MODE.FORWARDS,
+    contentMode: PLAYER_CONTENT_MODE.ASPECT_FIT,
+    startFrame: 0,
+    endFrame: 0,
+    loopStartFrame: 0,
+  };
 
   /**
    * 资源管理器
@@ -34,27 +52,24 @@ export class Player {
   public resource: ResourceManager | null = null;
 
   /**
-   * 刷头实例
+   * 画布渲染器
    */
   public readonly painter = new Painter();
 
   /**
-   * 动画实例
+   * 动画控制器
    */
   private readonly animator: Animator = new Animator();
+
+/**
+   * 动态元素管理器
+   */
+  private dynamicElementManager: DynamicElementManager | null = null;
 
   /**
    * 设置配置项
    * @param options 可配置项
-   * @property container 主屏，播放动画的 Canvas 元素
-   * @property secondary 副屏，播放动画的 Canvas 元素
-   * @property loop 循环次数，默认值 0（无限循环）
-   * @property fillMode 最后停留的目标模式，类似于 animation-fill-mode，接受值 forwards 和 fallbacks，默认值 forwards。
-   * @property playMode 播放模式，接受值 forwards 和 fallbacks ，默认值 forwards。
-   * @property startFrame 单个循环周期内开始播放的帧数，默认值 0
-   * @property endFrame 单个循环周期内结束播放的帧数，默认值 0
-   * @property loopStartFrame 循环播放的开始帧，仅影响第一个周期的开始帧，默认值 0
-   * @property enableInObserver 是否启用 IntersectionObserver 监听容器是否处于浏览器视窗内，默认值 false
+   * @param component 组件对象（小程序中使用）
    */
   public async setConfig(
     options: string | PlayerConfigOptions,
@@ -64,11 +79,19 @@ export class Player {
       typeof options === "string" ? { container: options } : options;
     const { container, secondary } = config;
 
-    this.config.register(config);
-    // 监听容器是否处于浏览器视窗内
-    // this.setIntersectionObserver()
+    // 合并配置
+    Object.assign(this.config, config);
+
+    // 注册画布
     await this.painter.register(container, secondary, component);
+
+    // 创建资源管理器
     this.resource = new ResourceManager(this.painter);
+
+    // 创建动态元素管理器
+    this.dynamicElementManager = new DynamicElementManager(this.painter);
+
+    // 设置动画帧回调
     this.animator.onAnimate = platform.rAF.bind(
       null,
       this.painter.F as PlatformCanvas
@@ -76,19 +99,19 @@ export class Player {
   }
 
   /**
-   * 更新配置
-   * @param key
-   * @param value
+   * 更新配置项
+   * @param key 配置项键
+   * @param value 配置项值
    */
   public setItem<T extends keyof PlayerConfig>(
     key: T,
     value: PlayerConfig[T]
   ): void {
-    this.config.setItem<T>(key, value);
+    this.config[key] = value;
   }
 
   /**
-   * 装载 SVGA 数据元
+   * 装载 SVGA 数据
    * @param videoEntity SVGA 数据源
    * @returns Promise<void>
    */
@@ -97,44 +120,48 @@ export class Player {
 
     const { images, filename } = videoEntity;
 
-    this.animator!.stop();
+    // 停止动画
+    this.animator.stop();
+
+    // 清空画布
     this.painter.clearSecondary();
-    this.resource!.release();
+
+    // 释放资源
+    this.resource?.release();
+
+    // 保存实体
     this.entity = videoEntity;
 
-    await this.resource!.loadImagesWithRecord(images, filename);
+    // 加载图片资源
+    if (this.resource) {
+      await this.resource.loadImagesWithRecord(images, filename);
+    }
   }
 
   /**
    * 开始播放事件回调
-   * @param frame
    */
   public onStart?: PlayerEventCallback;
   /**
    * 重新播放事件回调
-   * @param frame
    */
   public onResume?: PlayerEventCallback;
   /**
    * 暂停播放事件回调
-   * @param frame
    */
   public onPause?: PlayerEventCallback;
   /**
    * 停止播放事件回调
-   * @param frame
    */
   public onStop?: PlayerEventCallback;
   /**
    * 播放中事件回调
-   * @param percent
-   * @param frame
-   * @param frames
+   * @param percent 播放进度 (0-1)
+   * @param frame 当前帧数
    */
   public onProcess?: PlayerProcessEventCallback;
   /**
    * 结束播放事件回调
-   * @param frame
    */
   public onEnd?: PlayerEventCallback;
 
@@ -190,7 +217,7 @@ export class Player {
    * @param frame 目标帧
    * @param andPlay 是否立即播放
    */
-  public stepToFrame(frame: number, andPlay = false) {
+  public stepToFrame(frame: number, andPlay = false): void {
     if (!this.entity || frame < 0 || frame >= this.entity.frames) return;
 
     this.pause();
@@ -202,10 +229,10 @@ export class Player {
 
   /**
    * 跳转到指定百分比
-   * @param percent 目标百分比
+   * @param percent 目标百分比 (0-1)
    * @param andPlay 是否立即播放
    */
-  public stepToPercentage(percent: number, andPlay: boolean = false) {
+  public stepToPercentage(percent: number, andPlay = false): void {
     if (!this.entity) return;
 
     const { frames } = this.entity;
@@ -219,86 +246,214 @@ export class Player {
   }
 
   /**
+   * 替换指定 key 的图片
+   * @param key 动态元素的 key
+   * @param source 图片源（URL 或 Uint8Array）
+   * @returns Promise<Bitmap>
+   */
+  public async setImage(key: string, source: string | Uint8Array) {
+    if (!this.dynamicElementManager) {
+      throw new Error("Dynamic element manager not initialized");
+    }
+
+    const bitmap = await this.dynamicElementManager.setImage(key, source);
+
+    // 将动态素材添加到 ResourceManager
+    if (this.resource) {
+      this.resource.dynamicMaterials.set(key, bitmap);
+    }
+
+    return bitmap;
+  }
+
+  /**
+   * 添加动态文本
+   * @param key 动态元素的 key
+   * @param text 文本内容
+   * @param options 文本选项
+   * @returns Promise<Bitmap>
+   */
+  public async setText(key: string, text: string, options?: TextOptions) {
+    if (!this.dynamicElementManager) {
+      throw new Error("Dynamic element manager not initialized");
+    }
+
+    const bitmap = await this.dynamicElementManager.setText(key, text, options);
+
+    // 将动态素材添加到 ResourceManager
+    if (this.resource) {
+      this.resource.dynamicMaterials.set(key, bitmap);
+    }
+
+    return bitmap;
+  }
+
+  /**
+   * 添加二维码
+   * @param key 动态元素的 key
+   * @param content 二维码内容
+   * @param options 二维码选项
+   * @returns Promise<Bitmap>
+   */
+  public async setQRCode(key: string, content: string, options?: QRCodeOptions) {
+    if (!this.dynamicElementManager) {
+      throw new Error("Dynamic element manager not initialized");
+    }
+
+    const bitmap = await this.dynamicElementManager.setQRCode(key, content, options);
+
+    // 将动态素材添加到 ResourceManager
+    if (this.resource) {
+      this.resource.dynamicMaterials.set(key, bitmap);
+    }
+
+    return bitmap;
+  }
+
+  /**
+   * 添加自定义画布内容
+   * @param key 动态元素的 key
+   * @param context 画布上下文
+   * @param options 画布选项
+   * @returns Promise<Bitmap>
+   */
+  public async setCanvas(
+    key: string,
+    context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+    options?: CanvasOptions
+  ) {
+    if (!this.dynamicElementManager) {
+      throw new Error("Dynamic element manager not initialized");
+    }
+
+    const bitmap = await this.dynamicElementManager.setCanvas(key, context, options);
+
+    // 将动态素材添加到 ResourceManager
+    if (this.resource) {
+      this.resource.dynamicMaterials.set(key, bitmap);
+    }
+
+    return bitmap;
+  }
+
+  /**
+   * 移除动态素材
+   * @param key 动态元素的 key
+   */
+  public removeDynamicElement(key: string): void {
+    if (!this.dynamicElementManager) {
+      return;
+    }
+
+    this.dynamicElementManager.remove(key);
+    if (this.resource) {
+      this.resource.dynamicMaterials.delete(key);
+    }
+  }
+
+  /**
+   * 清空所有动态素材
+   */
+  public clearDynamicElements(): void {
+    if (!this.dynamicElementManager) {
+      return;
+    }
+
+    this.dynamicElementManager.clear();
+    if (this.resource) {
+      this.resource.dynamicMaterials.clear();
+    }
+  }
+
+  /**
    * 开始绘制动画
    */
   private startAnimation(): void {
     const { entity, config, animator, painter, resource } = this;
-    const { materials, dynamicMaterials } = resource!;
+    if (!entity || !resource) return;
+
+    const { materials, dynamicMaterials } = resource;
     const { fillMode, playMode, contentMode } = config;
-    const {
-      currFrame,
-      startFrame,
-      endFrame,
-      totalFrame,
-      spriteCount,
-      aniConfig,
-    } = config.getConfig(entity!);
-    const { duration, loopStart, loop, fillValue } = aniConfig;
-    const isReverseMode = playMode === PLAYER_PLAY_MODE.FALLBACKS;
+
+    // 计算帧范围
+    const totalFrames = entity.frames;
+    const startFrame = config.startFrame || 0;
+    const endFrame = config.endFrame || totalFrames - 1;
+    const loopStartFrame = config.loopStartFrame || 0;
+
+    // 计算有效帧数
+    const effectiveFrames = endFrame - startFrame + 1;
+    const spriteCount = entity.sprites.length;
+
+    // 计算动画时长（毫秒）
+    const duration = (effectiveFrames / entity.fps) * 1000;
+    const loopDuration = config.loop === 0 ? Infinity : duration * config.loop;
+    const loopStartOffset = (loopStartFrame / totalFrames) * duration;
 
     // 当前帧
-    let currentFrame = currFrame;
+    let currentFrame = startFrame;
     // 片段绘制结束位置
     let tail = 0;
-    let nextTail: number;
     // 上一帧
     let latestFrame: number;
     // 下一帧
     let nextFrame: number;
     // 精确帧
     let exactFrame: number;
-    // 当前已完成的百分比
+    // 当前百分比
     let percent: number;
     // 是否还有剩余时间
     let hasRemained: boolean;
 
-    // 更新动画基础信息
-    animator.setConfig(duration, loopStart, loop, fillValue);
-    painter.resize(contentMode, entity!.size);
+    // 更新动画配置
+    animator.setConfig(duration, loopStartOffset, config.loop, 0);
+    painter.resize(contentMode, entity.size);
 
     // 分段渲染函数
     const MAX_DRAW_TIME_PER_FRAME = 8;
     const MAX_ACCELERATE_DRAW_TIME_PER_FRAME = 3;
     const MAX_DYNAMIC_CHUNK_SIZE = 34;
     const MIN_DYNAMIC_CHUNK_SIZE = 1;
+
     const render = (head: number, tail: number) =>
       painter.draw(
-        entity!,
+        entity,
         materials,
         dynamicMaterials,
         currentFrame,
         head,
         tail
       );
+
     // 动态调整每次绘制的块大小
-    let dynamicChunkSize = 4; // 初始块大小
+    let dynamicChunkSize = 4;
     let startTime: number;
     let chunk: number;
     let elapsed: number;
-    // 使用`指数退避算法`平衡渲染速度和流畅度
+
+    // 使用指数退避算法平衡渲染速度和流畅度
     const patchDraw = (before: () => void) => {
       startTime = platform.now();
       before();
 
       while (tail < spriteCount) {
-        // 根据当前块大小计算nextTail
         chunk = Math.min(dynamicChunkSize, spriteCount - tail);
-        nextTail = (tail + chunk) | 0;
+        const nextTail = (tail + chunk) | 0;
         render(tail, nextTail);
         tail = nextTail;
-        // 动态调整块大小
+
         elapsed = platform.now() - startTime;
 
         if (elapsed < MAX_ACCELERATE_DRAW_TIME_PER_FRAME) {
           dynamicChunkSize = Math.min(
             dynamicChunkSize * 2,
             MAX_DYNAMIC_CHUNK_SIZE
-          ); // 加快绘制
+          );
         } else if (elapsed > MAX_DRAW_TIME_PER_FRAME) {
           dynamicChunkSize = Math.max(
             dynamicChunkSize / 2,
             MIN_DYNAMIC_CHUNK_SIZE
-          ); // 减慢绘制
+          );
           break;
         }
       }
@@ -307,22 +462,25 @@ export class Player {
     // 动画绘制过程
     animator.onUpdate = (timePercent: number) => {
       patchDraw(() => {
-        percent = isReverseMode ? 1 - timePercent : timePercent;
-        exactFrame = percent * totalFrame;
+        percent = playMode === PLAYER_PLAY_MODE.FALLBACKS
+          ? 1 - timePercent
+          : timePercent;
+        exactFrame = percent * effectiveFrames;
 
-        if (isReverseMode) {
+        if (playMode === PLAYER_PLAY_MODE.FALLBACKS) {
           nextFrame =
             (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
-          // 倒序会有一帧的偏差，需要校准当前帧
-          percent = currentFrame / totalFrame;
+          percent = currentFrame / totalFrames;
         } else {
-          nextFrame = timePercent === 1 ? startFrame : Math.floor(exactFrame);
+          nextFrame =
+            timePercent === 1 ? startFrame : Math.floor(exactFrame);
         }
 
         hasRemained = currentFrame === nextFrame;
       });
 
       if (hasRemained) return;
+
       if (tail < spriteCount) {
         render(tail, spriteCount);
       }
@@ -335,18 +493,19 @@ export class Player {
       tail = 0;
       this.onProcess?.(~~(percent * 100) / 100, latestFrame);
     };
+
     animator.onStart = () => {
-      entity!.locked = true;
+      entity.locked = true;
     };
+
     animator.onEnd = () => {
-      entity!.locked = false;
-      // 如果不保留最后一帧渲染，则清空画布
+      entity.locked = false;
       if (fillMode === PLAYER_FILL_MODE.NONE) {
         painter.clearContainer();
       }
-
       this.onEnd?.();
     };
+
     animator.start();
   }
 }

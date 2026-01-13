@@ -4,15 +4,13 @@ import type {
   PlatformOffscreenCanvas,
 } from "octopus-platform";
 import { platform } from "@/platform";
-import { create2DRenderer, Renderer2D, Renderer2DExtension } from "@/extensions";
+import { create2DRenderer, Renderer2D, Renderer2DExtensions } from "@/extensions";
 import type {
   PainterActionModel,
   PainterMode,
   PlatformVideo,
   PLAYER_CONTENT_MODE,
 } from "@/types";
-
-const { noop } = platform;
 
 export class Painter {
   /**
@@ -148,13 +146,15 @@ export class Painter {
     const { FC, F, W, H } = this;
     const clearType = model.clear;
 
-    this.clearContainer = Renderer2DExtension.clear(clearType, FC!, F!, W, H);
+    // 创建一个临时的 renderer 来获取 extensions
+    const tempRendererResult = create2DRenderer({ context: FC! });
+    this.clearContainer = tempRendererResult.extensions.clear(clearType, FC!, F!, W, H);
 
     if (mode === "single") {
       this.B = F;
       this.BC = FC;
       this.clearSecondary = this.clearContainer;
-      this.stick = noop;
+      this.stick = platform.noop;
     } else {
       // #region set secondary screen implement
       // ------- 创建副屏 ---------
@@ -175,19 +175,22 @@ export class Painter {
 
       const { BC, B } = this;
 
-      this.clearSecondary = Renderer2DExtension.clear(clearType, BC!, B!, W, H);
-      this.stick = Renderer2DExtension.stick(FC!, B!);
+      // 创建一个临时的 renderer 来获取 extensions
+      const tempRendererResult2 = create2DRenderer({ context: BC! });
+      this.clearSecondary = tempRendererResult2.extensions.clear(clearType, BC!, B!, W, H);
+      this.stick = tempRendererResult2.extensions.stick(FC!, B!);
     }
 
     // #region other methods implement
     // ------- 生成其他方法 --------
     const { B, BC } = this;
-    const renderer = (this.renderer = create2DRenderer({ context: BC }));
+    const rendererResult = create2DRenderer({ context: BC });
+    this.renderer = rendererResult.renderer;
 
     this.resize = (
       contentMode: PLAYER_CONTENT_MODE,
       videoSize: PlatformVideo.VideoSize
-    ) => renderer!.resize(contentMode, videoSize, B!);
+    ) => this.renderer!.resize(contentMode, videoSize, B!);
     this.draw = (
       videoEntity: PlatformVideo.Video,
       materials: Map<string, Bitmap>,
@@ -196,7 +199,7 @@ export class Painter {
       head: number,
       tail: number
     ) =>
-      renderer!.render(
+      this.renderer!.render(
         videoEntity,
         materials,
         dynamicMaterials,
@@ -207,14 +210,14 @@ export class Painter {
     // #endregion other methods implement
   }
 
-  public clearContainer: () => void = noop;
+  public clearContainer: () => void = platform.noop;
 
-  public clearSecondary: () => void = noop;
+  public clearSecondary: () => void = platform.noop;
 
   public resize: (
     contentMode: PLAYER_CONTENT_MODE,
     videoSize: PlatformVideo.VideoSize
-  ) => void = noop;
+  ) => void = platform.noop;
 
   public draw: (
     videoEntity: PlatformVideo.Video,
@@ -223,9 +226,9 @@ export class Painter {
     currentFrame: number,
     head: number,
     tail: number
-  ) => void = noop;
+  ) => void = platform.noop;
 
-  public stick: () => void = noop;
+  public stick: () => void = platform.noop;
 
   /**
    * 销毁画笔
@@ -234,7 +237,7 @@ export class Painter {
     this.clearContainer();
     this.clearSecondary();
     this.F = this.FC = this.B = this.BC = null;
-    this.clearContainer = this.clearSecondary = this.stick = noop;
+    this.clearContainer = this.clearSecondary = this.stick = platform.noop;
     this.renderer?.destroy();
   }
 }

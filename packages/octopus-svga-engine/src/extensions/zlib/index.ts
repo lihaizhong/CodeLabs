@@ -38,20 +38,33 @@ const freb = (eb: Uint8Array, start: number) => {
   return { b, r };
 }
 
-const { b: fl, r: revfl } = freb(fleb, 2);
-// we can ignore the fact that the other numbers are wrong; they never happen anyway
-fl[28] = 258, revfl[258] = 28;
-const { b: fd, r: revfd } = freb(fdeb, 0);
+const frebResult1 = freb(fleb, 2);
+const fl = frebResult1.b;
+const revfl = frebResult1.r;
+const frebResult2 = freb(fdeb, 0);
+const fd = frebResult2.b;
+const revfd = frebResult2.r;
 
 // map of value to reverse (assuming 16 bits)
 const rev = new u16(32768);
-for (let i = 0; i < 32768; ++i) {
+
+// 初始化函数
+function initZlibTables() {
+  // we can ignore the fact that the other numbers are wrong; they never happen anyway
+  fl[28] = 258;
+  revfl[258] = 28;
+
   // reverse table algorithm from SO
-  let x = ((i & 0xAAAA) >> 1) | ((i & 0x5555) << 1);
-  x = ((x & 0xCCCC) >> 2) | ((x & 0x3333) << 2);
-  x = ((x & 0xF0F0) >> 4) | ((x & 0x0F0F) << 4);
-  rev[i] = (((x & 0xFF00) >> 8) | ((x & 0x00FF) << 8)) >> 1;
+  for (let i = 0; i < 32768; ++i) {
+    let x = ((i & 0xAAAA) >> 1) | ((i & 0x5555) << 1);
+    x = ((x & 0xCCCC) >> 2) | ((x & 0x3333) << 2);
+    x = ((x & 0xF0F0) >> 4) | ((x & 0x0F0F) << 4);
+    rev[i] = (((x & 0xFF00) >> 8) | ((x & 0x00FF) << 8)) >> 1;
+  }
 }
+
+// 调用初始化函数
+initZlibTables();
 
 // create huffman tree from u8 "map": index -> code length for code index
 // mb (max bits) must be at most 15

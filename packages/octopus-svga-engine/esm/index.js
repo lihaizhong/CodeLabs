@@ -1,36 +1,17 @@
-import { OctopusPlatform, pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF, installPlugin } from 'octopus-platform';
+import { createPlatform, pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF } from 'octopus-platform';
 
-class EnhancedPlatform extends OctopusPlatform {
-    now;
-    path;
-    remote;
-    local;
-    codec;
-    image;
-    rAF;
-    getSelector;
-    getCanvas;
-    getOfsCanvas;
-    constructor() {
-        super([
-            pluginSelector,
-            pluginCanvas,
-            pluginOfsCanvas,
-            pluginCodec,
-            pluginDownload,
-            pluginFsm,
-            pluginImage,
-            pluginNow,
-            pluginPath,
-            pluginRAF,
-        ], "2.0.0");
-        this.init();
-    }
-    installPlugin(plugin) {
-        installPlugin(this, plugin);
-    }
-}
-const platform = new EnhancedPlatform();
+const platform = createPlatform([
+    pluginSelector,
+    pluginCanvas,
+    pluginOfsCanvas,
+    pluginCodec,
+    pluginDownload,
+    pluginFsm,
+    pluginImage,
+    pluginNow,
+    pluginPath,
+    pluginRAF,
+], "2.0.0");
 
 class ResourceManager {
     painter;
@@ -1660,6 +1641,880 @@ function createVideoEntity(data, filename) {
     throw new Error("Invalid data type");
 }
 
+/**
+ * CurrentPoint对象池，用于减少对象创建和GC压力
+ */
+class PointPool {
+    pool = [];
+    acquire() {
+        const { pool } = this;
+        return pool.length > 0
+            ? pool.pop()
+            : { x: 0, y: 0, x1: 0, y1: 0, x2: 0, y2: 0 };
+    }
+    release(point) {
+        // 重置点的属性
+        point.x = point.y = point.x1 = point.y1 = point.x2 = point.y2 = 0;
+        this.pool.push(point);
+    }
+}
+
+class Renderer2D {
+    context;
+    /**
+     * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Tutorial/Paths
+     * 绘制路径的不同指令：
+     * * 直线命令
+     * - M: moveTo，移动到指定点，不绘制直线。
+     * - L: lineTo，从起始点绘制一条直线到指定点。
+     * - H: horizontal lineTo，从起始点绘制一条水平线到指定点。
+     * - V: vertical lineTo，从起始点绘制一条垂直线到指定点。
+     * - Z: closePath，从起始点绘制一条直线到路径起点，形成一个闭合路径。
+     * * 曲线命令
+     * - C: bezierCurveTo，绘制三次贝塞尔曲线。
+     * - S: smooth curveTo，绘制平滑三次贝塞尔曲线。
+     * - Q: quadraticCurveTo，绘制两次贝塞尔曲线。
+     * - T: smooth quadraticCurveTo，绘制平滑两次贝塞尔曲线。
+     * * 弧线命令
+     * - A: arcTo，从起始点绘制一条弧线到指定点。
+     */
+    static SVG_PATH = new Set([
+        "M",
+        "L",
+        "H",
+        "V",
+        "Z",
+        "C",
+        "S",
+        "Q",
+        "m",
+        "l",
+        "h",
+        "v",
+        "z",
+        "c",
+        "s",
+        "q",
+    ]);
+    static SVG_LETTER_REGEXP = /[a-zA-Z]/;
+    // 在Renderer2D类中添加新的解析方法
+    static parseSVGPath(d) {
+        const { SVG_LETTER_REGEXP } = Renderer2D;
+        const result = [];
+        let currentIndex = 0;
+        // 状态：0 - 等待命令，1 - 读取参数
+        let state = 0;
+        let currentCommand = "";
+        let currentArgs = "";
+        while (currentIndex < d.length) {
+            const char = d[currentIndex];
+            switch (state) {
+                case 0: // 等待命令
+                    if (SVG_LETTER_REGEXP.test(char)) {
+                        currentCommand = char;
+                        state = 1;
+                    }
+                    break;
+                case 1: // 读取参数
+                    if (SVG_LETTER_REGEXP.test(char)) {
+                        // 遇到新命令，保存当前命令和参数
+                        result.push({
+                            command: currentCommand,
+                            args: currentArgs.trim(),
+                        });
+                        currentCommand = char;
+                        currentArgs = "";
+                    }
+                    else {
+                        currentArgs += char;
+                    }
+                    break;
+            }
+            currentIndex++;
+        }
+        // 处理最后一个命令
+        if (currentCommand && state === 1) {
+            result.push({
+                command: currentCommand,
+                args: currentArgs.trim(),
+            });
+        }
+        return result;
+    }
+    static fillOrStroke(context, styles) {
+        if (styles) {
+            if (styles.fill) {
+                context.fill();
+            }
+            if (styles.stroke) {
+                context.stroke();
+            }
+        }
+    }
+    static resetShapeStyles(context, styles) {
+        if (styles) {
+            context.strokeStyle = styles.stroke || "transparent";
+            if (styles.strokeWidth > 0) {
+                context.lineWidth = styles.strokeWidth;
+            }
+            if (styles.miterLimit > 0) {
+                context.miterLimit = styles.miterLimit;
+            }
+            if (styles.lineCap) {
+                context.lineCap = styles.lineCap;
+            }
+            if (styles.lineJoin) {
+                context.lineJoin = styles.lineJoin;
+            }
+            context.fillStyle = styles.fill || "transparent";
+            if (styles.lineDash) {
+                context.setLineDash(styles.lineDash);
+            }
+        }
+    }
+    /**
+     * 计算缩放比例
+     * @param contentMode
+     * @param videoSize
+     * @param canvasSize
+     * @returns
+     */
+    static calculateScale(contentMode, videoSize, canvasSize) {
+        const imageRatio = videoSize.width / videoSize.height;
+        const viewRatio = canvasSize.width / canvasSize.height;
+        const isAspectFit = contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */;
+        const shouldUseWidth = (imageRatio >= viewRatio && isAspectFit) ||
+            (imageRatio <= viewRatio && !isAspectFit);
+        const createTransform = (scale, translateX, translateY) => ({
+            scaleX: scale,
+            scaleY: scale,
+            translateX,
+            translateY,
+        });
+        if (shouldUseWidth) {
+            const scale = canvasSize.width / videoSize.width;
+            return createTransform(scale, 0, (canvasSize.height - videoSize.height * scale) / 2);
+        }
+        const scale = canvasSize.height / videoSize.height;
+        return createTransform(scale, (canvasSize.width - videoSize.width * scale) / 2, 0);
+    }
+    pointPool = new PointPool();
+    currentPoint;
+    lastResizeKey = "";
+    globalTransform = undefined;
+    constructor(context) {
+        this.context = context;
+        this.currentPoint = this.pointPool.acquire();
+    }
+    setTransform(transform) {
+        if (transform && this.context) {
+            this.context.transform(transform.a, transform.b, transform.c, transform.d, transform.tx, transform.ty);
+        }
+    }
+    drawBezier(d, transform, styles) {
+        const { context, pointPool } = this;
+        this.currentPoint = pointPool.acquire();
+        context.save();
+        Renderer2D.resetShapeStyles(context, styles);
+        this.setTransform(transform);
+        context.beginPath();
+        if (d) {
+            // 使用状态机解析器替代正则表达式
+            const commands = Renderer2D.parseSVGPath(d);
+            for (const { command, args } of commands) {
+                if (Renderer2D.SVG_PATH.has(command)) {
+                    this.drawBezierElement(this.currentPoint, command, args.split(/[\s,]+/).filter(Boolean));
+                }
+            }
+        }
+        Renderer2D.fillOrStroke(context, styles);
+        pointPool.release(this.currentPoint);
+        context.restore();
+    }
+    drawBezierElement(currentPoint, method, args) {
+        const { context } = this;
+        switch (method) {
+            case "M":
+                currentPoint.x = +args[0];
+                currentPoint.y = +args[1];
+                context.moveTo(currentPoint.x, currentPoint.y);
+                break;
+            case "m":
+                currentPoint.x += +args[0];
+                currentPoint.y += +args[1];
+                context.moveTo(currentPoint.x, currentPoint.y);
+                break;
+            case "L":
+                currentPoint.x = +args[0];
+                currentPoint.y = +args[1];
+                context.lineTo(currentPoint.x, currentPoint.y);
+                break;
+            case "l":
+                currentPoint.x += +args[0];
+                currentPoint.y += +args[1];
+                context.lineTo(currentPoint.x, currentPoint.y);
+                break;
+            case "H":
+                currentPoint.x = +args[0];
+                context.lineTo(currentPoint.x, currentPoint.y);
+                break;
+            case "h":
+                currentPoint.x += +args[0];
+                context.lineTo(currentPoint.x, currentPoint.y);
+                break;
+            case "V":
+                currentPoint.y = +args[0];
+                context.lineTo(currentPoint.x, currentPoint.y);
+                break;
+            case "v":
+                currentPoint.y += +args[0];
+                context.lineTo(currentPoint.x, currentPoint.y);
+                break;
+            case "C":
+                currentPoint.x1 = +args[0];
+                currentPoint.y1 = +args[1];
+                currentPoint.x2 = +args[2];
+                currentPoint.y2 = +args[3];
+                currentPoint.x = +args[4];
+                currentPoint.y = +args[5];
+                context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
+                break;
+            case "c":
+                currentPoint.x1 = currentPoint.x + +args[0];
+                currentPoint.y1 = currentPoint.y + +args[1];
+                currentPoint.x2 = currentPoint.x + +args[2];
+                currentPoint.y2 = currentPoint.y + +args[3];
+                currentPoint.x += +args[4];
+                currentPoint.y += +args[5];
+                context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
+                break;
+            case "S":
+                if (currentPoint.x1 !== undefined &&
+                    currentPoint.y1 !== undefined &&
+                    currentPoint.x2 !== undefined &&
+                    currentPoint.y2 !== undefined) {
+                    currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
+                    currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;
+                    currentPoint.x2 = +args[0];
+                    currentPoint.y2 = +args[1];
+                    currentPoint.x = +args[2];
+                    currentPoint.y = +args[3];
+                    context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
+                }
+                else {
+                    currentPoint.x1 = +args[0];
+                    currentPoint.y1 = +args[1];
+                    currentPoint.x = +args[2];
+                    currentPoint.y = +args[3];
+                    context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
+                }
+                break;
+            case "s":
+                if (currentPoint.x1 !== undefined &&
+                    currentPoint.y1 !== undefined &&
+                    currentPoint.x2 !== undefined &&
+                    currentPoint.y2 !== undefined) {
+                    currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
+                    currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;
+                    currentPoint.x2 = currentPoint.x + +args[0];
+                    currentPoint.y2 = currentPoint.y + +args[1];
+                    currentPoint.x += +args[2];
+                    currentPoint.y += +args[3];
+                    context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
+                }
+                else {
+                    currentPoint.x1 = currentPoint.x + +args[0];
+                    currentPoint.y1 = currentPoint.y + +args[1];
+                    currentPoint.x += +args[2];
+                    currentPoint.y += +args[3];
+                    context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
+                }
+                break;
+            case "Q":
+                currentPoint.x1 = +args[0];
+                currentPoint.y1 = +args[1];
+                currentPoint.x = +args[2];
+                currentPoint.y = +args[3];
+                context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
+                break;
+            case "q":
+                currentPoint.x1 = currentPoint.x + +args[0];
+                currentPoint.y1 = currentPoint.y + +args[1];
+                currentPoint.x += +args[2];
+                currentPoint.y += +args[3];
+                context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
+                break;
+            case "Z":
+            case "z":
+                context.closePath();
+                break;
+        }
+    }
+    drawEllipse(x, y, radiusX, radiusY, transform, styles) {
+        const { context } = this;
+        context.save();
+        Renderer2D.resetShapeStyles(context, styles);
+        this.setTransform(transform);
+        x -= radiusX;
+        y -= radiusY;
+        const w = radiusX * 2;
+        const h = radiusY * 2;
+        const kappa = 0.5522848;
+        const ox = (w / 2) * kappa;
+        const oy = (h / 2) * kappa;
+        const xe = x + w;
+        const ye = y + h;
+        const xm = x + w / 2;
+        const ym = y + h / 2;
+        context.beginPath();
+        context.moveTo(x, ym);
+        context.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+        context.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+        context.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+        context.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+        Renderer2D.fillOrStroke(context, styles);
+        context.restore();
+    }
+    drawRect(x, y, width, height, cornerRadius, transform, styles) {
+        const { context } = this;
+        context.save();
+        Renderer2D.resetShapeStyles(context, styles);
+        this.setTransform(transform);
+        let radius = cornerRadius;
+        if (width < 2 * radius) {
+            radius = width / 2;
+        }
+        if (height < 2 * radius) {
+            radius = height / 2;
+        }
+        context.beginPath();
+        context.moveTo(x + radius, y);
+        context.arcTo(x + width, y, x + width, y + height, radius);
+        context.arcTo(x + width, y + height, x, y + height, radius);
+        context.arcTo(x, y + height, x, y, radius);
+        context.arcTo(x, y, x + width, y, radius);
+        context.closePath();
+        Renderer2D.fillOrStroke(context, styles);
+        context.restore();
+    }
+    drawShape(shape) {
+        const { type, path, transform, styles } = shape;
+        switch (type) {
+            case "shape" /* PlatformVideo.SHAPE_TYPE.SHAPE */:
+                this.drawBezier(path.d, transform, styles);
+                break;
+            case "ellipse" /* PlatformVideo.SHAPE_TYPE.ELLIPSE */:
+                this.drawEllipse(path.x ?? 0, path.y ?? 0, path.radiusX ?? 0, path.radiusY ?? 0, transform, styles);
+                break;
+            case "rect" /* PlatformVideo.SHAPE_TYPE.RECT */:
+                this.drawRect(path.x ?? 0, path.y ?? 0, path.width ?? 0, path.height ?? 0, path.cornerRadius ?? 0, transform, styles);
+                break;
+        }
+    }
+    drawSprite(frame, bitmap, dynamicElement) {
+        if (frame.alpha === 0)
+            return;
+        const { context } = this;
+        const { alpha, transform, layout, shapes } = frame;
+        const { a = 1, b = 0, c = 0, d = 1, tx = 0, ty = 0 } = transform ?? {};
+        context.save();
+        this.setTransform(this.globalTransform);
+        context.globalAlpha = alpha;
+        context.transform(a, b, c, d, tx, ty);
+        if (bitmap) {
+            context.drawImage(bitmap, 0, 0, layout.width, layout.height);
+        }
+        if (dynamicElement) {
+            context.drawImage(dynamicElement, (layout.width - dynamicElement.width) / 2, (layout.height - dynamicElement.height) / 2);
+        }
+        for (let i = 0; i < shapes.length; i++) {
+            this.drawShape(shapes[i]);
+        }
+        context.restore();
+    }
+    /**
+     * 调整画布尺寸
+     * @param contentMode
+     * @param videoSize
+     * @param canvasSize
+     * @returns
+     */
+    resize(contentMode, videoSize, canvasSize) {
+        const { width: canvasWidth, height: canvasHeight } = canvasSize;
+        const { width: videoWidth, height: videoHeight } = videoSize;
+        const resizeKey = `${contentMode}-${videoWidth}-${videoHeight}-${canvasWidth}-${canvasHeight}`;
+        const lastTransform = this.globalTransform;
+        if (this.lastResizeKey === resizeKey && lastTransform) {
+            return;
+        }
+        let scale = {
+            scaleX: 1,
+            scaleY: 1,
+            translateX: 0,
+            translateY: 0,
+        };
+        if (contentMode === "fill" /* PLAYER_CONTENT_MODE.FILL */) {
+            scale.scaleX = canvasWidth / videoWidth;
+            scale.scaleY = canvasHeight / videoHeight;
+        }
+        else {
+            scale = Renderer2D.calculateScale(contentMode, videoSize, canvasSize);
+        }
+        this.lastResizeKey = resizeKey;
+        this.globalTransform = {
+            a: scale.scaleX,
+            b: 0.0,
+            c: 0.0,
+            d: scale.scaleY,
+            tx: scale.translateX,
+            ty: scale.translateY,
+        };
+    }
+    render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail) {
+        let sprite;
+        let imageKey;
+        let bitmap;
+        let dynamicElement;
+        for (let i = head; i < tail; i++) {
+            sprite = videoEntity.sprites[i];
+            imageKey = sprite.imageKey;
+            bitmap = materials.get(imageKey);
+            dynamicElement = dynamicMaterials.get(imageKey);
+            this.drawSprite(sprite.frames[currentFrame], bitmap, dynamicElement);
+        }
+    }
+    destroy() {
+        this.globalTransform = undefined;
+        this.lastResizeKey = "";
+        this.context = null;
+    }
+}
+
+const create2DRenderer = ({ context }) => {
+    return {
+        renderer: new Renderer2D(context),
+        extensions: {
+            stick: (context, bitmap) => () => context.drawImage(bitmap, 0, 0),
+            clear: (type, context, canvas, width, height) => {
+                if (type === "CL") {
+                    return () => {
+                        // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
+                        context.clearRect(0, 0, width, height);
+                    };
+                }
+                return () => {
+                    canvas.width = width;
+                    canvas.height = height;
+                };
+            },
+        }
+    };
+};
+const detect2DSupport = () => {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    return !!context;
+};
+
+class RendererGL {
+    glContext;
+    gl = null;
+    shaderProgram = null;
+    positionBuffer = null;
+    texCoordBuffer = null;
+    vertexBuffer = null;
+    colorBuffer = null;
+    textureCache = new Map();
+    globalTransform = undefined;
+    lastResizeKey = "";
+    constructor(glContext) {
+        this.glContext = glContext;
+        this.initialize();
+    }
+    initialize() {
+        if (!this.glContext)
+            return;
+        this.gl = this.glContext;
+        this.setupShaders();
+        this.setupBuffers();
+        this.setupAttributes();
+    }
+    setupShaders() {
+        if (!this.gl)
+            return;
+        const vertexShaderSource = `
+      attribute vec2 a_position;
+      attribute vec2 a_texCoord;
+      attribute vec4 a_color;
+      
+      uniform mat3 u_matrix;
+      
+      varying vec2 v_texCoord;
+      varying vec4 v_color;
+      
+      void main() {
+        vec3 position = u_matrix * vec3(a_position, 1.0);
+        gl_Position = vec4(position.xy, 0.0, 1.0);
+        v_texCoord = a_texCoord;
+        v_color = a_color;
+      }
+    `;
+        const fragmentShaderSource = `
+      precision mediump float;
+      
+      varying vec2 v_texCoord;
+      varying vec4 v_color;
+      uniform sampler2D u_texture;
+      
+      void main() {
+        vec4 color = texture2D(u_texture, v_texCoord);
+        gl_FragColor = color * v_color;
+      }
+    `;
+        const vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexShaderSource);
+        const fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, fragmentShaderSource);
+        if (vertexShader && fragmentShader) {
+            this.shaderProgram = this.createProgram(vertexShader, fragmentShader);
+        }
+    }
+    createShader(type, source) {
+        if (!this.gl)
+            return null;
+        const shader = this.gl.createShader(type);
+        if (!shader)
+            return null;
+        this.gl.shaderSource(shader, source);
+        this.gl.compileShader(shader);
+        if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+            console.error('Shader compile error:', this.gl.getShaderInfoLog(shader));
+            this.gl.deleteShader(shader);
+            return null;
+        }
+        return shader;
+    }
+    createProgram(vertexShader, fragmentShader) {
+        if (!this.gl)
+            return null;
+        const program = this.gl.createProgram();
+        if (!program)
+            return null;
+        this.gl.attachShader(program, vertexShader);
+        this.gl.attachShader(program, fragmentShader);
+        this.gl.linkProgram(program);
+        if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
+            console.error('Program link error:', this.gl.getProgramInfoLog(program));
+            this.gl.deleteProgram(program);
+            return null;
+        }
+        return program;
+    }
+    setupBuffers() {
+        if (!this.gl)
+            return;
+        // Position buffer (quad vertices)
+        this.positionBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
+        const positions = new Float32Array([
+            -1, -1,
+            1, -1,
+            -1, 1,
+            -1, 1,
+            1, -1,
+            1, 1,
+        ]);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, positions, this.gl.STATIC_DRAW);
+        // Texture coordinate buffer
+        this.texCoordBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
+        const texCoords = new Float32Array([
+            0, 0,
+            1, 0,
+            0, 1,
+            0, 1,
+            1, 0,
+            1, 1,
+        ]);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, texCoords, this.gl.STATIC_DRAW);
+        // Color buffer
+        this.colorBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+        const colors = new Float32Array([
+            1, 1, 1, 1,
+            1, 1, 1, 1,
+            1, 1, 1, 1,
+            1, 1, 1, 1,
+            1, 1, 1, 1,
+            1, 1, 1, 1,
+        ]);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, colors, this.gl.DYNAMIC_DRAW);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
+    }
+    setupAttributes() {
+        if (!this.gl || !this.shaderProgram)
+            return;
+        this.gl.useProgram(this.shaderProgram);
+        const positionLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
+        this.gl.enableVertexAttribArray(positionLocation);
+        this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
+        const texCoordLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_texCoord');
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
+        this.gl.enableVertexAttribArray(texCoordLocation);
+        this.gl.vertexAttribPointer(texCoordLocation, 2, this.gl.FLOAT, false, 0, 0);
+        const colorLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_color');
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+        this.gl.enableVertexAttribArray(colorLocation);
+        this.gl.vertexAttribPointer(colorLocation, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
+        this.gl.useProgram(null);
+    }
+    createTextureFromBitmap(bitmap) {
+        if (!this.gl)
+            return null;
+        const texture = this.gl.createTexture();
+        if (!texture)
+            return null;
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, bitmap);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+        return texture;
+    }
+    createMatrix(transform) {
+        const { a, b, c, d, tx, ty } = transform;
+        return new Float32Array([
+            a, c, tx,
+            b, d, ty,
+            0, 0, 1
+        ]);
+    }
+    static calculateScale(contentMode, videoSize, canvasSize) {
+        const imageRatio = videoSize.width / videoSize.height;
+        const viewRatio = canvasSize.width / canvasSize.height;
+        const isAspectFit = contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */;
+        const shouldUseWidth = (imageRatio >= viewRatio && isAspectFit) ||
+            (imageRatio <= viewRatio && !isAspectFit);
+        if (shouldUseWidth) {
+            const scale = canvasSize.width / videoSize.width;
+            return {
+                scaleX: scale,
+                scaleY: scale,
+                translateX: 0,
+                translateY: (canvasSize.height - videoSize.height * scale) / 2,
+            };
+        }
+        const scale = canvasSize.height / videoSize.height;
+        return {
+            scaleX: scale,
+            scaleY: scale,
+            translateX: (canvasSize.width - videoSize.width * scale) / 2,
+            translateY: 0,
+        };
+    }
+    drawRectangle(x, y, width, height, transform, color = [1, 1, 1, 1]) {
+        if (!this.gl || !this.shaderProgram)
+            return;
+        const vertices = new Float32Array([
+            x, y,
+            x + width, y,
+            x, y + height,
+            x, y + height,
+            x + width, y,
+            x + width, y + height,
+        ]);
+        if (!this.vertexBuffer) {
+            this.vertexBuffer = this.gl.createBuffer();
+        }
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.DYNAMIC_DRAW);
+        const matrix = this.createMatrix(transform);
+        const matrixLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_matrix');
+        const colors = new Float32Array([
+            ...color, ...color, ...color, ...color, ...color, ...color
+        ]);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, colors, this.gl.DYNAMIC_DRAW);
+        this.gl.uniformMatrix3fv(matrixLocation, false, matrix);
+        const positionLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
+        const colorLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_color');
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+        this.gl.vertexAttribPointer(colorLocation, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
+    }
+    drawEllipse(x, y, radiusX, radiusY, transform, color = [1, 1, 1, 1]) {
+        this.drawRectangle(x - radiusX, y - radiusY, radiusX * 2, radiusY * 2, transform, color);
+    }
+    drawShape(shape, globalTransform) {
+        const { type, path, styles, transform } = shape;
+        const combinedTransform = {
+            a: transform.a * globalTransform.a + transform.c * globalTransform.b,
+            b: transform.b * globalTransform.a + transform.d * globalTransform.b,
+            c: transform.a * globalTransform.c + transform.c * globalTransform.d,
+            d: transform.b * globalTransform.c + transform.d * globalTransform.d,
+            tx: transform.tx * globalTransform.a + transform.ty * globalTransform.c + globalTransform.tx,
+            ty: transform.tx * globalTransform.b + transform.ty * globalTransform.d + globalTransform.ty
+        };
+        const alpha = styles.fill ? parseFloat(styles.fill.split(',')[3]) : 1;
+        const color = [1, 1, 1, alpha];
+        switch (type) {
+            case "rect" /* PlatformVideo.SHAPE_TYPE.RECT */:
+                this.drawRectangle(path.x ?? 0, path.y ?? 0, path.width ?? 0, path.height ?? 0, combinedTransform, color);
+                break;
+            case "ellipse" /* PlatformVideo.SHAPE_TYPE.ELLIPSE */:
+                this.drawEllipse(path.x ?? 0, path.y ?? 0, path.radiusX ?? 0, path.radiusY ?? 0, combinedTransform, color);
+                break;
+        }
+    }
+    drawSprite(frame, bitmap, dynamicElement, globalTransform) {
+        if ('alpha' in frame && frame.alpha === 0)
+            return;
+        const transform = globalTransform || { a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0 };
+        if (bitmap) {
+            let texture = this.textureCache.get(bitmap) || null;
+            if (!texture) {
+                texture = this.createTextureFromBitmap(bitmap);
+                if (texture) {
+                    this.textureCache.set(bitmap, texture);
+                }
+            }
+            if (texture && this.gl && this.shaderProgram) {
+                this.gl.activeTexture(this.gl.TEXTURE0);
+                this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+                const textureLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_texture');
+                this.gl.uniform1i(textureLocation, 0);
+                const layout = frame.layout;
+                this.drawRectangle(0, 0, layout.width, layout.height, transform, [1, 1, 1, frame.alpha || 1]);
+            }
+        }
+        if ('shapes' in frame) {
+            for (const shape of frame.shapes) {
+                this.drawShape(shape, transform);
+            }
+        }
+        this.gl?.bindTexture(this.gl.TEXTURE_2D, null);
+    }
+    resize(contentMode, videoSize, canvasSize) {
+        const { width: canvasWidth, height: canvasHeight } = canvasSize;
+        const { width: videoWidth, height: videoHeight } = videoSize;
+        const resizeKey = `${contentMode}-${videoWidth}-${videoHeight}-${canvasWidth}-${canvasHeight}`;
+        if (this.lastResizeKey === resizeKey) {
+            return;
+        }
+        let scale = {
+            scaleX: 1,
+            scaleY: 1,
+            translateX: 0,
+            translateY: 0,
+        };
+        if (contentMode === "fill" /* PLAYER_CONTENT_MODE.FILL */) {
+            scale.scaleX = canvasWidth / videoWidth;
+            scale.scaleY = canvasHeight / videoHeight;
+        }
+        else {
+            scale = RendererGL.calculateScale(contentMode, videoSize, canvasSize);
+        }
+        this.lastResizeKey = resizeKey;
+        this.globalTransform = {
+            a: scale.scaleX,
+            b: 0.0,
+            c: 0.0,
+            d: scale.scaleY,
+            tx: scale.translateX,
+            ty: scale.translateY,
+        };
+    }
+    render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail) {
+        if (!this.gl || !this.shaderProgram) {
+            console.warn('WebGL not initialized');
+            return;
+        }
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+        this.gl.useProgram(this.shaderProgram);
+        for (let i = head; i < tail; i++) {
+            const sprite = videoEntity.sprites[i];
+            const frame = sprite.frames[currentFrame];
+            const bitmap = materials.get(sprite.imageKey);
+            const dynamicElement = dynamicMaterials.get(sprite.imageKey);
+            this.drawSprite(frame, bitmap, dynamicElement, this.globalTransform);
+        }
+        this.gl.useProgram(null);
+    }
+    destroy() {
+        if (!this.gl)
+            return;
+        this.textureCache.forEach(texture => {
+            this.gl.deleteTexture(texture);
+        });
+        this.textureCache.clear();
+        if (this.positionBuffer)
+            this.gl.deleteBuffer(this.positionBuffer);
+        if (this.texCoordBuffer)
+            this.gl.deleteBuffer(this.texCoordBuffer);
+        if (this.vertexBuffer)
+            this.gl.deleteBuffer(this.vertexBuffer);
+        if (this.colorBuffer)
+            this.gl.deleteBuffer(this.colorBuffer);
+        if (this.shaderProgram)
+            this.gl.deleteProgram(this.shaderProgram);
+        this.gl = null;
+        this.shaderProgram = null;
+        this.positionBuffer = null;
+        this.texCoordBuffer = null;
+        this.vertexBuffer = null;
+        this.colorBuffer = null;
+        this.globalTransform = undefined;
+        this.lastResizeKey = "";
+    }
+}
+
+const createGLRenderer = ({ glContext }) => {
+    return new RendererGL(glContext);
+};
+const detectGLSupport = () => {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl');
+    const gl2 = canvas.getContext('webgl2');
+    return {
+        webgl: !!gl,
+        webgl2: !!gl2,
+        maxTextureSize: gl ? gl.getParameter(gl.MAX_TEXTURE_SIZE) : 0,
+        maxVertexAttribs: gl ? gl.getParameter(gl.MAX_VERTEX_ATTRIBS) : 0
+    };
+};
+const RendererGLExtension = {
+    stick: (gl, bitmap) => () => {
+        const texture = gl.createTexture();
+        if (!texture)
+            return;
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmap);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+    },
+    clear: (type, gl, canvas, width, height) => {
+        if (type === "CL") {
+            return () => {
+                gl.clearColor(0, 0, 0, 0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+            };
+        }
+        return () => {
+            canvas.width = width;
+            canvas.height = height;
+            gl.viewport(0, 0, width, height);
+        };
+    },
+};
+
 class RendererGPU {
     gpuDevice;
     device = null;
@@ -2121,878 +2976,6 @@ const RendererGPUExtension = {
     },
 };
 
-class RendererGL {
-    glContext;
-    gl = null;
-    shaderProgram = null;
-    positionBuffer = null;
-    texCoordBuffer = null;
-    vertexBuffer = null;
-    colorBuffer = null;
-    textureCache = new Map();
-    globalTransform = undefined;
-    lastResizeKey = "";
-    constructor(glContext) {
-        this.glContext = glContext;
-        this.initialize();
-    }
-    initialize() {
-        if (!this.glContext)
-            return;
-        this.gl = this.glContext;
-        this.setupShaders();
-        this.setupBuffers();
-        this.setupAttributes();
-    }
-    setupShaders() {
-        if (!this.gl)
-            return;
-        const vertexShaderSource = `
-      attribute vec2 a_position;
-      attribute vec2 a_texCoord;
-      attribute vec4 a_color;
-      
-      uniform mat3 u_matrix;
-      
-      varying vec2 v_texCoord;
-      varying vec4 v_color;
-      
-      void main() {
-        vec3 position = u_matrix * vec3(a_position, 1.0);
-        gl_Position = vec4(position.xy, 0.0, 1.0);
-        v_texCoord = a_texCoord;
-        v_color = a_color;
-      }
-    `;
-        const fragmentShaderSource = `
-      precision mediump float;
-      
-      varying vec2 v_texCoord;
-      varying vec4 v_color;
-      uniform sampler2D u_texture;
-      
-      void main() {
-        vec4 color = texture2D(u_texture, v_texCoord);
-        gl_FragColor = color * v_color;
-      }
-    `;
-        const vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexShaderSource);
-        const fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, fragmentShaderSource);
-        if (vertexShader && fragmentShader) {
-            this.shaderProgram = this.createProgram(vertexShader, fragmentShader);
-        }
-    }
-    createShader(type, source) {
-        if (!this.gl)
-            return null;
-        const shader = this.gl.createShader(type);
-        if (!shader)
-            return null;
-        this.gl.shaderSource(shader, source);
-        this.gl.compileShader(shader);
-        if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-            console.error('Shader compile error:', this.gl.getShaderInfoLog(shader));
-            this.gl.deleteShader(shader);
-            return null;
-        }
-        return shader;
-    }
-    createProgram(vertexShader, fragmentShader) {
-        if (!this.gl)
-            return null;
-        const program = this.gl.createProgram();
-        if (!program)
-            return null;
-        this.gl.attachShader(program, vertexShader);
-        this.gl.attachShader(program, fragmentShader);
-        this.gl.linkProgram(program);
-        if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
-            console.error('Program link error:', this.gl.getProgramInfoLog(program));
-            this.gl.deleteProgram(program);
-            return null;
-        }
-        return program;
-    }
-    setupBuffers() {
-        if (!this.gl)
-            return;
-        // Position buffer (quad vertices)
-        this.positionBuffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-        const positions = new Float32Array([
-            -1, -1,
-            1, -1,
-            -1, 1,
-            -1, 1,
-            1, -1,
-            1, 1,
-        ]);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, positions, this.gl.STATIC_DRAW);
-        // Texture coordinate buffer
-        this.texCoordBuffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
-        const texCoords = new Float32Array([
-            0, 0,
-            1, 0,
-            0, 1,
-            0, 1,
-            1, 0,
-            1, 1,
-        ]);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, texCoords, this.gl.STATIC_DRAW);
-        // Color buffer
-        this.colorBuffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-        const colors = new Float32Array([
-            1, 1, 1, 1,
-            1, 1, 1, 1,
-            1, 1, 1, 1,
-            1, 1, 1, 1,
-            1, 1, 1, 1,
-            1, 1, 1, 1,
-        ]);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, colors, this.gl.DYNAMIC_DRAW);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
-    }
-    setupAttributes() {
-        if (!this.gl || !this.shaderProgram)
-            return;
-        this.gl.useProgram(this.shaderProgram);
-        const positionLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-        this.gl.enableVertexAttribArray(positionLocation);
-        this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
-        const texCoordLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_texCoord');
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
-        this.gl.enableVertexAttribArray(texCoordLocation);
-        this.gl.vertexAttribPointer(texCoordLocation, 2, this.gl.FLOAT, false, 0, 0);
-        const colorLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_color');
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-        this.gl.enableVertexAttribArray(colorLocation);
-        this.gl.vertexAttribPointer(colorLocation, 4, this.gl.FLOAT, false, 0, 0);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
-        this.gl.useProgram(null);
-    }
-    createTextureFromBitmap(bitmap) {
-        if (!this.gl)
-            return null;
-        const texture = this.gl.createTexture();
-        if (!texture)
-            return null;
-        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, bitmap);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
-        return texture;
-    }
-    createMatrix(transform) {
-        const { a, b, c, d, tx, ty } = transform;
-        return new Float32Array([
-            a, c, tx,
-            b, d, ty,
-            0, 0, 1
-        ]);
-    }
-    static calculateScale(contentMode, videoSize, canvasSize) {
-        const imageRatio = videoSize.width / videoSize.height;
-        const viewRatio = canvasSize.width / canvasSize.height;
-        const isAspectFit = contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */;
-        const shouldUseWidth = (imageRatio >= viewRatio && isAspectFit) ||
-            (imageRatio <= viewRatio && !isAspectFit);
-        if (shouldUseWidth) {
-            const scale = canvasSize.width / videoSize.width;
-            return {
-                scaleX: scale,
-                scaleY: scale,
-                translateX: 0,
-                translateY: (canvasSize.height - videoSize.height * scale) / 2,
-            };
-        }
-        const scale = canvasSize.height / videoSize.height;
-        return {
-            scaleX: scale,
-            scaleY: scale,
-            translateX: (canvasSize.width - videoSize.width * scale) / 2,
-            translateY: 0,
-        };
-    }
-    drawRectangle(x, y, width, height, transform, color = [1, 1, 1, 1]) {
-        if (!this.gl || !this.shaderProgram)
-            return;
-        const vertices = new Float32Array([
-            x, y,
-            x + width, y,
-            x, y + height,
-            x, y + height,
-            x + width, y,
-            x + width, y + height,
-        ]);
-        if (!this.vertexBuffer) {
-            this.vertexBuffer = this.gl.createBuffer();
-        }
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.DYNAMIC_DRAW);
-        const matrix = this.createMatrix(transform);
-        const matrixLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_matrix');
-        const colors = new Float32Array([
-            ...color, ...color, ...color, ...color, ...color, ...color
-        ]);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, colors, this.gl.DYNAMIC_DRAW);
-        this.gl.uniformMatrix3fv(matrixLocation, false, matrix);
-        const positionLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
-        const colorLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_color');
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-        this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-        this.gl.vertexAttribPointer(colorLocation, 4, this.gl.FLOAT, false, 0, 0);
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
-    }
-    drawEllipse(x, y, radiusX, radiusY, transform, color = [1, 1, 1, 1]) {
-        this.drawRectangle(x - radiusX, y - radiusY, radiusX * 2, radiusY * 2, transform, color);
-    }
-    drawShape(shape, globalTransform) {
-        const { type, path, styles, transform } = shape;
-        const combinedTransform = {
-            a: transform.a * globalTransform.a + transform.c * globalTransform.b,
-            b: transform.b * globalTransform.a + transform.d * globalTransform.b,
-            c: transform.a * globalTransform.c + transform.c * globalTransform.d,
-            d: transform.b * globalTransform.c + transform.d * globalTransform.d,
-            tx: transform.tx * globalTransform.a + transform.ty * globalTransform.c + globalTransform.tx,
-            ty: transform.tx * globalTransform.b + transform.ty * globalTransform.d + globalTransform.ty
-        };
-        const alpha = styles.fill ? parseFloat(styles.fill.split(',')[3]) : 1;
-        const color = [1, 1, 1, alpha];
-        switch (type) {
-            case "rect" /* PlatformVideo.SHAPE_TYPE.RECT */:
-                this.drawRectangle(path.x ?? 0, path.y ?? 0, path.width ?? 0, path.height ?? 0, combinedTransform, color);
-                break;
-            case "ellipse" /* PlatformVideo.SHAPE_TYPE.ELLIPSE */:
-                this.drawEllipse(path.x ?? 0, path.y ?? 0, path.radiusX ?? 0, path.radiusY ?? 0, combinedTransform, color);
-                break;
-        }
-    }
-    drawSprite(frame, bitmap, dynamicElement, globalTransform) {
-        if ('alpha' in frame && frame.alpha === 0)
-            return;
-        const transform = globalTransform || { a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0 };
-        if (bitmap) {
-            let texture = this.textureCache.get(bitmap) || null;
-            if (!texture) {
-                texture = this.createTextureFromBitmap(bitmap);
-                if (texture) {
-                    this.textureCache.set(bitmap, texture);
-                }
-            }
-            if (texture && this.gl && this.shaderProgram) {
-                this.gl.activeTexture(this.gl.TEXTURE0);
-                this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-                const textureLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_texture');
-                this.gl.uniform1i(textureLocation, 0);
-                const layout = frame.layout;
-                this.drawRectangle(0, 0, layout.width, layout.height, transform, [1, 1, 1, frame.alpha || 1]);
-            }
-        }
-        if ('shapes' in frame) {
-            for (const shape of frame.shapes) {
-                this.drawShape(shape, transform);
-            }
-        }
-        this.gl?.bindTexture(this.gl.TEXTURE_2D, null);
-    }
-    resize(contentMode, videoSize, canvasSize) {
-        const { width: canvasWidth, height: canvasHeight } = canvasSize;
-        const { width: videoWidth, height: videoHeight } = videoSize;
-        const resizeKey = `${contentMode}-${videoWidth}-${videoHeight}-${canvasWidth}-${canvasHeight}`;
-        if (this.lastResizeKey === resizeKey) {
-            return;
-        }
-        let scale = {
-            scaleX: 1,
-            scaleY: 1,
-            translateX: 0,
-            translateY: 0,
-        };
-        if (contentMode === "fill" /* PLAYER_CONTENT_MODE.FILL */) {
-            scale.scaleX = canvasWidth / videoWidth;
-            scale.scaleY = canvasHeight / videoHeight;
-        }
-        else {
-            scale = RendererGL.calculateScale(contentMode, videoSize, canvasSize);
-        }
-        this.lastResizeKey = resizeKey;
-        this.globalTransform = {
-            a: scale.scaleX,
-            b: 0.0,
-            c: 0.0,
-            d: scale.scaleY,
-            tx: scale.translateX,
-            ty: scale.translateY,
-        };
-    }
-    render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail) {
-        if (!this.gl || !this.shaderProgram) {
-            console.warn('WebGL not initialized');
-            return;
-        }
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-        this.gl.useProgram(this.shaderProgram);
-        for (let i = head; i < tail; i++) {
-            const sprite = videoEntity.sprites[i];
-            const frame = sprite.frames[currentFrame];
-            const bitmap = materials.get(sprite.imageKey);
-            const dynamicElement = dynamicMaterials.get(sprite.imageKey);
-            this.drawSprite(frame, bitmap, dynamicElement, this.globalTransform);
-        }
-        this.gl.useProgram(null);
-    }
-    destroy() {
-        if (!this.gl)
-            return;
-        this.textureCache.forEach(texture => {
-            this.gl.deleteTexture(texture);
-        });
-        this.textureCache.clear();
-        if (this.positionBuffer)
-            this.gl.deleteBuffer(this.positionBuffer);
-        if (this.texCoordBuffer)
-            this.gl.deleteBuffer(this.texCoordBuffer);
-        if (this.vertexBuffer)
-            this.gl.deleteBuffer(this.vertexBuffer);
-        if (this.colorBuffer)
-            this.gl.deleteBuffer(this.colorBuffer);
-        if (this.shaderProgram)
-            this.gl.deleteProgram(this.shaderProgram);
-        this.gl = null;
-        this.shaderProgram = null;
-        this.positionBuffer = null;
-        this.texCoordBuffer = null;
-        this.vertexBuffer = null;
-        this.colorBuffer = null;
-        this.globalTransform = undefined;
-        this.lastResizeKey = "";
-    }
-}
-
-const createGLRenderer = ({ glContext }) => {
-    return new RendererGL(glContext);
-};
-const detectGLSupport = () => {
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl');
-    const gl2 = canvas.getContext('webgl2');
-    return {
-        webgl: !!gl,
-        webgl2: !!gl2,
-        maxTextureSize: gl ? gl.getParameter(gl.MAX_TEXTURE_SIZE) : 0,
-        maxVertexAttribs: gl ? gl.getParameter(gl.MAX_VERTEX_ATTRIBS) : 0
-    };
-};
-const RendererGLExtension = {
-    stick: (gl, bitmap) => () => {
-        const texture = gl.createTexture();
-        if (!texture)
-            return;
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmap);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.bindTexture(gl.TEXTURE_2D, null);
-    },
-    clear: (type, gl, canvas, width, height) => {
-        if (type === "CL") {
-            return () => {
-                gl.clearColor(0, 0, 0, 0);
-                gl.clear(gl.COLOR_BUFFER_BIT);
-            };
-        }
-        return () => {
-            canvas.width = width;
-            canvas.height = height;
-            gl.viewport(0, 0, width, height);
-        };
-    },
-};
-
-/**
- * CurrentPoint对象池，用于减少对象创建和GC压力
- */
-class PointPool {
-    pool = [];
-    acquire() {
-        const { pool } = this;
-        return pool.length > 0
-            ? pool.pop()
-            : { x: 0, y: 0, x1: 0, y1: 0, x2: 0, y2: 0 };
-    }
-    release(point) {
-        // 重置点的属性
-        point.x = point.y = point.x1 = point.y1 = point.x2 = point.y2 = 0;
-        this.pool.push(point);
-    }
-}
-
-class Renderer2D {
-    context;
-    /**
-     * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Tutorial/Paths
-     * 绘制路径的不同指令：
-     * * 直线命令
-     * - M: moveTo，移动到指定点，不绘制直线。
-     * - L: lineTo，从起始点绘制一条直线到指定点。
-     * - H: horizontal lineTo，从起始点绘制一条水平线到指定点。
-     * - V: vertical lineTo，从起始点绘制一条垂直线到指定点。
-     * - Z: closePath，从起始点绘制一条直线到路径起点，形成一个闭合路径。
-     * * 曲线命令
-     * - C: bezierCurveTo，绘制三次贝塞尔曲线。
-     * - S: smooth curveTo，绘制平滑三次贝塞尔曲线。
-     * - Q: quadraticCurveTo，绘制两次贝塞尔曲线。
-     * - T: smooth quadraticCurveTo，绘制平滑两次贝塞尔曲线。
-     * * 弧线命令
-     * - A: arcTo，从起始点绘制一条弧线到指定点。
-     */
-    static SVG_PATH = new Set([
-        "M",
-        "L",
-        "H",
-        "V",
-        "Z",
-        "C",
-        "S",
-        "Q",
-        "m",
-        "l",
-        "h",
-        "v",
-        "z",
-        "c",
-        "s",
-        "q",
-    ]);
-    static SVG_LETTER_REGEXP = /[a-zA-Z]/;
-    // 在Renderer2D类中添加新的解析方法
-    static parseSVGPath(d) {
-        const { SVG_LETTER_REGEXP } = Renderer2D;
-        const result = [];
-        let currentIndex = 0;
-        // 状态：0 - 等待命令，1 - 读取参数
-        let state = 0;
-        let currentCommand = "";
-        let currentArgs = "";
-        while (currentIndex < d.length) {
-            const char = d[currentIndex];
-            switch (state) {
-                case 0: // 等待命令
-                    if (SVG_LETTER_REGEXP.test(char)) {
-                        currentCommand = char;
-                        state = 1;
-                    }
-                    break;
-                case 1: // 读取参数
-                    if (SVG_LETTER_REGEXP.test(char)) {
-                        // 遇到新命令，保存当前命令和参数
-                        result.push({
-                            command: currentCommand,
-                            args: currentArgs.trim(),
-                        });
-                        currentCommand = char;
-                        currentArgs = "";
-                    }
-                    else {
-                        currentArgs += char;
-                    }
-                    break;
-            }
-            currentIndex++;
-        }
-        // 处理最后一个命令
-        if (currentCommand && state === 1) {
-            result.push({
-                command: currentCommand,
-                args: currentArgs.trim(),
-            });
-        }
-        return result;
-    }
-    static fillOrStroke(context, styles) {
-        if (styles) {
-            if (styles.fill) {
-                context.fill();
-            }
-            if (styles.stroke) {
-                context.stroke();
-            }
-        }
-    }
-    static resetShapeStyles(context, styles) {
-        if (styles) {
-            context.strokeStyle = styles.stroke || "transparent";
-            if (styles.strokeWidth > 0) {
-                context.lineWidth = styles.strokeWidth;
-            }
-            if (styles.miterLimit > 0) {
-                context.miterLimit = styles.miterLimit;
-            }
-            if (styles.lineCap) {
-                context.lineCap = styles.lineCap;
-            }
-            if (styles.lineJoin) {
-                context.lineJoin = styles.lineJoin;
-            }
-            context.fillStyle = styles.fill || "transparent";
-            if (styles.lineDash) {
-                context.setLineDash(styles.lineDash);
-            }
-        }
-    }
-    /**
-     * 计算缩放比例
-     * @param contentMode
-     * @param videoSize
-     * @param canvasSize
-     * @returns
-     */
-    static calculateScale(contentMode, videoSize, canvasSize) {
-        const imageRatio = videoSize.width / videoSize.height;
-        const viewRatio = canvasSize.width / canvasSize.height;
-        const isAspectFit = contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */;
-        const shouldUseWidth = (imageRatio >= viewRatio && isAspectFit) ||
-            (imageRatio <= viewRatio && !isAspectFit);
-        const createTransform = (scale, translateX, translateY) => ({
-            scaleX: scale,
-            scaleY: scale,
-            translateX,
-            translateY,
-        });
-        if (shouldUseWidth) {
-            const scale = canvasSize.width / videoSize.width;
-            return createTransform(scale, 0, (canvasSize.height - videoSize.height * scale) / 2);
-        }
-        const scale = canvasSize.height / videoSize.height;
-        return createTransform(scale, (canvasSize.width - videoSize.width * scale) / 2, 0);
-    }
-    pointPool = new PointPool();
-    currentPoint;
-    lastResizeKey = "";
-    globalTransform = undefined;
-    constructor(context) {
-        this.context = context;
-        this.currentPoint = this.pointPool.acquire();
-    }
-    setTransform(transform) {
-        if (transform && this.context) {
-            this.context.transform(transform.a, transform.b, transform.c, transform.d, transform.tx, transform.ty);
-        }
-    }
-    drawBezier(d, transform, styles) {
-        const { context, pointPool } = this;
-        this.currentPoint = pointPool.acquire();
-        context.save();
-        Renderer2D.resetShapeStyles(context, styles);
-        this.setTransform(transform);
-        context.beginPath();
-        if (d) {
-            // 使用状态机解析器替代正则表达式
-            const commands = Renderer2D.parseSVGPath(d);
-            for (const { command, args } of commands) {
-                if (Renderer2D.SVG_PATH.has(command)) {
-                    this.drawBezierElement(this.currentPoint, command, args.split(/[\s,]+/).filter(Boolean));
-                }
-            }
-        }
-        Renderer2D.fillOrStroke(context, styles);
-        pointPool.release(this.currentPoint);
-        context.restore();
-    }
-    drawBezierElement(currentPoint, method, args) {
-        const { context } = this;
-        switch (method) {
-            case "M":
-                currentPoint.x = +args[0];
-                currentPoint.y = +args[1];
-                context.moveTo(currentPoint.x, currentPoint.y);
-                break;
-            case "m":
-                currentPoint.x += +args[0];
-                currentPoint.y += +args[1];
-                context.moveTo(currentPoint.x, currentPoint.y);
-                break;
-            case "L":
-                currentPoint.x = +args[0];
-                currentPoint.y = +args[1];
-                context.lineTo(currentPoint.x, currentPoint.y);
-                break;
-            case "l":
-                currentPoint.x += +args[0];
-                currentPoint.y += +args[1];
-                context.lineTo(currentPoint.x, currentPoint.y);
-                break;
-            case "H":
-                currentPoint.x = +args[0];
-                context.lineTo(currentPoint.x, currentPoint.y);
-                break;
-            case "h":
-                currentPoint.x += +args[0];
-                context.lineTo(currentPoint.x, currentPoint.y);
-                break;
-            case "V":
-                currentPoint.y = +args[0];
-                context.lineTo(currentPoint.x, currentPoint.y);
-                break;
-            case "v":
-                currentPoint.y += +args[0];
-                context.lineTo(currentPoint.x, currentPoint.y);
-                break;
-            case "C":
-                currentPoint.x1 = +args[0];
-                currentPoint.y1 = +args[1];
-                currentPoint.x2 = +args[2];
-                currentPoint.y2 = +args[3];
-                currentPoint.x = +args[4];
-                currentPoint.y = +args[5];
-                context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
-                break;
-            case "c":
-                currentPoint.x1 = currentPoint.x + +args[0];
-                currentPoint.y1 = currentPoint.y + +args[1];
-                currentPoint.x2 = currentPoint.x + +args[2];
-                currentPoint.y2 = currentPoint.y + +args[3];
-                currentPoint.x += +args[4];
-                currentPoint.y += +args[5];
-                context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
-                break;
-            case "S":
-                if (currentPoint.x1 !== undefined &&
-                    currentPoint.y1 !== undefined &&
-                    currentPoint.x2 !== undefined &&
-                    currentPoint.y2 !== undefined) {
-                    currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
-                    currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;
-                    currentPoint.x2 = +args[0];
-                    currentPoint.y2 = +args[1];
-                    currentPoint.x = +args[2];
-                    currentPoint.y = +args[3];
-                    context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
-                }
-                else {
-                    currentPoint.x1 = +args[0];
-                    currentPoint.y1 = +args[1];
-                    currentPoint.x = +args[2];
-                    currentPoint.y = +args[3];
-                    context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
-                }
-                break;
-            case "s":
-                if (currentPoint.x1 !== undefined &&
-                    currentPoint.y1 !== undefined &&
-                    currentPoint.x2 !== undefined &&
-                    currentPoint.y2 !== undefined) {
-                    currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
-                    currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;
-                    currentPoint.x2 = currentPoint.x + +args[0];
-                    currentPoint.y2 = currentPoint.y + +args[1];
-                    currentPoint.x += +args[2];
-                    currentPoint.y += +args[3];
-                    context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
-                }
-                else {
-                    currentPoint.x1 = currentPoint.x + +args[0];
-                    currentPoint.y1 = currentPoint.y + +args[1];
-                    currentPoint.x += +args[2];
-                    currentPoint.y += +args[3];
-                    context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
-                }
-                break;
-            case "Q":
-                currentPoint.x1 = +args[0];
-                currentPoint.y1 = +args[1];
-                currentPoint.x = +args[2];
-                currentPoint.y = +args[3];
-                context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
-                break;
-            case "q":
-                currentPoint.x1 = currentPoint.x + +args[0];
-                currentPoint.y1 = currentPoint.y + +args[1];
-                currentPoint.x += +args[2];
-                currentPoint.y += +args[3];
-                context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
-                break;
-            case "Z":
-            case "z":
-                context.closePath();
-                break;
-        }
-    }
-    drawEllipse(x, y, radiusX, radiusY, transform, styles) {
-        const { context } = this;
-        context.save();
-        Renderer2D.resetShapeStyles(context, styles);
-        this.setTransform(transform);
-        x -= radiusX;
-        y -= radiusY;
-        const w = radiusX * 2;
-        const h = radiusY * 2;
-        const kappa = 0.5522848;
-        const ox = (w / 2) * kappa;
-        const oy = (h / 2) * kappa;
-        const xe = x + w;
-        const ye = y + h;
-        const xm = x + w / 2;
-        const ym = y + h / 2;
-        context.beginPath();
-        context.moveTo(x, ym);
-        context.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
-        context.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
-        context.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-        context.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
-        Renderer2D.fillOrStroke(context, styles);
-        context.restore();
-    }
-    drawRect(x, y, width, height, cornerRadius, transform, styles) {
-        const { context } = this;
-        context.save();
-        Renderer2D.resetShapeStyles(context, styles);
-        this.setTransform(transform);
-        let radius = cornerRadius;
-        if (width < 2 * radius) {
-            radius = width / 2;
-        }
-        if (height < 2 * radius) {
-            radius = height / 2;
-        }
-        context.beginPath();
-        context.moveTo(x + radius, y);
-        context.arcTo(x + width, y, x + width, y + height, radius);
-        context.arcTo(x + width, y + height, x, y + height, radius);
-        context.arcTo(x, y + height, x, y, radius);
-        context.arcTo(x, y, x + width, y, radius);
-        context.closePath();
-        Renderer2D.fillOrStroke(context, styles);
-        context.restore();
-    }
-    drawShape(shape) {
-        const { type, path, transform, styles } = shape;
-        switch (type) {
-            case "shape" /* PlatformVideo.SHAPE_TYPE.SHAPE */:
-                this.drawBezier(path.d, transform, styles);
-                break;
-            case "ellipse" /* PlatformVideo.SHAPE_TYPE.ELLIPSE */:
-                this.drawEllipse(path.x ?? 0, path.y ?? 0, path.radiusX ?? 0, path.radiusY ?? 0, transform, styles);
-                break;
-            case "rect" /* PlatformVideo.SHAPE_TYPE.RECT */:
-                this.drawRect(path.x ?? 0, path.y ?? 0, path.width ?? 0, path.height ?? 0, path.cornerRadius ?? 0, transform, styles);
-                break;
-        }
-    }
-    drawSprite(frame, bitmap, dynamicElement) {
-        if (frame.alpha === 0)
-            return;
-        const { context } = this;
-        const { alpha, transform, layout, shapes } = frame;
-        const { a = 1, b = 0, c = 0, d = 1, tx = 0, ty = 0 } = transform ?? {};
-        context.save();
-        this.setTransform(this.globalTransform);
-        context.globalAlpha = alpha;
-        context.transform(a, b, c, d, tx, ty);
-        if (bitmap) {
-            context.drawImage(bitmap, 0, 0, layout.width, layout.height);
-        }
-        if (dynamicElement) {
-            context.drawImage(dynamicElement, (layout.width - dynamicElement.width) / 2, (layout.height - dynamicElement.height) / 2);
-        }
-        for (let i = 0; i < shapes.length; i++) {
-            this.drawShape(shapes[i]);
-        }
-        context.restore();
-    }
-    /**
-     * 调整画布尺寸
-     * @param contentMode
-     * @param videoSize
-     * @param canvasSize
-     * @returns
-     */
-    resize(contentMode, videoSize, canvasSize) {
-        const { width: canvasWidth, height: canvasHeight } = canvasSize;
-        const { width: videoWidth, height: videoHeight } = videoSize;
-        const resizeKey = `${contentMode}-${videoWidth}-${videoHeight}-${canvasWidth}-${canvasHeight}`;
-        const lastTransform = this.globalTransform;
-        if (this.lastResizeKey === resizeKey && lastTransform) {
-            return;
-        }
-        let scale = {
-            scaleX: 1,
-            scaleY: 1,
-            translateX: 0,
-            translateY: 0,
-        };
-        if (contentMode === "fill" /* PLAYER_CONTENT_MODE.FILL */) {
-            scale.scaleX = canvasWidth / videoWidth;
-            scale.scaleY = canvasHeight / videoHeight;
-        }
-        else {
-            scale = Renderer2D.calculateScale(contentMode, videoSize, canvasSize);
-        }
-        this.lastResizeKey = resizeKey;
-        this.globalTransform = {
-            a: scale.scaleX,
-            b: 0.0,
-            c: 0.0,
-            d: scale.scaleY,
-            tx: scale.translateX,
-            ty: scale.translateY,
-        };
-    }
-    render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail) {
-        let sprite;
-        let imageKey;
-        let bitmap;
-        let dynamicElement;
-        for (let i = head; i < tail; i++) {
-            sprite = videoEntity.sprites[i];
-            imageKey = sprite.imageKey;
-            bitmap = materials.get(imageKey);
-            dynamicElement = dynamicMaterials.get(imageKey);
-            this.drawSprite(sprite.frames[currentFrame], bitmap, dynamicElement);
-        }
-    }
-    destroy() {
-        this.globalTransform = undefined;
-        this.lastResizeKey = "";
-        this.context = null;
-    }
-}
-
-const create2DRenderer = ({ context }) => {
-    return new Renderer2D(context);
-};
-const detect2DSupport = () => {
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    return !!context;
-};
-const Renderer2DExtension = {
-    stick: (context, bitmap) => () => context.drawImage(bitmap, 0, 0),
-    clear: (type, context, canvas, width, height) => {
-        if (type === "CL") {
-            return () => {
-                // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
-                context.clearRect(0, 0, width, height);
-            };
-        }
-        return () => {
-            canvas.width = width;
-            canvas.height = height;
-        };
-    },
-};
-
 const rendererInfo = [
     { type: 'webgpu', name: 'WebGPU', supported: false, priority: 3 },
     { type: 'webgl', name: 'WebGL', supported: false, priority: 2 },
@@ -3051,7 +3034,8 @@ async function createRenderer(type, canvas, context) {
             break;
         case '2d':
             if (context) {
-                return create2DRenderer({ context });
+                const result = create2DRenderer({ context });
+                return result.renderer;
             }
             break;
     }
@@ -3077,7 +3061,8 @@ const createBestRenderer = async (canvas, context) => {
                 break;
             case '2d':
                 if (context) {
-                    renderer = create2DRenderer({ context });
+                    const result = create2DRenderer({ context });
+                    renderer = result.renderer;
                 }
                 break;
         }
@@ -3225,19 +3210,29 @@ const freb = (eb, start) => {
     }
     return { b, r };
 };
-const { b: fl, r: revfl } = freb(fleb, 2);
-// we can ignore the fact that the other numbers are wrong; they never happen anyway
-fl[28] = 258, revfl[258] = 28;
-const { b: fd, r: revfd } = freb(fdeb, 0);
+const frebResult1 = freb(fleb, 2);
+const fl = frebResult1.b;
+const revfl = frebResult1.r;
+const frebResult2 = freb(fdeb, 0);
+const fd = frebResult2.b;
+const revfd = frebResult2.r;
 // map of value to reverse (assuming 16 bits)
 const rev = new u16(32768);
-for (let i = 0; i < 32768; ++i) {
+// 初始化函数
+function initZlibTables() {
+    // we can ignore the fact that the other numbers are wrong; they never happen anyway
+    fl[28] = 258;
+    revfl[258] = 28;
     // reverse table algorithm from SO
-    let x = ((i & 0xAAAA) >> 1) | ((i & 0x5555) << 1);
-    x = ((x & 0xCCCC) >> 2) | ((x & 0x3333) << 2);
-    x = ((x & 0xF0F0) >> 4) | ((x & 0x0F0F) << 4);
-    rev[i] = (((x & 0xFF00) >> 8) | ((x & 0x00FF) << 8)) >> 1;
+    for (let i = 0; i < 32768; ++i) {
+        let x = ((i & 0xAAAA) >> 1) | ((i & 0x5555) << 1);
+        x = ((x & 0xCCCC) >> 2) | ((x & 0x3333) << 2);
+        x = ((x & 0xF0F0) >> 4) | ((x & 0x0F0F) << 4);
+        rev[i] = (((x & 0xFF00) >> 8) | ((x & 0x00FF) << 8)) >> 1;
+    }
 }
+// 调用初始化函数
+initZlibTables();
 // create huffman tree from u8 "map": index -> code length for code index
 // mb (max bits) must be at most 15
 // TODO: optimize/split up?
@@ -5144,7 +5139,6 @@ class Parser {
     }
 }
 
-const { noop } = platform;
 class Painter {
     mode;
     /**
@@ -5252,12 +5246,14 @@ class Painter {
         // #endregion set main screen implement
         const { FC, F, W, H } = this;
         const clearType = model.clear;
-        this.clearContainer = Renderer2DExtension.clear(clearType, FC, F, W, H);
+        // 创建一个临时的 renderer 来获取 extensions
+        const tempRendererResult = create2DRenderer({ context: FC });
+        this.clearContainer = tempRendererResult.extensions.clear(clearType, FC, F, W, H);
         if (mode === "single") {
             this.B = F;
             this.BC = FC;
             this.clearSecondary = this.clearContainer;
-            this.stick = noop;
+            this.stick = platform.noop;
         }
         else {
             // #region set secondary screen implement
@@ -5277,22 +5273,25 @@ class Painter {
             this.BC = ofsResult.context;
             // #endregion set secondary screen implement
             const { BC, B } = this;
-            this.clearSecondary = Renderer2DExtension.clear(clearType, BC, B, W, H);
-            this.stick = Renderer2DExtension.stick(FC, B);
+            // 创建一个临时的 renderer 来获取 extensions
+            const tempRendererResult2 = create2DRenderer({ context: BC });
+            this.clearSecondary = tempRendererResult2.extensions.clear(clearType, BC, B, W, H);
+            this.stick = tempRendererResult2.extensions.stick(FC, B);
         }
         // #region other methods implement
         // ------- 生成其他方法 --------
         const { B, BC } = this;
-        const renderer = (this.renderer = create2DRenderer({ context: BC }));
-        this.resize = (contentMode, videoSize) => renderer.resize(contentMode, videoSize, B);
-        this.draw = (videoEntity, materials, dynamicMaterials, currentFrame, head, tail) => renderer.render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail);
+        const rendererResult = create2DRenderer({ context: BC });
+        this.renderer = rendererResult.renderer;
+        this.resize = (contentMode, videoSize) => this.renderer.resize(contentMode, videoSize, B);
+        this.draw = (videoEntity, materials, dynamicMaterials, currentFrame, head, tail) => this.renderer.render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail);
         // #endregion other methods implement
     }
-    clearContainer = noop;
-    clearSecondary = noop;
-    resize = noop;
-    draw = noop;
-    stick = noop;
+    clearContainer = platform.noop;
+    clearSecondary = platform.noop;
+    resize = platform.noop;
+    draw = platform.noop;
+    stick = platform.noop;
     /**
      * 销毁画笔
      */
@@ -5300,7 +5299,7 @@ class Painter {
         this.clearContainer();
         this.clearSecondary();
         this.F = this.FC = this.B = this.BC = null;
-        this.clearContainer = this.clearSecondary = this.stick = noop;
+        this.clearContainer = this.clearSecondary = this.stick = platform.noop;
         this.renderer?.destroy();
     }
 }
@@ -5447,5 +5446,5 @@ function isZlibCompressed(data) {
     return true;
 }
 
-export { Animator, EnhancedPlatform, PNGEncoder, Painter, Parser, QRCode, Renderer2D, Renderer2DExtension, RendererGL, RendererGLExtension, RendererGPU, RendererGPUExtension, ResourceManager, create2DRenderer, createBestRenderer, createBufferOfImageData, createGLRenderer, createGPURenderer, createImageDataUrl, createRenderer, createVideoEntity, detect2DSupport, detectGLSupport, detectGPUSupport, detectRendererSupport, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform, unzlibSync, zlibSync };
+export { Animator, PNGEncoder, Painter, Parser, QRCode, Renderer2D, RendererGL, RendererGLExtension, RendererGPU, RendererGPUExtension, ResourceManager, create2DRenderer, createBestRenderer, createBufferOfImageData, createGLRenderer, createGPURenderer, createImageDataUrl, createRenderer, createVideoEntity, detect2DSupport, detectGLSupport, detectGPUSupport, detectRendererSupport, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform, unzlibSync, zlibSync };
 //# sourceMappingURL=index.js.map

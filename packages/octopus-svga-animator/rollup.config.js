@@ -35,7 +35,7 @@ export default defineConfig([
         plugins: [terser()],
       },
     ],
-    external: ["octopus-platform"],
+    external: ["octopus-svga-engine"],
     plugins: [
       nodeResolve({ browser: true }),
       replace({
@@ -59,7 +59,7 @@ export default defineConfig([
       {
         file: pkg.main,
         format: "umd",
-        name: "OctopusSvga",
+        name: "OctopusSvgaAnimator",
         exports: "named",
         compact: true,
         esModule: true,
@@ -68,7 +68,7 @@ export default defineConfig([
       {
         file: minifyFileName(pkg.main),
         format: "umd",
-        name: "OctopusSvga",
+        name: "OctopusSvgaAnimator",
         exports: "named",
         esModule: true,
         compact: true,
@@ -89,13 +89,13 @@ export default defineConfig([
         babelHelpers: "bundled",
         include: [
           "src/**",
-          // 🔥 匹配 workspace 中的 octopus-platform 包
-          "../octopus-platform/**",
+          // 🔥 匹配 workspace 中的 octopus-svga-engine 包
+          "../octopus-svga-engine/**",
           // 🔥 匹配 pnpm 的 .pnpm 结构
-          '**/node_modules/.pnpm/*/node_modules/octopus-platform/**',
+          '**/node_modules/.pnpm/*/node_modules/octopus-svga-engine/**',
           // 或更通用：
-          '**/node_modules/octopus-platform/**', // 通配任何层级
-          '**/node_modules/.pnpm/**/octopus-platform/**' // 精确匹配 pnpm
+          '**/node_modules/octopus-svga-engine/**', // 通配任何层级
+          '**/node_modules/.pnpm/**/octopus-svga-engine/**' // 精确匹配 pnpm
         ],
         exclude: [
           "node_modules/@babel/**",

@@ -96,7 +96,8 @@ export async function createRenderer(
       break;
     case '2d':
       if (context) {
-        return create2DRenderer({ context });
+        const result = create2DRenderer({ context });
+        return result.renderer;
       }
       break;
   }
@@ -128,7 +129,8 @@ export const createBestRenderer = async (
         break;
       case '2d':
         if (context) {
-          renderer = create2DRenderer({ context });
+          const result = create2DRenderer({ context });
+          renderer = result.renderer;
         }
         break;
     }

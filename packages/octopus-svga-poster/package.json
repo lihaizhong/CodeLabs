@@ -69,6 +69,6 @@
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
-    "octopus-platform": "workspace:^"
+    "octopus-svga-engine": "workspace:^"
   }
 }

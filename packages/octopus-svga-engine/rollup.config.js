@@ -44,7 +44,11 @@ export default defineConfig([
           __VERSION__: JSON.stringify(pkg.version),
         },
       }),
-      typescript(),
+      typescript({
+        declaration: false,
+        emitDeclarationOnly: false,
+        declarationDir: undefined,
+      }),
       commonjs(),
     ],
   },
@@ -74,7 +78,12 @@ export default defineConfig([
     plugins: [
       nodeResolve({ browser: true }),
       commonjs(),
-      typescript({ target: "ES6" }),
+      typescript({
+        target: "ES6",
+        declaration: false,
+        emitDeclarationOnly: false,
+        declarationDir: undefined,
+      }),
       babel({
         babelHelpers: "bundled",
         include: [
@@ -109,17 +118,9 @@ export default defineConfig([
       file: pkg.types,
       format: "esm",
     },
-    external: ["octopus-platform"],
     plugins: [
       // 将类型文件全部集中到一个文件中
-      dts({
-        // 使用专门的 tsconfig.dts.json 中的路径映射
-        tsconfig: "./tsconfig.dts.json",
-        // 确保解析路径别名
-        respectExternal: true,
-        // 包含外部模块的类型定义
-        includeExternal: ["octopus-platform"]
-      }),
+      dts(),
       // 在构建完成后，删除 types 文件夹
       del({
         targets: "types",

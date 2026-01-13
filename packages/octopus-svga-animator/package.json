@@ -1,5 +1,5 @@
 {
-  "name": "octopus-svga-poster",
+  "name": "octopus-svga-animator",
   "version": "2.0.0",
   "keywords": [
     "svgaplayer",
@@ -69,6 +69,7 @@
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
+    "octopus-svga-engine": "workspace:^",
     "octopus-platform": "workspace:^"
   }
 }

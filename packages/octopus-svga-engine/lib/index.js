@@ -367,14 +367,7 @@ function __awaiter(thisArg, _arguments, P, generator) {
 typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
     var e = new Error(message);
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
-};var noop$1 = function noop() {};
-function delay(callback, interval) {
-  return new Promise(function (resolve) {
-    return setTimeout(function () {
-      return resolve(callback());
-    }, interval);
-  });
-}
+};var noop = function noop() {};
 function retry(_x) {
   return _retry.apply(this, arguments);
 } // 使用静态缓冲区，避免重复创建
@@ -388,28 +381,220 @@ function _retry() {
       while (1) switch (_context4.p = _context4.n) {
         case 0:
           intervals = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : [];
-          times = _args4.length > 2 && _args4[2] !== undefined ? _args4[2] : 0;
-          _context4.p = 1;
-          return _context4.a(2, fn());
-        case 2:
+          times = 0;
+        case 1:
           _context4.p = 2;
+          _context4.n = 3;
+          return fn();
+        case 3:
+          return _context4.a(2, _context4.v);
+        case 4:
+          _context4.p = 4;
           _t4 = _context4.v;
           if (!(times >= intervals.length)) {
-            _context4.n = 3;
+            _context4.n = 5;
             break;
           }
           throw _t4;
-        case 3:
-          return _context4.a(2, delay(function () {
-            return retry(fn, intervals, ++times);
-          }, intervals[times]));
+        case 5:
+          _context4.n = 6;
+          return new Promise(function (resolve) {
+            return setTimeout(resolve, intervals[times]);
+          });
+        case 6:
+          times++;
+          _context4.n = 1;
+          break;
+        case 7:
+          return _context4.a(2);
       }
-    }, _callee4, null, [[1, 2]]);
+    }, _callee4, null, [[2, 4]]);
   }));
   return _retry.apply(this, arguments);
 }
 var BUFFER_SIZE = 4096; // 更大的缓冲区，减少字符串拼接次数
 var STATIC_BUFFER = new Uint16Array(BUFFER_SIZE); // 预分配ASCII缓冲区
+/**
+ * 验证 UTF-8 解码的输入范围
+ * @param buffer - 输入的字节数组
+ * @param start - 起始位置
+ * @param end - 结束位置
+ * @throws RangeError 如果范围无效
+ */
+function validateRange(buffer, start, end) {
+  if (start < 0 || end > buffer.length) {
+    throw new RangeError("Index out of range");
+  }
+}
+/**
+ * 检测指定范围是否全为 ASCII 字符
+ * @param buffer - 输入的字节数组
+ * @param start - 起始位置
+ * @param end - 结束位置
+ * @returns true 如果所有字节 <= 0x7F
+ */
+function isAllAscii(buffer, start, end) {
+  for (var i = start; i < end; i++) {
+    if (buffer[i] > 0x7F) {
+      return false;
+    }
+  }
+  return true;
+}
+/**
+ * 快速解码纯 ASCII 内容
+ * @param buffer - 输入的字节数组
+ * @param start - 起始位置
+ * @param end - 结束位置
+ * @returns 解码后的字符串
+ */
+function decodeAsciiFastPath(buffer, start, end) {
+  var resultParts = [];
+  // 批量处理，每次处理 BUFFER_SIZE 个字节
+  for (var i = start; i < end; i += BUFFER_SIZE) {
+    var chunkEnd = Math.min(i + BUFFER_SIZE, end);
+    var len = chunkEnd - i;
+    // 直接复制到 Uint16Array
+    for (var j = 0; j < len; j++) {
+      STATIC_BUFFER[j] = buffer[i + j];
+    }
+    // 将缓冲区转换为字符串
+    var str = '';
+    for (var k = 0; k < len; k++) {
+      str += String.fromCharCode(STATIC_BUFFER[k]);
+    }
+    resultParts.push(str);
+  }
+  return resultParts.join('');
+}
+/**
+ * 解码单个 UTF-8 多字节序列
+ * @param buffer - 输入的字节数组
+ * @param pos - 当前位置（指向第一个字节）
+ * @param end - 结束位置
+ * @returns { codePoint, nextPos } 解码结果和下一位置
+ */
+function decodeUTF8Sequence(buffer, pos, end) {
+  var byte = buffer[pos];
+  var codePoint;
+  var nextPos = pos + 1;
+  // 2 字节序列: 110xxxxx 10xxxxxx
+  if ((byte & 0xE0) === 0xC0 && nextPos < end) {
+    codePoint = (byte & 0x1F) << 6 | buffer[nextPos++] & 0x3F;
+  }
+  // 3 字节序列: 1110xxxx 10xxxxxx 10xxxxxx
+  else if ((byte & 0xF0) === 0xE0 && nextPos + 1 < end) {
+    codePoint = (byte & 0x0F) << 12 | (buffer[nextPos++] & 0x3F) << 6 | buffer[nextPos++] & 0x3F;
+  }
+  // 4 字节序列: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+  else if ((byte & 0xF8) === 0xF0 && nextPos + 2 < end) {
+    codePoint = (byte & 0x07) << 18 | (buffer[nextPos++] & 0x3F) << 12 | (buffer[nextPos++] & 0x3F) << 6 | buffer[nextPos++] & 0x3F;
+  }
+  // 无效的 UTF-8 序列
+  else {
+    codePoint = 0xFFFD; // Unicode 替换字符
+    // 跳过可能的后续字节
+    while (nextPos < end && (buffer[nextPos] & 0xC0) === 0x80) {
+      nextPos++;
+    }
+  }
+  return {
+    codePoint: codePoint,
+    nextPos: nextPos
+  };
+}
+/**
+ * 将码点追加到缓冲区，必要时提交
+ * @param staticBuffer - 静态缓冲区
+ * @param bufferPos - 当前缓冲区位置
+ * @param codePoint - 要追加的码点
+ * @param resultParts - 结果字符串数组
+ * @param forceCommit - 是否强制提交
+ * @returns 新的缓冲区位置
+ */
+function appendToBuffer(staticBuffer, bufferPos, codePoint, resultParts, forceCommit) {
+  staticBuffer[bufferPos++] = codePoint;
+  // 检查是否需要提交缓冲区
+  if (bufferPos >= BUFFER_SIZE - 3) {
+    var str = '';
+    for (var i = 0; i < bufferPos; i++) {
+      str += String.fromCharCode(staticBuffer[i]);
+    }
+    resultParts.push(str);
+    bufferPos = 0;
+  }
+  return bufferPos;
+}
+/**
+ * 解码混合内容（ASCII + 多字节 UTF-8）
+ * @param buffer - 输入的字节数组
+ * @param start - 起始位置
+ * @param end - 结束位置
+ * @returns 解码后的字符串
+ */
+function decodeMixedContent(buffer, start, end) {
+  var resultParts = [];
+  var bufferPos = 0;
+  var i = start;
+  while (i < end) {
+    var byte = buffer[i++];
+    // ASCII 字符处理
+    if (byte < 0x80) {
+      STATIC_BUFFER[bufferPos++] = byte;
+      // 如果缓冲区满了，提交并清空
+      if (bufferPos === BUFFER_SIZE) {
+        var str = '';
+        for (var j = 0; j < bufferPos; j++) {
+          str += String.fromCharCode(STATIC_BUFFER[j]);
+        }
+        resultParts.push(str);
+        bufferPos = 0;
+      }
+      continue;
+    }
+    // 提交之前的 ASCII 字符
+    if (bufferPos > 0) {
+      var _str = '';
+      for (var _j = 0; _j < bufferPos; _j++) {
+        _str += String.fromCharCode(STATIC_BUFFER[_j]);
+      }
+      resultParts.push(_str);
+      bufferPos = 0;
+    }
+    // 解码 UTF-8 多字节序列
+    var _decodeUTF8Sequence = decodeUTF8Sequence(buffer, i - 1, end),
+      codePoint = _decodeUTF8Sequence.codePoint,
+      nextPos = _decodeUTF8Sequence.nextPos;
+    i = nextPos;
+    // 处理 Unicode 代理对（超过 0xFFFF 的码点）
+    if (codePoint > 0xFFFF) {
+      var surrogateCodePoint = codePoint - 0x10000;
+      STATIC_BUFFER[bufferPos++] = 0xD800 + (surrogateCodePoint >> 10);
+      STATIC_BUFFER[bufferPos++] = 0xDC00 + (surrogateCodePoint & 0x3FF);
+      // 检查缓冲区是否需要提交（预留空间给下一个可能的代理对）
+      if (bufferPos >= BUFFER_SIZE - 2) {
+        var _str2 = '';
+        for (var _j2 = 0; _j2 < bufferPos; _j2++) {
+          _str2 += String.fromCharCode(STATIC_BUFFER[_j2]);
+        }
+        resultParts.push(_str2);
+        bufferPos = 0;
+      }
+    } else {
+      // 普通码点
+      bufferPos = appendToBuffer(STATIC_BUFFER, bufferPos, codePoint, resultParts);
+    }
+  }
+  // 提交剩余字符
+  if (bufferPos > 0) {
+    var _str3 = '';
+    for (var _j3 = 0; _j3 < bufferPos; _j3++) {
+      _str3 += String.fromCharCode(STATIC_BUFFER[_j3]);
+    }
+    resultParts.push(_str3);
+  }
+  return resultParts.join('');
+}
 /**
  * 优化的 UTF-8 解码函数
  * 主要优化点：
@@ -417,101 +602,25 @@ var STATIC_BUFFER = new Uint16Array(BUFFER_SIZE); // 预分配ASCII缓冲区
  * 2. 批量处理 ASCII 字符
  * 3. 优化循环结构和条件判断
  * 4. 使用 Uint16Array 代替普通数组提高性能
+ *
+ * @param buffer - 输入的 UTF-8 编码字节数组
+ * @param start - 起始位置
+ * @param end - 结束位置
+ * @returns 解码后的字符串
  */
 function utf8(buffer, start, end) {
-  // 边界检查
-  if (start < 0 || end > buffer.length) throw new RangeError("Index out of range");
-  if (end - start < 1) return "";
-  var resultParts = [];
-  var bufferPos = 0;
-  var appendBuffer = function appendBuffer(parts) {
-    resultParts.push(String.fromCharCode.apply(null, Array.from(parts)));
-  };
-  // 快速路径：检查是否全是 ASCII
-  var allAscii = true;
-  for (var i = start; i < end; i++) {
-    if (buffer[i] > 0x7F) {
-      allAscii = false;
-      break;
-    }
+  // 1. 边界验证
+  validateRange(buffer, start, end);
+  // 2. 处理空输入
+  if (end - start < 1) {
+    return "";
   }
-  // 全 ASCII 优化路径
-  if (allAscii) {
-    for (var _i = start; _i < end; _i += BUFFER_SIZE) {
-      var chunkEnd = Math.min(_i + BUFFER_SIZE, end);
-      var len = chunkEnd - _i;
-      // 直接复制到 Uint16Array
-      for (var j = 0; j < len; j++) {
-        STATIC_BUFFER[j] = buffer[_i + j];
-      }
-      appendBuffer(STATIC_BUFFER.subarray(0, len));
-    }
-    return resultParts.join('');
+  // 3. 快速路径：全 ASCII
+  if (isAllAscii(buffer, start, end)) {
+    return decodeAsciiFastPath(buffer, start, end);
   }
-  // 混合内容处理
-  for (var _i2 = start; _i2 < end;) {
-    var byte = buffer[_i2++];
-    // ASCII 字符处理
-    if (byte < 0x80) {
-      STATIC_BUFFER[bufferPos++] = byte;
-      // 如果缓冲区满了，提交并清空
-      if (bufferPos === BUFFER_SIZE) {
-        appendBuffer(STATIC_BUFFER);
-        bufferPos = 0;
-      }
-      continue;
-    }
-    // 提交之前的 ASCII 字符
-    if (bufferPos > 0) {
-      appendBuffer(STATIC_BUFFER.subarray(0, bufferPos));
-      bufferPos = 0;
-    }
-    // 变长编码处理 - 使用查表法代替多个条件判断
-    var codePoint = void 0;
-    // 2 字节序列: 110xxxxx 10xxxxxx
-    if ((byte & 0xE0) === 0xC0 && _i2 < end) {
-      codePoint = (byte & 0x1F) << 6 | buffer[_i2++] & 0x3F;
-    }
-    // 3 字节序列: 1110xxxx 10xxxxxx 10xxxxxx
-    else if ((byte & 0xF0) === 0xE0 && _i2 + 1 < end) {
-      codePoint = (byte & 0x0F) << 12 | (buffer[_i2++] & 0x3F) << 6 | buffer[_i2++] & 0x3F;
-    }
-    // 4 字节序列: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-    else if ((byte & 0xF8) === 0xF0 && _i2 + 2 < end) {
-      codePoint = (byte & 0x07) << 18 | (buffer[_i2++] & 0x3F) << 12 | (buffer[_i2++] & 0x3F) << 6 | buffer[_i2++] & 0x3F;
-      // 处理 Unicode 代理对
-      if (codePoint > 0xFFFF) {
-        codePoint -= 0x10000;
-        STATIC_BUFFER[bufferPos++] = 0xD800 + (codePoint >> 10);
-        STATIC_BUFFER[bufferPos++] = 0xDC00 + (codePoint & 0x3FF);
-        // 检查缓冲区是否需要提交
-        if (bufferPos >= BUFFER_SIZE - 2) {
-          // 预留空间给下一个可能的代理对
-          appendBuffer(STATIC_BUFFER.subarray(0, bufferPos));
-          bufferPos = 0;
-        }
-        continue;
-      }
-    }
-    // 无效的 UTF-8 序列
-    else {
-      codePoint = 0xFFFD; // Unicode 替换字符
-      // 跳过可能的后续字节
-      while (_i2 < end && (buffer[_i2] & 0xC0) === 0x80) _i2++;
-    }
-    STATIC_BUFFER[bufferPos++] = codePoint;
-    // 检查缓冲区是否需要提交
-    if (bufferPos >= BUFFER_SIZE - 3) {
-      // 预留空间给下一个可能的多字节字符
-      appendBuffer(STATIC_BUFFER.subarray(0, bufferPos));
-      bufferPos = 0;
-    }
-  }
-  // 提交剩余字符
-  if (bufferPos > 0) {
-    appendBuffer(STATIC_BUFFER.subarray(0, bufferPos));
-  }
-  return resultParts.join('');
+  // 4. 混合内容处理
+  return decodeMixedContent(buffer, start, end);
 }
 var OctopusPlatform = /*#__PURE__*/function () {
   function OctopusPlatform(plugins, version) {
@@ -537,7 +646,7 @@ var OctopusPlatform = /*#__PURE__*/function () {
       dpr: 1,
       system: ""
     });
-    _defineProperty(this, "noop", noop$1);
+    _defineProperty(this, "noop", noop);
     _defineProperty(this, "retry", retry);
     this.version = version || "";
     this.plugins = plugins;
@@ -573,23 +682,39 @@ var OctopusPlatform = /*#__PURE__*/function () {
   }, {
     key: "autoEnv",
     value: function autoEnv() {
-      if (typeof window !== "undefined") {
-        return "h5";
+      var envs = [{
+        name: 'h5',
+        check: function check() {
+          return typeof window !== 'undefined';
+        }
+      }, {
+        name: 'tt',
+        check: function check() {
+          return typeof tt !== 'undefined';
+        }
+      }, {
+        name: 'alipay',
+        check: function check() {
+          return typeof my !== 'undefined';
+        }
+      }, {
+        name: 'weapp',
+        check: function check() {
+          return typeof wx !== 'undefined';
+        }
+      }, {
+        name: 'harmony',
+        check: function check() {
+          return typeof has !== 'undefined';
+        }
+      }];
+      for (var _i = 0, _envs = envs; _i < _envs.length; _i++) {
+        var env = _envs[_i];
+        if (env.check()) return env.name;
       }
-      // FIXME：由于抖音场景支持wx对象，所以需要放在wx对象之前检查
-      if (typeof tt !== "undefined") {
-        return "tt";
-      }
-      if (typeof my !== "undefined") {
-        return "alipay";
-      }
-      if (typeof wx !== "undefined") {
-        return "weapp";
-      }
-      if (typeof has !== "undefined") {
-        return "harmony";
-      }
-      throw new Error("Unsupported platform！");
+      throw new Error("Unsupported platform! Available: ".concat(envs.map(function (e) {
+        return e.name;
+      }).join(', ')));
     }
   }, {
     key: "useBridge",
@@ -719,15 +844,47 @@ var OctopusPlatform = /*#__PURE__*/function () {
 var definePlugin = function definePlugin(plugin) {
   return plugin;
 };
-function installPlugin(platform, plugin) {
-  var value = plugin.install.call(platform);
-  Object.defineProperty(platform, plugin.name, {
+function _installPlugin(self, plugin) {
+  var value = plugin.install.call(self);
+  Object.defineProperty(self, plugin.name, {
     get: function get() {
       return value;
     },
     enumerable: true,
     configurable: true
   });
+}
+
+/**
+ * 创建平台实例的工厂函数
+ *
+ * 通过工厂函数创建平台实例，无需继承。
+ * TypeScript 会根据插件列表自动推断实例的属性类型。
+ *
+ * @param plugins - 插件列表
+ * @param version - 应用版本
+ * @returns 平台实例，自动推断插件属性类型
+ */
+function createPlatform(plugins, version) {
+  // 内部类：继承 OctopusPlatform 并实现 installPlugin
+  var InternalPlatform = /*#__PURE__*/function (_OctopusPlatform2) {
+    function InternalPlatform() {
+      var _this;
+      _classCallCheck(this, InternalPlatform);
+      _this = _callSuper(this, InternalPlatform, [plugins, version]);
+      _this.init(); // 在基类中调用 init
+      return _this;
+    }
+    _inherits(InternalPlatform, _OctopusPlatform2);
+    return _createClass(InternalPlatform, [{
+      key: "installPlugin",
+      value: function installPlugin(plugin) {
+        // 使用 installPlugin.ts 中的实现（包含类型断言）
+        _installPlugin(this, plugin);
+      }
+    }]);
+  }(OctopusPlatform);
+  return new InternalPlatform();
 }
 var pluginSelector = definePlugin({
   name: "getSelector",
@@ -807,12 +964,13 @@ var pluginCanvas = definePlugin({
       var type;
       var component;
       if (options) {
+        // 如果是小程序组件对象
         if (typeof options.setData === "function") {
           type = "2d";
           component = options;
         } else {
           type = options.type || "2d";
-          component = null;
+          component = options.component || null;
         }
       } else {
         type = "2d";
@@ -1308,23 +1466,7 @@ var pluginRaf = definePlugin({
       }
     };
   }
-});var EnhancedPlatform = /*#__PURE__*/function (_OctopusPlatform) {
-  function EnhancedPlatform() {
-    var _this;
-    _classCallCheck(this, EnhancedPlatform);
-    _this = _callSuper(this, EnhancedPlatform, [[pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "2.0.0"]);
-    _this.init();
-    return _this;
-  }
-  _inherits(EnhancedPlatform, _OctopusPlatform);
-  return _createClass(EnhancedPlatform, [{
-    key: "installPlugin",
-    value: function installPlugin$1(plugin) {
-      installPlugin(this, plugin);
-    }
-  }]);
-}(OctopusPlatform);
-var platform = new EnhancedPlatform();var ResourceManager = /*#__PURE__*/function () {
+});var platform = createPlatform([pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "2.0.0");var ResourceManager = /*#__PURE__*/function () {
   function ResourceManager(painter) {
     _classCallCheck(this, ResourceManager);
     this.painter = painter;
@@ -3166,7 +3308,911 @@ function createVideoEntity(data, filename) {
     return video;
   }
   throw new Error("Invalid data type");
-}var RendererGPU = /*#__PURE__*/function () {
+}/**
+ * CurrentPoint对象池，用于减少对象创建和GC压力
+ */
+var PointPool = /*#__PURE__*/function () {
+  function PointPool() {
+    _classCallCheck(this, PointPool);
+    this.pool = [];
+  }
+  return _createClass(PointPool, [{
+    key: "acquire",
+    value: function acquire() {
+      var pool = this.pool;
+      return pool.length > 0 ? pool.pop() : {
+        x: 0,
+        y: 0,
+        x1: 0,
+        y1: 0,
+        x2: 0,
+        y2: 0
+      };
+    }
+  }, {
+    key: "release",
+    value: function release(point) {
+      // 重置点的属性
+      point.x = point.y = point.x1 = point.y1 = point.x2 = point.y2 = 0;
+      this.pool.push(point);
+    }
+  }]);
+}();var Renderer2D = /*#__PURE__*/function () {
+  function Renderer2D(context) {
+    _classCallCheck(this, Renderer2D);
+    this.context = context;
+    this.pointPool = new PointPool();
+    this.lastResizeKey = "";
+    this.globalTransform = undefined;
+    this.currentPoint = this.pointPool.acquire();
+  }
+  return _createClass(Renderer2D, [{
+    key: "setTransform",
+    value: function setTransform(transform) {
+      if (transform && this.context) {
+        this.context.transform(transform.a, transform.b, transform.c, transform.d, transform.tx, transform.ty);
+      }
+    }
+  }, {
+    key: "drawBezier",
+    value: function drawBezier(d, transform, styles) {
+      var context = this.context,
+        pointPool = this.pointPool;
+      this.currentPoint = pointPool.acquire();
+      context.save();
+      Renderer2D.resetShapeStyles(context, styles);
+      this.setTransform(transform);
+      context.beginPath();
+      if (d) {
+        // 使用状态机解析器替代正则表达式
+        var commands = Renderer2D.parseSVGPath(d);
+        var _iterator = _createForOfIteratorHelper(commands),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var _step$value = _step.value,
+              command = _step$value.command,
+              args = _step$value.args;
+            if (Renderer2D.SVG_PATH.has(command)) {
+              this.drawBezierElement(this.currentPoint, command, args.split(/[\s,]+/).filter(Boolean));
+            }
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      }
+      Renderer2D.fillOrStroke(context, styles);
+      pointPool.release(this.currentPoint);
+      context.restore();
+    }
+  }, {
+    key: "drawBezierElement",
+    value: function drawBezierElement(currentPoint, method, args) {
+      var context = this.context;
+      switch (method) {
+        case "M":
+          currentPoint.x = +args[0];
+          currentPoint.y = +args[1];
+          context.moveTo(currentPoint.x, currentPoint.y);
+          break;
+        case "m":
+          currentPoint.x += +args[0];
+          currentPoint.y += +args[1];
+          context.moveTo(currentPoint.x, currentPoint.y);
+          break;
+        case "L":
+          currentPoint.x = +args[0];
+          currentPoint.y = +args[1];
+          context.lineTo(currentPoint.x, currentPoint.y);
+          break;
+        case "l":
+          currentPoint.x += +args[0];
+          currentPoint.y += +args[1];
+          context.lineTo(currentPoint.x, currentPoint.y);
+          break;
+        case "H":
+          currentPoint.x = +args[0];
+          context.lineTo(currentPoint.x, currentPoint.y);
+          break;
+        case "h":
+          currentPoint.x += +args[0];
+          context.lineTo(currentPoint.x, currentPoint.y);
+          break;
+        case "V":
+          currentPoint.y = +args[0];
+          context.lineTo(currentPoint.x, currentPoint.y);
+          break;
+        case "v":
+          currentPoint.y += +args[0];
+          context.lineTo(currentPoint.x, currentPoint.y);
+          break;
+        case "C":
+          currentPoint.x1 = +args[0];
+          currentPoint.y1 = +args[1];
+          currentPoint.x2 = +args[2];
+          currentPoint.y2 = +args[3];
+          currentPoint.x = +args[4];
+          currentPoint.y = +args[5];
+          context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
+          break;
+        case "c":
+          currentPoint.x1 = currentPoint.x + +args[0];
+          currentPoint.y1 = currentPoint.y + +args[1];
+          currentPoint.x2 = currentPoint.x + +args[2];
+          currentPoint.y2 = currentPoint.y + +args[3];
+          currentPoint.x += +args[4];
+          currentPoint.y += +args[5];
+          context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
+          break;
+        case "S":
+          if (currentPoint.x1 !== undefined && currentPoint.y1 !== undefined && currentPoint.x2 !== undefined && currentPoint.y2 !== undefined) {
+            currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
+            currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;
+            currentPoint.x2 = +args[0];
+            currentPoint.y2 = +args[1];
+            currentPoint.x = +args[2];
+            currentPoint.y = +args[3];
+            context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
+          } else {
+            currentPoint.x1 = +args[0];
+            currentPoint.y1 = +args[1];
+            currentPoint.x = +args[2];
+            currentPoint.y = +args[3];
+            context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
+          }
+          break;
+        case "s":
+          if (currentPoint.x1 !== undefined && currentPoint.y1 !== undefined && currentPoint.x2 !== undefined && currentPoint.y2 !== undefined) {
+            currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
+            currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;
+            currentPoint.x2 = currentPoint.x + +args[0];
+            currentPoint.y2 = currentPoint.y + +args[1];
+            currentPoint.x += +args[2];
+            currentPoint.y += +args[3];
+            context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
+          } else {
+            currentPoint.x1 = currentPoint.x + +args[0];
+            currentPoint.y1 = currentPoint.y + +args[1];
+            currentPoint.x += +args[2];
+            currentPoint.y += +args[3];
+            context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
+          }
+          break;
+        case "Q":
+          currentPoint.x1 = +args[0];
+          currentPoint.y1 = +args[1];
+          currentPoint.x = +args[2];
+          currentPoint.y = +args[3];
+          context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
+          break;
+        case "q":
+          currentPoint.x1 = currentPoint.x + +args[0];
+          currentPoint.y1 = currentPoint.y + +args[1];
+          currentPoint.x += +args[2];
+          currentPoint.y += +args[3];
+          context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
+          break;
+        case "Z":
+        case "z":
+          context.closePath();
+          break;
+      }
+    }
+  }, {
+    key: "drawEllipse",
+    value: function drawEllipse(x, y, radiusX, radiusY, transform, styles) {
+      var context = this.context;
+      context.save();
+      Renderer2D.resetShapeStyles(context, styles);
+      this.setTransform(transform);
+      x -= radiusX;
+      y -= radiusY;
+      var w = radiusX * 2;
+      var h = radiusY * 2;
+      var kappa = 0.5522848;
+      var ox = w / 2 * kappa;
+      var oy = h / 2 * kappa;
+      var xe = x + w;
+      var ye = y + h;
+      var xm = x + w / 2;
+      var ym = y + h / 2;
+      context.beginPath();
+      context.moveTo(x, ym);
+      context.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
+      context.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
+      context.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+      context.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
+      Renderer2D.fillOrStroke(context, styles);
+      context.restore();
+    }
+  }, {
+    key: "drawRect",
+    value: function drawRect(x, y, width, height, cornerRadius, transform, styles) {
+      var context = this.context;
+      context.save();
+      Renderer2D.resetShapeStyles(context, styles);
+      this.setTransform(transform);
+      var radius = cornerRadius;
+      if (width < 2 * radius) {
+        radius = width / 2;
+      }
+      if (height < 2 * radius) {
+        radius = height / 2;
+      }
+      context.beginPath();
+      context.moveTo(x + radius, y);
+      context.arcTo(x + width, y, x + width, y + height, radius);
+      context.arcTo(x + width, y + height, x, y + height, radius);
+      context.arcTo(x, y + height, x, y, radius);
+      context.arcTo(x, y, x + width, y, radius);
+      context.closePath();
+      Renderer2D.fillOrStroke(context, styles);
+      context.restore();
+    }
+  }, {
+    key: "drawShape",
+    value: function drawShape(shape) {
+      var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+      var type = shape.type,
+        path = shape.path,
+        transform = shape.transform,
+        styles = shape.styles;
+      switch (type) {
+        case "shape" /* PlatformVideo.SHAPE_TYPE.SHAPE */:
+          this.drawBezier(path.d, transform, styles);
+          break;
+        case "ellipse" /* PlatformVideo.SHAPE_TYPE.ELLIPSE */:
+          this.drawEllipse((_a = path.x) !== null && _a !== void 0 ? _a : 0, (_b = path.y) !== null && _b !== void 0 ? _b : 0, (_c = path.radiusX) !== null && _c !== void 0 ? _c : 0, (_d = path.radiusY) !== null && _d !== void 0 ? _d : 0, transform, styles);
+          break;
+        case "rect" /* PlatformVideo.SHAPE_TYPE.RECT */:
+          this.drawRect((_e = path.x) !== null && _e !== void 0 ? _e : 0, (_f = path.y) !== null && _f !== void 0 ? _f : 0, (_g = path.width) !== null && _g !== void 0 ? _g : 0, (_h = path.height) !== null && _h !== void 0 ? _h : 0, (_j = path.cornerRadius) !== null && _j !== void 0 ? _j : 0, transform, styles);
+          break;
+      }
+    }
+  }, {
+    key: "drawSprite",
+    value: function drawSprite(frame, bitmap, dynamicElement) {
+      if (frame.alpha === 0) return;
+      var context = this.context;
+      var alpha = frame.alpha,
+        transform = frame.transform,
+        layout = frame.layout,
+        shapes = frame.shapes;
+      var _ref = transform !== null && transform !== void 0 ? transform : {},
+        _ref$a = _ref.a,
+        a = _ref$a === void 0 ? 1 : _ref$a,
+        _ref$b = _ref.b,
+        b = _ref$b === void 0 ? 0 : _ref$b,
+        _ref$c = _ref.c,
+        c = _ref$c === void 0 ? 0 : _ref$c,
+        _ref$d = _ref.d,
+        d = _ref$d === void 0 ? 1 : _ref$d,
+        _ref$tx = _ref.tx,
+        tx = _ref$tx === void 0 ? 0 : _ref$tx,
+        _ref$ty = _ref.ty,
+        ty = _ref$ty === void 0 ? 0 : _ref$ty;
+      context.save();
+      this.setTransform(this.globalTransform);
+      context.globalAlpha = alpha;
+      context.transform(a, b, c, d, tx, ty);
+      if (bitmap) {
+        context.drawImage(bitmap, 0, 0, layout.width, layout.height);
+      }
+      if (dynamicElement) {
+        context.drawImage(dynamicElement, (layout.width - dynamicElement.width) / 2, (layout.height - dynamicElement.height) / 2);
+      }
+      for (var i = 0; i < shapes.length; i++) {
+        this.drawShape(shapes[i]);
+      }
+      context.restore();
+    }
+    /**
+     * 调整画布尺寸
+     * @param contentMode
+     * @param videoSize
+     * @param canvasSize
+     * @returns
+     */
+  }, {
+    key: "resize",
+    value: function resize(contentMode, videoSize, canvasSize) {
+      var canvasWidth = canvasSize.width,
+        canvasHeight = canvasSize.height;
+      var videoWidth = videoSize.width,
+        videoHeight = videoSize.height;
+      var resizeKey = "".concat(contentMode, "-").concat(videoWidth, "-").concat(videoHeight, "-").concat(canvasWidth, "-").concat(canvasHeight);
+      var lastTransform = this.globalTransform;
+      if (this.lastResizeKey === resizeKey && lastTransform) {
+        return;
+      }
+      var scale = {
+        scaleX: 1,
+        scaleY: 1,
+        translateX: 0,
+        translateY: 0
+      };
+      if (contentMode === "fill" /* PLAYER_CONTENT_MODE.FILL */) {
+        scale.scaleX = canvasWidth / videoWidth;
+        scale.scaleY = canvasHeight / videoHeight;
+      } else {
+        scale = Renderer2D.calculateScale(contentMode, videoSize, canvasSize);
+      }
+      this.lastResizeKey = resizeKey;
+      this.globalTransform = {
+        a: scale.scaleX,
+        b: 0.0,
+        c: 0.0,
+        d: scale.scaleY,
+        tx: scale.translateX,
+        ty: scale.translateY
+      };
+    }
+  }, {
+    key: "render",
+    value: function render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail) {
+      var sprite;
+      var imageKey;
+      var bitmap;
+      var dynamicElement;
+      for (var i = head; i < tail; i++) {
+        sprite = videoEntity.sprites[i];
+        imageKey = sprite.imageKey;
+        bitmap = materials.get(imageKey);
+        dynamicElement = dynamicMaterials.get(imageKey);
+        this.drawSprite(sprite.frames[currentFrame], bitmap, dynamicElement);
+      }
+    }
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      this.globalTransform = undefined;
+      this.lastResizeKey = "";
+      this.context = null;
+    }
+  }], [{
+    key: "parseSVGPath",
+    value:
+    // 在Renderer2D类中添加新的解析方法
+    function parseSVGPath(d) {
+      var SVG_LETTER_REGEXP = Renderer2D.SVG_LETTER_REGEXP;
+      var result = [];
+      var currentIndex = 0;
+      // 状态：0 - 等待命令，1 - 读取参数
+      var state = 0;
+      var currentCommand = "";
+      var currentArgs = "";
+      while (currentIndex < d.length) {
+        var char = d[currentIndex];
+        switch (state) {
+          case 0:
+            // 等待命令
+            if (SVG_LETTER_REGEXP.test(char)) {
+              currentCommand = char;
+              state = 1;
+            }
+            break;
+          case 1:
+            // 读取参数
+            if (SVG_LETTER_REGEXP.test(char)) {
+              // 遇到新命令，保存当前命令和参数
+              result.push({
+                command: currentCommand,
+                args: currentArgs.trim()
+              });
+              currentCommand = char;
+              currentArgs = "";
+            } else {
+              currentArgs += char;
+            }
+            break;
+        }
+        currentIndex++;
+      }
+      // 处理最后一个命令
+      if (currentCommand && state === 1) {
+        result.push({
+          command: currentCommand,
+          args: currentArgs.trim()
+        });
+      }
+      return result;
+    }
+  }, {
+    key: "fillOrStroke",
+    value: function fillOrStroke(context, styles) {
+      if (styles) {
+        if (styles.fill) {
+          context.fill();
+        }
+        if (styles.stroke) {
+          context.stroke();
+        }
+      }
+    }
+  }, {
+    key: "resetShapeStyles",
+    value: function resetShapeStyles(context, styles) {
+      if (styles) {
+        context.strokeStyle = styles.stroke || "transparent";
+        if (styles.strokeWidth > 0) {
+          context.lineWidth = styles.strokeWidth;
+        }
+        if (styles.miterLimit > 0) {
+          context.miterLimit = styles.miterLimit;
+        }
+        if (styles.lineCap) {
+          context.lineCap = styles.lineCap;
+        }
+        if (styles.lineJoin) {
+          context.lineJoin = styles.lineJoin;
+        }
+        context.fillStyle = styles.fill || "transparent";
+        if (styles.lineDash) {
+          context.setLineDash(styles.lineDash);
+        }
+      }
+    }
+    /**
+     * 计算缩放比例
+     * @param contentMode
+     * @param videoSize
+     * @param canvasSize
+     * @returns
+     */
+  }, {
+    key: "calculateScale",
+    value: function calculateScale(contentMode, videoSize, canvasSize) {
+      var imageRatio = videoSize.width / videoSize.height;
+      var viewRatio = canvasSize.width / canvasSize.height;
+      var isAspectFit = contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */;
+      var shouldUseWidth = imageRatio >= viewRatio && isAspectFit || imageRatio <= viewRatio && !isAspectFit;
+      var createTransform = function createTransform(scale, translateX, translateY) {
+        return {
+          scaleX: scale,
+          scaleY: scale,
+          translateX: translateX,
+          translateY: translateY
+        };
+      };
+      if (shouldUseWidth) {
+        var _scale = canvasSize.width / videoSize.width;
+        return createTransform(_scale, 0, (canvasSize.height - videoSize.height * _scale) / 2);
+      }
+      var scale = canvasSize.height / videoSize.height;
+      return createTransform(scale, (canvasSize.width - videoSize.width * scale) / 2, 0);
+    }
+  }]);
+}();
+/**
+ * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Tutorial/Paths
+ * 绘制路径的不同指令：
+ * * 直线命令
+ * - M: moveTo，移动到指定点，不绘制直线。
+ * - L: lineTo，从起始点绘制一条直线到指定点。
+ * - H: horizontal lineTo，从起始点绘制一条水平线到指定点。
+ * - V: vertical lineTo，从起始点绘制一条垂直线到指定点。
+ * - Z: closePath，从起始点绘制一条直线到路径起点，形成一个闭合路径。
+ * * 曲线命令
+ * - C: bezierCurveTo，绘制三次贝塞尔曲线。
+ * - S: smooth curveTo，绘制平滑三次贝塞尔曲线。
+ * - Q: quadraticCurveTo，绘制两次贝塞尔曲线。
+ * - T: smooth quadraticCurveTo，绘制平滑两次贝塞尔曲线。
+ * * 弧线命令
+ * - A: arcTo，从起始点绘制一条弧线到指定点。
+ */
+Renderer2D.SVG_PATH = new Set(["M", "L", "H", "V", "Z", "C", "S", "Q", "m", "l", "h", "v", "z", "c", "s", "q"]);
+Renderer2D.SVG_LETTER_REGEXP = /[a-zA-Z]/;var create2DRenderer = function create2DRenderer(_ref) {
+  var context = _ref.context;
+  return {
+    renderer: new Renderer2D(context),
+    extensions: {
+      stick: function stick(context, bitmap) {
+        return function () {
+          return context.drawImage(bitmap, 0, 0);
+        };
+      },
+      clear: function clear(type, context, canvas, width, height) {
+        if (type === "CL") {
+          return function () {
+            // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
+            context.clearRect(0, 0, width, height);
+          };
+        }
+        return function () {
+          canvas.width = width;
+          canvas.height = height;
+        };
+      }
+    }
+  };
+};
+var detect2DSupport = function detect2DSupport() {
+  var canvas = document.createElement('canvas');
+  var context = canvas.getContext('2d');
+  return !!context;
+};var RendererGL = /*#__PURE__*/function () {
+  function RendererGL(glContext) {
+    _classCallCheck(this, RendererGL);
+    this.glContext = glContext;
+    this.gl = null;
+    this.shaderProgram = null;
+    this.positionBuffer = null;
+    this.texCoordBuffer = null;
+    this.vertexBuffer = null;
+    this.colorBuffer = null;
+    this.textureCache = new Map();
+    this.globalTransform = undefined;
+    this.lastResizeKey = "";
+    this.initialize();
+  }
+  return _createClass(RendererGL, [{
+    key: "initialize",
+    value: function initialize() {
+      if (!this.glContext) return;
+      this.gl = this.glContext;
+      this.setupShaders();
+      this.setupBuffers();
+      this.setupAttributes();
+    }
+  }, {
+    key: "setupShaders",
+    value: function setupShaders() {
+      if (!this.gl) return;
+      var vertexShaderSource = "\n      attribute vec2 a_position;\n      attribute vec2 a_texCoord;\n      attribute vec4 a_color;\n      \n      uniform mat3 u_matrix;\n      \n      varying vec2 v_texCoord;\n      varying vec4 v_color;\n      \n      void main() {\n        vec3 position = u_matrix * vec3(a_position, 1.0);\n        gl_Position = vec4(position.xy, 0.0, 1.0);\n        v_texCoord = a_texCoord;\n        v_color = a_color;\n      }\n    ";
+      var fragmentShaderSource = "\n      precision mediump float;\n      \n      varying vec2 v_texCoord;\n      varying vec4 v_color;\n      uniform sampler2D u_texture;\n      \n      void main() {\n        vec4 color = texture2D(u_texture, v_texCoord);\n        gl_FragColor = color * v_color;\n      }\n    ";
+      var vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexShaderSource);
+      var fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, fragmentShaderSource);
+      if (vertexShader && fragmentShader) {
+        this.shaderProgram = this.createProgram(vertexShader, fragmentShader);
+      }
+    }
+  }, {
+    key: "createShader",
+    value: function createShader(type, source) {
+      if (!this.gl) return null;
+      var shader = this.gl.createShader(type);
+      if (!shader) return null;
+      this.gl.shaderSource(shader, source);
+      this.gl.compileShader(shader);
+      if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+        console.error('Shader compile error:', this.gl.getShaderInfoLog(shader));
+        this.gl.deleteShader(shader);
+        return null;
+      }
+      return shader;
+    }
+  }, {
+    key: "createProgram",
+    value: function createProgram(vertexShader, fragmentShader) {
+      if (!this.gl) return null;
+      var program = this.gl.createProgram();
+      if (!program) return null;
+      this.gl.attachShader(program, vertexShader);
+      this.gl.attachShader(program, fragmentShader);
+      this.gl.linkProgram(program);
+      if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
+        console.error('Program link error:', this.gl.getProgramInfoLog(program));
+        this.gl.deleteProgram(program);
+        return null;
+      }
+      return program;
+    }
+  }, {
+    key: "setupBuffers",
+    value: function setupBuffers() {
+      if (!this.gl) return;
+      // Position buffer (quad vertices)
+      this.positionBuffer = this.gl.createBuffer();
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
+      var positions = new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]);
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, positions, this.gl.STATIC_DRAW);
+      // Texture coordinate buffer
+      this.texCoordBuffer = this.gl.createBuffer();
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
+      var texCoords = new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]);
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, texCoords, this.gl.STATIC_DRAW);
+      // Color buffer
+      this.colorBuffer = this.gl.createBuffer();
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+      var colors = new Float32Array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, colors, this.gl.DYNAMIC_DRAW);
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
+    }
+  }, {
+    key: "setupAttributes",
+    value: function setupAttributes() {
+      if (!this.gl || !this.shaderProgram) return;
+      this.gl.useProgram(this.shaderProgram);
+      var positionLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
+      this.gl.enableVertexAttribArray(positionLocation);
+      this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
+      var texCoordLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_texCoord');
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
+      this.gl.enableVertexAttribArray(texCoordLocation);
+      this.gl.vertexAttribPointer(texCoordLocation, 2, this.gl.FLOAT, false, 0, 0);
+      var colorLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_color');
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+      this.gl.enableVertexAttribArray(colorLocation);
+      this.gl.vertexAttribPointer(colorLocation, 4, this.gl.FLOAT, false, 0, 0);
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
+      this.gl.useProgram(null);
+    }
+  }, {
+    key: "createTextureFromBitmap",
+    value: function createTextureFromBitmap(bitmap) {
+      if (!this.gl) return null;
+      var texture = this.gl.createTexture();
+      if (!texture) return null;
+      this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, bitmap);
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+      return texture;
+    }
+  }, {
+    key: "createMatrix",
+    value: function createMatrix(transform) {
+      var a = transform.a,
+        b = transform.b,
+        c = transform.c,
+        d = transform.d,
+        tx = transform.tx,
+        ty = transform.ty;
+      return new Float32Array([a, c, tx, b, d, ty, 0, 0, 1]);
+    }
+  }, {
+    key: "drawRectangle",
+    value: function drawRectangle(x, y, width, height, transform) {
+      var color = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : [1, 1, 1, 1];
+      if (!this.gl || !this.shaderProgram) return;
+      var vertices = new Float32Array([x, y, x + width, y, x, y + height, x, y + height, x + width, y, x + width, y + height]);
+      if (!this.vertexBuffer) {
+        this.vertexBuffer = this.gl.createBuffer();
+      }
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.DYNAMIC_DRAW);
+      var matrix = this.createMatrix(transform);
+      var matrixLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_matrix');
+      var colors = new Float32Array([].concat(_toConsumableArray(color), _toConsumableArray(color), _toConsumableArray(color), _toConsumableArray(color), _toConsumableArray(color), _toConsumableArray(color)));
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, colors, this.gl.DYNAMIC_DRAW);
+      this.gl.uniformMatrix3fv(matrixLocation, false, matrix);
+      var positionLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
+      var colorLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_color');
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+      this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+      this.gl.vertexAttribPointer(colorLocation, 4, this.gl.FLOAT, false, 0, 0);
+      this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
+    }
+  }, {
+    key: "drawEllipse",
+    value: function drawEllipse(x, y, radiusX, radiusY, transform) {
+      var color = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : [1, 1, 1, 1];
+      this.drawRectangle(x - radiusX, y - radiusY, radiusX * 2, radiusY * 2, transform, color);
+    }
+  }, {
+    key: "drawShape",
+    value: function drawShape(shape, globalTransform) {
+      var _a, _b, _c, _d, _e, _f, _g, _h;
+      var type = shape.type,
+        path = shape.path,
+        styles = shape.styles,
+        transform = shape.transform;
+      var combinedTransform = {
+        a: transform.a * globalTransform.a + transform.c * globalTransform.b,
+        b: transform.b * globalTransform.a + transform.d * globalTransform.b,
+        c: transform.a * globalTransform.c + transform.c * globalTransform.d,
+        d: transform.b * globalTransform.c + transform.d * globalTransform.d,
+        tx: transform.tx * globalTransform.a + transform.ty * globalTransform.c + globalTransform.tx,
+        ty: transform.tx * globalTransform.b + transform.ty * globalTransform.d + globalTransform.ty
+      };
+      var alpha = styles.fill ? parseFloat(styles.fill.split(',')[3]) : 1;
+      var color = [1, 1, 1, alpha];
+      switch (type) {
+        case "rect" /* PlatformVideo.SHAPE_TYPE.RECT */:
+          this.drawRectangle((_a = path.x) !== null && _a !== void 0 ? _a : 0, (_b = path.y) !== null && _b !== void 0 ? _b : 0, (_c = path.width) !== null && _c !== void 0 ? _c : 0, (_d = path.height) !== null && _d !== void 0 ? _d : 0, combinedTransform, color);
+          break;
+        case "ellipse" /* PlatformVideo.SHAPE_TYPE.ELLIPSE */:
+          this.drawEllipse((_e = path.x) !== null && _e !== void 0 ? _e : 0, (_f = path.y) !== null && _f !== void 0 ? _f : 0, (_g = path.radiusX) !== null && _g !== void 0 ? _g : 0, (_h = path.radiusY) !== null && _h !== void 0 ? _h : 0, combinedTransform, color);
+          break;
+      }
+    }
+  }, {
+    key: "drawSprite",
+    value: function drawSprite(frame, bitmap, dynamicElement, globalTransform) {
+      var _a;
+      if ('alpha' in frame && frame.alpha === 0) return;
+      var transform = globalTransform || {
+        a: 1,
+        b: 0,
+        c: 0,
+        d: 1,
+        tx: 0,
+        ty: 0
+      };
+      if (bitmap) {
+        var texture = this.textureCache.get(bitmap) || null;
+        if (!texture) {
+          texture = this.createTextureFromBitmap(bitmap);
+          if (texture) {
+            this.textureCache.set(bitmap, texture);
+          }
+        }
+        if (texture && this.gl && this.shaderProgram) {
+          this.gl.activeTexture(this.gl.TEXTURE0);
+          this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+          var textureLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_texture');
+          this.gl.uniform1i(textureLocation, 0);
+          var layout = frame.layout;
+          this.drawRectangle(0, 0, layout.width, layout.height, transform, [1, 1, 1, frame.alpha || 1]);
+        }
+      }
+      if ('shapes' in frame) {
+        var _iterator = _createForOfIteratorHelper(frame.shapes),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var shape = _step.value;
+            this.drawShape(shape, transform);
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      }
+      (_a = this.gl) === null || _a === void 0 ? void 0 : _a.bindTexture(this.gl.TEXTURE_2D, null);
+    }
+  }, {
+    key: "resize",
+    value: function resize(contentMode, videoSize, canvasSize) {
+      var canvasWidth = canvasSize.width,
+        canvasHeight = canvasSize.height;
+      var videoWidth = videoSize.width,
+        videoHeight = videoSize.height;
+      var resizeKey = "".concat(contentMode, "-").concat(videoWidth, "-").concat(videoHeight, "-").concat(canvasWidth, "-").concat(canvasHeight);
+      if (this.lastResizeKey === resizeKey) {
+        return;
+      }
+      var scale = {
+        scaleX: 1,
+        scaleY: 1,
+        translateX: 0,
+        translateY: 0
+      };
+      if (contentMode === "fill" /* PLAYER_CONTENT_MODE.FILL */) {
+        scale.scaleX = canvasWidth / videoWidth;
+        scale.scaleY = canvasHeight / videoHeight;
+      } else {
+        scale = RendererGL.calculateScale(contentMode, videoSize, canvasSize);
+      }
+      this.lastResizeKey = resizeKey;
+      this.globalTransform = {
+        a: scale.scaleX,
+        b: 0.0,
+        c: 0.0,
+        d: scale.scaleY,
+        tx: scale.translateX,
+        ty: scale.translateY
+      };
+    }
+  }, {
+    key: "render",
+    value: function render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail) {
+      if (!this.gl || !this.shaderProgram) {
+        console.warn('WebGL not initialized');
+        return;
+      }
+      this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+      this.gl.useProgram(this.shaderProgram);
+      for (var i = head; i < tail; i++) {
+        var sprite = videoEntity.sprites[i];
+        var frame = sprite.frames[currentFrame];
+        var bitmap = materials.get(sprite.imageKey);
+        var dynamicElement = dynamicMaterials.get(sprite.imageKey);
+        this.drawSprite(frame, bitmap, dynamicElement, this.globalTransform);
+      }
+      this.gl.useProgram(null);
+    }
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      var _this = this;
+      if (!this.gl) return;
+      this.textureCache.forEach(function (texture) {
+        _this.gl.deleteTexture(texture);
+      });
+      this.textureCache.clear();
+      if (this.positionBuffer) this.gl.deleteBuffer(this.positionBuffer);
+      if (this.texCoordBuffer) this.gl.deleteBuffer(this.texCoordBuffer);
+      if (this.vertexBuffer) this.gl.deleteBuffer(this.vertexBuffer);
+      if (this.colorBuffer) this.gl.deleteBuffer(this.colorBuffer);
+      if (this.shaderProgram) this.gl.deleteProgram(this.shaderProgram);
+      this.gl = null;
+      this.shaderProgram = null;
+      this.positionBuffer = null;
+      this.texCoordBuffer = null;
+      this.vertexBuffer = null;
+      this.colorBuffer = null;
+      this.globalTransform = undefined;
+      this.lastResizeKey = "";
+    }
+  }], [{
+    key: "calculateScale",
+    value: function calculateScale(contentMode, videoSize, canvasSize) {
+      var imageRatio = videoSize.width / videoSize.height;
+      var viewRatio = canvasSize.width / canvasSize.height;
+      var isAspectFit = contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */;
+      var shouldUseWidth = imageRatio >= viewRatio && isAspectFit || imageRatio <= viewRatio && !isAspectFit;
+      if (shouldUseWidth) {
+        var _scale = canvasSize.width / videoSize.width;
+        return {
+          scaleX: _scale,
+          scaleY: _scale,
+          translateX: 0,
+          translateY: (canvasSize.height - videoSize.height * _scale) / 2
+        };
+      }
+      var scale = canvasSize.height / videoSize.height;
+      return {
+        scaleX: scale,
+        scaleY: scale,
+        translateX: (canvasSize.width - videoSize.width * scale) / 2,
+        translateY: 0
+      };
+    }
+  }]);
+}();var createGLRenderer = function createGLRenderer(_ref) {
+  var glContext = _ref.glContext;
+  return new RendererGL(glContext);
+};
+var detectGLSupport = function detectGLSupport() {
+  var canvas = document.createElement('canvas');
+  var gl = canvas.getContext('webgl');
+  var gl2 = canvas.getContext('webgl2');
+  return {
+    webgl: !!gl,
+    webgl2: !!gl2,
+    maxTextureSize: gl ? gl.getParameter(gl.MAX_TEXTURE_SIZE) : 0,
+    maxVertexAttribs: gl ? gl.getParameter(gl.MAX_VERTEX_ATTRIBS) : 0
+  };
+};
+var RendererGLExtension = {
+  stick: function stick(gl, bitmap) {
+    return function () {
+      var texture = gl.createTexture();
+      if (!texture) return;
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmap);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+    };
+  },
+  clear: function clear(type, gl, canvas, width, height) {
+    if (type === "CL") {
+      return function () {
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+      };
+    }
+    return function () {
+      canvas.width = width;
+      canvas.height = height;
+      gl.viewport(0, 0, width, height);
+    };
+  }
+};var RendererGPU = /*#__PURE__*/function () {
   function RendererGPU(gpuDevice, canvas) {
     _classCallCheck(this, RendererGPU);
     this.gpuDevice = gpuDevice;
@@ -3719,908 +4765,6 @@ var RendererGPUExtension = {
       });
     };
   }
-};var RendererGL = /*#__PURE__*/function () {
-  function RendererGL(glContext) {
-    _classCallCheck(this, RendererGL);
-    this.glContext = glContext;
-    this.gl = null;
-    this.shaderProgram = null;
-    this.positionBuffer = null;
-    this.texCoordBuffer = null;
-    this.vertexBuffer = null;
-    this.colorBuffer = null;
-    this.textureCache = new Map();
-    this.globalTransform = undefined;
-    this.lastResizeKey = "";
-    this.initialize();
-  }
-  return _createClass(RendererGL, [{
-    key: "initialize",
-    value: function initialize() {
-      if (!this.glContext) return;
-      this.gl = this.glContext;
-      this.setupShaders();
-      this.setupBuffers();
-      this.setupAttributes();
-    }
-  }, {
-    key: "setupShaders",
-    value: function setupShaders() {
-      if (!this.gl) return;
-      var vertexShaderSource = "\n      attribute vec2 a_position;\n      attribute vec2 a_texCoord;\n      attribute vec4 a_color;\n      \n      uniform mat3 u_matrix;\n      \n      varying vec2 v_texCoord;\n      varying vec4 v_color;\n      \n      void main() {\n        vec3 position = u_matrix * vec3(a_position, 1.0);\n        gl_Position = vec4(position.xy, 0.0, 1.0);\n        v_texCoord = a_texCoord;\n        v_color = a_color;\n      }\n    ";
-      var fragmentShaderSource = "\n      precision mediump float;\n      \n      varying vec2 v_texCoord;\n      varying vec4 v_color;\n      uniform sampler2D u_texture;\n      \n      void main() {\n        vec4 color = texture2D(u_texture, v_texCoord);\n        gl_FragColor = color * v_color;\n      }\n    ";
-      var vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexShaderSource);
-      var fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, fragmentShaderSource);
-      if (vertexShader && fragmentShader) {
-        this.shaderProgram = this.createProgram(vertexShader, fragmentShader);
-      }
-    }
-  }, {
-    key: "createShader",
-    value: function createShader(type, source) {
-      if (!this.gl) return null;
-      var shader = this.gl.createShader(type);
-      if (!shader) return null;
-      this.gl.shaderSource(shader, source);
-      this.gl.compileShader(shader);
-      if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-        console.error('Shader compile error:', this.gl.getShaderInfoLog(shader));
-        this.gl.deleteShader(shader);
-        return null;
-      }
-      return shader;
-    }
-  }, {
-    key: "createProgram",
-    value: function createProgram(vertexShader, fragmentShader) {
-      if (!this.gl) return null;
-      var program = this.gl.createProgram();
-      if (!program) return null;
-      this.gl.attachShader(program, vertexShader);
-      this.gl.attachShader(program, fragmentShader);
-      this.gl.linkProgram(program);
-      if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
-        console.error('Program link error:', this.gl.getProgramInfoLog(program));
-        this.gl.deleteProgram(program);
-        return null;
-      }
-      return program;
-    }
-  }, {
-    key: "setupBuffers",
-    value: function setupBuffers() {
-      if (!this.gl) return;
-      // Position buffer (quad vertices)
-      this.positionBuffer = this.gl.createBuffer();
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-      var positions = new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]);
-      this.gl.bufferData(this.gl.ARRAY_BUFFER, positions, this.gl.STATIC_DRAW);
-      // Texture coordinate buffer
-      this.texCoordBuffer = this.gl.createBuffer();
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
-      var texCoords = new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]);
-      this.gl.bufferData(this.gl.ARRAY_BUFFER, texCoords, this.gl.STATIC_DRAW);
-      // Color buffer
-      this.colorBuffer = this.gl.createBuffer();
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-      var colors = new Float32Array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
-      this.gl.bufferData(this.gl.ARRAY_BUFFER, colors, this.gl.DYNAMIC_DRAW);
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
-    }
-  }, {
-    key: "setupAttributes",
-    value: function setupAttributes() {
-      if (!this.gl || !this.shaderProgram) return;
-      this.gl.useProgram(this.shaderProgram);
-      var positionLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-      this.gl.enableVertexAttribArray(positionLocation);
-      this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
-      var texCoordLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_texCoord');
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
-      this.gl.enableVertexAttribArray(texCoordLocation);
-      this.gl.vertexAttribPointer(texCoordLocation, 2, this.gl.FLOAT, false, 0, 0);
-      var colorLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_color');
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-      this.gl.enableVertexAttribArray(colorLocation);
-      this.gl.vertexAttribPointer(colorLocation, 4, this.gl.FLOAT, false, 0, 0);
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
-      this.gl.useProgram(null);
-    }
-  }, {
-    key: "createTextureFromBitmap",
-    value: function createTextureFromBitmap(bitmap) {
-      if (!this.gl) return null;
-      var texture = this.gl.createTexture();
-      if (!texture) return null;
-      this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, bitmap);
-      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
-      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
-      this.gl.bindTexture(this.gl.TEXTURE_2D, null);
-      return texture;
-    }
-  }, {
-    key: "createMatrix",
-    value: function createMatrix(transform) {
-      var a = transform.a,
-        b = transform.b,
-        c = transform.c,
-        d = transform.d,
-        tx = transform.tx,
-        ty = transform.ty;
-      return new Float32Array([a, c, tx, b, d, ty, 0, 0, 1]);
-    }
-  }, {
-    key: "drawRectangle",
-    value: function drawRectangle(x, y, width, height, transform) {
-      var color = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : [1, 1, 1, 1];
-      if (!this.gl || !this.shaderProgram) return;
-      var vertices = new Float32Array([x, y, x + width, y, x, y + height, x, y + height, x + width, y, x + width, y + height]);
-      if (!this.vertexBuffer) {
-        this.vertexBuffer = this.gl.createBuffer();
-      }
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-      this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.DYNAMIC_DRAW);
-      var matrix = this.createMatrix(transform);
-      var matrixLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_matrix');
-      var colors = new Float32Array([].concat(_toConsumableArray(color), _toConsumableArray(color), _toConsumableArray(color), _toConsumableArray(color), _toConsumableArray(color), _toConsumableArray(color)));
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-      this.gl.bufferData(this.gl.ARRAY_BUFFER, colors, this.gl.DYNAMIC_DRAW);
-      this.gl.uniformMatrix3fv(matrixLocation, false, matrix);
-      var positionLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_position');
-      var colorLocation = this.gl.getAttribLocation(this.shaderProgram, 'a_color');
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-      this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-      this.gl.vertexAttribPointer(colorLocation, 4, this.gl.FLOAT, false, 0, 0);
-      this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
-    }
-  }, {
-    key: "drawEllipse",
-    value: function drawEllipse(x, y, radiusX, radiusY, transform) {
-      var color = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : [1, 1, 1, 1];
-      this.drawRectangle(x - radiusX, y - radiusY, radiusX * 2, radiusY * 2, transform, color);
-    }
-  }, {
-    key: "drawShape",
-    value: function drawShape(shape, globalTransform) {
-      var _a, _b, _c, _d, _e, _f, _g, _h;
-      var type = shape.type,
-        path = shape.path,
-        styles = shape.styles,
-        transform = shape.transform;
-      var combinedTransform = {
-        a: transform.a * globalTransform.a + transform.c * globalTransform.b,
-        b: transform.b * globalTransform.a + transform.d * globalTransform.b,
-        c: transform.a * globalTransform.c + transform.c * globalTransform.d,
-        d: transform.b * globalTransform.c + transform.d * globalTransform.d,
-        tx: transform.tx * globalTransform.a + transform.ty * globalTransform.c + globalTransform.tx,
-        ty: transform.tx * globalTransform.b + transform.ty * globalTransform.d + globalTransform.ty
-      };
-      var alpha = styles.fill ? parseFloat(styles.fill.split(',')[3]) : 1;
-      var color = [1, 1, 1, alpha];
-      switch (type) {
-        case "rect" /* PlatformVideo.SHAPE_TYPE.RECT */:
-          this.drawRectangle((_a = path.x) !== null && _a !== void 0 ? _a : 0, (_b = path.y) !== null && _b !== void 0 ? _b : 0, (_c = path.width) !== null && _c !== void 0 ? _c : 0, (_d = path.height) !== null && _d !== void 0 ? _d : 0, combinedTransform, color);
-          break;
-        case "ellipse" /* PlatformVideo.SHAPE_TYPE.ELLIPSE */:
-          this.drawEllipse((_e = path.x) !== null && _e !== void 0 ? _e : 0, (_f = path.y) !== null && _f !== void 0 ? _f : 0, (_g = path.radiusX) !== null && _g !== void 0 ? _g : 0, (_h = path.radiusY) !== null && _h !== void 0 ? _h : 0, combinedTransform, color);
-          break;
-      }
-    }
-  }, {
-    key: "drawSprite",
-    value: function drawSprite(frame, bitmap, dynamicElement, globalTransform) {
-      var _a;
-      if ('alpha' in frame && frame.alpha === 0) return;
-      var transform = globalTransform || {
-        a: 1,
-        b: 0,
-        c: 0,
-        d: 1,
-        tx: 0,
-        ty: 0
-      };
-      if (bitmap) {
-        var texture = this.textureCache.get(bitmap) || null;
-        if (!texture) {
-          texture = this.createTextureFromBitmap(bitmap);
-          if (texture) {
-            this.textureCache.set(bitmap, texture);
-          }
-        }
-        if (texture && this.gl && this.shaderProgram) {
-          this.gl.activeTexture(this.gl.TEXTURE0);
-          this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-          var textureLocation = this.gl.getUniformLocation(this.shaderProgram, 'u_texture');
-          this.gl.uniform1i(textureLocation, 0);
-          var layout = frame.layout;
-          this.drawRectangle(0, 0, layout.width, layout.height, transform, [1, 1, 1, frame.alpha || 1]);
-        }
-      }
-      if ('shapes' in frame) {
-        var _iterator = _createForOfIteratorHelper(frame.shapes),
-          _step;
-        try {
-          for (_iterator.s(); !(_step = _iterator.n()).done;) {
-            var shape = _step.value;
-            this.drawShape(shape, transform);
-          }
-        } catch (err) {
-          _iterator.e(err);
-        } finally {
-          _iterator.f();
-        }
-      }
-      (_a = this.gl) === null || _a === void 0 ? void 0 : _a.bindTexture(this.gl.TEXTURE_2D, null);
-    }
-  }, {
-    key: "resize",
-    value: function resize(contentMode, videoSize, canvasSize) {
-      var canvasWidth = canvasSize.width,
-        canvasHeight = canvasSize.height;
-      var videoWidth = videoSize.width,
-        videoHeight = videoSize.height;
-      var resizeKey = "".concat(contentMode, "-").concat(videoWidth, "-").concat(videoHeight, "-").concat(canvasWidth, "-").concat(canvasHeight);
-      if (this.lastResizeKey === resizeKey) {
-        return;
-      }
-      var scale = {
-        scaleX: 1,
-        scaleY: 1,
-        translateX: 0,
-        translateY: 0
-      };
-      if (contentMode === "fill" /* PLAYER_CONTENT_MODE.FILL */) {
-        scale.scaleX = canvasWidth / videoWidth;
-        scale.scaleY = canvasHeight / videoHeight;
-      } else {
-        scale = RendererGL.calculateScale(contentMode, videoSize, canvasSize);
-      }
-      this.lastResizeKey = resizeKey;
-      this.globalTransform = {
-        a: scale.scaleX,
-        b: 0.0,
-        c: 0.0,
-        d: scale.scaleY,
-        tx: scale.translateX,
-        ty: scale.translateY
-      };
-    }
-  }, {
-    key: "render",
-    value: function render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail) {
-      if (!this.gl || !this.shaderProgram) {
-        console.warn('WebGL not initialized');
-        return;
-      }
-      this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-      this.gl.useProgram(this.shaderProgram);
-      for (var i = head; i < tail; i++) {
-        var sprite = videoEntity.sprites[i];
-        var frame = sprite.frames[currentFrame];
-        var bitmap = materials.get(sprite.imageKey);
-        var dynamicElement = dynamicMaterials.get(sprite.imageKey);
-        this.drawSprite(frame, bitmap, dynamicElement, this.globalTransform);
-      }
-      this.gl.useProgram(null);
-    }
-  }, {
-    key: "destroy",
-    value: function destroy() {
-      var _this = this;
-      if (!this.gl) return;
-      this.textureCache.forEach(function (texture) {
-        _this.gl.deleteTexture(texture);
-      });
-      this.textureCache.clear();
-      if (this.positionBuffer) this.gl.deleteBuffer(this.positionBuffer);
-      if (this.texCoordBuffer) this.gl.deleteBuffer(this.texCoordBuffer);
-      if (this.vertexBuffer) this.gl.deleteBuffer(this.vertexBuffer);
-      if (this.colorBuffer) this.gl.deleteBuffer(this.colorBuffer);
-      if (this.shaderProgram) this.gl.deleteProgram(this.shaderProgram);
-      this.gl = null;
-      this.shaderProgram = null;
-      this.positionBuffer = null;
-      this.texCoordBuffer = null;
-      this.vertexBuffer = null;
-      this.colorBuffer = null;
-      this.globalTransform = undefined;
-      this.lastResizeKey = "";
-    }
-  }], [{
-    key: "calculateScale",
-    value: function calculateScale(contentMode, videoSize, canvasSize) {
-      var imageRatio = videoSize.width / videoSize.height;
-      var viewRatio = canvasSize.width / canvasSize.height;
-      var isAspectFit = contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */;
-      var shouldUseWidth = imageRatio >= viewRatio && isAspectFit || imageRatio <= viewRatio && !isAspectFit;
-      if (shouldUseWidth) {
-        var _scale = canvasSize.width / videoSize.width;
-        return {
-          scaleX: _scale,
-          scaleY: _scale,
-          translateX: 0,
-          translateY: (canvasSize.height - videoSize.height * _scale) / 2
-        };
-      }
-      var scale = canvasSize.height / videoSize.height;
-      return {
-        scaleX: scale,
-        scaleY: scale,
-        translateX: (canvasSize.width - videoSize.width * scale) / 2,
-        translateY: 0
-      };
-    }
-  }]);
-}();var createGLRenderer = function createGLRenderer(_ref) {
-  var glContext = _ref.glContext;
-  return new RendererGL(glContext);
-};
-var detectGLSupport = function detectGLSupport() {
-  var canvas = document.createElement('canvas');
-  var gl = canvas.getContext('webgl');
-  var gl2 = canvas.getContext('webgl2');
-  return {
-    webgl: !!gl,
-    webgl2: !!gl2,
-    maxTextureSize: gl ? gl.getParameter(gl.MAX_TEXTURE_SIZE) : 0,
-    maxVertexAttribs: gl ? gl.getParameter(gl.MAX_VERTEX_ATTRIBS) : 0
-  };
-};
-var RendererGLExtension = {
-  stick: function stick(gl, bitmap) {
-    return function () {
-      var texture = gl.createTexture();
-      if (!texture) return;
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmap);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.bindTexture(gl.TEXTURE_2D, null);
-    };
-  },
-  clear: function clear(type, gl, canvas, width, height) {
-    if (type === "CL") {
-      return function () {
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-      };
-    }
-    return function () {
-      canvas.width = width;
-      canvas.height = height;
-      gl.viewport(0, 0, width, height);
-    };
-  }
-};/**
- * CurrentPoint对象池，用于减少对象创建和GC压力
- */
-var PointPool = /*#__PURE__*/function () {
-  function PointPool() {
-    _classCallCheck(this, PointPool);
-    this.pool = [];
-  }
-  return _createClass(PointPool, [{
-    key: "acquire",
-    value: function acquire() {
-      var pool = this.pool;
-      return pool.length > 0 ? pool.pop() : {
-        x: 0,
-        y: 0,
-        x1: 0,
-        y1: 0,
-        x2: 0,
-        y2: 0
-      };
-    }
-  }, {
-    key: "release",
-    value: function release(point) {
-      // 重置点的属性
-      point.x = point.y = point.x1 = point.y1 = point.x2 = point.y2 = 0;
-      this.pool.push(point);
-    }
-  }]);
-}();var Renderer2D = /*#__PURE__*/function () {
-  function Renderer2D(context) {
-    _classCallCheck(this, Renderer2D);
-    this.context = context;
-    this.pointPool = new PointPool();
-    this.lastResizeKey = "";
-    this.globalTransform = undefined;
-    this.currentPoint = this.pointPool.acquire();
-  }
-  return _createClass(Renderer2D, [{
-    key: "setTransform",
-    value: function setTransform(transform) {
-      if (transform && this.context) {
-        this.context.transform(transform.a, transform.b, transform.c, transform.d, transform.tx, transform.ty);
-      }
-    }
-  }, {
-    key: "drawBezier",
-    value: function drawBezier(d, transform, styles) {
-      var context = this.context,
-        pointPool = this.pointPool;
-      this.currentPoint = pointPool.acquire();
-      context.save();
-      Renderer2D.resetShapeStyles(context, styles);
-      this.setTransform(transform);
-      context.beginPath();
-      if (d) {
-        // 使用状态机解析器替代正则表达式
-        var commands = Renderer2D.parseSVGPath(d);
-        var _iterator = _createForOfIteratorHelper(commands),
-          _step;
-        try {
-          for (_iterator.s(); !(_step = _iterator.n()).done;) {
-            var _step$value = _step.value,
-              command = _step$value.command,
-              args = _step$value.args;
-            if (Renderer2D.SVG_PATH.has(command)) {
-              this.drawBezierElement(this.currentPoint, command, args.split(/[\s,]+/).filter(Boolean));
-            }
-          }
-        } catch (err) {
-          _iterator.e(err);
-        } finally {
-          _iterator.f();
-        }
-      }
-      Renderer2D.fillOrStroke(context, styles);
-      pointPool.release(this.currentPoint);
-      context.restore();
-    }
-  }, {
-    key: "drawBezierElement",
-    value: function drawBezierElement(currentPoint, method, args) {
-      var context = this.context;
-      switch (method) {
-        case "M":
-          currentPoint.x = +args[0];
-          currentPoint.y = +args[1];
-          context.moveTo(currentPoint.x, currentPoint.y);
-          break;
-        case "m":
-          currentPoint.x += +args[0];
-          currentPoint.y += +args[1];
-          context.moveTo(currentPoint.x, currentPoint.y);
-          break;
-        case "L":
-          currentPoint.x = +args[0];
-          currentPoint.y = +args[1];
-          context.lineTo(currentPoint.x, currentPoint.y);
-          break;
-        case "l":
-          currentPoint.x += +args[0];
-          currentPoint.y += +args[1];
-          context.lineTo(currentPoint.x, currentPoint.y);
-          break;
-        case "H":
-          currentPoint.x = +args[0];
-          context.lineTo(currentPoint.x, currentPoint.y);
-          break;
-        case "h":
-          currentPoint.x += +args[0];
-          context.lineTo(currentPoint.x, currentPoint.y);
-          break;
-        case "V":
-          currentPoint.y = +args[0];
-          context.lineTo(currentPoint.x, currentPoint.y);
-          break;
-        case "v":
-          currentPoint.y += +args[0];
-          context.lineTo(currentPoint.x, currentPoint.y);
-          break;
-        case "C":
-          currentPoint.x1 = +args[0];
-          currentPoint.y1 = +args[1];
-          currentPoint.x2 = +args[2];
-          currentPoint.y2 = +args[3];
-          currentPoint.x = +args[4];
-          currentPoint.y = +args[5];
-          context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
-          break;
-        case "c":
-          currentPoint.x1 = currentPoint.x + +args[0];
-          currentPoint.y1 = currentPoint.y + +args[1];
-          currentPoint.x2 = currentPoint.x + +args[2];
-          currentPoint.y2 = currentPoint.y + +args[3];
-          currentPoint.x += +args[4];
-          currentPoint.y += +args[5];
-          context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
-          break;
-        case "S":
-          if (currentPoint.x1 !== undefined && currentPoint.y1 !== undefined && currentPoint.x2 !== undefined && currentPoint.y2 !== undefined) {
-            currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
-            currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;
-            currentPoint.x2 = +args[0];
-            currentPoint.y2 = +args[1];
-            currentPoint.x = +args[2];
-            currentPoint.y = +args[3];
-            context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
-          } else {
-            currentPoint.x1 = +args[0];
-            currentPoint.y1 = +args[1];
-            currentPoint.x = +args[2];
-            currentPoint.y = +args[3];
-            context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
-          }
-          break;
-        case "s":
-          if (currentPoint.x1 !== undefined && currentPoint.y1 !== undefined && currentPoint.x2 !== undefined && currentPoint.y2 !== undefined) {
-            currentPoint.x1 = currentPoint.x - currentPoint.x2 + currentPoint.x;
-            currentPoint.y1 = currentPoint.y - currentPoint.y2 + currentPoint.y;
-            currentPoint.x2 = currentPoint.x + +args[0];
-            currentPoint.y2 = currentPoint.y + +args[1];
-            currentPoint.x += +args[2];
-            currentPoint.y += +args[3];
-            context.bezierCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x2, currentPoint.y2, currentPoint.x, currentPoint.y);
-          } else {
-            currentPoint.x1 = currentPoint.x + +args[0];
-            currentPoint.y1 = currentPoint.y + +args[1];
-            currentPoint.x += +args[2];
-            currentPoint.y += +args[3];
-            context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
-          }
-          break;
-        case "Q":
-          currentPoint.x1 = +args[0];
-          currentPoint.y1 = +args[1];
-          currentPoint.x = +args[2];
-          currentPoint.y = +args[3];
-          context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
-          break;
-        case "q":
-          currentPoint.x1 = currentPoint.x + +args[0];
-          currentPoint.y1 = currentPoint.y + +args[1];
-          currentPoint.x += +args[2];
-          currentPoint.y += +args[3];
-          context.quadraticCurveTo(currentPoint.x1, currentPoint.y1, currentPoint.x, currentPoint.y);
-          break;
-        case "Z":
-        case "z":
-          context.closePath();
-          break;
-      }
-    }
-  }, {
-    key: "drawEllipse",
-    value: function drawEllipse(x, y, radiusX, radiusY, transform, styles) {
-      var context = this.context;
-      context.save();
-      Renderer2D.resetShapeStyles(context, styles);
-      this.setTransform(transform);
-      x -= radiusX;
-      y -= radiusY;
-      var w = radiusX * 2;
-      var h = radiusY * 2;
-      var kappa = 0.5522848;
-      var ox = w / 2 * kappa;
-      var oy = h / 2 * kappa;
-      var xe = x + w;
-      var ye = y + h;
-      var xm = x + w / 2;
-      var ym = y + h / 2;
-      context.beginPath();
-      context.moveTo(x, ym);
-      context.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
-      context.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
-      context.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-      context.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
-      Renderer2D.fillOrStroke(context, styles);
-      context.restore();
-    }
-  }, {
-    key: "drawRect",
-    value: function drawRect(x, y, width, height, cornerRadius, transform, styles) {
-      var context = this.context;
-      context.save();
-      Renderer2D.resetShapeStyles(context, styles);
-      this.setTransform(transform);
-      var radius = cornerRadius;
-      if (width < 2 * radius) {
-        radius = width / 2;
-      }
-      if (height < 2 * radius) {
-        radius = height / 2;
-      }
-      context.beginPath();
-      context.moveTo(x + radius, y);
-      context.arcTo(x + width, y, x + width, y + height, radius);
-      context.arcTo(x + width, y + height, x, y + height, radius);
-      context.arcTo(x, y + height, x, y, radius);
-      context.arcTo(x, y, x + width, y, radius);
-      context.closePath();
-      Renderer2D.fillOrStroke(context, styles);
-      context.restore();
-    }
-  }, {
-    key: "drawShape",
-    value: function drawShape(shape) {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _j;
-      var type = shape.type,
-        path = shape.path,
-        transform = shape.transform,
-        styles = shape.styles;
-      switch (type) {
-        case "shape" /* PlatformVideo.SHAPE_TYPE.SHAPE */:
-          this.drawBezier(path.d, transform, styles);
-          break;
-        case "ellipse" /* PlatformVideo.SHAPE_TYPE.ELLIPSE */:
-          this.drawEllipse((_a = path.x) !== null && _a !== void 0 ? _a : 0, (_b = path.y) !== null && _b !== void 0 ? _b : 0, (_c = path.radiusX) !== null && _c !== void 0 ? _c : 0, (_d = path.radiusY) !== null && _d !== void 0 ? _d : 0, transform, styles);
-          break;
-        case "rect" /* PlatformVideo.SHAPE_TYPE.RECT */:
-          this.drawRect((_e = path.x) !== null && _e !== void 0 ? _e : 0, (_f = path.y) !== null && _f !== void 0 ? _f : 0, (_g = path.width) !== null && _g !== void 0 ? _g : 0, (_h = path.height) !== null && _h !== void 0 ? _h : 0, (_j = path.cornerRadius) !== null && _j !== void 0 ? _j : 0, transform, styles);
-          break;
-      }
-    }
-  }, {
-    key: "drawSprite",
-    value: function drawSprite(frame, bitmap, dynamicElement) {
-      if (frame.alpha === 0) return;
-      var context = this.context;
-      var alpha = frame.alpha,
-        transform = frame.transform,
-        layout = frame.layout,
-        shapes = frame.shapes;
-      var _ref = transform !== null && transform !== void 0 ? transform : {},
-        _ref$a = _ref.a,
-        a = _ref$a === void 0 ? 1 : _ref$a,
-        _ref$b = _ref.b,
-        b = _ref$b === void 0 ? 0 : _ref$b,
-        _ref$c = _ref.c,
-        c = _ref$c === void 0 ? 0 : _ref$c,
-        _ref$d = _ref.d,
-        d = _ref$d === void 0 ? 1 : _ref$d,
-        _ref$tx = _ref.tx,
-        tx = _ref$tx === void 0 ? 0 : _ref$tx,
-        _ref$ty = _ref.ty,
-        ty = _ref$ty === void 0 ? 0 : _ref$ty;
-      context.save();
-      this.setTransform(this.globalTransform);
-      context.globalAlpha = alpha;
-      context.transform(a, b, c, d, tx, ty);
-      if (bitmap) {
-        context.drawImage(bitmap, 0, 0, layout.width, layout.height);
-      }
-      if (dynamicElement) {
-        context.drawImage(dynamicElement, (layout.width - dynamicElement.width) / 2, (layout.height - dynamicElement.height) / 2);
-      }
-      for (var i = 0; i < shapes.length; i++) {
-        this.drawShape(shapes[i]);
-      }
-      context.restore();
-    }
-    /**
-     * 调整画布尺寸
-     * @param contentMode
-     * @param videoSize
-     * @param canvasSize
-     * @returns
-     */
-  }, {
-    key: "resize",
-    value: function resize(contentMode, videoSize, canvasSize) {
-      var canvasWidth = canvasSize.width,
-        canvasHeight = canvasSize.height;
-      var videoWidth = videoSize.width,
-        videoHeight = videoSize.height;
-      var resizeKey = "".concat(contentMode, "-").concat(videoWidth, "-").concat(videoHeight, "-").concat(canvasWidth, "-").concat(canvasHeight);
-      var lastTransform = this.globalTransform;
-      if (this.lastResizeKey === resizeKey && lastTransform) {
-        return;
-      }
-      var scale = {
-        scaleX: 1,
-        scaleY: 1,
-        translateX: 0,
-        translateY: 0
-      };
-      if (contentMode === "fill" /* PLAYER_CONTENT_MODE.FILL */) {
-        scale.scaleX = canvasWidth / videoWidth;
-        scale.scaleY = canvasHeight / videoHeight;
-      } else {
-        scale = Renderer2D.calculateScale(contentMode, videoSize, canvasSize);
-      }
-      this.lastResizeKey = resizeKey;
-      this.globalTransform = {
-        a: scale.scaleX,
-        b: 0.0,
-        c: 0.0,
-        d: scale.scaleY,
-        tx: scale.translateX,
-        ty: scale.translateY
-      };
-    }
-  }, {
-    key: "render",
-    value: function render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail) {
-      var sprite;
-      var imageKey;
-      var bitmap;
-      var dynamicElement;
-      for (var i = head; i < tail; i++) {
-        sprite = videoEntity.sprites[i];
-        imageKey = sprite.imageKey;
-        bitmap = materials.get(imageKey);
-        dynamicElement = dynamicMaterials.get(imageKey);
-        this.drawSprite(sprite.frames[currentFrame], bitmap, dynamicElement);
-      }
-    }
-  }, {
-    key: "destroy",
-    value: function destroy() {
-      this.globalTransform = undefined;
-      this.lastResizeKey = "";
-      this.context = null;
-    }
-  }], [{
-    key: "parseSVGPath",
-    value:
-    // 在Renderer2D类中添加新的解析方法
-    function parseSVGPath(d) {
-      var SVG_LETTER_REGEXP = Renderer2D.SVG_LETTER_REGEXP;
-      var result = [];
-      var currentIndex = 0;
-      // 状态：0 - 等待命令，1 - 读取参数
-      var state = 0;
-      var currentCommand = "";
-      var currentArgs = "";
-      while (currentIndex < d.length) {
-        var char = d[currentIndex];
-        switch (state) {
-          case 0:
-            // 等待命令
-            if (SVG_LETTER_REGEXP.test(char)) {
-              currentCommand = char;
-              state = 1;
-            }
-            break;
-          case 1:
-            // 读取参数
-            if (SVG_LETTER_REGEXP.test(char)) {
-              // 遇到新命令，保存当前命令和参数
-              result.push({
-                command: currentCommand,
-                args: currentArgs.trim()
-              });
-              currentCommand = char;
-              currentArgs = "";
-            } else {
-              currentArgs += char;
-            }
-            break;
-        }
-        currentIndex++;
-      }
-      // 处理最后一个命令
-      if (currentCommand && state === 1) {
-        result.push({
-          command: currentCommand,
-          args: currentArgs.trim()
-        });
-      }
-      return result;
-    }
-  }, {
-    key: "fillOrStroke",
-    value: function fillOrStroke(context, styles) {
-      if (styles) {
-        if (styles.fill) {
-          context.fill();
-        }
-        if (styles.stroke) {
-          context.stroke();
-        }
-      }
-    }
-  }, {
-    key: "resetShapeStyles",
-    value: function resetShapeStyles(context, styles) {
-      if (styles) {
-        context.strokeStyle = styles.stroke || "transparent";
-        if (styles.strokeWidth > 0) {
-          context.lineWidth = styles.strokeWidth;
-        }
-        if (styles.miterLimit > 0) {
-          context.miterLimit = styles.miterLimit;
-        }
-        if (styles.lineCap) {
-          context.lineCap = styles.lineCap;
-        }
-        if (styles.lineJoin) {
-          context.lineJoin = styles.lineJoin;
-        }
-        context.fillStyle = styles.fill || "transparent";
-        if (styles.lineDash) {
-          context.setLineDash(styles.lineDash);
-        }
-      }
-    }
-    /**
-     * 计算缩放比例
-     * @param contentMode
-     * @param videoSize
-     * @param canvasSize
-     * @returns
-     */
-  }, {
-    key: "calculateScale",
-    value: function calculateScale(contentMode, videoSize, canvasSize) {
-      var imageRatio = videoSize.width / videoSize.height;
-      var viewRatio = canvasSize.width / canvasSize.height;
-      var isAspectFit = contentMode === "aspect-fit" /* PLAYER_CONTENT_MODE.ASPECT_FIT */;
-      var shouldUseWidth = imageRatio >= viewRatio && isAspectFit || imageRatio <= viewRatio && !isAspectFit;
-      var createTransform = function createTransform(scale, translateX, translateY) {
-        return {
-          scaleX: scale,
-          scaleY: scale,
-          translateX: translateX,
-          translateY: translateY
-        };
-      };
-      if (shouldUseWidth) {
-        var _scale = canvasSize.width / videoSize.width;
-        return createTransform(_scale, 0, (canvasSize.height - videoSize.height * _scale) / 2);
-      }
-      var scale = canvasSize.height / videoSize.height;
-      return createTransform(scale, (canvasSize.width - videoSize.width * scale) / 2, 0);
-    }
-  }]);
-}();
-/**
- * https://developer.mozilla.org/zh-CN/docs/Web/SVG/Tutorial/Paths
- * 绘制路径的不同指令：
- * * 直线命令
- * - M: moveTo，移动到指定点，不绘制直线。
- * - L: lineTo，从起始点绘制一条直线到指定点。
- * - H: horizontal lineTo，从起始点绘制一条水平线到指定点。
- * - V: vertical lineTo，从起始点绘制一条垂直线到指定点。
- * - Z: closePath，从起始点绘制一条直线到路径起点，形成一个闭合路径。
- * * 曲线命令
- * - C: bezierCurveTo，绘制三次贝塞尔曲线。
- * - S: smooth curveTo，绘制平滑三次贝塞尔曲线。
- * - Q: quadraticCurveTo，绘制两次贝塞尔曲线。
- * - T: smooth quadraticCurveTo，绘制平滑两次贝塞尔曲线。
- * * 弧线命令
- * - A: arcTo，从起始点绘制一条弧线到指定点。
- */
-Renderer2D.SVG_PATH = new Set(["M", "L", "H", "V", "Z", "C", "S", "Q", "m", "l", "h", "v", "z", "c", "s", "q"]);
-Renderer2D.SVG_LETTER_REGEXP = /[a-zA-Z]/;var create2DRenderer = function create2DRenderer(_ref) {
-  var context = _ref.context;
-  return new Renderer2D(context);
-};
-var detect2DSupport = function detect2DSupport() {
-  var canvas = document.createElement('canvas');
-  var context = canvas.getContext('2d');
-  return !!context;
-};
-var Renderer2DExtension = {
-  stick: function stick(context, bitmap) {
-    return function () {
-      return context.drawImage(bitmap, 0, 0);
-    };
-  },
-  clear: function clear(type, context, canvas, width, height) {
-    if (type === "CL") {
-      return function () {
-        // FIXME:【支付宝小程序】无法通过改变尺寸来清理画布，无论是Canvas还是OffscreenCanvas
-        context.clearRect(0, 0, width, height);
-      };
-    }
-    return function () {
-      canvas.width = width;
-      canvas.height = height;
-    };
-  }
 };var rendererInfo = [{
   type: 'webgpu',
   name: 'WebGPU',
@@ -4690,7 +4834,7 @@ var detectRendererSupport = function detectRendererSupport() {
 };
 function createRenderer(type, canvas, context) {
   return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee2() {
-    var _t2;
+    var result, _t2;
     return _regenerator().w(function (_context2) {
       while (1) switch (_context2.n) {
         case 0:
@@ -4726,9 +4870,10 @@ function createRenderer(type, canvas, context) {
             _context2.n = 7;
             break;
           }
-          return _context2.a(2, create2DRenderer({
+          result = create2DRenderer({
             context: context
-          }));
+          });
+          return _context2.a(2, result.renderer);
         case 7:
           return _context2.a(3, 8);
         case 8:
@@ -4739,7 +4884,7 @@ function createRenderer(type, canvas, context) {
 }
 var createBestRenderer = function createBestRenderer(canvas, context) {
   return __awaiter(void 0, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee3() {
-    var supportInfo, _iterator, _step, info, renderer, _t3, _t4;
+    var supportInfo, _iterator, _step, info, renderer, result, _t3, _t4;
     return _regenerator().w(function (_context3) {
       while (1) switch (_context3.p = _context3.n) {
         case 0:
@@ -4789,9 +4934,10 @@ var createBestRenderer = function createBestRenderer(canvas, context) {
           return _context3.a(3, 10);
         case 9:
           if (context) {
-            renderer = create2DRenderer({
+            result = create2DRenderer({
               context: context
             });
+            renderer = result.renderer;
           }
           return _context3.a(3, 10);
         case 10:
@@ -4984,23 +5130,29 @@ var freb = function freb(eb, start) {
     r: r
   };
 };
-var _freb = freb(fleb, 2),
-  fl = _freb.b,
-  revfl = _freb.r;
-// we can ignore the fact that the other numbers are wrong; they never happen anyway
-fl[28] = 258, revfl[258] = 28;
-var _freb2 = freb(fdeb, 0),
-  fd = _freb2.b,
-  revfd = _freb2.r;
+var frebResult1 = freb(fleb, 2);
+var fl = frebResult1.b;
+var revfl = frebResult1.r;
+var frebResult2 = freb(fdeb, 0);
+var fd = frebResult2.b;
+var revfd = frebResult2.r;
 // map of value to reverse (assuming 16 bits)
 var rev = new u16(32768);
-for (var i$1 = 0; i$1 < 32768; ++i$1) {
+// 初始化函数
+function initZlibTables() {
+  // we can ignore the fact that the other numbers are wrong; they never happen anyway
+  fl[28] = 258;
+  revfl[258] = 28;
   // reverse table algorithm from SO
-  var x = (i$1 & 0xAAAA) >> 1 | (i$1 & 0x5555) << 1;
-  x = (x & 0xCCCC) >> 2 | (x & 0x3333) << 2;
-  x = (x & 0xF0F0) >> 4 | (x & 0x0F0F) << 4;
-  rev[i$1] = ((x & 0xFF00) >> 8 | (x & 0x00FF) << 8) >> 1;
+  for (var i = 0; i < 32768; ++i) {
+    var x = (i & 0xAAAA) >> 1 | (i & 0x5555) << 1;
+    x = (x & 0xCCCC) >> 2 | (x & 0x3333) << 2;
+    x = (x & 0xF0F0) >> 4 | (x & 0x0F0F) << 4;
+    rev[i] = ((x & 0xFF00) >> 8 | (x & 0x00FF) << 8) >> 1;
+  }
 }
+// 调用初始化函数
+initZlibTables();
 // create huffman tree from u8 "map": index -> code length for code index
 // mb (max bits) must be at most 15
 // TODO: optimize/split up?
@@ -5053,13 +5205,13 @@ var hMap = function hMap(cd, mb, r) {
 };
 // fixed length tree
 var flt = new u8(288);
-for (var _i2$1 = 0; _i2$1 < 144; ++_i2$1) flt[_i2$1] = 8;
-for (var _i3 = 144; _i3 < 256; ++_i3) flt[_i3] = 9;
-for (var _i4 = 256; _i4 < 280; ++_i4) flt[_i4] = 7;
-for (var _i5 = 280; _i5 < 288; ++_i5) flt[_i5] = 8;
+for (var i$1 = 0; i$1 < 144; ++i$1) flt[i$1] = 8;
+for (var _i2$1 = 144; _i2$1 < 256; ++_i2$1) flt[_i2$1] = 9;
+for (var _i3 = 256; _i3 < 280; ++_i3) flt[_i3] = 7;
+for (var _i4 = 280; _i4 < 288; ++_i4) flt[_i4] = 8;
 // fixed distance tree
 var fdt = new u8(32);
-for (var _i6 = 0; _i6 < 32; ++_i6) fdt[_i6] = 5;
+for (var _i5 = 0; _i5 < 32; ++_i5) fdt[_i5] = 5;
 // fixed length map
 var flm = /*#__PURE__*/hMap(flt, 9, 0),
   flrm = /*#__PURE__*/hMap(flt, 9, 1);
@@ -5069,8 +5221,8 @@ var fdm = /*#__PURE__*/hMap(fdt, 5, 0),
 // find max of array
 var max = function max(a) {
   var m = a[0];
-  for (var _i7 = 1; _i7 < a.length; ++_i7) {
-    if (a[_i7] > m) m = a[_i7];
+  for (var _i6 = 1; _i6 < a.length; ++_i6) {
+    if (a[_i6] > m) m = a[_i6];
   }
   return m;
 };
@@ -5175,9 +5327,9 @@ var inflt = function inflt(dat, st, buf, dict) {
         var ldt = new u8(tl);
         // code length tree
         var clt = new u8(19);
-        for (var _i8 = 0; _i8 < hcLen; ++_i8) {
+        for (var _i7 = 0; _i7 < hcLen; ++_i7) {
           // use index map to get real code
-          clt[clim[_i8]] = bits(dat, pos + _i8 * 3, 7);
+          clt[clim[_i7]] = bits(dat, pos + _i7 * 3, 7);
         }
         pos += hcLen * 3;
         // code lengths bits
@@ -5185,7 +5337,7 @@ var inflt = function inflt(dat, st, buf, dict) {
           clbmsk = (1 << clb) - 1;
         // code lengths map
         var clm = hMap(clt, clb, 1);
-        for (var _i9 = 0; _i9 < tl;) {
+        for (var _i8 = 0; _i8 < tl;) {
           var r = clm[bits(dat, pos, clbmsk)];
           // bits read
           pos += r & 15;
@@ -5193,13 +5345,13 @@ var inflt = function inflt(dat, st, buf, dict) {
           var _s = r >> 4;
           // code length to copy
           if (_s < 16) {
-            ldt[_i9++] = _s;
+            ldt[_i8++] = _s;
           } else {
             //  copy   count
             var c = 0,
               n = 0;
-            if (_s == 16) n = 3 + bits(dat, pos, 3), pos += 2, c = ldt[_i9 - 1];else if (_s == 17) n = 3 + bits(dat, pos, 7), pos += 3;else if (_s == 18) n = 11 + bits(dat, pos, 127), pos += 7;
-            while (n--) ldt[_i9++] = c;
+            if (_s == 16) n = 3 + bits(dat, pos, 3), pos += 2, c = ldt[_i8 - 1];else if (_s == 17) n = 3 + bits(dat, pos, 7), pos += 3;else if (_s == 18) n = 11 + bits(dat, pos, 127), pos += 7;
+            while (n--) ldt[_i8++] = c;
           }
         }
         //    length tree                 distance tree
@@ -5241,9 +5393,9 @@ var inflt = function inflt(dat, st, buf, dict) {
         // no extra bits needed if less
         if (sym > 264) {
           // index
-          var _i0 = sym - 257,
-            b = fleb[_i0];
-          add = bits(dat, pos, (1 << b) - 1) + fl[_i0];
+          var _i9 = sym - 257,
+            b = fleb[_i9];
+          add = bits(dat, pos, (1 << b) - 1) + fl[_i9];
           pos += b;
         }
         // dist
@@ -5296,10 +5448,10 @@ var wbits16 = function wbits16(d, p, v) {
 var hTree = function hTree(d, mb) {
   // Need extra info to make a tree
   var t = [];
-  for (var _i1 = 0; _i1 < d.length; ++_i1) {
-    if (d[_i1]) t.push({
-      s: _i1,
-      f: d[_i1]
+  for (var _i0 = 0; _i0 < d.length; ++_i0) {
+    if (d[_i0]) t.push({
+      s: _i0,
+      f: d[_i0]
     });
   }
   var s = t.length;
@@ -5352,8 +5504,8 @@ var hTree = function hTree(d, mb) {
     };
   }
   var maxSym = t2[0].s;
-  for (var _i10 = 1; _i10 < s; ++_i10) {
-    if (t2[_i10].s > maxSym) maxSym = t2[_i10].s;
+  for (var _i1 = 1; _i1 < s; ++_i1) {
+    if (t2[_i1].s > maxSym) maxSym = t2[_i1].s;
   }
   // code lengths
   var tr = new u16(maxSym + 1);
@@ -5363,7 +5515,7 @@ var hTree = function hTree(d, mb) {
     // more algorithms from UZIP.js
     // TODO: find out how this code works (debt)
     //  ind    debt
-    var _i11 = 0,
+    var _i10 = 0,
       dt = 0;
     //    left            cost
     var lft = mbt - mb,
@@ -5371,22 +5523,22 @@ var hTree = function hTree(d, mb) {
     t2.sort(function (a, b) {
       return tr[b.s] - tr[a.s] || a.f - b.f;
     });
-    for (; _i11 < s; ++_i11) {
-      var _i12 = t2[_i11].s;
-      if (tr[_i12] > mb) {
-        dt += cst - (1 << mbt - tr[_i12]);
-        tr[_i12] = mb;
+    for (; _i10 < s; ++_i10) {
+      var _i11 = t2[_i10].s;
+      if (tr[_i11] > mb) {
+        dt += cst - (1 << mbt - tr[_i11]);
+        tr[_i11] = mb;
       } else break;
     }
     dt >>= lft;
     while (dt > 0) {
-      var _i13 = t2[_i11].s;
-      if (tr[_i13] < mb) dt -= 1 << mb - tr[_i13]++ - 1;else ++_i11;
+      var _i12 = t2[_i10].s;
+      if (tr[_i12] < mb) dt -= 1 << mb - tr[_i12]++ - 1;else ++_i10;
     }
-    for (; _i11 >= 0 && dt; --_i11) {
-      var _i14 = t2[_i11].s;
-      if (tr[_i14] == mb) {
-        --tr[_i14];
+    for (; _i10 >= 0 && dt; --_i10) {
+      var _i13 = t2[_i10].s;
+      if (tr[_i13] == mb) {
+        --tr[_i13];
         ++dt;
       }
     }
@@ -5414,8 +5566,8 @@ var lc = function lc(c) {
   var w = function w(v) {
     cl[cli++] = v;
   };
-  for (var _i15 = 1; _i15 <= s; ++_i15) {
-    if (c[_i15] == cln && _i15 != s) ++cls;else {
+  for (var _i14 = 1; _i14 <= s; ++_i14) {
+    if (c[_i14] == cln && _i14 != s) ++cls;else {
       if (!cln && cls > 2) {
         for (; cls > 138; cls -= 138) w(32754);
         if (cls > 2) {
@@ -5429,7 +5581,7 @@ var lc = function lc(c) {
       }
       while (cls--) w(cln);
       cls = 1;
-      cln = c[_i15];
+      cln = c[_i14];
     }
   }
   return {
@@ -5440,7 +5592,7 @@ var lc = function lc(c) {
 // calculate the length of output from tree, code lengths
 var clen = function clen(cf, cl) {
   var l = 0;
-  for (var _i16 = 0; _i16 < cl.length; ++_i16) l += cf[_i16] * cl[_i16];
+  for (var _i15 = 0; _i15 < cl.length; ++_i15) l += cf[_i15] * cl[_i15];
   return l;
 };
 // writes a fixed block
@@ -5453,7 +5605,7 @@ var wfblk = function wfblk(out, pos, dat) {
   out[o + 1] = s >> 8;
   out[o + 2] = out[o] ^ 255;
   out[o + 3] = out[o + 1] ^ 255;
-  for (var _i17 = 0; _i17 < s; ++_i17) out[o + _i17 + 4] = dat[_i17];
+  for (var _i16 = 0; _i16 < s; ++_i16) out[o + _i16 + 4] = dat[_i16];
   return (o + 4 + s) * 8;
 };
 // writes a block
@@ -5473,8 +5625,8 @@ var wblk = function wblk(dat, out, final, syms, lf, df, eb, li, bs, bl, p) {
     lcdt = _lc2.c,
     ndc = _lc2.n;
   var lcfreq = new u16(19);
-  for (var _i18 = 0; _i18 < lclt.length; ++_i18) ++lcfreq[lclt[_i18] & 31];
-  for (var _i19 = 0; _i19 < lcdt.length; ++_i19) ++lcfreq[lcdt[_i19] & 31];
+  for (var _i17 = 0; _i17 < lclt.length; ++_i17) ++lcfreq[lclt[_i17] & 31];
+  for (var _i18 = 0; _i18 < lcdt.length; ++_i18) ++lcfreq[lcdt[_i18] & 31];
   var _hTree3 = hTree(lcfreq, 7),
     lct = _hTree3.t,
     mlcb = _hTree3.l;
@@ -5493,22 +5645,22 @@ var wblk = function wblk(dat, out, final, syms, lf, df, eb, li, bs, bl, p) {
     wbits(out, p + 5, ndc - 1);
     wbits(out, p + 10, nlcc - 4);
     p += 14;
-    for (var _i20 = 0; _i20 < nlcc; ++_i20) wbits(out, p + 3 * _i20, lct[clim[_i20]]);
+    for (var _i19 = 0; _i19 < nlcc; ++_i19) wbits(out, p + 3 * _i19, lct[clim[_i19]]);
     p += 3 * nlcc;
     var lcts = [lclt, lcdt];
     for (var it = 0; it < 2; ++it) {
       var clct = lcts[it];
-      for (var _i21 = 0; _i21 < clct.length; ++_i21) {
-        var len = clct[_i21] & 31;
+      for (var _i20 = 0; _i20 < clct.length; ++_i20) {
+        var len = clct[_i20] & 31;
         wbits(out, p, llm[len]), p += lct[len];
-        if (len > 15) wbits(out, p, clct[_i21] >> 5 & 127), p += clct[_i21] >> 12;
+        if (len > 15) wbits(out, p, clct[_i20] >> 5 & 127), p += clct[_i20] >> 12;
       }
     }
   } else {
     lm = flm, ll = flt, dm = fdm, dl = fdt;
   }
-  for (var _i22 = 0; _i22 < li; ++_i22) {
-    var sym = syms[_i22];
+  for (var _i21 = 0; _i21 < li; ++_i21) {
+    var sym = syms[_i21];
     if (sym > 255) {
       var _len = sym >> 18 & 31;
       wbits16(out, p, lm[_len + 257]), p += ll[_len + 257];
@@ -5558,26 +5710,26 @@ var dflt = function dflt(dat, lvl, plvl, pre, post, st) {
     //  l/lcnt  exbits  index          l/lind  waitdx          blkpos
     var _lc3 = 0,
       eb = 0,
-      _i23 = st.i || 0,
+      _i22 = st.i || 0,
       li = 0,
       wi = st.w || 0,
       bs = 0;
-    for (; _i23 + 2 < s; ++_i23) {
+    for (; _i22 + 2 < s; ++_i22) {
       // hash value
-      var hv = hsh(_i23);
+      var hv = hsh(_i22);
       // index mod 32768    previous index mod
-      var imod = _i23 & 32767,
+      var imod = _i22 & 32767,
         pimod = head[hv];
       prev[imod] = pimod;
       head[hv] = imod;
       // We always should modify head and prev, but only add symbols if
       // this data is not yet processed ("wait" for wait index)
-      if (wi <= _i23) {
+      if (wi <= _i22) {
         // bytes remaining
-        var rem = s - _i23;
+        var rem = s - _i22;
         if ((_lc3 > 7000 || li > 24576) && (rem > 423 || !lst)) {
-          pos = wblk(dat, w, 0, syms, lf, df, eb, li, bs, _i23 - bs, pos);
-          li = _lc3 = eb = 0, bs = _i23;
+          pos = wblk(dat, w, 0, syms, lf, df, eb, li, bs, _i22 - bs, pos);
+          li = _lc3 = eb = 0, bs = _i22;
           for (var j = 0; j < 286; ++j) lf[j] = 0;
           for (var _j = 0; _j < 30; ++_j) df[_j] = 0;
         }
@@ -5586,16 +5738,16 @@ var dflt = function dflt(dat, lvl, plvl, pre, post, st) {
           d = 0,
           ch = c,
           dif = imod - pimod & 32767;
-        if (rem > 2 && hv == hsh(_i23 - dif)) {
+        if (rem > 2 && hv == hsh(_i22 - dif)) {
           var maxn = Math.min(n, rem) - 1;
-          var maxd = Math.min(32767, _i23);
+          var maxd = Math.min(32767, _i22);
           // max possible length
           // not capped at dif because decompressors implement "rolling" index population
           var ml = Math.min(258, rem);
           while (dif <= maxd && --ch && imod != pimod) {
-            if (dat[_i23 + l] == dat[_i23 + l - dif]) {
+            if (dat[_i22 + l] == dat[_i22 + l - dif]) {
               var nl = 0;
-              for (; nl < ml && dat[_i23 + nl] == dat[_i23 + nl - dif]; ++nl);
+              for (; nl < ml && dat[_i22 + nl] == dat[_i22 + nl - dif]; ++nl);
               if (nl > l) {
                 l = nl, d = dif;
                 // break out early when we reach "nice" (we are satisfied enough)
@@ -5606,7 +5758,7 @@ var dflt = function dflt(dat, lvl, plvl, pre, post, st) {
                 var mmd = Math.min(dif, nl - 2);
                 var md = 0;
                 for (var _j2 = 0; _j2 < mmd; ++_j2) {
-                  var ti = _i23 - dif + _j2 & 32767;
+                  var ti = _i22 - dif + _j2 & 32767;
                   var pti = prev[ti];
                   var cd = ti - pti & 32767;
                   if (cd > md) md = cd, pimod = ti;
@@ -5628,35 +5780,35 @@ var dflt = function dflt(dat, lvl, plvl, pre, post, st) {
           eb += fleb[lin] + fdeb[din];
           ++lf[257 + lin];
           ++df[din];
-          wi = _i23 + l;
+          wi = _i22 + l;
           ++_lc3;
         } else {
-          syms[li++] = dat[_i23];
-          ++lf[dat[_i23]];
+          syms[li++] = dat[_i22];
+          ++lf[dat[_i22]];
         }
       }
     }
-    for (_i23 = Math.max(_i23, wi); _i23 < s; ++_i23) {
-      syms[li++] = dat[_i23];
-      ++lf[dat[_i23]];
+    for (_i22 = Math.max(_i22, wi); _i22 < s; ++_i22) {
+      syms[li++] = dat[_i22];
+      ++lf[dat[_i22]];
     }
-    pos = wblk(dat, w, lst, syms, lf, df, eb, li, bs, _i23 - bs, pos);
+    pos = wblk(dat, w, lst, syms, lf, df, eb, li, bs, _i22 - bs, pos);
     if (!lst) {
       st.r = pos & 7 | w[pos / 8 | 0] << 3;
       // shft(pos) now 1 less if pos & 7 != 0
       pos -= 7;
-      st.h = head, st.p = prev, st.i = _i23, st.w = wi;
+      st.h = head, st.p = prev, st.i = _i22, st.w = wi;
     }
   } else {
-    for (var _i24 = st.w || 0; _i24 < s + lst; _i24 += 65535) {
+    for (var _i23 = st.w || 0; _i23 < s + lst; _i23 += 65535) {
       // end
-      var e = _i24 + 65535;
+      var e = _i23 + 65535;
       if (e >= s) {
         // write final block
         w[pos / 8 | 0] = lst;
         e = s;
       }
-      pos = wfblk(w, pos + 1, dat.subarray(_i24, e));
+      pos = wfblk(w, pos + 1, dat.subarray(_i23, e));
     }
     st.i = s;
   }
@@ -5672,9 +5824,9 @@ var adler = function adler() {
       var n = a,
         m = b;
       var l = d.length | 0;
-      for (var _i25 = 0; _i25 != l;) {
-        var e = Math.min(_i25 + 2655, l);
-        for (; _i25 < e; ++_i25) m += n += d[_i25];
+      for (var _i24 = 0; _i24 != l;) {
+        var e = Math.min(_i24 + 2655, l);
+        for (; _i24 < e; ++_i24) m += n += d[_i24];
         n = (n & 65535) + 15 * (n >> 16), m = (m & 65535) + 15 * (m >> 16);
       }
       a = n, b = m;
@@ -6794,8 +6946,7 @@ var Parser = /*#__PURE__*/function () {
       }));
     }
   }]);
-}();var noop = platform.noop;
-var Painter = /*#__PURE__*/function () {
+}();var Painter = /*#__PURE__*/function () {
   /**
    *
    * @param mode
@@ -6836,11 +6987,11 @@ var Painter = /*#__PURE__*/function () {
      * 渲染器实例
      */
     this.renderer = null;
-    this.clearContainer = noop;
-    this.clearSecondary = noop;
-    this.resize = noop;
-    this.draw = noop;
-    this.stick = noop;
+    this.clearContainer = platform.noop;
+    this.clearSecondary = platform.noop;
+    this.resize = platform.noop;
+    this.draw = platform.noop;
+    this.stick = platform.noop;
     var dpr = platform.globals.dpr;
     this.W = width * dpr;
     this.H = height * dpr;
@@ -6874,7 +7025,8 @@ var Painter = /*#__PURE__*/function () {
     key: "register",
     value: function register(selector, ofsSelector, component) {
       return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee() {
-        var model, mode, getCanvas, getOfsCanvas, env, _W, _H, _getOfsCanvas, canvas, context, _yield$getCanvas, _canvas, _context, FC, F, W, H, clearType, ofsResult, _BC, _B, B, BC, renderer;
+        var _this = this;
+        var model, mode, getCanvas, getOfsCanvas, env, _W, _H, _getOfsCanvas, canvas, context, _yield$getCanvas, _canvas, _context, FC, F, W, H, clearType, tempRendererResult, ofsResult, _BC, _B, tempRendererResult2, B, BC, rendererResult;
         return _regenerator().w(function (_context2) {
           while (1) switch (_context2.n) {
             case 0:
@@ -6921,8 +7073,11 @@ var Painter = /*#__PURE__*/function () {
             case 3:
               // #endregion set main screen implement
               FC = this.FC, F = this.F, W = this.W, H = this.H;
-              clearType = model.clear;
-              this.clearContainer = Renderer2DExtension.clear(clearType, FC, F, W, H);
+              clearType = model.clear; // 创建一个临时的 renderer 来获取 extensions
+              tempRendererResult = create2DRenderer({
+                context: FC
+              });
+              this.clearContainer = tempRendererResult.extensions.clear(clearType, FC, F, W, H);
               if (!(mode === "single")) {
                 _context2.n = 4;
                 break;
@@ -6930,7 +7085,7 @@ var Painter = /*#__PURE__*/function () {
               this.B = F;
               this.BC = FC;
               this.clearSecondary = this.clearContainer;
-              this.stick = noop;
+              this.stick = platform.noop;
               _context2.n = 8;
               break;
             case 4:
@@ -6961,21 +7116,25 @@ var Painter = /*#__PURE__*/function () {
               this.B = ofsResult.canvas;
               this.BC = ofsResult.context;
               // #endregion set secondary screen implement
-              _BC = this.BC, _B = this.B;
-              this.clearSecondary = Renderer2DExtension.clear(clearType, _BC, _B, W, H);
-              this.stick = Renderer2DExtension.stick(FC, _B);
+              _BC = this.BC, _B = this.B; // 创建一个临时的 renderer 来获取 extensions
+              tempRendererResult2 = create2DRenderer({
+                context: _BC
+              });
+              this.clearSecondary = tempRendererResult2.extensions.clear(clearType, _BC, _B, W, H);
+              this.stick = tempRendererResult2.extensions.stick(FC, _B);
             case 8:
               // #region other methods implement
               // ------- 生成其他方法 --------
               B = this.B, BC = this.BC;
-              renderer = this.renderer = create2DRenderer({
+              rendererResult = create2DRenderer({
                 context: BC
               });
+              this.renderer = rendererResult.renderer;
               this.resize = function (contentMode, videoSize) {
-                return renderer.resize(contentMode, videoSize, B);
+                return _this.renderer.resize(contentMode, videoSize, B);
               };
               this.draw = function (videoEntity, materials, dynamicMaterials, currentFrame, head, tail) {
-                return renderer.render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail);
+                return _this.renderer.render(videoEntity, materials, dynamicMaterials, currentFrame, head, tail);
               };
               // #endregion other methods implement
             case 9:
@@ -6994,7 +7153,7 @@ var Painter = /*#__PURE__*/function () {
       this.clearContainer();
       this.clearSecondary();
       this.F = this.FC = this.B = this.BC = null;
-      this.clearContainer = this.clearSecondary = this.stick = noop;
+      this.clearContainer = this.clearSecondary = this.stick = platform.noop;
       (_a = this.renderer) === null || _a === void 0 ? void 0 : _a.destroy();
     }
   }]);
@@ -7140,4 +7299,4 @@ function isZlibCompressed(data) {
   }
   // 所有检查都通过，数据可能是zlib压缩格式
   return true;
-}exports.Animator=Animator;exports.EnhancedPlatform=EnhancedPlatform;exports.PNGEncoder=PNGEncoder;exports.Painter=Painter;exports.Parser=Parser;exports.QRCode=QRCode;exports.Renderer2D=Renderer2D;exports.Renderer2DExtension=Renderer2DExtension;exports.RendererGL=RendererGL;exports.RendererGLExtension=RendererGLExtension;exports.RendererGPU=RendererGPU;exports.RendererGPUExtension=RendererGPUExtension;exports.ResourceManager=ResourceManager;exports.create2DRenderer=create2DRenderer;exports.createBestRenderer=createBestRenderer;exports.createBufferOfImageData=createBufferOfImageData;exports.createGLRenderer=createGLRenderer;exports.createGPURenderer=createGPURenderer;exports.createImageDataUrl=createImageDataUrl;exports.createRenderer=createRenderer;exports.createVideoEntity=createVideoEntity;exports.detect2DSupport=detect2DSupport;exports.detectGLSupport=detectGLSupport;exports.detectGPUSupport=detectGPUSupport;exports.detectRendererSupport=detectRendererSupport;exports.generateImageBufferFromCode=generateImageBufferFromCode;exports.generateImageFromCode=generateImageFromCode;exports.getBufferFromImageData=getBufferFromImageData;exports.getDataURLFromImageData=getDataURLFromImageData;exports.isZlibCompressed=isZlibCompressed;exports.platform=platform;exports.unzlibSync=unzlibSync;exports.zlibSync=zlibSync;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map
+}exports.Animator=Animator;exports.PNGEncoder=PNGEncoder;exports.Painter=Painter;exports.Parser=Parser;exports.QRCode=QRCode;exports.Renderer2D=Renderer2D;exports.RendererGL=RendererGL;exports.RendererGLExtension=RendererGLExtension;exports.RendererGPU=RendererGPU;exports.RendererGPUExtension=RendererGPUExtension;exports.ResourceManager=ResourceManager;exports.create2DRenderer=create2DRenderer;exports.createBestRenderer=createBestRenderer;exports.createBufferOfImageData=createBufferOfImageData;exports.createGLRenderer=createGLRenderer;exports.createGPURenderer=createGPURenderer;exports.createImageDataUrl=createImageDataUrl;exports.createRenderer=createRenderer;exports.createVideoEntity=createVideoEntity;exports.detect2DSupport=detect2DSupport;exports.detectGLSupport=detectGLSupport;exports.detectGPUSupport=detectGPUSupport;exports.detectRendererSupport=detectRendererSupport;exports.generateImageBufferFromCode=generateImageBufferFromCode;exports.generateImageFromCode=generateImageFromCode;exports.getBufferFromImageData=getBufferFromImageData;exports.getDataURLFromImageData=getDataURLFromImageData;exports.isZlibCompressed=isZlibCompressed;exports.platform=platform;exports.unzlibSync=unzlibSync;exports.zlibSync=zlibSync;Object.defineProperty(exports,'__esModule',{value:true});}));//# sourceMappingURL=index.js.map
