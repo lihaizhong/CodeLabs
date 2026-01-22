@@ -98,7 +98,6 @@ export class Player {
     const { images, filename } = videoEntity;
 
     this.animator!.stop();
-    this.painter.clearSecondary();
     this.resource!.release();
     this.entity = videoEntity;
 
@@ -251,6 +250,7 @@ export class Player {
     let percent: number;
     // 是否还有剩余时间
     let hasRemained: boolean;
+    let shouldCleanup = true;
 
     // 更新动画基础信息
     animator.setConfig(duration, loopStart, loop, fillValue);
@@ -306,6 +306,11 @@ export class Player {
 
     // 动画绘制过程
     animator.onUpdate = (timePercent: number) => {
+      if (shouldCleanup) {
+        painter.clearSecondary();
+        shouldCleanup = false;
+      }
+
       patchDraw(() => {
         percent = isReverseMode ? 1 - timePercent : timePercent;
         exactFrame = percent * totalFrame;
@@ -329,7 +334,7 @@ export class Player {
 
       painter.clearContainer();
       painter.stick();
-      painter.clearSecondary();
+      shouldCleanup = true;
       latestFrame = currentFrame;
       currentFrame = nextFrame;
       tail = 0;
