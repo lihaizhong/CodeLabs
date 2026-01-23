@@ -128,7 +128,7 @@ export class Config {
         extFrame = 1;
       }
       loopStart =
-        currFrame < end ? (end - currFrame) * frameDuration : 0;
+        currFrame < end ? (end - 1 - currFrame) * frameDuration : 0;
     }
 
     return {
