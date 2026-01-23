@@ -282,6 +282,7 @@ declare namespace PlatformVideo {
  * SVGA 下载解析器
  */
 declare class Parser {
+    private static cached;
     /**
      * 解压视频源文件
      * @param data

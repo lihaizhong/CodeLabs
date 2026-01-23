@@ -5716,50 +5716,21 @@ var Parser = /*#__PURE__*/function () {
     key: "download",
     value: function download(url) {
       return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee() {
-        var globals, remote, path, local, env, supportLocal, filepath, buff, _t;
+        var buff;
         return _regenerator().w(function (_context) {
-          while (1) switch (_context.p = _context.n) {
+          while (1) switch (_context.n) {
             case 0:
-              globals = platform.globals, remote = platform.remote, path = platform.path, local = platform.local;
-              env = globals.env;
-              supportLocal = env !== "h5" && env !== "tt";
-              filepath = path.is(url) ? url : path.resolve(path.filename(url)); // 本地读取
-              if (!supportLocal) {
-                _context.n = 2;
-                break;
+              if (!Parser.cached.has(url)) {
+                Parser.cached.set(url, platform.remote.fetch(url));
               }
               _context.n = 1;
-              return local.exists(filepath);
+              return Parser.cached.get(url);
             case 1:
-              if (!_context.v) {
-                _context.n = 2;
-                break;
-              }
-              return _context.a(2, local.read(filepath));
-            case 2:
-              _context.n = 3;
-              return remote.fetch(url);
-            case 3:
               buff = _context.v;
-              if (!supportLocal) {
-                _context.n = 7;
-                break;
-              }
-              _context.p = 4;
-              _context.n = 5;
-              return local.write(buff, filepath);
-            case 5:
-              _context.n = 7;
-              break;
-            case 6:
-              _context.p = 6;
-              _t = _context.v;
-              // eslint-disable-next-line no-console
-              console.error(_t);
-            case 7:
+              Parser.cached.delete(url);
               return _context.a(2, buff);
           }
-        }, _callee, null, [[4, 6]]);
+        }, _callee);
       }));
     }
     /**
@@ -5771,23 +5742,24 @@ var Parser = /*#__PURE__*/function () {
     key: "load",
     value: function load(url) {
       return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator().m(function _callee2() {
-        var _t2, _t3, _t4;
+        var _t, _t2, _t3;
         return _regenerator().w(function (_context2) {
           while (1) switch (_context2.n) {
             case 0:
-              _t2 = Parser;
+              _t = Parser;
               _context2.n = 1;
               return Parser.download(url);
             case 1:
-              _t3 = _context2.v;
-              _t4 = url;
-              return _context2.a(2, _t2.parseVideo.call(_t2, _t3, _t4));
+              _t2 = _context2.v;
+              _t3 = url;
+              return _context2.a(2, _t.parseVideo.call(_t, _t2, _t3));
           }
         }, _callee2);
       }));
     }
   }]);
-}();var noop = platform.noop;
+}();
+Parser.cached = new Map();var noop = platform.noop;
 var Painter = /*#__PURE__*/function () {
   /**
    *
@@ -6083,19 +6055,19 @@ var Painter = /*#__PURE__*/function () {
       var loopStart;
       // 顺序播放/倒叙播放
       if (playMode === "forwards" /* PLAYER_PLAY_MODE.FORWARDS */) {
-        // 重置为开始帧
-        currFrame = Math.max(loopStartFrame, startFrame);
+        // 重置为开始帧（不能将设置为动画最后一帧）
+        currFrame = loopStartFrame > 0 ? loopStartFrame : start;
         if (fillMode === "forwards" /* PLAYER_FILL_MODE.FORWARDS */) {
           extFrame = 1;
         }
-        loopStart = loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0;
+        loopStart = currFrame > start ? (currFrame - start) * frameDuration : 0;
       } else {
-        // 重置为开始帧
-        currFrame = Math.min(loopStartFrame, end - 1);
+        // 重置为开始帧（不能将设置为动画最后一帧）
+        currFrame = loopStartFrame < end - 1 ? loopStartFrame : end - 1;
         if (fillMode === "backwards" /* PLAYER_FILL_MODE.BACKWARDS */) {
           extFrame = 1;
         }
-        loopStart = loopStartFrame < end ? (end - loopStartFrame) * frameDuration : 0;
+        loopStart = currFrame < end ? (end - 1 - currFrame) * frameDuration : 0;
       }
       return {
         currFrame: currFrame,
@@ -6209,7 +6181,6 @@ var Player = /*#__PURE__*/function () {
             case 1:
               images = videoEntity.images, filename = videoEntity.filename;
               this.animator.stop();
-              this.painter.clearSecondary();
               this.resource.release();
               this.entity = videoEntity;
               _context2.n = 2;
@@ -6354,6 +6325,7 @@ var Player = /*#__PURE__*/function () {
       var percent;
       // 是否还有剩余时间
       var hasRemained;
+      var shouldCleanup = true;
       // 更新动画基础信息
       animator.setConfig(duration, loopStart, loop, fillValue);
       painter.resize(contentMode, entity.size);
@@ -6393,6 +6365,10 @@ var Player = /*#__PURE__*/function () {
       // 动画绘制过程
       animator.onUpdate = function (timePercent) {
         var _a;
+        if (shouldCleanup) {
+          painter.clearSecondary();
+          shouldCleanup = false;
+        }
         patchDraw(function () {
           percent = isReverseMode ? 1 - timePercent : timePercent;
           exactFrame = percent * totalFrame;
@@ -6411,7 +6387,7 @@ var Player = /*#__PURE__*/function () {
         }
         painter.clearContainer();
         painter.stick();
-        painter.clearSecondary();
+        shouldCleanup = true;
         latestFrame = currentFrame;
         currentFrame = nextFrame;
         tail = 0;

@@ -4102,6 +4102,7 @@ class QRCode {
  * SVGA 下载解析器
  */
 class Parser {
+    static cached = new Map();
     /**
      * 解压视频源文件
      * @param data
@@ -4126,30 +4127,11 @@ class Parser {
      * @returns
      */
     static async download(url) {
-        const { globals, remote, path, local } = platform;
-        const { env } = globals;
-        const supportLocal = env !== "h5" && env !== "tt";
-        const filepath = path.is(url)
-            ? url
-            : path.resolve(path.filename(url));
-        // 本地读取
-        if (supportLocal) {
-            if (await local.exists(filepath)) {
-                return local.read(filepath);
-            }
+        if (!Parser.cached.has(url)) {
+            Parser.cached.set(url, platform.remote.fetch(url));
         }
-        // 远程读取
-        const buff = await remote.fetch(url);
-        // 本地缓存
-        if (supportLocal) {
-            try {
-                await local.write(buff, filepath);
-            }
-            catch (ex) {
-                // eslint-disable-next-line no-console
-                console.error(ex);
-            }
-        }
+        const buff = await Parser.cached.get(url);
+        Parser.cached.delete(url);
         return buff;
     }
     /**
@@ -4410,22 +4392,22 @@ class Config {
         let loopStart;
         // 顺序播放/倒叙播放
         if (playMode === "forwards" /* PLAYER_PLAY_MODE.FORWARDS */) {
-            // 重置为开始帧
-            currFrame = Math.max(loopStartFrame, startFrame);
+            // 重置为开始帧（不能将设置为动画最后一帧）
+            currFrame = loopStartFrame > 0 ? loopStartFrame : start;
             if (fillMode === "forwards" /* PLAYER_FILL_MODE.FORWARDS */) {
                 extFrame = 1;
             }
             loopStart =
-                loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0;
+                currFrame > start ? (currFrame - start) * frameDuration : 0;
         }
         else {
-            // 重置为开始帧
-            currFrame = Math.min(loopStartFrame, end - 1);
+            // 重置为开始帧（不能将设置为动画最后一帧）
+            currFrame = loopStartFrame < end - 1 ? loopStartFrame : end - 1;
             if (fillMode === "backwards" /* PLAYER_FILL_MODE.BACKWARDS */) {
                 extFrame = 1;
             }
             loopStart =
-                loopStartFrame < end ? (end - loopStartFrame) * frameDuration : 0;
+                currFrame < end ? (end - 1 - currFrame) * frameDuration : 0;
         }
         return {
             currFrame,
@@ -4513,7 +4495,6 @@ class Player {
             throw new Error("videoEntity undefined");
         const { images, filename } = videoEntity;
         this.animator.stop();
-        this.painter.clearSecondary();
         this.resource.release();
         this.entity = videoEntity;
         await this.resource.loadImagesWithRecord(images, filename);
@@ -4646,6 +4627,7 @@ class Player {
         let percent;
         // 是否还有剩余时间
         let hasRemained;
+        let shouldCleanup = true;
         // 更新动画基础信息
         animator.setConfig(duration, loopStart, loop, fillValue);
         painter.resize(contentMode, entity.size);
@@ -4683,6 +4665,10 @@ class Player {
         };
         // 动画绘制过程
         animator.onUpdate = (timePercent) => {
+            if (shouldCleanup) {
+                painter.clearSecondary();
+                shouldCleanup = false;
+            }
             patchDraw(() => {
                 percent = isReverseMode ? 1 - timePercent : timePercent;
                 exactFrame = percent * totalFrame;
@@ -4704,7 +4690,7 @@ class Player {
             }
             painter.clearContainer();
             painter.stick();
-            painter.clearSecondary();
+            shouldCleanup = true;
             latestFrame = currentFrame;
             currentFrame = nextFrame;
             tail = 0;
