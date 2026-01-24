@@ -1,6 +1,6 @@
 import { createPlatform, pluginNow } from 'octopus-platform';
 
-const platform = createPlatform([pluginNow], "2.0.0");
+const platform = createPlatform([pluginNow], "2.0.2");
 
 const BADGE_PREFIX = "%cBENCHMARK";
 const BASE_STYLE = "padding: 2px 4px; color: #FFFFFF; border-radius: 4px;";

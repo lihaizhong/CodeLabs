@@ -355,7 +355,7 @@ var OctopusPlatform = /*#__PURE__*/function () {
     /**
      * 平台版本
      */
-    _defineProperty(this, "platformVersion", "0.2.0");
+    _defineProperty(this, "platformVersion", "0.2.2");
     /**
      * 应用版本
      */
@@ -633,7 +633,7 @@ var pluginNow = definePlugin({
       return Date.now();
     };
   }
-});var platform = createPlatform([pluginNow], "2.0.0");var BADGE_PREFIX = "%cBENCHMARK";
+});var platform = createPlatform([pluginNow], "2.0.2");var BADGE_PREFIX = "%cBENCHMARK";
 var BASE_STYLE = "padding: 2px 4px; color: #FFFFFF; border-radius: 4px;";
 var logBadge = [BADGE_PREFIX, "".concat(BASE_STYLE, " background: #68B984;")];
 var infoBadge = [BADGE_PREFIX, "".concat(BASE_STYLE, " background: #89CFF0;")];
