@@ -15,5 +15,9 @@ App({
     } else {
       console.error('未找到页面', e)
     }
+  },
+
+  onUnhandledRejection(error) {
+    console.error('未捕获的异步异常', error)
   }
 })

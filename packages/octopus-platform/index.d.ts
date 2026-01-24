@@ -1,4 +1,4 @@
-declare function retry<T>(fn: () => T | Promise<T>, intervals?: number[], times?: number): Promise<T>;
+declare function retry<T>(fn: () => T | Promise<T>, intervals?: number[]): Promise<T>;
 
 interface MiniProgramCanvas extends HTMLCanvasElement {
     createImage(): HTMLImageElement;
@@ -12,7 +12,7 @@ type PlatformOffscreenCanvas = MiniProgramOffscreenCanvas | OffscreenCanvas;
 interface OffscreenCanvasOptions {
     width: number;
     height: number;
-    type?: "2d" | "webgl";
+    type?: "2d" | "webgl" | "webgl2" | "webgpu";
 }
 interface MiniProgramImage extends HTMLImageElement {
     width: number;
@@ -21,13 +21,49 @@ interface MiniProgramImage extends HTMLImageElement {
 type PlatformImage = MiniProgramImage | HTMLImageElement;
 type Bitmap = PlatformImage | ImageBitmap | HTMLCanvasElement | OffscreenCanvas;
 type RawImage = string | Uint8Array;
-interface GetCanvasResult {
+interface GetOffscreenCanvas2DResult {
+    canvas: PlatformOffscreenCanvas;
+    context: OffscreenCanvasRenderingContext2D;
+}
+interface GetOffscreenCanvasGLResult {
+    canvas: PlatformOffscreenCanvas;
+    context: WebGLRenderingContext;
+}
+interface GetOffscreenCanvasGL2Result {
+    canvas: PlatformOffscreenCanvas;
+    context: WebGL2RenderingContext;
+}
+interface GetOffscreenCanvasGPUResult {
+    canvas: PlatformOffscreenCanvas;
+    context: any;
+}
+interface GetOffscreenCanvasResult {
+    "2d": GetOffscreenCanvas2DResult;
+    webgl: GetOffscreenCanvasGLResult;
+    webgl2: GetOffscreenCanvasGL2Result;
+    webgpu: GetOffscreenCanvasGPUResult;
+}
+interface GetCanvas2DResult {
     canvas: PlatformCanvas;
     context: CanvasRenderingContext2D;
 }
-interface GetOffscreenCanvasResult {
-    canvas: PlatformOffscreenCanvas;
-    context: OffscreenCanvasRenderingContext2D;
+interface GetCanvasGLResult {
+    canvas: PlatformCanvas;
+    context: WebGLRenderingContext;
+}
+interface GetCanvasGL2Result {
+    canvas: PlatformCanvas;
+    context: WebGL2RenderingContext;
+}
+interface GetCanvasGPUResult {
+    canvas: PlatformCanvas;
+    context: any;
+}
+interface GetCanvasResult {
+    "2d": GetCanvas2DResult;
+    webgl: GetCanvasGLResult;
+    webgl2: GetCanvasGL2Result;
+    webgpu: GetCanvasGPUResult;
 }
 interface MiniProgramIntersectionObserver {
     relativeTo: (selector: string) => void;
@@ -46,8 +82,8 @@ interface WalkInOptions {
  */
 interface OctopusPlatformPlugins {
     getSelector: (selector: string, component?: any) => any;
-    getCanvas: (selector: string, component?: any) => Promise<GetCanvasResult>;
-    getOfsCanvas: (options: OffscreenCanvasOptions) => GetOffscreenCanvasResult;
+    getCanvas: <T extends keyof GetCanvasResult = "2d">(selector: string, options?: any) => Promise<GetCanvasResult[T]>;
+    getOfsCanvas: <T extends keyof GetOffscreenCanvasResult = "2d">(options: OffscreenCanvasOptions) => GetOffscreenCanvasResult[T];
     now: () => number;
     rAF: (canvas: PlatformCanvas, callback: () => void) => number;
     walkIn: (callback: (isBeIntersection: boolean) => void, selector: string, options: WalkInOptions) => () => void;
@@ -129,11 +165,23 @@ declare abstract class OctopusPlatform<N extends keyof OctopusPlatformPlugins> {
     private usePixelRatio;
     private useSystem;
     private usePlugins;
-    abstract installPlugin(plugin: OctopusPlatformPluginOptions<N, N>): void;
+    protected abstract installPlugin(plugin: OctopusPlatformPluginOptions<N, N>): void;
     switch(env: OctopusSupportedPlatform): void;
 }
 
-declare function installPlugin<Props extends keyof OctopusPlatformPlugins>(platform: OctopusPlatformWithDependencies<Props, never>, plugin: OctopusPlatformPluginOptions<Props>): void;
+/**
+ * 创建平台实例的工厂函数
+ *
+ * 通过工厂函数创建平台实例，无需继承。
+ * TypeScript 会根据插件列表自动推断实例的属性类型。
+ *
+ * @param plugins - 插件列表
+ * @param version - 应用版本
+ * @returns 平台实例，自动推断插件属性类型
+ */
+declare function createPlatform<T extends readonly OctopusPlatformPluginOptions<any, any>[]>(plugins: T, version?: string): OctopusPlatform<never> & Pick<OctopusPlatformPlugins, T[number]["name"]>;
+
+declare function installPlugin<Props extends keyof OctopusPlatformPlugins>(self: OctopusPlatformWithDependencies<Props, never>, plugin: OctopusPlatformPluginOptions<Props>): void;
 
 declare const _default$a: OctopusPlatformPluginOptions<"getSelector", never>;
 
@@ -191,5 +239,5 @@ declare const _default$1: OctopusPlatformPluginOptions<"rAF", never>;
 
 declare const _default: OctopusPlatformPluginOptions<"walkIn", never>;
 
-export { OctopusPlatform, definePlugin, installPlugin, _default$9 as pluginCanvas, _default$8 as pluginCodec, _default$7 as pluginDownload, _default$6 as pluginFsm, _default$5 as pluginImage, _default as pluginIntersectionObserver, _default$4 as pluginNow, _default$3 as pluginOfsCanvas, _default$2 as pluginPath, _default$1 as pluginRAF, _default$a as pluginSelector };
-export type { Bitmap, GetCanvasResult, GetOffscreenCanvasResult, MiniProgramCanvas, MiniProgramImage, MiniProgramIntersectionObserver, MiniProgramOffscreenCanvas, OctopusPlatformGlobals, OctopusPlatformPluginOptions, OctopusPlatformPlugins, OctopusPlatformWithDependencies, OctopusSupportedPlatform, OffscreenCanvasOptions, PlatformCanvas, PlatformImage, PlatformOffscreenCanvas, RawImage, WalkInOptions };
+export { OctopusPlatform, createPlatform, definePlugin, installPlugin, _default$9 as pluginCanvas, _default$8 as pluginCodec, _default$7 as pluginDownload, _default$6 as pluginFsm, _default$5 as pluginImage, _default as pluginIntersectionObserver, _default$4 as pluginNow, _default$3 as pluginOfsCanvas, _default$2 as pluginPath, _default$1 as pluginRAF, _default$a as pluginSelector };
+export type { Bitmap, GetCanvas2DResult, GetCanvasGL2Result, GetCanvasGLResult, GetCanvasGPUResult, GetCanvasResult, GetOffscreenCanvas2DResult, GetOffscreenCanvasGL2Result, GetOffscreenCanvasGLResult, GetOffscreenCanvasGPUResult, GetOffscreenCanvasResult, MiniProgramCanvas, MiniProgramImage, MiniProgramIntersectionObserver, MiniProgramOffscreenCanvas, OctopusPlatformGlobals, OctopusPlatformPluginOptions, OctopusPlatformPlugins, OctopusPlatformWithDependencies, OctopusSupportedPlatform, OffscreenCanvasOptions, PlatformCanvas, PlatformImage, PlatformOffscreenCanvas, RawImage, WalkInOptions };

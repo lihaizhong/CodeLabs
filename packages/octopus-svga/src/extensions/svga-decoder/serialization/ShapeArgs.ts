@@ -1,16 +1,6 @@
 import Reader from "../io/Reader";
 import { PlatformVideo } from "../../../types/video";
 
-/**
- * Properties of a ShapeArgs.
- * @memberof com.opensource.svga.ShapeEntity
- * @interface IShapeArgs
- * @property {string|null} [d] ShapeArgs d
- */
-export interface ShapeArgsProps {
-  d: string | null;
-}
-
 export default class ShapeArgs {
   /**
    * Decodes a ShapeArgs message from the specified reader.

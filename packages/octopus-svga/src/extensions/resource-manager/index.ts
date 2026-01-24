@@ -30,7 +30,7 @@ export class ResourceManager {
     }
   }
 
-  // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
+  // 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
   private caches: Array<PlatformImage | ImageBitmap> = [];
 
   /**
@@ -155,14 +155,14 @@ export class ResourceManager {
    * 释放图片资源
    */
   public release(): void {
-    // FIXME: 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
+    // 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
     for (const img of this.caches) {
       ResourceManager.releaseOne(img);
     }
 
     this.materials.clear();
     this.dynamicMaterials.clear();
-    // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
+    // 支付宝小程序 image 修改 src 无法触发 onload 事件
     platform.globals.env === "alipay" ? this.cleanup() : this.tidyUp();
   }
 

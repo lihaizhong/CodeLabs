@@ -25,6 +25,10 @@ export class EnhancedWorker {
       benchmark.stop(`${method} 解压时间`);
     });
 
+    this.worker.onError((error) => {
+      console.error('Worker 错误:', error)
+    })
+
     // 实验模式可能会出现 worker 被杀的情况，需要重新创建 worker
     this.worker.onProcessKilled(() => {
       benchmark.log("worker killed");

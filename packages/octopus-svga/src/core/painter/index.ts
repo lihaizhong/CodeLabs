@@ -10,7 +10,7 @@ import type {
   PlatformVideo,
   PLAYER_CONTENT_MODE,
 } from "../../types";
-import { Renderer2D, Renderer2DExtension } from "../../extensions";
+import { Renderer2D, RendererExtension } from "../../extensions";
 
 const { noop } = platform;
 
@@ -123,13 +123,13 @@ export class Painter {
       (env !== "h5" || "OffscreenCanvas" in globalThis)
     ) {
       const { W, H } = this;
-      const { canvas, context } = getOfsCanvas({ width: W, height: H });
+      const { canvas, context } = getOfsCanvas({ type: '2d', width: W, height: H });
       // 添加主屏
       this.F = canvas;
       this.FC = context;
       this.setActionModel("O");
     } else {
-      const { canvas, context } = await getCanvas(selector, component);
+      const { canvas, context } = await getCanvas(selector, { type: '2d', component });
       // 添加主屏
       this.F = canvas;
       this.FC = context;
@@ -148,7 +148,7 @@ export class Painter {
     const { FC, F, W, H } = this;
     const clearType = model.clear;
 
-    this.clearContainer = Renderer2DExtension.clear(clearType, FC!, F!, W, H);
+    this.clearContainer = RendererExtension.clear(clearType, FC!, F!, W, H);
 
     if (mode === "single") {
       this.B = F;
@@ -160,12 +160,12 @@ export class Painter {
       // ------- 创建副屏 ---------
       let ofsResult;
       if (typeof ofsSelector === "string" && ofsSelector !== "") {
-        ofsResult = await getCanvas(ofsSelector, component);
+        ofsResult = await getCanvas(ofsSelector, { type: '2d', component });
         ofsResult.canvas.width = W;
         ofsResult.canvas.height = H;
         this.setActionModel("C");
       } else {
-        ofsResult = getOfsCanvas({ width: W, height: H });
+        ofsResult = getOfsCanvas({ type: '2d', width: W, height: H });
         this.setActionModel("O");
       }
 
@@ -175,8 +175,8 @@ export class Painter {
 
       const { BC, B } = this;
 
-      this.clearSecondary = Renderer2DExtension.clear(clearType, BC!, B!, W, H);
-      this.stick = Renderer2DExtension.stick(FC!, B!);
+      this.clearSecondary = RendererExtension.clear(clearType, BC!, B!, W, H);
+      this.stick = RendererExtension.stick(FC!, B!);
     }
 
     // #region other methods implement

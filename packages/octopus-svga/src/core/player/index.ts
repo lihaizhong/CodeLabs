@@ -98,7 +98,6 @@ export class Player {
     const { images, filename } = videoEntity;
 
     this.animator!.stop();
-    this.painter.clearSecondary();
     this.resource!.release();
     this.entity = videoEntity;
 
@@ -215,7 +214,6 @@ export class Player {
       frame = frames - 1;
     }
 
-    debugger;
     this.stepToFrame(frame, andPlay);
   }
 
@@ -224,7 +222,6 @@ export class Player {
    */
   private startAnimation(): void {
     const { entity, config, animator, painter, resource } = this;
-    const { W, H } = painter;
     const { materials, dynamicMaterials } = resource!;
     const { fillMode, playMode, contentMode } = config;
     const {
@@ -253,6 +250,7 @@ export class Player {
     let percent: number;
     // 是否还有剩余时间
     let hasRemained: boolean;
+    let shouldCleanup = true;
 
     // 更新动画基础信息
     animator.setConfig(duration, loopStart, loop, fillValue);
@@ -308,6 +306,11 @@ export class Player {
 
     // 动画绘制过程
     animator.onUpdate = (timePercent: number) => {
+      if (shouldCleanup) {
+        painter.clearSecondary();
+        shouldCleanup = false;
+      }
+
       patchDraw(() => {
         percent = isReverseMode ? 1 - timePercent : timePercent;
         exactFrame = percent * totalFrame;
@@ -315,7 +318,7 @@ export class Player {
         if (isReverseMode) {
           nextFrame =
             (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
-          // FIXME: 倒序会有一帧的偏差，需要校准当前帧
+          // 倒序会有一帧的偏差，需要校准当前帧
           percent = currentFrame / totalFrame;
         } else {
           nextFrame = timePercent === 1 ? startFrame : Math.floor(exactFrame);
@@ -331,7 +334,7 @@ export class Player {
 
       painter.clearContainer();
       painter.stick();
-      painter.clearSecondary();
+      shouldCleanup = true;
       latestFrame = currentFrame;
       currentFrame = nextFrame;
       tail = 0;

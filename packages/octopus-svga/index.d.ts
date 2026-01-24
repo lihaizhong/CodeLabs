@@ -1,4 +1,5 @@
-import { RawImage, PlatformImage, PlatformCanvas, PlatformOffscreenCanvas, Bitmap, OctopusPlatform, OctopusPlatformPlugins, OctopusPlatformPluginOptions } from 'octopus-platform';
+import * as octopus_platform from 'octopus-platform';
+import { RawImage, PlatformImage, PlatformCanvas, PlatformOffscreenCanvas, Bitmap } from 'octopus-platform';
 
 type PlatformRenderingContext2D = OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D;
 interface RawImages {
@@ -281,6 +282,7 @@ declare namespace PlatformVideo {
  * SVGA 下载解析器
  */
 declare class Parser {
+    private static cached;
     /**
      * 解压视频源文件
      * @param data
@@ -629,22 +631,7 @@ declare class Poster {
     destroy(): void;
 }
 
-type PlatformProperties = "now" | "path" | "remote" | "local" | "codec" | "image" | "rAF" | "getSelector" | "getCanvas" | "getOfsCanvas";
-declare class EnhancedPlatform extends OctopusPlatform<PlatformProperties> {
-    now: OctopusPlatformPlugins["now"];
-    path: OctopusPlatformPlugins["path"];
-    remote: OctopusPlatformPlugins["remote"];
-    local: OctopusPlatformPlugins["local"];
-    codec: OctopusPlatformPlugins["codec"];
-    image: OctopusPlatformPlugins["image"];
-    rAF: OctopusPlatformPlugins["rAF"];
-    getSelector: OctopusPlatformPlugins["getSelector"];
-    getCanvas: OctopusPlatformPlugins["getCanvas"];
-    getOfsCanvas: OctopusPlatformPlugins["getOfsCanvas"];
-    constructor();
-    installPlugin(plugin: OctopusPlatformPluginOptions<PlatformProperties>): void;
-}
-declare const platform: EnhancedPlatform;
+declare const platform: octopus_platform.OctopusPlatform<never> & Pick<octopus_platform.OctopusPlatformPlugins, "getSelector" | "getCanvas" | "getOfsCanvas" | "codec" | "remote" | "local" | "image" | "now" | "path" | "rAF">;
 
 interface IQrCodeImgOptions {
     /**
@@ -676,7 +663,7 @@ interface IQrCodeImgOptions {
      */
     backgroundColor?: string;
 }
-declare function generateImageBufferFromCode(options: IQrCodeImgOptions): any;
+declare function generateImageBufferFromCode(options: IQrCodeImgOptions): Uint8Array<ArrayBufferLike>;
 declare function generateImageFromCode(options: IQrCodeImgOptions): string;
 
 /**
@@ -686,19 +673,11 @@ declare function generateImageFromCode(options: IQrCodeImgOptions): string;
  */
 declare function createBufferOfImageData(imageData: ImageData): Uint8Array<ArrayBufferLike>;
 /**
- * @deprecated 请使用 createBufferOfImageData 代替，此方法可能在后续版本中移除
- */
-declare const getBufferFromImageData: typeof createBufferOfImageData;
-/**
  * 将 ImageData 转换为 PNG 格式的 Base64 字符串
  * @param imageData
  * @returns PNG 格式的 Base64 字符串
  */
 declare function createImageDataUrl(imageData: ImageData): string;
-/**
- * @deprecated 请使用 createImageDataUrl 代替，此方法可能在后续版本中移除
- */
-declare const getDataURLFromImageData: typeof createImageDataUrl;
 
 /**
  * 检查数据是否为zlib压缩格式
@@ -712,11 +691,6 @@ interface Bucket {
     local: string;
     entity: PlatformVideo.Video | null;
     promise: Promise<ArrayBufferLike> | null;
-}
-interface NeedUpdatePoint {
-    action: "remove" | "add";
-    start: number;
-    end: number;
 }
 type LoadMode = "fast" | "whole";
 interface VideoManagerOptions {
@@ -862,5 +836,5 @@ declare class VideoEditor {
     setQRCode(key: string, code: string, options: VideoEditorOptions & Omit<IQrCodeImgOptions, "code">): Promise<void>;
 }
 
-export { EnhancedPlatform, PLAYER_CONTENT_MODE, PLAYER_FILL_MODE, PLAYER_PLAY_MODE, Painter, Parser, PlatformVideo, Player, Poster, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
-export type { Bucket, CanvasSize, IQrCodeImgOptions, LoadMode, NeedUpdatePoint, PainterActionModel, PainterMode, PlatformImages, PlatformProperties, PlatformRenderingContext2D, PlayerConfig, PlayerConfigOptions, PlayerEventCallback, PlayerProcessEventCallback, PosterConfig, PosterConfigOptions, PosterEventCallback, RawImages, TransformScale, VideoManagerOptions };
+export { PLAYER_CONTENT_MODE, PLAYER_FILL_MODE, PLAYER_PLAY_MODE, Painter, Parser, PlatformVideo, Player, Poster, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, isZlibCompressed, platform };
+export type { Bucket, CanvasSize, IQrCodeImgOptions, LoadMode, PainterActionModel, PainterMode, PlatformImages, PlatformRenderingContext2D, PlayerConfig, PlayerConfigOptions, PlayerEventCallback, PlayerProcessEventCallback, PosterConfig, PosterConfigOptions, PosterEventCallback, RawImages, TransformScale, VideoManagerOptions };

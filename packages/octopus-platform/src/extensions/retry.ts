@@ -1,27 +1,17 @@
-function delay<T>(
-  callback: () => T | Promise<T>,
-  interval: number
-): Promise<T> {
-  return new Promise<T>((resolve) =>
-    setTimeout(() => resolve(callback()), interval)
-  );
-}
-
 export async function retry<T>(
   fn: () => T | Promise<T>,
-  intervals: number[] = [],
-  /*
-   * @private 不建议外部传入
-   */
-  times: number = 0
+  intervals: number[] = []
 ): Promise<T> {
-  try {
-    return fn();
-  } catch (err) {
-    if (times >= intervals.length) {
-      throw err;
+  let times = 0;
+  while (true) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (times >= intervals.length) {
+        throw err;
+      }
+      await new Promise(resolve => setTimeout(resolve, intervals[times]));
+      times++;
     }
-
-    return delay<T>(() => retry<T>(fn, intervals, ++times), intervals[times]);
   }
 }

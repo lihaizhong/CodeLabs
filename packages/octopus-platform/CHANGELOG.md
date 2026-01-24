@@ -1,5 +1,11 @@
 # octopus-platform
 
+## 0.2.1
+
+### Patch Changes
+
+- 修复已知问题
+
 ## 0.2.0
 
 ### Minor Changes

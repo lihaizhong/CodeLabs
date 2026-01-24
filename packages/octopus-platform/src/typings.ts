@@ -18,7 +18,7 @@ export type PlatformOffscreenCanvas =
 export interface OffscreenCanvasOptions {
   width: number;
   height: number;
-  type?: "2d" | "webgl";
+  type?: "2d" | "webgl" | "webgl2" | "webgpu";
 }
 
 export interface MiniProgramImage extends HTMLImageElement {
@@ -36,14 +36,58 @@ export type Bitmap =
 
 export type RawImage = string | Uint8Array;
 
-export interface GetCanvasResult {
+export interface GetOffscreenCanvas2DResult {
+  canvas: PlatformOffscreenCanvas;
+  context: OffscreenCanvasRenderingContext2D;
+}
+
+export interface GetOffscreenCanvasGLResult {
+  canvas: PlatformOffscreenCanvas;
+  context: WebGLRenderingContext;
+}
+
+export interface GetOffscreenCanvasGL2Result {
+  canvas: PlatformOffscreenCanvas;
+  context: WebGL2RenderingContext;
+}
+
+export interface GetOffscreenCanvasGPUResult {
+  canvas: PlatformOffscreenCanvas;
+  context: any;
+}
+
+export interface GetOffscreenCanvasResult {
+  "2d": GetOffscreenCanvas2DResult;
+  webgl: GetOffscreenCanvasGLResult;
+  webgl2: GetOffscreenCanvasGL2Result;
+  webgpu: GetOffscreenCanvasGPUResult;
+}
+
+export interface GetCanvas2DResult {
   canvas: PlatformCanvas;
   context: CanvasRenderingContext2D;
 }
 
-export interface GetOffscreenCanvasResult {
-  canvas: PlatformOffscreenCanvas;
-  context: OffscreenCanvasRenderingContext2D;
+export interface GetCanvasGLResult {
+  canvas: PlatformCanvas;
+  context: WebGLRenderingContext;
+}
+
+export interface GetCanvasGL2Result {
+  canvas: PlatformCanvas;
+  context: WebGL2RenderingContext;
+}
+
+export interface GetCanvasGPUResult {
+  canvas: PlatformCanvas;
+  context: any;
+}
+
+export interface GetCanvasResult {
+  "2d": GetCanvas2DResult;
+  webgl: GetCanvasGLResult;
+  webgl2: GetCanvasGL2Result;
+  webgpu: GetCanvasGPUResult;
 }
 
 export interface MiniProgramIntersectionObserver {
@@ -66,9 +110,14 @@ export interface WalkInOptions {
 export interface OctopusPlatformPlugins {
   getSelector: (selector: string, component?: any) => any;
 
-  getCanvas: (selector: string, component?: any) => Promise<GetCanvasResult>;
+  getCanvas: <T extends keyof GetCanvasResult = "2d">(
+    selector: string,
+    options?: any
+  ) => Promise<GetCanvasResult[T]>;
 
-  getOfsCanvas: (options: OffscreenCanvasOptions) => GetOffscreenCanvasResult;
+  getOfsCanvas: <T extends keyof GetOffscreenCanvasResult = "2d">(
+    options: OffscreenCanvasOptions
+  ) => GetOffscreenCanvasResult[T];
 
   now: () => number;
 

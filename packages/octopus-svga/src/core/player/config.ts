@@ -114,21 +114,21 @@ export class Config {
 
     // 顺序播放/倒叙播放
     if (playMode === PLAYER_PLAY_MODE.FORWARDS) {
-      // 重置为开始帧
-      currFrame = Math.max(loopStartFrame, startFrame);
+      // 重置为开始帧（不能将设置为动画最后一帧）
+      currFrame = loopStartFrame > 0 ? loopStartFrame : start;
       if (fillMode === PLAYER_FILL_MODE.FORWARDS) {
         extFrame = 1;
       }
       loopStart =
-        loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0;
+        currFrame > start ? (currFrame - start) * frameDuration : 0;
     } else {
-      // 重置为开始帧
-      currFrame = Math.min(loopStartFrame, end - 1);
+      // 重置为开始帧（不能将设置为动画最后一帧）
+      currFrame = loopStartFrame < end - 1 ? loopStartFrame : end - 1;
       if (fillMode === PLAYER_FILL_MODE.BACKWARDS) {
         extFrame = 1;
       }
       loopStart =
-        loopStartFrame < end ? (end - loopStartFrame) * frameDuration : 0;
+        currFrame < end ? (end - 1 - currFrame) * frameDuration : 0;
     }
 
     return {

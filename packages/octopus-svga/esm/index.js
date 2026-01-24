@@ -1,36 +1,17 @@
-import { OctopusPlatform, pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF, installPlugin } from 'octopus-platform';
+import { createPlatform, pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRAF } from 'octopus-platform';
 
-class EnhancedPlatform extends OctopusPlatform {
-    now;
-    path;
-    remote;
-    local;
-    codec;
-    image;
-    rAF;
-    getSelector;
-    getCanvas;
-    getOfsCanvas;
-    constructor() {
-        super([
-            pluginSelector,
-            pluginCanvas,
-            pluginOfsCanvas,
-            pluginCodec,
-            pluginDownload,
-            pluginFsm,
-            pluginImage,
-            pluginNow,
-            pluginPath,
-            pluginRAF,
-        ], "1.3.0");
-        this.init();
-    }
-    installPlugin(plugin) {
-        installPlugin(this, plugin);
-    }
-}
-const platform = new EnhancedPlatform();
+const platform = createPlatform([
+    pluginSelector,
+    pluginCanvas,
+    pluginOfsCanvas,
+    pluginCodec,
+    pluginDownload,
+    pluginFsm,
+    pluginImage,
+    pluginNow,
+    pluginPath,
+    pluginRAF,
+], "2.0.0");
 
 class ResourceManager {
     painter;
@@ -58,7 +39,7 @@ class ResourceManager {
             platform.image.release(img);
         }
     }
-    // FIXME: 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
+    // 微信小程序创建调用太多createImage会导致微信/微信小程序崩溃
     caches = [];
     /**
      * 动态素材
@@ -147,13 +128,13 @@ class ResourceManager {
      * 释放图片资源
      */
     release() {
-        // FIXME: 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
+        // 小程序 image 对象需要手动释放内存，否则可能导致小程序崩溃
         for (const img of this.caches) {
             ResourceManager.releaseOne(img);
         }
         this.materials.clear();
         this.dynamicMaterials.clear();
-        // FIXME: 支付宝小程序 image 修改 src 无法触发 onload 事件
+        // 支付宝小程序 image 修改 src 无法触发 onload 事件
         platform.globals.env === "alipay" ? this.cleanup() : this.tidyUp();
     }
     /**
@@ -2108,8 +2089,7 @@ class Renderer2D {
         this.context = null;
     }
 }
-
-const Renderer2DExtension = {
+const RendererExtension = {
     stick: (context, bitmap) => () => context.drawImage(bitmap, 0, 0),
     clear: (type, context, canvas, width, height) => {
         if (type === "CL") {
@@ -4122,6 +4102,7 @@ class QRCode {
  * SVGA 下载解析器
  */
 class Parser {
+    static cached = new Map();
     /**
      * 解压视频源文件
      * @param data
@@ -4146,30 +4127,11 @@ class Parser {
      * @returns
      */
     static async download(url) {
-        const { globals, remote, path, local } = platform;
-        const { env } = globals;
-        const supportLocal = env !== "h5" && env !== "tt";
-        const filepath = path.is(url)
-            ? url
-            : path.resolve(path.filename(url));
-        // 本地读取
-        if (supportLocal) {
-            if (await local.exists(filepath)) {
-                return local.read(filepath);
-            }
+        if (!Parser.cached.has(url)) {
+            Parser.cached.set(url, platform.remote.fetch(url));
         }
-        // 远程读取
-        const buff = await remote.fetch(url);
-        // 本地缓存
-        if (supportLocal) {
-            try {
-                await local.write(buff, filepath);
-            }
-            catch (ex) {
-                // eslint-disable-next-line no-console
-                console.error(ex);
-            }
-        }
+        const buff = await Parser.cached.get(url);
+        Parser.cached.delete(url);
         return buff;
     }
     /**
@@ -4266,14 +4228,14 @@ class Painter {
         if (mode === "single" &&
             (env !== "h5" || "OffscreenCanvas" in globalThis)) {
             const { W, H } = this;
-            const { canvas, context } = getOfsCanvas({ width: W, height: H });
+            const { canvas, context } = getOfsCanvas({ type: '2d', width: W, height: H });
             // 添加主屏
             this.F = canvas;
             this.FC = context;
             this.setActionModel("O");
         }
         else {
-            const { canvas, context } = await getCanvas(selector, component);
+            const { canvas, context } = await getCanvas(selector, { type: '2d', component });
             // 添加主屏
             this.F = canvas;
             this.FC = context;
@@ -4290,7 +4252,7 @@ class Painter {
         // #endregion set main screen implement
         const { FC, F, W, H } = this;
         const clearType = model.clear;
-        this.clearContainer = Renderer2DExtension.clear(clearType, FC, F, W, H);
+        this.clearContainer = RendererExtension.clear(clearType, FC, F, W, H);
         if (mode === "single") {
             this.B = F;
             this.BC = FC;
@@ -4302,21 +4264,21 @@ class Painter {
             // ------- 创建副屏 ---------
             let ofsResult;
             if (typeof ofsSelector === "string" && ofsSelector !== "") {
-                ofsResult = await getCanvas(ofsSelector, component);
+                ofsResult = await getCanvas(ofsSelector, { type: '2d', component });
                 ofsResult.canvas.width = W;
                 ofsResult.canvas.height = H;
                 this.setActionModel("C");
             }
             else {
-                ofsResult = getOfsCanvas({ width: W, height: H });
+                ofsResult = getOfsCanvas({ type: '2d', width: W, height: H });
                 this.setActionModel("O");
             }
             this.B = ofsResult.canvas;
             this.BC = ofsResult.context;
             // #endregion set secondary screen implement
             const { BC, B } = this;
-            this.clearSecondary = Renderer2DExtension.clear(clearType, BC, B, W, H);
-            this.stick = Renderer2DExtension.stick(FC, B);
+            this.clearSecondary = RendererExtension.clear(clearType, BC, B, W, H);
+            this.stick = RendererExtension.stick(FC, B);
         }
         // #region other methods implement
         // ------- 生成其他方法 --------
@@ -4430,22 +4392,22 @@ class Config {
         let loopStart;
         // 顺序播放/倒叙播放
         if (playMode === "forwards" /* PLAYER_PLAY_MODE.FORWARDS */) {
-            // 重置为开始帧
-            currFrame = Math.max(loopStartFrame, startFrame);
+            // 重置为开始帧（不能将设置为动画最后一帧）
+            currFrame = loopStartFrame > 0 ? loopStartFrame : start;
             if (fillMode === "forwards" /* PLAYER_FILL_MODE.FORWARDS */) {
                 extFrame = 1;
             }
             loopStart =
-                loopStartFrame > start ? (loopStartFrame - start) * frameDuration : 0;
+                currFrame > start ? (currFrame - start) * frameDuration : 0;
         }
         else {
-            // 重置为开始帧
-            currFrame = Math.min(loopStartFrame, end - 1);
+            // 重置为开始帧（不能将设置为动画最后一帧）
+            currFrame = loopStartFrame < end - 1 ? loopStartFrame : end - 1;
             if (fillMode === "backwards" /* PLAYER_FILL_MODE.BACKWARDS */) {
                 extFrame = 1;
             }
             loopStart =
-                loopStartFrame < end ? (end - loopStartFrame) * frameDuration : 0;
+                currFrame < end ? (end - 1 - currFrame) * frameDuration : 0;
         }
         return {
             currFrame,
@@ -4533,7 +4495,6 @@ class Player {
             throw new Error("videoEntity undefined");
         const { images, filename } = videoEntity;
         this.animator.stop();
-        this.painter.clearSecondary();
         this.resource.release();
         this.entity = videoEntity;
         await this.resource.loadImagesWithRecord(images, filename);
@@ -4639,7 +4600,6 @@ class Player {
         if (frame >= frames) {
             frame = frames - 1;
         }
-        debugger;
         this.stepToFrame(frame, andPlay);
     }
     /**
@@ -4647,7 +4607,6 @@ class Player {
      */
     startAnimation() {
         const { entity, config, animator, painter, resource } = this;
-        const { W, H } = painter;
         const { materials, dynamicMaterials } = resource;
         const { fillMode, playMode, contentMode } = config;
         const { currFrame, startFrame, endFrame, totalFrame, spriteCount, aniConfig, } = config.getConfig(entity);
@@ -4668,6 +4627,7 @@ class Player {
         let percent;
         // 是否还有剩余时间
         let hasRemained;
+        let shouldCleanup = true;
         // 更新动画基础信息
         animator.setConfig(duration, loopStart, loop, fillValue);
         painter.resize(contentMode, entity.size);
@@ -4705,13 +4665,17 @@ class Player {
         };
         // 动画绘制过程
         animator.onUpdate = (timePercent) => {
+            if (shouldCleanup) {
+                painter.clearSecondary();
+                shouldCleanup = false;
+            }
             patchDraw(() => {
                 percent = isReverseMode ? 1 - timePercent : timePercent;
                 exactFrame = percent * totalFrame;
                 if (isReverseMode) {
                     nextFrame =
                         (timePercent === 0 ? endFrame : Math.ceil(exactFrame)) - 1;
-                    // FIXME: 倒序会有一帧的偏差，需要校准当前帧
+                    // 倒序会有一帧的偏差，需要校准当前帧
                     percent = currentFrame / totalFrame;
                 }
                 else {
@@ -4726,7 +4690,7 @@ class Player {
             }
             painter.clearContainer();
             painter.stick();
-            painter.clearSecondary();
+            shouldCleanup = true;
             latestFrame = currentFrame;
             currentFrame = nextFrame;
             tail = 0;
@@ -4891,7 +4855,7 @@ const calcCellSizeAndPadding = (moduleCount, size) => {
         cellSize: cellSize || 2,
     };
 };
-function generateImageBufferFromCode(options) {
+function generateImageBufferFromCodeInternal(options) {
     const { code, typeNumber, correctLevel, size, codeColor, backgroundColor } = parseOptions(options);
     let qr;
     try {
@@ -4903,7 +4867,7 @@ function generateImageBufferFromCode(options) {
         if (typeNumber >= 40) {
             throw new Error("Text too long to encode");
         }
-        return arguments.callee({
+        return generateImageBufferFromCodeInternal({
             code,
             size,
             correctLevel,
@@ -4933,6 +4897,9 @@ function generateImageBufferFromCode(options) {
     }
     return png.flush();
 }
+function generateImageBufferFromCode(options) {
+    return generateImageBufferFromCodeInternal(options);
+}
 function generateImageFromCode(options) {
     const buff = generateImageBufferFromCode(options);
     return platform.codec.toDataURL(buff);
@@ -4948,10 +4915,6 @@ function createBufferOfImageData(imageData) {
     return new PNGEncoder(width, height).write(data).flush();
 }
 /**
- * @deprecated 请使用 createBufferOfImageData 代替，此方法可能在后续版本中移除
- */
-const getBufferFromImageData = createBufferOfImageData;
-/**
  * 将 ImageData 转换为 PNG 格式的 Base64 字符串
  * @param imageData
  * @returns PNG 格式的 Base64 字符串
@@ -4959,10 +4922,6 @@ const getBufferFromImageData = createBufferOfImageData;
 function createImageDataUrl(imageData) {
     return platform.codec.toDataURL(createBufferOfImageData(imageData));
 }
-/**
- * @deprecated 请使用 createImageDataUrl 代替，此方法可能在后续版本中移除
- */
-const getDataURLFromImageData = createImageDataUrl;
 
 /**
  * 检查数据是否为zlib压缩格式
@@ -5337,5 +5296,5 @@ class VideoEditor {
     }
 }
 
-export { EnhancedPlatform, Painter, Parser, Player, Poster, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, getBufferFromImageData, getDataURLFromImageData, isZlibCompressed, platform };
+export { Painter, Parser, Player, Poster, VideoEditor, VideoManager, createBufferOfImageData, createImageDataUrl, generateImageBufferFromCode, generateImageFromCode, isZlibCompressed, platform };
 //# sourceMappingURL=index.js.map

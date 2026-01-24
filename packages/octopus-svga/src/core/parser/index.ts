@@ -7,6 +7,7 @@ import type { PlatformVideo } from "../../types";
  * SVGA 下载解析器
  */
 export class Parser {
+  private static cached: Map<string, Promise<ArrayBuffer>> = new Map();
   /**
    * 解压视频源文件
    * @param data
@@ -26,11 +27,11 @@ export class Parser {
   static parseVideo(
     data: ArrayBufferLike,
     url: string,
-    needDecompress: boolean = true
+    needDecompress: boolean = true,
   ): PlatformVideo.Video {
     return createVideoEntity(
       new Uint8Array(needDecompress ? this.decompress(data) : data),
-      platform.path.filename(url)
+      platform.path.filename(url),
     );
   }
 
@@ -40,32 +41,13 @@ export class Parser {
    * @returns
    */
   static async download(url: string): Promise<ArrayBuffer> {
-    const { globals, remote, path, local } = platform;
-    const { env } = globals;
-    const supportLocal = env !== "h5" && env !== "tt";
-    const filepath = path.is(url)
-        ? url
-        : path.resolve(path.filename(url));
-
-    // 本地读取
-    if (supportLocal) {
-      if (await local!.exists(filepath)) {
-        return local!.read(filepath);
-      }
+    if (!Parser.cached.has(url)) {
+      Parser.cached.set(url, platform.remote.fetch(url));
     }
 
-    // 远程读取
-    const buff = await remote.fetch(url);
+    const buff = await Parser.cached.get(url)!;
 
-    // 本地缓存
-    if (supportLocal) {
-      try {
-        await local!.write(buff, filepath);
-      } catch (ex) {
-        // eslint-disable-next-line no-console
-        console.error(ex);
-      }
-    }
+    Parser.cached.delete(url);
 
     return buff;
   }

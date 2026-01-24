@@ -1,22 +1,6 @@
 import Reader from "../io/Reader";
 import { PlatformVideo } from "../../../types/video";
 
-/**
- * Properties of a RGBAColor.
- * @memberof com.opensource.svga.ShapeEntity.ShapeStyle
- * @interface IRGBAColor
- * @property {number|null} [r] RGBAColor r
- * @property {number|null} [g] RGBAColor g
- * @property {number|null} [b] RGBAColor b
- * @property {number|null} [a] RGBAColor a
- */
-export interface RGBAColorProps {
-  r: number | null;
-  g: number | null;
-  b: number | null;
-  a: number | null;
-}
-
 export default class RGBAColor {
   /**
    * Decodes a RGBAColor message from the specified reader.

@@ -13,12 +13,6 @@ export interface Bucket {
   promise: Promise<ArrayBufferLike> | null;
 }
 
-export interface NeedUpdatePoint {
-  action: "remove" | "add";
-  start: number;
-  end: number;
-}
-
 export type LoadMode = "fast" | "whole";
 
 export interface VideoManagerOptions {
