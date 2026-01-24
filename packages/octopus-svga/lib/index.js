@@ -622,7 +622,7 @@ var OctopusPlatform = /*#__PURE__*/function () {
     /**
      * 平台版本
      */
-    _defineProperty(this, "platformVersion", "0.2.0");
+    _defineProperty(this, "platformVersion", "0.2.2");
     /**
      * 应用版本
      */
@@ -1457,7 +1457,7 @@ var pluginRaf = definePlugin({
       }
     };
   }
-});var platform = createPlatform([pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "2.0.0");var ResourceManager = /*#__PURE__*/function () {
+});var platform = createPlatform([pluginSelector, pluginCanvas, pluginOfsCanvas, pluginCodec, pluginDownload, pluginFsm, pluginImage, pluginNow, pluginPath, pluginRaf], "2.0.1");var ResourceManager = /*#__PURE__*/function () {
   function ResourceManager(painter) {
     _classCallCheck(this, ResourceManager);
     this.painter = painter;
