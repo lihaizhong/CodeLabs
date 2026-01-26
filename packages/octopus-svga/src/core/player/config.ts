@@ -103,21 +103,18 @@ export class Config {
     // 更新动画总帧数
     const finalFrames = end - start;
     const duration = Math.floor(finalFrames * frameDuration * 10 ** 6) / 10 ** 6;
-    let currFrame = 0;
+    // 重置为开始帧
+    const currFrame = Math.min(end - 1, Math.max(loopStartFrame, start));
     let extFrame = 0;
     let loopStart: number;
 
     // 顺序播放/倒叙播放
     if (playMode === PLAYER_PLAY_MODE.FORWARDS) {
-      // 重置为开始帧（不能将设置为动画最后一帧）
-      currFrame = Math.max(loopStartFrame, start);
       if (fillMode === PLAYER_FILL_MODE.FORWARDS) {
         extFrame = 1;
       }
       loopStart = (currFrame - start) * frameDuration;
     } else {
-      // 重置为开始帧（不能将设置为动画最后一帧）
-      currFrame = Math.min(end - 1, Math.max(loopStartFrame, 0));
       if (fillMode === PLAYER_FILL_MODE.BACKWARDS) {
         extFrame = 1;
       }

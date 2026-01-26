@@ -4372,31 +4372,28 @@ class Config {
         const { fps, sprites } = entity;
         const { frames } = entity;
         const spriteCount = sprites.length;
-        const start = Math.min(frames - 1, Math.max(startFrame, 0));
-        const end = endFrame > 0 ? Math.min(frames, endFrame) : frames;
+        const start = Math.min(frames - 1, Math.max(startFrame, 0)); // startFrame 不能等于 frames
+        const end = endFrame > 0 ? Math.min(frames, endFrame) : frames; // endFrame 不能等于 0
         // 每帧持续的时间
         const frameDuration = 1000 / fps;
-        if (start > end) {
-            throw new Error("StartFrame should greater than EndFrame");
+        if (start >= end) {
+            throw new Error("endFrame should greater than startFrame");
         }
         // 更新动画总帧数
         const finalFrames = end - start;
         const duration = Math.floor(finalFrames * frameDuration * 10 ** 6) / 10 ** 6;
-        let currFrame = 0;
+        // 重置为开始帧
+        const currFrame = Math.min(end - 1, Math.max(loopStartFrame, start));
         let extFrame = 0;
         let loopStart;
         // 顺序播放/倒叙播放
         if (playMode === "forwards" /* PLAYER_PLAY_MODE.FORWARDS */) {
-            // 重置为开始帧（不能将设置为动画最后一帧）
-            currFrame = Math.max(loopStartFrame, start);
             if (fillMode === "forwards" /* PLAYER_FILL_MODE.FORWARDS */) {
                 extFrame = 1;
             }
             loopStart = (currFrame - start) * frameDuration;
         }
         else {
-            // 重置为开始帧（不能将设置为动画最后一帧）
-            currFrame = Math.min(end - 1, Math.max(loopStartFrame, 0));
             if (fillMode === "backwards" /* PLAYER_FILL_MODE.BACKWARDS */) {
                 extFrame = 1;
             }
