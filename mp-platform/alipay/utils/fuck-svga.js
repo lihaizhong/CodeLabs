@@ -6005,13 +6005,13 @@ var Painter = /*#__PURE__*/function () {
       if (config.playMode && ["forwards" /* PLAYER_PLAY_MODE.FORWARDS */, "fallbacks" /* PLAYER_PLAY_MODE.FALLBACKS */].includes(config.playMode)) {
         this.playMode = config.playMode;
       }
-      if (typeof config.startFrame === "number" && config.startFrame >= 0) {
+      if (typeof config.startFrame === "number") {
         this.startFrame = config.startFrame;
       }
-      if (typeof config.endFrame === "number" && config.endFrame >= 0) {
+      if (typeof config.endFrame === "number") {
         this.endFrame = config.endFrame;
       }
-      if (typeof config.loopStartFrame === "number" && config.loopStartFrame >= 0) {
+      if (typeof config.loopStartFrame === "number") {
         this.loopStartFrame = config.loopStartFrame;
       }
       if (typeof config.contentMode === "string") {
@@ -6045,22 +6045,26 @@ var Painter = /*#__PURE__*/function () {
       }
       // 更新动画总帧数
       var finalFrames = end - start;
+      var lastFrame = end - 1;
       var duration = Math.floor(finalFrames * frameDuration * Math.pow(10, 6)) / Math.pow(10, 6);
-      // 重置为开始帧
-      var currFrame = Math.min(end - 1, Math.max(loopStartFrame, start));
+      var currFrame;
       var extFrame = 0;
       var loopStart;
       // 顺序播放/倒叙播放
       if (playMode === "forwards" /* PLAYER_PLAY_MODE.FORWARDS */) {
+        // 重置开始帧
+        currFrame = Math.min(lastFrame, Math.max(loopStartFrame, start));
         if (fillMode === "forwards" /* PLAYER_FILL_MODE.FORWARDS */) {
           extFrame = 1;
         }
         loopStart = (currFrame - start) * frameDuration;
       } else {
+        // 重置开始帧
+        currFrame = Math.min(lastFrame, lastFrame - Math.max(loopStartFrame, start));
         if (fillMode === "backwards" /* PLAYER_FILL_MODE.BACKWARDS */) {
           extFrame = 1;
         }
-        loopStart = (end - 1 - currFrame) * frameDuration;
+        loopStart = (lastFrame - currFrame) * frameDuration;
       }
       return {
         currFrame: currFrame,
