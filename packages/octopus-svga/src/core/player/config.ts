@@ -96,8 +96,8 @@ export class Config {
     // 每帧持续的时间
     const frameDuration = 1000 / fps;
 
-    if (start > end) {
-      throw new Error("StartFrame should greater than EndFrame");
+    if (start >= end) {
+      throw new Error("endFrame should greater than startFrame");
     }
 
     // 更新动画总帧数
