@@ -4370,30 +4370,25 @@ class Config {
     getConfig(entity) {
         const { playMode, loopStartFrame, startFrame, endFrame, fillMode, loop } = this;
         const { fps, sprites } = entity;
-        let { frames } = entity;
+        const { frames } = entity;
         const spriteCount = sprites.length;
-        const start = startFrame > 0 ? startFrame : 0;
-        const end = endFrame > 0 && endFrame < frames ? endFrame : frames;
+        const start = Math.min(frames - 1, Math.max(startFrame, 0));
+        const end = endFrame > 0 ? Math.min(frames, endFrame) : frames;
         // 每帧持续的时间
         const frameDuration = 1000 / fps;
         if (start > end) {
             throw new Error("StartFrame should greater than EndFrame");
         }
-        // 更新活动帧总数
-        if (end < frames) {
-            frames = end - start;
-        }
-        else if (start > 0) {
-            frames -= start;
-        }
-        const duration = Math.floor(frames * frameDuration * 10 ** 6) / 10 ** 6;
+        // 更新动画总帧数
+        const finalFrames = end - start;
+        const duration = Math.floor(finalFrames * frameDuration * 10 ** 6) / 10 ** 6;
         let currFrame = 0;
         let extFrame = 0;
         let loopStart;
         // 顺序播放/倒叙播放
         if (playMode === "forwards" /* PLAYER_PLAY_MODE.FORWARDS */) {
             // 重置为开始帧（不能将设置为动画最后一帧）
-            currFrame = loopStartFrame > 0 ? loopStartFrame : start;
+            currFrame = Math.max(loopStartFrame, start);
             if (fillMode === "forwards" /* PLAYER_FILL_MODE.FORWARDS */) {
                 extFrame = 1;
             }
@@ -4401,7 +4396,7 @@ class Config {
         }
         else {
             // 重置为开始帧（不能将设置为动画最后一帧）
-            currFrame = loopStartFrame < end - 1 ? loopStartFrame : end - 1;
+            currFrame = Math.min(end - 1, Math.max(loopStartFrame, 0));
             if (fillMode === "backwards" /* PLAYER_FILL_MODE.BACKWARDS */) {
                 extFrame = 1;
             }
@@ -4411,7 +4406,7 @@ class Config {
             currFrame,
             startFrame: start,
             endFrame: end,
-            totalFrame: frames,
+            totalFrame: finalFrames,
             spriteCount,
             aniConfig: {
                 // 单个周期的运行时长

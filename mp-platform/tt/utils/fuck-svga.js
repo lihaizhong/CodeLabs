@@ -6036,34 +6036,30 @@ var Painter = /*#__PURE__*/function () {
         sprites = entity.sprites;
       var frames = entity.frames;
       var spriteCount = sprites.length;
-      var start = startFrame > 0 ? startFrame : 0;
-      var end = endFrame > 0 && endFrame < frames ? endFrame : frames;
+      var start = Math.min(frames - 1, Math.max(startFrame, 0));
+      var end = endFrame > 0 ? Math.min(frames, endFrame) : frames;
       // 每帧持续的时间
       var frameDuration = 1000 / fps;
       if (start > end) {
         throw new Error("StartFrame should greater than EndFrame");
       }
-      // 更新活动帧总数
-      if (end < frames) {
-        frames = end - start;
-      } else if (start > 0) {
-        frames -= start;
-      }
-      var duration = Math.floor(frames * frameDuration * Math.pow(10, 6)) / Math.pow(10, 6);
+      // 更新动画总帧数
+      var finalFrames = end - start;
+      var duration = Math.floor(finalFrames * frameDuration * Math.pow(10, 6)) / Math.pow(10, 6);
       var currFrame = 0;
       var extFrame = 0;
       var loopStart;
       // 顺序播放/倒叙播放
       if (playMode === "forwards" /* PLAYER_PLAY_MODE.FORWARDS */) {
         // 重置为开始帧（不能将设置为动画最后一帧）
-        currFrame = loopStartFrame > 0 ? loopStartFrame : start;
+        currFrame = Math.max(loopStartFrame, start);
         if (fillMode === "forwards" /* PLAYER_FILL_MODE.FORWARDS */) {
           extFrame = 1;
         }
         loopStart = (currFrame - start) * frameDuration;
       } else {
         // 重置为开始帧（不能将设置为动画最后一帧）
-        currFrame = loopStartFrame < end - 1 ? loopStartFrame : end - 1;
+        currFrame = Math.min(end - 1, Math.max(loopStartFrame, 0));
         if (fillMode === "backwards" /* PLAYER_FILL_MODE.BACKWARDS */) {
           extFrame = 1;
         }
@@ -6073,7 +6069,7 @@ var Painter = /*#__PURE__*/function () {
         currFrame: currFrame,
         startFrame: start,
         endFrame: end,
-        totalFrame: frames,
+        totalFrame: finalFrames,
         spriteCount: spriteCount,
         aniConfig: {
           // 单个周期的运行时长
