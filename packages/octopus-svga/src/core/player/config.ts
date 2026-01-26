@@ -119,16 +119,14 @@ export class Config {
       if (fillMode === PLAYER_FILL_MODE.FORWARDS) {
         extFrame = 1;
       }
-      loopStart =
-        currFrame > start ? (currFrame - start) * frameDuration : 0;
+      loopStart = (currFrame - start) * frameDuration;
     } else {
       // 重置为开始帧（不能将设置为动画最后一帧）
       currFrame = loopStartFrame < end - 1 ? loopStartFrame : end - 1;
       if (fillMode === PLAYER_FILL_MODE.BACKWARDS) {
         extFrame = 1;
       }
-      loopStart =
-        currFrame < end ? (end - 1 - currFrame) * frameDuration : 0;
+      loopStart = (end - 1 - currFrame) * frameDuration;
     }
 
     return {
