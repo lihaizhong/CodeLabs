@@ -30,8 +30,8 @@ Svga动效播放器，是一个高性能、多端兼容（Web端、微信小程�
 
 在 `mp-platform` 中，可通过对应小程序开发者工具查看（*抖音小程序，请在真机中查看*）。
 
-- Web端请执行 `pnpm dev`，在浏览器中打开。
-- 小程序请执行 `pnpm minio`，并修改 `utils/constants` 文件中的远程地址，保证小程序端能正常访问到资源。
+- Web端请执行 `bun dev`，在浏览器中打开。
+- 小程序请执行 `bun minio`，并修改 `utils/constants` 文件中的远程地址，保证小程序端能正常访问到资源。
 
 ### OctopusPlatform
 
@@ -50,11 +50,11 @@ Svga动效播放器，是一个高性能、多端兼容（Web端、微信小程�
 ### 发布准备
 
 ```bash
-pnpm changeset # 新增变更集，多次执行可针对不同的包创建变更集
+bun changeset # 新增变更集，多次执行可针对不同的包创建变更集
 
-pnpm changeset version # 针对所有的变更集，更新版本号
+bun changeset version # 针对所有的变更集，更新版本号
 
-pnpm --filter <package name> build # 针对不同的包进行构建
+bun --filter <package name> build # 针对不同的包进行构建
 
 git add .
 
@@ -62,7 +62,7 @@ git commit -m "chore: release"
 
 git push
 
-pnpm --filter <package name> publish # 针对不同的包进行发布
+bun --filter <package name> publish # 针对不同的包进行发布
 ```
 
 ### git submodule

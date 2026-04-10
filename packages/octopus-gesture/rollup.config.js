@@ -90,11 +90,8 @@ export default defineConfig([
           "src/**",
           // 🔥 匹配 workspace 中的 octopus-platform 包
           "../octopus-platform/**",
-          // 🔥 匹配 pnpm 的 .pnpm 结构
-          '**/node_modules/.pnpm/*/node_modules/octopus-platform/**',
-          // 或更通用：
-          '**/node_modules/octopus-platform/**', // 通配任何层级
-          '**/node_modules/.pnpm/**/octopus-platform/**' // 精确匹配 pnpm
+          // 🔥 匹配 node_modules 中的包
+          '**/node_modules/octopus-platform/**'
         ],
         exclude: [
           "node_modules/@babel/**",

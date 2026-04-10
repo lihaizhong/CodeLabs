@@ -4,7 +4,7 @@
   "description": "代码片段整理",
   "private": true,
   "scripts": {
-    "preinstall": "npx -y only-allow pnpm",
+    "preinstall": "npx -y only-allow bun",
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
@@ -46,8 +46,12 @@
     "vite-plugin-commonjs": "^0.10.4",
     "zx": "^8.8.5"
   },
+  "workspaces": [
+    "experiments/*",
+    "mp-platform/*",
+    "packages/*"
+  ],
   "engines": {
-    "node": ">=20.x",
-    "parcel": "2.x"
+    "node": ">=20.x"
   }
 }

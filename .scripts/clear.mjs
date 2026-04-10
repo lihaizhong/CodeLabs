@@ -2,11 +2,8 @@
 
 import "zx/globals";
 
-const yamlProfile = fs.readFileSync("./pnpm-workspace.yaml", {
-  encoding: "utf8",
-});
-const profile = YAML.parse(yamlProfile);
-const patterns = profile.packages.map((pattern) => pattern + "/node_modules");
+const workspacePatterns = ["experiments/*", "mp-platform/*", "packages/*"];
+const patterns = workspacePatterns.map((pattern) => pattern + "/node_modules");
 const packageGarbages = await glob(patterns, {
   onlyDirectories: true,
   deep: 3,
@@ -18,8 +15,7 @@ await spinner(chalk.green("Cleaning up workspace..."), async () => {
   workspaceGarbage.forEach(cleanup);
   packageGarbages.forEach(cleanup);
 
-  await $`pnpm store prune`;
-  await $`pnpm prune`;
+  await $`bun install --force`;
 });
 
 console.log(chalk.green("Cleaned up workspace!"));
